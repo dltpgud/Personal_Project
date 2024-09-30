@@ -1,0 +1,93 @@
+#include "Channel.h"
+#include "Bone.h"
+CChannel::CChannel()
+{
+}
+
+HRESULT CChannel::Initialize(HANDLE& hFile)
+{
+	DWORD dwByte{};
+	_bool bReadFile{};
+
+	bReadFile = ReadFile(hFile, m_szName, sizeof(_char) * MAX_PATH, &dwByte, nullptr);
+	bReadFile = ReadFile(hFile, &m_iBoneIndex, sizeof(m_iBoneIndex), &dwByte, nullptr);
+	bReadFile = ReadFile(hFile, &m_iNumKeyFrames, sizeof(m_iNumKeyFrames), &dwByte, nullptr);
+
+	KEYFRAME* pKeyFrame = new KEYFRAME;
+
+	for (_uint i = 0; i < m_iNumKeyFrames; i++)
+	{
+		bReadFile = ReadFile(hFile, pKeyFrame, sizeof(KEYFRAME), &dwByte, nullptr);
+
+		m_KeyFrames.push_back(*pKeyFrame);
+	}
+
+	Safe_Delete(pKeyFrame);
+
+	return S_OK;
+}
+
+void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _uint* pCurrentKeyFrameIndex, _float fCurrentPosition)
+{
+	KEYFRAME LastKeyFrame = m_KeyFrames.back();
+
+	_vector			vScale;
+	_vector			vRotation;
+	_vector			vPosition;
+
+	if (fCurrentPosition >= LastKeyFrame.fTrackPosition)
+	{
+		vScale = XMLoadFloat3(&LastKeyFrame.vScale);
+		vRotation = XMLoadFloat4(&LastKeyFrame.vRotation);
+		vPosition = XMVectorSetW(XMLoadFloat3(&LastKeyFrame.vPosition), 1.f);
+
+		return;
+	}
+
+	if (!fCurrentPosition)
+		*pCurrentKeyFrameIndex = 0;
+
+	while (fCurrentPosition >= m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition)
+		++*pCurrentKeyFrameIndex;
+
+	_float fLinearRatio = (fCurrentPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition)
+		/ (m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition);
+
+	_vector			vSourScale{}, vDestScale{};
+	_vector			vSourRotation{}, vDestRotation{};
+	_vector			vSourPosition{}, vDestPosition{};
+
+	vSourScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vScale);
+	vSourRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex].vRotation);
+	vSourPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vPosition), 1.f);
+
+	vDestScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vScale);
+	vDestRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vRotation);
+	vDestPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vPosition), 1.f);
+
+	vScale = XMVectorLerp(vSourScale, vDestScale, fLinearRatio);
+	vRotation = XMQuaternionSlerp(vSourRotation, vDestRotation, fLinearRatio);
+	vPosition = XMVectorLerp(vSourPosition, vDestPosition, fLinearRatio);
+
+	_matrix			TransformMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
+
+	Bones[m_iBoneIndex]->Set_TransformationMatrix(TransformMatrix);
+}
+
+CChannel* CChannel::Create(HANDLE& hFile)
+{
+	CChannel* pInstance = new CChannel();
+
+	if (FAILED(pInstance->Initialize(hFile)))
+	{
+		MSG_BOX("Failed To Created : CAnimation");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
+}
+
+void CChannel::Free()
+{
+	__super::Free();
+}
