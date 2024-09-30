@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="99.Tool">
+      <UniqueIdentifier>{2cf19476-ef86-4ae2-ae12-cf439d40ed0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{ea3a9a5d-d0c2-46fd-8eed-ba2bde5af67c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{e98e0d55-e27f-4a87-9b97-dcc029b5eb98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LEVEL_EDIT">
+      <UniqueIdentifier>{f7dc8337-c365-4f6e-825c-677c0ada8de5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Tool.h">
+      <Filter>99.Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>99.Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>99.Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>99.Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Terrain.h" />
+    <ClInclude Include="..\Public\MainApp.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Camera_Tool.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Edit.h">
+      <Filter>LEVEL_EDIT</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool_Defines.h">
+      <Filter>99.Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\fabric.h" />
+    <ClInclude Include="..\Public\AniObj.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Tool.ico">
+      <Filter>99.Tool</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>99.Tool</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Tool.cpp">
+      <Filter>99.Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>99.Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Terrain.cpp" />
+    <ClCompile Include="..\Private\MainApp.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Camera_Tool.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Edit.cpp">
+      <Filter>LEVEL_EDIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\fabric.cpp" />
+    <ClCompile Include="..\Private\AniObj.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Tool.rc">
+      <Filter>99.Tool</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,38 @@
+﻿#pragma once
+#include "Base.h"
+#include "UI.h"
+BEGIN(Engine)
+
+class ENGINE_DLL CLayer  : public CBase
+{
+private: 
+			CLayer();
+	virtual ~CLayer() = default;
+	
+public:
+	HRESULT Add_GameObject(class CGameObject* pGameObject, const _uint& strLayerTag);
+	void	Priority_Update(_float fTimeDelta);
+	void	Update(_float fTimeDelta);
+	void	Late_Update(_float fTimeDelta);
+
+
+
+	/*for_EDIT*/
+	_bool IsGameObject(const _uint& strLayerTag);
+	CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir);
+	CGameObject* Recent_GameObject(const _uint& strLayerTag);
+	list<class CGameObject*> Get_ALL_GameObject(const _uint& strLayerTag);
+
+private :
+    _uint					  m_iObjType{};
+	list<class CGameObject*>* m_GameObjects = { nullptr };
+
+
+public : 
+
+	static CLayer* Create();
+	virtual void Free() override;
+
+};
+
+END
