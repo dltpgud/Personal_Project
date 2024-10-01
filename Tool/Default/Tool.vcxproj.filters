@@ -41,7 +41,8 @@
       <Filter>99.Tool</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\fabric.h" />
-    <ClInclude Include="..\Public\AniObj.h" />
+    <ClInclude Include="..\Public\Door.h" />
+    <ClInclude Include="..\Public\Chest.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Tool.ico">
@@ -69,7 +70,8 @@
       <Filter>LEVEL_EDIT</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\fabric.cpp" />
-    <ClCompile Include="..\Private\AniObj.cpp" />
+    <ClCompile Include="..\Private\Door.cpp" />
+    <ClCompile Include="..\Private\Chest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tool.rc">

@@ -172,6 +172,12 @@ _uint CMesh::Get_iNumIndexices()
     return m_iNumIndexices;
 }
 
+_uint CMesh::Get_iNumVertices()
+{
+    return m_iNumVertices;
+}
+
+
 HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
 {
     DWORD dwByte{};

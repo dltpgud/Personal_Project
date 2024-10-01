@@ -240,7 +240,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(_uint iLevelIndex, const _uint& st
     return S_OK;
 }
 
-HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath, void* Arg)
+HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& type, const _tchar* strProtoMapPath, void* Arg)
 {
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -288,15 +288,16 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& 
             break;
         }
 
-        CGameObject* pGameObject = ProtoObj->Clone(Arg);
+        if (type == Type) {
+            CGameObject* pGameObject = ProtoObj->Clone(Arg);
 
-        pGameObject->Set_Model(pModel);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-
+            pGameObject->Set_Model(pModel);
+            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        }
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }

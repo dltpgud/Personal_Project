@@ -6,7 +6,7 @@ class CBone :  public CBase
 {
 private:
 	CBone();
-	virtual ~CBone() = default;
+	 ~CBone() = default;
 
 public:
 	const _char* Get_Name() const {

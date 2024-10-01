@@ -29,6 +29,7 @@ public:
     _uint* Get_pIndices(_int i);
 
     _uint Get_iNumIndexices();
+    _uint Get_iNumVertices();
 
 private:
     HRESULT Load_AnimMesh(HANDLE hFile);

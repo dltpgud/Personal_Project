@@ -17,7 +17,7 @@ HRESULT CNonAni::Initialize_Prototype()
 
 HRESULT CNonAni::Initialize(void* pArg)
 {
-
+    m_DATA_TYPE = GAMEOBJ_DATA::DATA_NONANIMAPOBJ;
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 

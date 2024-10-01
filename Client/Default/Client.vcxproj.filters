@@ -117,14 +117,17 @@
     <ClInclude Include="..\Public\Terrain.h">
       <Filter>02.GameObjects\01. Map\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AniObj.h">
+    <ClInclude Include="..\Public\DOOR.h">
       <Filter>02.GameObjects\01. Map\AniObj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Wall.h">
+      <Filter>02.GameObjects\01. Map\Wall</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\NonAniObj.h">
       <Filter>02.GameObjects\01. Map\NonAniObj</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Wall.h">
-      <Filter>02.GameObjects\01. Map\Wall</Filter>
+    <ClInclude Include="..\Public\CHEST.h">
+      <Filter>02.GameObjects\01. Map\AniObj</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,14 +170,17 @@
     <ClCompile Include="..\Private\Terrain.cpp">
       <Filter>02.GameObjects\01. Map\Terrain</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AniObj.cpp">
-      <Filter>02.GameObjects\01. Map\AniObj</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\NonAniObj.cpp">
       <Filter>02.GameObjects\01. Map\NonAniObj</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Wall.cpp">
       <Filter>02.GameObjects\01. Map\Wall</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\DOOR.cpp">
+      <Filter>02.GameObjects\01. Map\AniObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CHEST.cpp">
+      <Filter>02.GameObjects\01. Map\AniObj</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

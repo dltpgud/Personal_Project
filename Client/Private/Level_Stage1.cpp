@@ -91,6 +91,11 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _uint& pLayerTag)
  		return   E_FAIL;
 
 
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,L"Prototype GameObject_CHEST", L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_CHEST)))
+		return   E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_DOOR", L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_DOOR)))
+		return   E_FAIL;
 	return S_OK;
 }
 

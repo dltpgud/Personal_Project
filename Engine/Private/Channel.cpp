@@ -41,37 +41,40 @@ void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _u
 		vRotation = XMLoadFloat4(&LastKeyFrame.vRotation);
 		vPosition = XMVectorSetW(XMLoadFloat3(&LastKeyFrame.vPosition), 1.f);
 
-		return;
+		
 	}
+	else 
+	{
+		if (0.f == fCurrentPosition)
+			*pCurrentKeyFrameIndex = 0;
 
-	if (!fCurrentPosition)
-		*pCurrentKeyFrameIndex = 0;
+		/*프레임 드랍시 키 프레임이 넓게 찍혀서 모델이 깨지는 현상을 막음*/
+		while (fCurrentPosition >= m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition)
+			++*pCurrentKeyFrameIndex;
 
-	while (fCurrentPosition >= m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition)
-		++*pCurrentKeyFrameIndex;
+		_float fLinearRatio = (fCurrentPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition)
+			/ (m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition);
 
-	_float fLinearRatio = (fCurrentPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition)
-		/ (m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition);
+		_vector			vSourScale{}, vDestScale{};
+		_vector			vSourRotation{}, vDestRotation{};
+		_vector			vSourPosition{}, vDestPosition{};
 
-	_vector			vSourScale{}, vDestScale{};
-	_vector			vSourRotation{}, vDestRotation{};
-	_vector			vSourPosition{}, vDestPosition{};
+		vSourScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vScale);
+		vSourRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex].vRotation);
+		vSourPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vPosition), 1.f);
 
-	vSourScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vScale);
-	vSourRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex].vRotation);
-	vSourPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vPosition), 1.f);
+		vDestScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vScale);
+		vDestRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vRotation);
+		vDestPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vPosition), 1.f);
 
-	vDestScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vScale);
-	vDestRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vRotation);
-	vDestPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex + 1].vPosition), 1.f);
+		vScale = XMVectorLerp(vSourScale, vDestScale, fLinearRatio);// 보간해주는 함수
+		vRotation = XMQuaternionSlerp(vSourRotation, vDestRotation, fLinearRatio);
+		vPosition = XMVectorLerp(vSourPosition, vDestPosition, fLinearRatio);
+	}
+		_matrix			TransformMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
 
-	vScale = XMVectorLerp(vSourScale, vDestScale, fLinearRatio);
-	vRotation = XMQuaternionSlerp(vSourRotation, vDestRotation, fLinearRatio);
-	vPosition = XMVectorLerp(vSourPosition, vDestPosition, fLinearRatio);
-
-	_matrix			TransformMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
-
-	Bones[m_iBoneIndex]->Set_TransformationMatrix(TransformMatrix);
+		Bones[m_iBoneIndex]->Set_TransformationMatrix(TransformMatrix);
+	
 }
 
 CChannel* CChannel::Create(HANDLE& hFile)

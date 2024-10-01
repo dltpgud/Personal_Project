@@ -21,7 +21,7 @@ HRESULT Cfabric::Initialize(void* pArg)
     m_DATA_TYPE = pDesc->DATA_TYPE;
     
 
-    _uint iLen = wcslen(pDesc->ProtoName) + 1;
+    size_t iLen = wcslen(pDesc->ProtoName) + 1;
     m_Proto = new wchar_t[iLen];
     lstrcpyW(m_Proto, pDesc->ProtoName);
 
