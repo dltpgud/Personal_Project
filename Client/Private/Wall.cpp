@@ -17,10 +17,9 @@ HRESULT CWall::Initialize_Prototype()
 
 HRESULT CWall::Initialize(void* pArg)
 {
-    GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    m_DATA_TYPE = pDesc->DATA_TYPE;
+    m_DATA_TYPE = GAMEOBJ_DATA::DATA_WALL;
 
-    if (FAILED(__super::Initialize(pDesc)))
+    if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
@@ -92,11 +91,6 @@ HRESULT CWall::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
-
-    /* For.Com_Model */
-    // if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype Component struck_Model"),
-    //	TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
-    //	return E_FAIL;
 
     return S_OK;
 }

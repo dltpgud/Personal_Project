@@ -138,7 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Public\AniObj.h" />
+    <ClInclude Include="..\Public\Chest.h" />
+    <ClInclude Include="..\Public\Door.h" />
     <ClInclude Include="..\Public\Camera_Tool.h" />
     <ClInclude Include="..\Public\fabric.h" />
     <ClInclude Include="..\Public\Level_Edit.h" />
@@ -151,7 +152,8 @@
     <ClInclude Include="Tool_Defines.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Private\AniObj.cpp" />
+    <ClCompile Include="..\Private\Chest.cpp" />
+    <ClCompile Include="..\Private\Door.cpp" />
     <ClCompile Include="..\Private\Camera_Tool.cpp" />
     <ClCompile Include="..\Private\fabric.cpp" />
     <ClCompile Include="..\Private\Level_Edit.cpp" />

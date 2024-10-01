@@ -11,9 +11,6 @@ HRESULT CLayer::Add_GameObject(CGameObject* pGameObject, const _uint& strLayerTa
     if (nullptr == pGameObject)
         return E_FAIL;
 
-    //
-
-
     m_GameObjects[strLayerTag].push_back(pGameObject);
 
     return S_OK;
@@ -79,7 +76,7 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
 
     Desc.pPickedObj = nullptr;
     Desc.fDis = {0xffff};
-
+    _float fCurDIs{};
     for (size_t i = 0; i < m_iObjType; i++)
     {
         for (auto& pGameObject : m_GameObjects[i])
@@ -90,10 +87,10 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
             if (nullptr == pGameObject->Get_Model())
                 continue;
 
-            if( CGameObject::DATA_ANIMAPOBJ==pGameObject->Get_Data() )
-                continue;
-
-            _float fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform());
+        if (CGameObject::DATA_CHEST == pGameObject->Get_Data() || CGameObject::DATA_DOOR == pGameObject->Get_Data())
+                fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
+            else
+             fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform());
             if (fCurDIs < Desc.fDis)
             {
                 Desc.fDis = fCurDIs;
@@ -114,6 +111,8 @@ list<class CGameObject*> CLayer::Get_ALL_GameObject(const _uint& strLayerTag)
 {
     return m_GameObjects[strLayerTag];
 }
+
+
 
 CLayer* CLayer::Create()
 {

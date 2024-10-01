@@ -10,20 +10,16 @@ CModel::CModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CComponen
 }
 
 CModel::CModel(const CModel& Prototype)
-    : CComponent{Prototype} 
-    , m_eModelType{ Prototype.m_eModelType }
-    , m_PreTransformMatrix{ Prototype.m_PreTransformMatrix }
-    , m_iNumMeshes{ Prototype.m_iNumMeshes }
-    , m_Meshes{ Prototype.m_Meshes }
-    , m_iNumMaterials{ Prototype.m_iNumMaterials }
-    , m_Materials{ Prototype.m_Materials }
-    , m_iNumAnimations{ Prototype.m_iNumAnimations }
-    , m_Animations{ Prototype.m_Animations }
+    : CComponent{Prototype}, m_eModelType{Prototype.m_eModelType}, m_PreTransformMatrix{Prototype.m_PreTransformMatrix},
+      m_iNumMeshes{Prototype.m_iNumMeshes}, m_Meshes{Prototype.m_Meshes}, m_iNumMaterials{Prototype.m_iNumMaterials},
+      m_Materials{Prototype.m_Materials}, m_iNumAnimations{Prototype.m_iNumAnimations}
+   // ,m_Animations{Prototype.m_Animations}, m_Bones{Prototype.m_Bones}
 {
-    for (auto& pAnimation : m_Animations)
-        Safe_AddRef(pAnimation);
+    for (auto& pPrototypeAnimation : Prototype.m_Animations) 
+        m_Animations.push_back(pPrototypeAnimation->Clone());
 
-    for (auto& pPrototypeBone : Prototype.m_Bones) m_Bones.push_back(pPrototypeBone->Clone());
+    for (auto& pPrototypeBone : Prototype.m_Bones) 
+        m_Bones.push_back(pPrototypeBone->Clone());
 
     for (auto& pMesh : m_Meshes) Safe_AddRef(pMesh);
 
@@ -132,6 +128,10 @@ _float CModel::Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform
 
     return _float(0xffff);
 }
+
+
+
+
 
 /*
 HRESULT CModel::Ready_Model(const _tchar* pModelFilePath)
@@ -310,7 +310,10 @@ HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)
     CloseHandle(hFile);
 
     return S_OK;
+
+    return S_OK;
 }
+
 
 CModel* CModel::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, TYPE eModelType,
                        const TCHAR* pModelFilePath, _fmatrix PreTransformMatrix)
@@ -343,8 +346,8 @@ void CModel::Free()
 {
     __super::Free();
 
-    for (auto& pAnimation : m_Animations) Safe_Release(pAnimation);
-
+    for (auto& pAnimation : m_Animations) 
+        Safe_Release(pAnimation);
 
     for (auto& pBone : m_Bones) { Safe_Release(pBone); }
 

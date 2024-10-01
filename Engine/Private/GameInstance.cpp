@@ -302,8 +302,8 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 			return m_pLevel_Manager->Load_to_Next_Map_Wall(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
 			break;
 	
-		case CGameObject::DATA_ANIMAPOBJ:
-			return m_pLevel_Manager->Load_to_Next_Map_AniOBj(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
+		default:
+			return m_pLevel_Manager->Load_to_Next_Map_AniOBj(iLevelIndex, strLayerTag, pPrototype, DataType, strProtoMapPath, pArg);
 			break;
 		}
 	

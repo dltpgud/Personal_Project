@@ -6,7 +6,8 @@
 #include "Terrain.h"
 #include "Model.h"
 #include "fabric.h"
-#include "AniObj.h"
+#include "Door.h"
+#include "Chest.h"
 CMainApp::CMainApp()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
 {
@@ -130,9 +131,23 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 		return E_FAIL;
 
 
+	///*Prototype_Component_Door*/
+	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component StageDoor Model_aniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/StageDoor.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component BossDoor Model_aniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/BossDoor.dat"), PreTransformMatrix))))
+		return E_FAIL;
 
-
+	///*Prototype_Component_Chest*/
 	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) *XMMatrixRotationY((XMConvertToRadians(180.f)));
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component ChestWeapon Model_aniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/ChestWeapon.dat"), PreTransformMatrix))))
+		return E_FAIL;
+
+	///*Prototype_Component_Player*/
+	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY((XMConvertToRadians(180.f)));
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Player Model_aniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/Player.dat"), PreTransformMatrix))))
 		return E_FAIL;
@@ -150,12 +165,14 @@ HRESULT CMainApp::Ready_Prototype_For_GameObject()
 	if(FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject_Terrain"),CTerrain::Create(m_pDevice,m_pContext))))
 		return E_FAIL;
 
-	/* For.Prototype_GameObject_fabric*/
+	/* For.Prototype_GameObject_nonaniObj*/
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject fabric_nonaniObj"), Cfabric::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
-    /* For.Prototype_GameObject_AniObj*/
-	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject AniObj_aniObj"), CAniObj::Create(m_pDevice, m_pContext))))
+    /* For.Prototype_GameObject_aniObj*/
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject Door_aniObj"), CDoor::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject Chest_aniObj"), CChest::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 	return S_OK;
 }

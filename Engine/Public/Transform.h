@@ -45,8 +45,13 @@ public:
     void Go_Backward(_float fTimeDelta);
     void Go_Up(_float fTimeDelta);
     void Go_Down(_float fTimeDelta);
-    void Turn(_fvector vAxis, _float fTimeDelta);
 
+    /* 현재 상태를 기준으로 추가로 더 회전한다. */
+    void Turn(_fvector vAxis, _float fTimeDelta);
+    void Turn(_bool bX, _bool bY, _bool bZ, _float fTimeDelta);
+
+    /* 항등회전 상태를 기준으로 지정한 각도만큼 회전한다. */
+    void Rotation(_float fX, _float fY, _float fZ);
 public:
     _vector Get_TRANSFORM(TRANSFORM eTRANSFORM)
     {

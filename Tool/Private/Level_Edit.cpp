@@ -42,6 +42,12 @@ HRESULT CLevel_Edit::Initialize()
 
 void CLevel_Edit::Update(_float fTimeDelta)
 {
+    if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::CAMERA))
+    {
+        if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
+            return;
+    }
+
     Tool();
 
     Msg_collection();
@@ -350,6 +356,11 @@ void CLevel_Edit::Wall_ListBox()
 
 HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, _int Iindex, _uint Comindex)
 {
+    if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::CAMERA))
+    {
+        if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
+            return E_FAIL;
+    }
     _tchar* protKey{}; // wstring을 _char로 변형하고 보관할 변수
 
     _char* key = m_protokey[type][Iindex];
@@ -420,10 +431,20 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     break;
     case Tool::CLevel_Edit::ANIMAPOBJ:
     {
-        pDec.DATA_TYPE = CGameObject::DATA_ANIMAPOBJ;
-        CGameObject* aObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
-        aObj->Set_Model(protcomKey);
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
+        if (false == lstrcmpW(protKey, L"Proto GameObject Door_aniObj"))
+        {
+            pDec.DATA_TYPE = CGameObject::DATA_DOOR;
+            CGameObject* aObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+            aObj->Set_Model(protcomKey);
+            m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
+        }
+        if (false == lstrcmpW(protKey, L"Proto GameObject Chest_aniObj"))
+        {
+            pDec.DATA_TYPE = CGameObject::DATA_CHEST;
+            CGameObject* aObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+            aObj->Set_Model(protcomKey);
+            m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
+        }
     }
     break;
     }
@@ -752,9 +773,13 @@ void CLevel_Edit::Msg_ALL_Del_Box()
         if (ImGui::Button("Delete OK"))
         {
             m_pGameInstance->ObjClear(LEVEL_EDIT);
+
+            
+
             if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
             {
                 re_setting();
+               
             }
             m_bshow_ALLDel_MessageBox = false; // 메시지 상자 닫기
         }
@@ -781,6 +806,7 @@ void CLevel_Edit::Msg_Save_box()
             Save_Wall(m_tFPath[1]);
             Save_NonAniObj(m_tFPath[2]);
             Save_Ani(m_tFPath[3]);
+
             m_bshow_Save_MessageBox = false; // 메시지 상자 닫기
         }
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
@@ -802,10 +828,11 @@ void CLevel_Edit::Msg_Load_box()
         // 버튼들: OK와 Cancel
         if (ImGui::Button("Load_Ok"))
         {
-            Load_Terrain(m_tFPath[0]);
-            Load_Wall(m_tFPath[1]);
+           // Load_Terrain(m_tFPath[0]);
+          //  Load_Wall(m_tFPath[1]);
             Load_NonAniObj(m_tFPath[2]);
             Load_Ani(m_tFPath[3]);
+
             m_bshow_Load_MessageBox = false; // 메시지 상자 닫기
         }
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
@@ -1015,7 +1042,26 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-        if (Type == CGameObject::DATA_ANIMAPOBJ) {
+        if (Type == CGameObject::DATA_DOOR) {
+            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
+
+            DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
+            WriteFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+            // wstring 데이터 쓰기
+            WriteFile(hFile, pModel.c_str(), strLength * sizeof(_tchar), &dwByte, NULL);
+
+            // tchar 자료형 쓰기
+            DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
+            WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+            WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+        }
+        else if (Type == CGameObject::DATA_CHEST) 
+        {
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
@@ -1094,7 +1140,7 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
             pDec.fSpeedPerSec = m_fspped;
             pDec.fRotationPerSec = m_fRotfspped;
             pDec.ProtoName = pPoroto;
-
+            pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>( Type);
             CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
             pGameObject->Set_Buffer(TileX, TileY);
             pGameObject->Set_Model(pModel);
@@ -1171,7 +1217,7 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
             pDec.fSpeedPerSec = m_fspped;
             pDec.fRotationPerSec = m_fRotfspped;
             pDec.ProtoName = pPoroto;
-
+            pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
             CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
 
             pGameObject->Set_Model(pModel);
@@ -1245,7 +1291,7 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-
+        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
         CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
@@ -1266,7 +1312,7 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
 
 void CLevel_Edit::Load_Ani(const _tchar* tFPath)
 {
-    HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+   HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
     {
@@ -1311,7 +1357,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
-            Safe_Delete_Array(pPoroto);
+           Safe_Delete_Array(pPoroto);
             break;
         }
 
@@ -1319,7 +1365,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-
+        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
         CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
@@ -1333,6 +1379,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
+    CloseHandle(hFile);
 }
 
 void CLevel_Edit::Key_input(_float ftimedelta)

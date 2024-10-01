@@ -21,7 +21,8 @@ public:
         DATA_TERRAIN,
         DATA_WALL,
         DATA_NONANIMAPOBJ,
-        DATA_ANIMAPOBJ
+        DATA_DOOR,
+        DATA_CHEST
     };
 public:
     typedef struct GAMEOBJ_DESC : public CTransform::TRANSFORM_DESC
@@ -36,6 +37,7 @@ public:
         CGameObject* pPickedObj{};
         _float fDis{};
     } PICKEDOBJ_DESC;
+
 
 protected:
     CGameObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -81,14 +83,14 @@ public:
   virtual void Set_Model(const _wstring& protoModel)
   {
   }
-  GAMEOBJ_DATA Get_Data()
+ GAMEOBJ_DATA Get_Data()
   {
-      return  m_DATA_TYPE;
+      return m_DATA_TYPE;
   }
   virtual _wstring Get_ComPonentName() { return 0; }
   virtual _tchar* Get_ProtoName() { return nullptr; }
   virtual void Set_Buffer(_uint x, _uint y) {};
-
+  virtual _float check_BoxDist(_vector RayPos, _vector RayDir) { return _float(0xffff); }
 protected:
     class CGameInstance* m_pGameInstance = {nullptr};
     ID3D11Device* m_pDevice = {nullptr};
@@ -102,7 +104,7 @@ protected:
     GAMEOBJ_DATA m_DATA_TYPE{};
    
     _bool m_bClone{};
-
+    BoundingBox pBox;
 protected:
     /*컴포넌트 사본을 저장하는 맵컨테이너*/
     map<const _wstring, class CComponent*> m_Components;

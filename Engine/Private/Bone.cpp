@@ -21,18 +21,15 @@ void CBone::Update_CombinedTransformationMatrix(const vector<class CBone*>& Bone
 CBone* CBone::Create(HANDLE& hFile)
 {
 	CBone* pInstance = new CBone();
-
+	CBone* pNew = nullptr;
 	DWORD dwByte = { 0 };
 	_bool bReadFile;
 
-//	bReadFile = ReadFile(hFile, pInstance, sizeof(CBone), &dwByte, nullptr);
+	bReadFile = ReadFile(hFile, pInstance, sizeof(CBone), &dwByte, nullptr);
 
+	pNew = pInstance->Clone();
 
-
-bReadFile =	ReadFile(hFile, pInstance->m_szName, sizeof(_char) * MAX_PATH, &dwByte, nullptr);
-bReadFile =	ReadFile(hFile, &pInstance->m_iParentBoneIndex, sizeof(_int), &dwByte, nullptr);
-bReadFile =	ReadFile(hFile, &pInstance->m_TransformationMatrix, sizeof(_float4x4), &dwByte, nullptr);
-bReadFile =	ReadFile(hFile, &pInstance->m_CombinedTransformationMatrix, sizeof(_float4x4), &dwByte, nullptr);
+	delete static_cast<void*>(pInstance);
 	
 	if (!bReadFile)
 	{
@@ -40,13 +37,9 @@ bReadFile =	ReadFile(hFile, &pInstance->m_CombinedTransformationMatrix, sizeof(_
 		Safe_Release(pInstance);
 	}
 
-	//CBone temp{};
-	//memcpy(pInstance->m_szName, temp.m_szName, MAX_PATH);
-	//memcpy(&pInstance->m_TransformationMatrix, &temp.m_TransformationMatrix, sizeof m_TransformationMatrix);
-	//memcpy(&pInstance->m_CombinedTransformationMatrix, &temp.m_CombinedTransformationMatrix, sizeof m_CombinedTransformationMatrix);
-	//memcpy(&pInstance->m_iParentBoneIndex, &temp.m_iParentBoneIndex, sizeof m_iParentBoneIndex);
 
- 	return pInstance;
+
+ 	return pNew;
 }
 
 CBone* CBone::Clone()

@@ -118,8 +118,11 @@
     <Filter Include="01.Utility\04.Component\Model\Channel">
       <UniqueIdentifier>{af517dd5-d5f0-431c-8b7f-a0adcfcba9cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\02.GameObjects\MmpObj">
-      <UniqueIdentifier>{478787ed-0832-47a3-9fad-6355f37d6a34}</UniqueIdentifier>
+    <Filter Include="01.Utility\02.GameObjects\ContainerObject">
+      <UniqueIdentifier>{7fff1e9f-2215-4fc0-8a2b-91e7b9d452fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\02.GameObjects\ContainerObject\PartObject">
+      <UniqueIdentifier>{851fb8ea-f8b4-457d-b10d-a9a2e92539bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -240,8 +243,11 @@
     <ClInclude Include="..\Public\Channel.h">
       <Filter>01.Utility\04.Component\Model\Channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapOBJ.h">
-      <Filter>01.Utility\02.GameObjects\MmpObj</Filter>
+    <ClInclude Include="..\Public\ContainerObject.h">
+      <Filter>01.Utility\02.GameObjects\ContainerObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PartObject.h">
+      <Filter>01.Utility\02.GameObjects\ContainerObject\PartObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -350,8 +356,11 @@
     <ClCompile Include="..\Private\Channel.cpp">
       <Filter>01.Utility\04.Component\Model\Channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapOBJ.cpp">
-      <Filter>01.Utility\02.GameObjects\MmpObj</Filter>
+    <ClCompile Include="..\Private\ContainerObject.cpp">
+      <Filter>01.Utility\02.GameObjects\ContainerObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PartObject.cpp">
+      <Filter>01.Utility\02.GameObjects\ContainerObject\PartObject</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

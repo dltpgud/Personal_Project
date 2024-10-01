@@ -10,12 +10,12 @@ END
 
 BEGIN(Client)
 
-class CAniObj final : public CGameObject
+class CCHEST final : public CGameObject
 {
 private:
-	CAniObj(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CAniObj(const CAniObj& Prototype);
-	virtual ~CAniObj() = default;
+	CCHEST(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CCHEST(const CCHEST& Prototype);
+	virtual ~CCHEST() = default;
 
 public:
 	/* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
@@ -28,7 +28,9 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
-
+	virtual void Set_Model(const _wstring& protoModel) override;
+	virtual CModel* Get_Model() override { return m_pModelCom; }
+	virtual CTransform* Get_Transform();
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CModel*						m_pModelCom = { nullptr };
@@ -39,7 +41,7 @@ private:
 
 
 public:
-	static CAniObj* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CCHEST* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void Free() override;
 };
