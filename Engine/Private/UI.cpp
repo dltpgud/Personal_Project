@@ -31,8 +31,8 @@ HRESULT CUI::Initialize(void* pArg)
         m_iDepth = pDesc->iDepth;
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
-    }else
-    if (FAILED(__super::Initialize(pArg)))
+    }
+    else if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     // 컨텍스트 디바이스는 원본 이니셜에서 설정해 주지 못함, 원본이 Loader(서브 스레드)에서 만들어 지면서 호출되기 때문
@@ -62,7 +62,12 @@ void CUI::Late_Update(_float fTimeDelta)
 HRESULT CUI::Render()
 {
 
-    return S_OK;
+    m_pTransformCom->Set_TRANSFORM(
+        CTransform::TRANSFORM_POSITION,
+        XMVectorSet(m_fX + -ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, 0.f, 1.f));
+
+
+     return S_OK;
 }
 
 void CUI::Set_UI_Pos(void* pArg)
@@ -90,6 +95,35 @@ void CUI::Set_UI_Pos(void* pArg)
     m_pTransformCom->Set_TRANSFORM(
         CTransform::TRANSFORM_POSITION,
         XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, 0.f, 1.f));
+}
+
+void CUI::Set_UI_shaking(_float fShakingTime, _float fPowerX, _float fPowerY)
+{
+
+    m_fShakingTime = fShakingTime;
+    m_fShakingPower_X = fPowerX;
+    m_fShakingPower_Y = fPowerY;
+    m_IsShaking = true;
+}
+
+void CUI::UI_shaking(_float fTimeDelta)
+{
+
+    if (m_fShakingTime > 0.f)
+    {
+
+        m_fShakingTime -= fTimeDelta;
+        m_fShaking_X = (_float)((rand() % 21)) * m_fShakingPower_X * 0.1f;
+        m_fShaking_Y = (_float)((rand() % 21)) * m_fShakingPower_Y * 0.1f;
+
+        if (m_fShakingTime <= 0.f)
+        {
+            m_fShakingTime = 0;
+            m_fShaking_X = 0.f;
+            m_fShaking_Y = 0.f;
+        }
+    }
+
 }
 
 void CUI::Free()

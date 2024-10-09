@@ -35,6 +35,8 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
         return OBJ_DEAD;
     }
 
+    m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
+
     return OBJ_NOEVENT;
 }
 
@@ -46,11 +48,6 @@ void CTerrain::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-}
-
-CTransform* CTerrain::Get_Transform()
-{
-    return m_pTransformCom;
 }
 
 HRESULT CTerrain::Render()
@@ -89,6 +86,12 @@ HRESULT CTerrain::Render()
 
     m_pVIBufferCom->Render();
 
+
+#ifdef _DEBUG
+    m_pNavigationCom->Render();
+#endif
+
+
     return S_OK;
 }
 
@@ -126,6 +129,11 @@ HRESULT CTerrain::Add_Components()
         reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
 
+    /* For.Com_Navigation */
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
+        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -160,6 +168,7 @@ void CTerrain::Free()
 {
     __super::Free();
 
+    Safe_Release(m_pNavigationCom);
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);

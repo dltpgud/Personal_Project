@@ -29,9 +29,10 @@ public:
     HRESULT Set_UpdateUI(const _uint& uid, _bool open);
     HRESULT Set_LateUpdateUI(const _uint& uid, _bool open);
 
-    CGameObject* Get_UI(const _uint& iLevel, const _uint& uID);
 
-private:
+    CGameObject* Get_UI(const _uint& iLevel, const _uint& uID);
+    HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY );
+    HRESULT UI_shaking(const _uint& uID,_float fTimeDelta);
     vector<class CUI*>* m_UIVec = {nullptr};
     _uint m_iLevel{};
 

@@ -149,7 +149,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(_uint iLevelIndex, const _uin
         bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
         wchar_t* pPoroto = new wchar_t[Length + 1];
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
-
+        pPoroto[Length] = L'\0';
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
@@ -204,18 +204,18 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(_uint iLevelIndex, const _uint& st
 
         // wstring 문자열 길이
         DWORD strLength;
-        ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+        bFile = ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
 
         // wstring 데이터 읽기
         wchar_t* pModel = new wchar_t[strLength + 1]; // NULL 종단 추가
-        ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
+        bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
         pModel[strLength] = L'\0';
 
         DWORD Length;
         bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
         wchar_t* pPoroto = new wchar_t[Length + 1];
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
-
+        pPoroto[Length] = L'\0';
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
@@ -230,6 +230,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(_uint iLevelIndex, const _uint& st
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+
         m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
 
         Safe_Delete_Array(pModel);
@@ -255,8 +256,8 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& 
     _vector UP = { 0.f, 0.f, 0.f, 0.f };
     _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
     _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
-    _uint Type{ 0 };
-
+    _uint Type = { 0 };
+    _uint WType = {};
     while (true)
     {
         _bool bFile(false);
@@ -280,7 +281,11 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& 
         bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
         wchar_t* pPoroto = new wchar_t[Length + 1];
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
+        pPoroto[Length] = L'\0';
 
+
+        if (Type == CGameObject::DATA_CHEST)
+            bFile = ReadFile(hFile, &(WType), sizeof(_uint), &dwByte, nullptr);
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
@@ -296,6 +301,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& 
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+
+            if (CGameObject::DATA_CHEST == Type)
+                pGameObject->Set_Buffer(0, WType);
             m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
         }
         Safe_Delete_Array(pModel);

@@ -21,6 +21,15 @@ public:
 		XMStoreFloat4x4(&m_TransformationMatrix, TransformationMatrix);
 	}
 
+	_matrix Get_TransformationMatrix()
+	{
+		return XMLoadFloat4x4(&m_TransformationMatrix);
+	}
+
+	const _float4x4* Get_CombinedTransformationFloat4x4Ptr() const {
+		return &m_CombinedTransformationMatrix;
+	}
+
 public:
 	void Update_CombinedTransformationMatrix(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix);
 

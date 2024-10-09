@@ -41,6 +41,11 @@ _int Cfabric::Priority_Update(_float fTimeDelta)
         return OBJ_DEAD;
     }
 
+    _float3 Center;
+    XMStoreFloat3(&Center, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    pBox.Center = Center;
+    pBox.Extents = { 1,1,1 };
+
     return OBJ_NOEVENT;
 }
 
@@ -52,11 +57,6 @@ void Cfabric::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-}
-
-CTransform* Cfabric::Get_Transform()
-{
-    return m_pTransformCom;
 }
 
 HRESULT Cfabric::Render()
@@ -94,6 +94,23 @@ void Cfabric::Set_Model(const _wstring& protoModel)
 _tchar* Cfabric::Get_ProtoName()
 {
     return m_Proto;
+}
+
+_float Cfabric::check_BoxDist(_vector RayPos, _vector RayDir)
+{
+    _matrix matWorld = m_pTransformCom->Get_WorldMatrix_Inverse();
+
+    _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
+    _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
+    CurRayDir = XMVector3Normalize(CurRayDir);
+
+    _float Dist{};
+    if (pBox.Intersects(RayPos, RayDir, Dist))
+    {
+        return Dist;
+    }
+
+    return _float(0xffff);
 }
 
 

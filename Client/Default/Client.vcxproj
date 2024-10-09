@@ -171,6 +171,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\CHEST.h" />
     <ClInclude Include="..\Public\DOOR.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -190,6 +191,7 @@
     </ClInclude>
     <ClInclude Include="..\public\MainApp.h" />
     <ClInclude Include="..\Public\NonAniObj.h" />
+    <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\PlayerUI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -200,12 +202,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\Weapon.h" />
+    <ClInclude Include="..\Public\WeaPonIcon.h" />
+    <ClInclude Include="..\Public\WeaponUI.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />
     <ClCompile Include="..\Private\DOOR.cpp" />
     <ClCompile Include="..\Private\Camera_Free.cpp" />
@@ -222,6 +228,7 @@
     </ClCompile>
     <ClCompile Include="..\private\MainApp.cpp" />
     <ClCompile Include="..\Private\NonAniObj.cpp" />
+    <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\PlayerUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -231,6 +238,9 @@
     <ClCompile Include="..\Private\Wall.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\Weapon.cpp" />
+    <ClCompile Include="..\Private\WeaPonIcon.cpp" />
+    <ClCompile Include="..\Private\WeaponUI.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

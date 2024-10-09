@@ -23,7 +23,6 @@ public:
 	virtual _int	Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
-	virtual CTransform* Get_Transform();
 	
 	virtual HRESULT Render() override;
 

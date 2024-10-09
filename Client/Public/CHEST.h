@@ -12,6 +12,9 @@ BEGIN(Client)
 
 class CCHEST final : public CGameObject
 {
+public : 
+	enum chestType { ANI, NONANI, CHEST_END};
+
 private:
 	CCHEST(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CCHEST(const CCHEST& Prototype);
@@ -29,15 +32,21 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
 	virtual void Set_Model(const _wstring& protoModel) override;
-	virtual CModel* Get_Model() override { return m_pModelCom; }
-	virtual CTransform* Get_Transform();
-private:
-	CShader*					m_pShaderCom = { nullptr };
-	CModel*						m_pModelCom = { nullptr };
+	virtual void Set_Buffer(_uint x, _uint y)override { m_pWeaPonType = y; }
 
+
+	//virtual CModel* Get_Model() override { return m_pModelCom; }
+	void Key_input(_float fTimeDelta);
+private:
+	CShader*					m_pShaderCom[CHEST_END] = {nullptr};
+	CModel*						m_pModelCom [CHEST_END] = {nullptr};
+	_bool						m_bOpen = { false };
+	_bool						m_bIcon = { false };
+	_uint						m_pWeaPonType{};
+	_uint						m_istate{0};
 private:
 	HRESULT Add_Components();
-	HRESULT Bind_ShaderResources();
+	HRESULT Bind_ShaderResources(_int i);
 
 
 public:

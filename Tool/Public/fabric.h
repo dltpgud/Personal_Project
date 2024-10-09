@@ -25,7 +25,6 @@ public:
     virtual _int Priority_Update(_float fTimeDelta) override;
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
-    virtual CTransform* Get_Transform();
     virtual HRESULT Render() override;
 
     virtual void Set_Model( const _wstring& protoModel) override;
@@ -33,7 +32,7 @@ public:
     virtual _wstring Get_ComPonentName() override  { return m_wModel; }
     virtual _tchar* Get_ProtoName() override;
 
-
+    virtual _float check_BoxDist(_vector RayPos, _vector RayDir)override;
 private:
     CShader* m_pShaderCom = {nullptr};
     CModel* m_pModelCom = {nullptr};

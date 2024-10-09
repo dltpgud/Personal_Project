@@ -37,7 +37,7 @@ public:
 private:
 	HRESULT						Loading_For_MenuLevel();
 	HRESULT						Loading_For_Stage1Level();
-	HRESULT						Loading_For_EDIT();
+
 
 public:
 	const _bool&				Finished() { return m_bFinished; }

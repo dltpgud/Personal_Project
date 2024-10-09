@@ -30,7 +30,6 @@ public:
 	virtual HRESULT Render() override;	
 
 	virtual void Set_Model(const _wstring& protoModel) override;
-	virtual CTransform* Get_Transform();
 	virtual CModel* Get_Model() override { return m_pModelCom; }
 	virtual _wstring Get_ComPonentName() override { return m_wModel; }
 	virtual _tchar* Get_ProtoName() override;

@@ -17,7 +17,7 @@ HRESULT CWall::Initialize_Prototype()
 
 HRESULT CWall::Initialize(void* pArg)
 {
-    m_DATA_TYPE = GAMEOBJ_DATA::DATA_WALL;
+  //  m_DATA_TYPE = GAMEOBJ_DATA::DATA_WALL;
 
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
@@ -46,11 +46,6 @@ void CWall::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-}
-
-CTransform* CWall::Get_Transform()
-{
-    return m_pTransformCom;
 }
 
 HRESULT CWall::Render()

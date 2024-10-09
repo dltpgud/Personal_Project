@@ -95,6 +95,19 @@ CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)
 	return iter->second;
 }
 
+CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, void* pArg)
+{
+	CGameObject* pPrototype = Find_Prototype(strPrototypeTag);
+	if (nullptr == pPrototype)
+		return nullptr;
+
+	CGameObject* pGameObject = pPrototype->Clone(pArg);
+	if (nullptr == pGameObject)
+		return nullptr;
+
+	return pGameObject;
+}
+
 
 
 _bool CObject_Manager::IsGameObject(_uint iLevelIndex, const _uint& strLayerTag)

@@ -30,7 +30,7 @@ public:
 
 protected:
 	const _float4x4*				m_pParentMatrix = { nullptr };
-
+	_float4x4						m_WorldMatrix = {};   
 public:
 	virtual CGameObject* Clone(void* pArg) = 0;
 	virtual void Free() override;

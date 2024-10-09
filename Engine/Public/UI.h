@@ -12,7 +12,8 @@ public:
         UIID_Menu,
         UIID_Cursor,
         UIID_Loading,
-        UIID_Player,
+        UIID_PlayerHP,
+        UIID_PlayerWeaPon,
         UIID_Monster,
         UIID_END
     };
@@ -49,8 +50,10 @@ public:
     virtual HRESULT Render();
 
     void Set_UI_Pos(void* pArg);
-
-public:
+    void UI_shaking(_float fTimeDelta);
+    void Set_UI_shaking( _float fShakingTime, _float fPowerX, _float fPowerY);
+    
+    public:
     void Set_Open(_bool open)
     {
         m_bPrUpdate = open;
@@ -107,7 +110,8 @@ protected:
     /*wincx ,wincy 가져오기*/
     _uint iNumViewports = {1};
     D3D11_VIEWPORT ViewportDesc{};
-
+    _float m_fShaking_X{}, m_fShaking_Y{}, m_fShakingTime{}, m_fShakingPower_X{}, m_fShakingPower_Y{};
+    _bool m_IsShaking = false;
 public:
     virtual CGameObject* Clone(void* pArg) = 0;
     virtual void Free() override;

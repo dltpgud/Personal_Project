@@ -52,8 +52,14 @@ void CLevel_Edit::Update(_float fTimeDelta)
 
     Msg_collection();
 
-    Key_input(fTimeDelta);
 
+    if (m_pGameInstance->Get_DIKeyDown(DIK_F1))
+        m_Key = true;
+
+
+    if (m_Key) {
+        Key_input(fTimeDelta);
+    }
     __super::Update(fTimeDelta);
 }
 
@@ -288,6 +294,9 @@ void CLevel_Edit::MapANIObj_ListBox()
         ImGui::EndListBox();
     }
 
+    ChsetWeapon();
+
+
     Create_Leyer_Botton(ANIMAPOBJ, m_iItem_selected_idx[3], m_iIcomtem_selected_idx[3]);
 }
 void CLevel_Edit::Terrain_ListBox()
@@ -397,7 +406,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
             return E_FAIL;
 
         pDec.DATA_TYPE = CGameObject::DATA_TERRAIN;
-        CGameObject* pTerrain = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+        CGameObject* pTerrain = m_pGameInstance->Clone_Prototype(protKey, &pDec);
 
         pTerrain->Set_Model(protcomKey);
 
@@ -416,7 +425,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     case Tool::CLevel_Edit::WALL:
     {
         pDec.DATA_TYPE = CGameObject::DATA_WALL;
-        CGameObject* pObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+        CGameObject* pObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
         pObj->Set_Model(protcomKey);
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, pObj);
     }
@@ -424,7 +433,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     case Tool::CLevel_Edit::NONANIMAPOBJ:
     {
         pDec.DATA_TYPE = CGameObject::DATA_NONANIMAPOBJ;
-        CGameObject* nObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+        CGameObject* nObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
         nObj->Set_Model(protcomKey);
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, nObj);
     }
@@ -434,15 +443,16 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
         if (false == lstrcmpW(protKey, L"Proto GameObject Door_aniObj"))
         {
             pDec.DATA_TYPE = CGameObject::DATA_DOOR;
-            CGameObject* aObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+            CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
         }
         if (false == lstrcmpW(protKey, L"Proto GameObject Chest_aniObj"))
         {
             pDec.DATA_TYPE = CGameObject::DATA_CHEST;
-            CGameObject* aObj = m_pGameInstance->Clone_GameObject(protKey, &pDec);
+            CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
+             aObj->Set_Buffer(0, m_WeaPon);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
         }
     }
@@ -625,7 +635,7 @@ HRESULT CLevel_Edit::Ready_ToolCamera(const _uint& pLayerTag)
 
     Desc.vEye = _float4(0.f, 10.f, -8.f, 1.f);
     Desc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
-    Desc.fFovy = XMConvertToRadians(60.0f);
+    Desc.fFovy = XMConvertToRadians(30.0f);
     Desc.fNearZ = 0.1f;
     Desc.fFarZ = 500.f;
     Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
@@ -829,9 +839,11 @@ void CLevel_Edit::Msg_Load_box()
         if (ImGui::Button("Load_Ok"))
         {
            // Load_Terrain(m_tFPath[0]);
-          //  Load_Wall(m_tFPath[1]);
+            Load_Wall(m_tFPath[1]);
             Load_NonAniObj(m_tFPath[2]);
             Load_Ani(m_tFPath[3]);
+
+            m_pObjTransform = m_pGameInstance->Recent_GameObject(CGameObject::MAP)->Get_Transform();
 
             m_bshow_Load_MessageBox = false; // 메시지 상자 닫기
         }
@@ -955,6 +967,8 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
             DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+
+      
         }
     }
     CloseHandle(hFile);
@@ -1030,7 +1044,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
     _uint Type = { 0 };
     _wstring pModel = {};
     _tchar* pPoroto = {};
-
+    _uint WeaPonType = {};
     for (auto& ObjList : AllSave)
     {
 
@@ -1041,7 +1055,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
         Type = ObjList->Get_Data();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
-
+        WeaPonType =  ObjList->Get_Scalra();
         if (Type == CGameObject::DATA_DOOR) {
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
@@ -1078,6 +1092,10 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
             DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+
+
+            WriteFile(hFile, &WeaPonType, sizeof(_uint), &dwByte, nullptr);
+   
         }
     }
     CloseHandle(hFile);
@@ -1141,7 +1159,7 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
             pDec.fRotationPerSec = m_fRotfspped;
             pDec.ProtoName = pPoroto;
             pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>( Type);
-            CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
+            CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
             pGameObject->Set_Buffer(TileX, TileY);
             pGameObject->Set_Model(pModel);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
@@ -1218,7 +1236,7 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
             pDec.fRotationPerSec = m_fRotfspped;
             pDec.ProtoName = pPoroto;
             pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
-            CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
+            CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
             pGameObject->Set_Model(pModel);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
@@ -1292,7 +1310,7 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
         pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
-        CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
@@ -1328,6 +1346,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
     _uint Type = { 0 };
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
+    _uint WaPonType = {};
     while (true)
     {
         _bool bFile(false);
@@ -1354,6 +1373,9 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
         pPoroto[Length] = L'\0';
 
+        if(Type ==CGameObject::DATA_CHEST)
+        bFile = ReadFile(hFile, &(WaPonType), sizeof(_uint), &dwByte, nullptr);
+
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
@@ -1366,7 +1388,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
         pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
-        CGameObject* pGameObject = m_pGameInstance->Clone_GameObject(pPoroto, &pDec);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
@@ -1380,6 +1402,17 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         Safe_Delete_Array(pPoroto);
     }
     CloseHandle(hFile);
+}
+
+
+void CLevel_Edit::ChsetWeapon()
+{
+    
+    ImGui::Text("Set_weaPon");
+    ImGui::SameLine(100, 0);
+    ImGui::InputInt("##44", &m_WeaPon);
+
+   
 }
 
 void CLevel_Edit::Key_input(_float ftimedelta)
@@ -1446,11 +1479,13 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         {
             m_pObjTransform->Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), ftimedelta * MouseMove * m_fRotfspped);
         }
-
-        if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
+        if (m_pGameInstance->Get_DIKeyState(DIK_T))
         {
-            m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
-                                  ftimedelta * MouseMove * m_fRotfspped);
+            if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
+            {
+                m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
+                    ftimedelta * MouseMove * m_fRotfspped);
+            }
         }
     }
 

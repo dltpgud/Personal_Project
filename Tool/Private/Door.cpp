@@ -55,7 +55,7 @@ void CDoor::Update(_float fTimeDelta)
     _float3 Center;
     XMStoreFloat3(&Center, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
     pBox.Center = Center;
-    
+    pBox.Extents = { 1,1,1 };
 
 
      m_pModelCom->Set_Animation(m_istate, false);
@@ -107,10 +107,6 @@ void CDoor::Set_Model(const _wstring& protoModel)
     m_pModelCom->Set_Animation(m_istate, false);
 }
 
-CTransform* CDoor::Get_Transform()
-{
-    return m_pTransformCom;
-}
 
 _tchar* CDoor::Get_ProtoName()
 {

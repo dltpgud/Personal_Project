@@ -19,12 +19,13 @@ public:
     };
     typedef struct TRANSFORM_DESC
     {
-        _float fSpeedPerSec;
-        _float fRotationPerSec;
-        _vector RIGHT;
-        _vector UP;
-        _vector LOOK;
-        _vector POSITION;
+        _float fSpeedPerSec{};
+        _float fRotationPerSec{};
+        _vector RIGHT{};
+        _vector UP{};
+        _vector LOOK{};
+        _vector POSITION{};
+        _float JumpPower{};
     } TRANSFORM_DESC;
 
 private:
@@ -41,10 +42,13 @@ public:
     void LookAt(_fvector vAt);
     void Go_Straight(_float fTimeDelta);
     void Go_Left(_float fTimeDelta);
-    void Go_Right(_float fTimeDelta);
+    void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void Go_Backward(_float fTimeDelta);
     void Go_Up(_float fTimeDelta);
     void Go_Down(_float fTimeDelta);
+    void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck);
+
+    void Rotation_to_Player();
 
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
     void Turn(_fvector vAxis, _float fTimeDelta);
@@ -61,6 +65,10 @@ public:
     _matrix Get_WorldMatrix_Inverse()
     {
         return XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix));
+    }
+
+    const _float4x4* Get_WorldMatrixPtr() const {
+        return &m_WorldMatrix;
     }
 
     _matrix Get_WorldMatrix()
@@ -93,6 +101,10 @@ public:
         return m_fRotationPerSec;
     }
 
+    _float Get_JumpPower()
+    {
+        return m_JumpPower;
+    }
 public:
     HRESULT Bind_ShaderResource(class CShader* pShader, const _char* pConstantName);
 
@@ -105,7 +117,8 @@ private:
     _float m_fSpeedPerSec = {};
     _float m_fRotationPerSec = {};
 
-
+    _float m_JumpPower{};
+    _float m_fTimeSum{};
 public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;
