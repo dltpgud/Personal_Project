@@ -1,6 +1,6 @@
 ﻿#include "Transform.h"
 #include "Shader.h"
-
+#include "GameInstance.h"
 CTransform::CTransform(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CComponent{pDevice, pContext}
 {
 }
@@ -49,12 +49,17 @@ void CTransform::Go_Left(_float fTimeDelta)
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Right(_float fTimeDelta)
+void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation)
 {
     _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
 
     vPosition += XMVector3Normalize(vRight) * m_fSpeedPerSec * fTimeDelta;
+
+
+    if (nullptr != pNavigation && false == pNavigation->isMove(vPosition)) // 아마 이 안에서 슬라이드 구현하면 될듯..?
+        return;
+
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
@@ -88,6 +93,50 @@ void CTransform::Go_Down(_float fTimeDelta)
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
+
+void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck)
+{
+    m_fTimeSum += fTimeDelta * 9.8f;
+
+    Go_Straight(fTimeDelta);
+
+    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
+
+    vPosition += XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
+
+     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vPosition);
+
+
+    _float3 Position;
+    XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    if (Position.y <= YPos)
+    {
+        Position.y = YPos;
+        cout << Position.x << "  " << Position.y << "   " << Position.z << endl;
+       Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
+        m_fTimeSum = 0.f;
+        *Jumpcheck = false;
+    }
+}
+
+void CTransform::Rotation_to_Player()
+{
+   _matrix met = XMMatrixLookAtLH(Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 
+       m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), XMVectorSet(0.f, 1.f, 0.f, 0.f));
+
+
+   _matrix Wmet = XMMatrixInverse(nullptr, met);
+
+   _float4x4 wmet{};
+
+   XMStoreFloat4x4(&wmet, Wmet);
+   Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, XMVectorSet(wmet._11, wmet._12, wmet._13, wmet._14));
+   Set_TRANSFORM(CTransform::TRANSFORM_UP, XMVectorSet(wmet._21, wmet._22, wmet._23, wmet._24));
+   Set_TRANSFORM(CTransform::TRANSFORM_LOOK, XMVectorSet(wmet._31, wmet._32, wmet._33, wmet._34));
+}
+
 
 void CTransform::Turn(_fvector vAxis, _float fTimeDelta)
 {
@@ -149,6 +198,7 @@ HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 
         m_fSpeedPerSec = pDesc->fSpeedPerSec;
         m_fRotationPerSec = pDesc->fRotationPerSec;
+        m_JumpPower = pDesc->JumpPower;
     }
 
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());

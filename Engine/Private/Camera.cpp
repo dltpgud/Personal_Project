@@ -33,7 +33,6 @@ HRESULT CCamera::Initialize(void* pArg)
 	m_fNearZ = pDesc->fNearZ;
 	m_fFarZ = pDesc->fFarZ;
 
-
 	return S_OK;
 }
 

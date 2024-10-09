@@ -30,7 +30,6 @@ public:
 	virtual HRESULT Render() override;	
 	virtual void Set_Model(const _wstring& protoModel) override;
 	virtual CModel* Get_Model() override { return m_pModelCom; }
-	virtual CTransform* Get_Transform();
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CModel*						m_pModelCom = { nullptr };

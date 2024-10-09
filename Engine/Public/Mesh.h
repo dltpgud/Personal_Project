@@ -30,7 +30,7 @@ public:
 
     _uint Get_iNumIndexices();
     _uint Get_iNumVertices();
-
+   
 private:
     HRESULT Load_AnimMesh(HANDLE hFile);
     HRESULT Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix);

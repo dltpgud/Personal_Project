@@ -60,7 +60,7 @@ private:
 	void    Load_Wall(const _tchar* tFPath);
 	void    Load_Ani(const _tchar* tFPath);
 
-
+	void	ChsetWeapon();
 	void    Key_input(_float ftimedelta);
 	void    Update_Pos();
 	void    Update_Speed();
@@ -100,6 +100,7 @@ private:
 	_int     m_CopyiItem_selected_idx{};
 	_int     m_CopyiIcomtem_selected_idx{};
 	_uint    m_iScene{};
+	_int  m_WeaPon{};
 
 	/*float*/
 	_float	 m_fspped{};
@@ -119,6 +120,8 @@ private:
 	vector <_char*>    m_protokey[POROTO_TYPE_END];
 	vector <_char*>    m_protoComkey[POROTO_TYPE_END];
 	vector <CTransform*> m_TerrainVT;
+
+	_bool m_Key = false;
 
 public:
 	static CLevel_Edit* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

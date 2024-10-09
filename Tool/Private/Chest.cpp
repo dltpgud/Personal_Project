@@ -109,11 +109,6 @@ void CChest::Set_Model(const _wstring& protoModel)
 
 }
 
-CTransform* CChest::Get_Transform()
-{
-    return m_pTransformCom;
-}
-
 _tchar* CChest::Get_ProtoName()
 {
     return m_Proto;

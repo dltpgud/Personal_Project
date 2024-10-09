@@ -53,10 +53,6 @@ void CTerrain::Late_Update(_float fTimeDelta)
         return;
 }
 
-CTransform* CTerrain::Get_Transform()
-{
-    return m_pTransformCom;
-}
 
 HRESULT CTerrain::Render()
 {

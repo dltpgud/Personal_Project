@@ -42,8 +42,8 @@ private:
 	_float m_HP = 100.f;
 	_float m_MaxHP = 100.f;
 	_float m_HP_Pluse = 0.f;
-
-public:
+	_float m_fPrXPos{}, m_fPrYPos{};
+public:	
 	static CPlayerUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void		 Free() override;

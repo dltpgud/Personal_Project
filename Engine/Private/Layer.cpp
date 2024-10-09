@@ -2,8 +2,8 @@
 #include "GameObject.h"
 #include "Model.h"
 CLayer::CLayer()
-{   m_iObjType = CGameObject::GAMEOBJ_TYPE_END;
-    m_GameObjects = new list<class CGameObject*>[m_iObjType];
+{  
+   
 }
 
 HRESULT CLayer::Add_GameObject(CGameObject* pGameObject, const _uint& strLayerTag)
@@ -87,10 +87,12 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
             if (nullptr == pGameObject->Get_Model())
                 continue;
 
-        if (CGameObject::DATA_CHEST == pGameObject->Get_Data() || CGameObject::DATA_DOOR == pGameObject->Get_Data())
-                fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
-            else
-             fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform());
+        // if (CGameObject::DATA_CHEST == pGameObject->Get_Data() ) 
+        //        fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
+        // else if (CGameObject::DATA_DOOR == pGameObject->Get_Data())
+            fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
+        //   else
+        //    fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform());
             if (fCurDIs < Desc.fDis)
             {
                 Desc.fDis = fCurDIs;
@@ -98,7 +100,7 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
             }
         }
     }
-
+            
     return Desc;
 }
 
@@ -127,5 +129,5 @@ void CLayer::Free()
         for (auto& pGameObject : m_GameObjects[i]) Safe_Release(pGameObject);
         m_GameObjects[i].clear();
     }
-    Safe_Delete_Array(m_GameObjects);
+
 }

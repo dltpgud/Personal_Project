@@ -28,6 +28,10 @@ public:
 	void	Draw();
 	void	Clear(_uint iClearLevelID);
 
+
+	void Set_Player(CGameObject* pPlayer);
+	CGameObject* Get_Player();
+
 public: /* For.Graphic_Device */
 	HRESULT Render_Begin(_float4 Color);
 	HRESULT Render_End();
@@ -54,10 +58,9 @@ public: /* for.Level_Manager */
 public: /* For.Object_Manager*/
 	HRESULT Add_Prototype(const _wstring& strPrototypeTag, class CGameObject* pPrototype);
 	HRESULT Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath = nullptr, const _uint& DataType =0, void* pArg = nullptr);
-	CGameObject* Clone_GameObject( const _wstring& strPrototypeTag, void* pArg = nullptr);
 	HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, class CGameObject* pGameObject);
-     CGameObject* Find_Prototype(const _wstring& strPrototypeTag);
-
+    CGameObject* Find_Prototype(const _wstring& strPrototypeTag);
+	class CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg = nullptr);
 
 	/*---EDIT----*/
 	map<const _wstring, class CGameObject*>		 Get_ProtoObject_map();
@@ -73,8 +76,9 @@ public: /* For.UI_Manager*/
 	HRESULT Set_UpdateUI(const _uint& uID, _bool UIopen);
 	HRESULT Set_LateUpdateUI(const _uint& uID, _bool UIopen);
 	CGameObject* Get_UI(const _uint& iLevel, const _uint& uID);
-
-public: /* For.Component_Manager */
+    HRESULT UI_shaking(const _uint& uID, _float fTimeDelta);    
+	HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY);
+    public: /* For.Component_Manager */
 	HRESULT Add_Prototype_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, class CComponent* pPrototype);
 	class CComponent* Clone_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, void* pArg = nullptr);
 	map<const _wstring, class CComponent*> Get_Com_proto_vec(_uint iLevelindex);
@@ -108,6 +112,7 @@ public: /* For.Calculator */
 
 
 private:
+	CGameObject* m_pPlayer = {nullptr};
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
 	class CInput_Device*			m_pInput_Device		 = { nullptr };
 	class CTimer_Manager*			m_pTimer_Manager	 = { nullptr };

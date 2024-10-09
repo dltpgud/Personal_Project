@@ -12,11 +12,8 @@ CMesh::CMesh(const CMesh& Prototype) : CVIBuffer{Prototype}, m_iMaterialIndex{Pr
     m_pPos = new _float3[m_iNumVertices];
     m_pIndices = new _uint[m_iNumIndexices];
 
-
     memcpy(m_pPos, Prototype.m_pPos, sizeof(_float3) * m_iNumVertices);
     memcpy(m_pIndices, Prototype.m_pIndices, sizeof(_uint) * m_iNumIndexices);
-     
-
 }
 HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix)
 {
@@ -26,28 +23,21 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
     bReadFile = ReadFile(hFile, m_szName, sizeof(char) * MAX_PATH, &dwByte, nullptr);
     bReadFile = ReadFile(hFile, &m_iMaterialIndex, sizeof(m_iMaterialIndex), &dwByte, nullptr);
     bReadFile = ReadFile(hFile, &m_iNumVertices, sizeof(m_iNumVertices), &dwByte, nullptr);
-
     _uint iNumFaces;
     bReadFile = ReadFile(hFile, &iNumFaces, sizeof(iNumFaces), &dwByte, nullptr);
     m_iNumIndexices = iNumFaces * 3;
     _uint* pIndices = new _uint[m_iNumIndexices];
     bReadFile = ReadFile(hFile, pIndices, sizeof(_uint) * m_iNumIndexices, &dwByte, nullptr);
 
-
     m_pIndices = new _uint[m_iNumIndexices];
 
-    for (_uint i = 0; i < m_iNumIndexices; i++)
-    {
-        m_pIndices[i] = pIndices[i];
-
-    }
+    for (_uint i = 0; i < m_iNumIndexices; i++) { m_pIndices[i] = pIndices[i]; }
     m_iIndexStride = sizeof(_uint);
     m_iNumVertexBuffers = 1;
     m_eIndexFormat = DXGI_FORMAT_R32_UINT;
     m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     HRESULT hr = eModelType == CModel::TYPE_ANIM ? Load_AnimMesh(hFile) : Load_NonAnimMesh(hFile, PreTransformMatrix);
-
 
 #pragma region INDEX_BUFFER
 
@@ -63,14 +53,13 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
     ZeroMemory(&m_InitialDesc, sizeof m_InitialDesc);
     m_InitialDesc.pSysMem = pIndices;
 
-    _uint		iNumIndices = { 0 };
+    _uint iNumIndices = {0};
 
     if (FAILED(__super::Create_Buffer(&m_pIB)))
         return E_FAIL;
 
 #pragma endregion
     Safe_Delete_Array(pIndices);
-
 
     return S_OK;
 }
@@ -89,14 +78,14 @@ HRESULT CMesh::Initialize_Proto(_char* pName, _uint iMaterialIndex, _uint iNumVe
     m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 #pragma region VERTEX_BUFFER
-    // dx9 : 정점버퍼를 할당하고 -> 락언락해서 정점버퍼에 초기값을 채운다. 
+    // dx9 : 정점버퍼를 할당하고 -> 락언락해서 정점버퍼에 초기값을 채운다.
     // dx9 : 정점버퍼에 초기값을 채우면서 정점버퍼를 할당한다
     ZeroMemory(&m_BufferDesc, sizeof m_BufferDesc);
 
     // 할당하고자하는 메모리공간의 크기(Byte)
     m_BufferDesc.ByteWidth = m_iVertexStride * m_iNumVertices;
 
-    // 버퍼의 속성 (정적, 동적) 
+    // 버퍼의 속성 (정적, 동적)
     m_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
     m_BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     m_BufferDesc.CPUAccessFlags = 0;
@@ -142,14 +131,14 @@ HRESULT CMesh::Initialize(void* pArg)
 
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName)
 {
-    _float4x4			BoneMatrices[512];
+    _float4x4 BoneMatrices[512];
 
-    _uint		iNumBones = { 0 };
+    _uint iNumBones = {0};
 
-    for (auto& iBoneIndex : m_Bones)   /*뼈의 인덱스 만큼 돌면서 행렬을 곱해라*/
+    for (auto& iBoneIndex : m_Bones) /*뼈의 인덱스 만큼 돌면서 행렬을 곱해라*/
     {
-        _matrix			CombinedMatrix = Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
-        _matrix			OffsetMatrix = XMLoadFloat4x4(&m_OffsetMatrices[iNumBones]);
+        _matrix CombinedMatrix = Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
+        _matrix OffsetMatrix = XMLoadFloat4x4(&m_OffsetMatrices[iNumBones]);
 
         XMStoreFloat4x4(&BoneMatrices[iNumBones++], OffsetMatrix * CombinedMatrix);
     }
@@ -177,7 +166,6 @@ _uint CMesh::Get_iNumVertices()
     return m_iNumVertices;
 }
 
-
 HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
 {
     DWORD dwByte{};
@@ -187,14 +175,9 @@ HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
 
     bReadFile = ReadFile(hFile, pVertices, sizeof(VTXANIMMESH) * m_iNumVertices, &dwByte, nullptr);
     m_pPos = new _float3[m_iNumVertices];
-    for (size_t i = 0; i < m_iNumVertices; i++)
-    {
-        m_pPos[i] = pVertices[i].vPosition;
-    }
+    for (size_t i = 0; i < m_iNumVertices; i++) { m_pPos[i] = pVertices[i].vPosition; }
 
     m_iVertexStride = sizeof(VTXANIMMESH);
-
-
 
     bReadFile = ReadFile(hFile, &m_iNumBones, sizeof(m_iNumBones), &dwByte, nullptr);
 
@@ -247,10 +230,12 @@ HRESULT CMesh::Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix)
     for (_uint i = 0; i < m_iNumVertices; i++)
     {
         pVertices[i].vPosition = pLoadVertices[i].vPosition;
-        XMStoreFloat3(&pVertices[i].vPosition, XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
+        XMStoreFloat3(&pVertices[i].vPosition,
+                      XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
         m_pPos[i] = pVertices[i].vPosition;
         pVertices[i].vNormal = pLoadVertices[i].vNormal;
-        XMStoreFloat3(&pVertices[i].vPosition, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
+        XMStoreFloat3(&pVertices[i].vPosition,
+                      XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
 
         pVertices[i].vTangent = pLoadVertices[i].vTangent;
         pVertices[i].vTexcoord = pLoadVertices[i].vTexcoord;
@@ -307,7 +292,8 @@ CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _char
     return pInstance;
 }*/
 
-CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix)
+CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile,
+                     _fmatrix PreTransformMatrix)
 {
     CMesh* pInstance = new CMesh(pDevice, pContext);
 

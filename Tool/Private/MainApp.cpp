@@ -8,6 +8,7 @@
 #include "fabric.h"
 #include "Door.h"
 #include "Chest.h"
+#include "Wall.h"
 CMainApp::CMainApp()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
 {
@@ -129,6 +130,31 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component struck2 Model_nonaniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/struck2.dat"), PreTransformMatrix))))
 		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Bus Model_nonaniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Bus.dat"), PreTransformMatrix))))
+		return E_FAIL;
+
+		///*Prototype_Component_Wall*/
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component RockWallLarge01 Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/RockWallLarge.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component RockWallLarge02 Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/RockWallLarge02.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component RockWallLarge03 Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/RockWallLarge03.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component RockWallsmall Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/RockWallsmall.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component RockBase Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/RockBase.dat"), PreTransformMatrix))))
+		return E_FAIL;
+
+
+
+
+
 
 
 	///*Prototype_Component_Door*/
@@ -146,11 +172,8 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/ChestWeapon.dat"), PreTransformMatrix))))
 		return E_FAIL;
 
-	///*Prototype_Component_Player*/
-	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY((XMConvertToRadians(180.f)));
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Player Model_aniObj"),
-		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/Player.dat"), PreTransformMatrix))))
-		return E_FAIL;
+
+	
 	return S_OK;
 }
 
@@ -167,6 +190,8 @@ HRESULT CMainApp::Ready_Prototype_For_GameObject()
 
 	/* For.Prototype_GameObject_nonaniObj*/
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject fabric_nonaniObj"), Cfabric::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject Rock_Wall"),  CWALL::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
     /* For.Prototype_GameObject_aniObj*/

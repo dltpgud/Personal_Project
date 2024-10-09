@@ -17,10 +17,12 @@ public:
 	virtual HRESULT Render() override;
 
 private: 
+    	HRESULT Ready_Layer_Player(const _uint& pLayerTag);
 		HRESULT Ready_Layer_Camera(const _uint& pLayerTag);
 		HRESULT Ready_Layer_UI(const _uint& pLayerTag );
 		HRESULT Ready_Layer_Map(const _uint& pLayerTag);
 		HRESULT Ready_Light();
+	
 public:
 	static CLevel_Stage1* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void Free() override;

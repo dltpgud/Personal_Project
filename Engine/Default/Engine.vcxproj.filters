@@ -124,6 +124,18 @@
     <Filter Include="01.Utility\02.GameObjects\ContainerObject\PartObject">
       <UniqueIdentifier>{851fb8ea-f8b4-457d-b10d-a9a2e92539bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Utility\04.Component\Navigation">
+      <UniqueIdentifier>{12bbd5b6-f40a-450c-81c1-348cf97e5121}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Navigation\Cell">
+      <UniqueIdentifier>{602935b4-d1f2-47f8-af72-53bdb3ce79be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\VIBuffer\Cell">
+      <UniqueIdentifier>{3ad739b4-759a-40df-acbd-116449fa956f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="08.ShaderFiles">
+      <UniqueIdentifier>{c8765a11-7d92-4e54-914a-be038a5d86e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -249,6 +261,15 @@
     <ClInclude Include="..\Public\PartObject.h">
       <Filter>01.Utility\02.GameObjects\ContainerObject\PartObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Cell.h">
+      <Filter>01.Utility\04.Component\Navigation\Cell</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Navigation.h">
+      <Filter>01.Utility\04.Component\Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Cell.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Cell</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -362,5 +383,19 @@
     <ClCompile Include="..\Private\PartObject.cpp">
       <Filter>01.Utility\02.GameObjects\ContainerObject\PartObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Navigation.cpp">
+      <Filter>01.Utility\04.Component\Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Cell.cpp">
+      <Filter>01.Utility\04.Component\Navigation\Cell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Cell.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Cell</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl">
+      <Filter>08.ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ public:
     virtual _int Priority_Update(_float fTimeDelta) override;
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
-    virtual CTransform* Get_Transform();
+ 
     virtual HRESULT Render() override;
     virtual void Set_Model(const _wstring& protoModel) override;
     virtual CModel* Get_Model() override { return m_pModelCom; }

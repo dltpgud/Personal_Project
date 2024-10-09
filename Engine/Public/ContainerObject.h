@@ -34,7 +34,7 @@ protected:
 	vector<class CPartObject*>			m_PartObjects;
 
 protected:
-	HRESULT Add_PartObject(_uint iLevelIndex, const _wstring& strPrototypeTag, _uint iPartObjectIndex, void* pArg = nullptr);
+	HRESULT Add_PartObject( const _wstring& strPrototypeTag, _uint iPartObjectIndex, void* pArg = nullptr);
 
 public:
 	virtual CGameObject* Clone(void* pArg) = 0;

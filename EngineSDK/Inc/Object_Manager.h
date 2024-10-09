@@ -50,8 +50,7 @@ public:
 	/*원본을 탐색한다*/
 	class CGameObject* Find_Prototype(const _wstring& strPrototypeTag); 
 	map<const _wstring, class CGameObject*> Get_ProtoObject_map() { return  m_Prototypes; }
-
-
+	class CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg);
 
 private:
 	/*레이어를 탐색한다*/

@@ -145,6 +145,7 @@
     <ClInclude Include="..\Public\Level_Edit.h" />
     <ClInclude Include="..\Public\MainApp.h" />
     <ClInclude Include="..\Public\Terrain.h" />
+    <ClInclude Include="..\Public\Wall.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="..\Private\Level_Edit.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\Terrain.cpp" />
+    <ClCompile Include="..\Private\Wall.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Tool.cpp" />
   </ItemGroup>

@@ -112,6 +112,16 @@ void CGameInstance::Clear(_uint iClearLevelID)
 
 }
 
+void CGameInstance::Set_Player(CGameObject* pPlayer)
+{
+	m_pPlayer = pPlayer;
+}
+
+CGameObject* CGameInstance::Get_Player()
+{
+	return m_pPlayer;
+}
+
 void CGameInstance::Release_Engine()
 {
 	CGameInstance::GetInstance()->Free();
@@ -295,15 +305,15 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 			break;
 
 		case CGameObject::DATA_NONANIMAPOBJ:
-			return m_pLevel_Manager->Load_to_Next_Map_NonaniObj(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
+		    	return m_pLevel_Manager->Load_to_Next_Map_NonaniObj(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
 			break;
 
 		case CGameObject::DATA_WALL:
-			return m_pLevel_Manager->Load_to_Next_Map_Wall(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
+			    return m_pLevel_Manager->Load_to_Next_Map_Wall(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
 			break;
 	
 		default:
-			return m_pLevel_Manager->Load_to_Next_Map_AniOBj(iLevelIndex, strLayerTag, pPrototype, DataType, strProtoMapPath, pArg);
+			      return m_pLevel_Manager->Load_to_Next_Map_AniOBj(iLevelIndex, strLayerTag, pPrototype, DataType, strProtoMapPath, pArg);
 			break;
 		}
 	
@@ -315,6 +325,9 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 		if (nullptr == pGameObject)
 			return E_FAIL;
 
+		//if (L"Prototype_GameObject_Player" == strPrototypeTag)
+		//	Set_Player(pGameObject); 
+
 		if (strLayerTag == CGameObject::UI)
 			return m_pUI_Manager->Add_UI(pGameObject, iLevelIndex);
 		else
@@ -323,19 +336,6 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 	return S_OK;
 }
 
-CGameObject* CGameInstance::Clone_GameObject(const _wstring& strPrototypeTag, void* pArg)
-{
-	CGameObject* pPrototype = m_pObject_Manager->Find_Prototype(strPrototypeTag);
-	if (nullptr == pPrototype)
-		return nullptr;
-
-	/*사본을 만든다*/
-	CGameObject* pGameObject = pPrototype->Clone(pArg);
-	if (nullptr == pGameObject)
-		return nullptr;
-
-	return pGameObject;
-}
 
 HRESULT CGameInstance::Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* pGameObject)
 {
@@ -351,6 +351,13 @@ CGameObject* CGameInstance::Find_Prototype(const _wstring& strPrototypeTag)
 		return nullptr;
 
 	return m_pObject_Manager->Find_Prototype(strPrototypeTag);
+}
+CGameObject* CGameInstance::Clone_Prototype(const _wstring& strPrototypeTag, void* pArg)
+{
+	if (nullptr == m_pObject_Manager)
+		return nullptr;
+
+	return m_pObject_Manager->Clone_Prototype(strPrototypeTag, pArg);
 }
 #pragma endregion
 
@@ -389,8 +396,28 @@ HRESULT CGameInstance::Set_LateUpdateUI(const _uint& uID, _bool UIopen)
 
 CGameObject* CGameInstance::Get_UI(const _uint& iLevel, const _uint& uID)
 {
+    if (nullptr == m_pUI_Manager)
+        return nullptr;
 	return m_pUI_Manager->Get_UI(iLevel, uID);
 }
+
+HRESULT CGameInstance::UI_shaking(const _uint& uID, _float fTimeDelta)
+{
+    if (nullptr == m_pUI_Manager)
+        return E_FAIL;
+
+
+    return m_pUI_Manager->UI_shaking(uID, fTimeDelta);
+}
+
+HRESULT CGameInstance::Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY)
+{
+    if (nullptr == m_pUI_Manager)
+        return E_FAIL;
+
+    return m_pUI_Manager->Set_UI_shaking(uID, fShakingTime, fPowerX, fPowerY);
+}
+
 
 #pragma endregion
 
@@ -534,7 +561,7 @@ _float CGameInstance::Compute_Random(_float fMin, _float fMax)
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
-
+	Safe_Release(m_pPlayer);
 	Safe_Release(m_pCalculator);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pPipeLine);

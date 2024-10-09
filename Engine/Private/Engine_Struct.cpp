@@ -27,6 +27,12 @@ namespace Engine
 	InstanceDataStepRate: 일단 지금은 0을 지정한다. 다른 값들은 고급 기법인 인스턴싱에 쓰인다
 	*/
 
+
+	const D3D11_INPUT_ELEMENT_DESC	VTXPOS::Elements[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+
 	const   D3D11_INPUT_ELEMENT_DESC	VTXPOSTEX::Elements[] = 
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },

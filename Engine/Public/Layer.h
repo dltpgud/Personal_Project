@@ -24,8 +24,8 @@ public:
 	list<class CGameObject*> Get_ALL_GameObject(const _uint& strLayerTag);
 
 private :
-    _uint					  m_iObjType{};
-	list<class CGameObject*>* m_GameObjects = { nullptr };
+    _uint					m_iObjType = CGameObject::GAMEOBJ_TYPE_END;
+	list<class CGameObject*> m_GameObjects[CGameObject::GAMEOBJ_TYPE_END] ;
 
 
 public : 

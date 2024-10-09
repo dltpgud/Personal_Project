@@ -64,6 +64,21 @@
     <Filter Include="02.GameObjects\01. Map\Wall">
       <UniqueIdentifier>{904b1528-598e-4fce-a3fa-446eafa2204b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\Player">
+      <UniqueIdentifier>{ca79e80a-f4cb-48b4-9198-3b373697e1a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\Player\Body">
+      <UniqueIdentifier>{b3714dd1-c571-4890-bb9a-37830a175434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\Player\Weapon">
+      <UniqueIdentifier>{d63ee020-c2aa-4e09-aecf-49b601153227}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\02.Item">
+      <UniqueIdentifier>{97bd9f6e-047c-4ae6-9a8d-f0f1245d8fad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\02.Item\WeaPonIcon">
+      <UniqueIdentifier>{df8316f9-c884-4df1-b4e5-ce6fb5635cb4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -129,6 +144,21 @@
     <ClInclude Include="..\Public\CHEST.h">
       <Filter>02.GameObjects\01. Map\AniObj</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Body_Player.h">
+      <Filter>02.GameObjects\Player\Body</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player.h">
+      <Filter>02.GameObjects\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Weapon.h">
+      <Filter>02.GameObjects\Player\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\WeaponUI.h">
+      <Filter>02.GameObjects\UI\PlayerUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\WeaPonIcon.h">
+      <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -181,6 +211,21 @@
     </ClCompile>
     <ClCompile Include="..\Private\CHEST.cpp">
       <Filter>02.GameObjects\01. Map\AniObj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_Player.cpp">
+      <Filter>02.GameObjects\Player\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Weapon.cpp">
+      <Filter>02.GameObjects\Player\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player.cpp">
+      <Filter>02.GameObjects\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\WeaponUI.cpp">
+      <Filter>02.GameObjects\UI\PlayerUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\WeaPonIcon.cpp">
+      <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -29,7 +29,7 @@ public:
     {
         GAMEOBJ_DATA  DATA_TYPE{};
         const _tchar* FilePath{};
-         _tchar* ProtoName{};
+        _tchar* ProtoName{};
     }GAMEOBJ_DESC;
 
     typedef struct PickObj_Desc
@@ -54,42 +54,44 @@ public:
     virtual _int Priority_Update(_float fTimeDelta);
     virtual void Update(_float fTimeDelta);
     virtual void Late_Update(_float fTimeDelta);
-
     virtual HRESULT Render();
-    virtual CTransform* Get_Transform()
-    {
-        return nullptr;
-    }
-
     virtual CModel* Get_Model() {
         return nullptr;
     };
+
+    CTransform* Get_Transform()
+    {
+        return m_pTransformCom;
+    }
+
+
     void Set_Dead(_bool Dead)
     {
-         m_bDead = Dead;
+        m_bDead = Dead;
     }
 
     _bool Get_Dead(_bool Dead)
     {
-        return  m_bDead ;
+        return  m_bDead;
     }
 
-  virtual _float Check_Pick(_vector RayPos, _vector RayDir)
+    virtual _float Check_Pick(_vector RayPos, _vector RayDir)
     {
-        return _float{0xffff};
+        return _float{ 0xffff };
     }
 
-  /*for EDIT to Client*/
-  virtual void Set_Model(const _wstring& protoModel)
-  {
-  }
- GAMEOBJ_DATA Get_Data()
-  {
-      return m_DATA_TYPE;
-  }
-  virtual _wstring Get_ComPonentName() { return 0; }
-  virtual _tchar* Get_ProtoName() { return nullptr; }
-  virtual void Set_Buffer(_uint x, _uint y) {};
+    /*for EDIT to Client*/
+    virtual void Set_Model(const _wstring& protoModel)
+    {
+    }
+    GAMEOBJ_DATA Get_Data()
+    {
+        return m_DATA_TYPE;
+    }
+    virtual _wstring Get_ComPonentName() { return NULL; }
+    virtual _tchar* Get_ProtoName() { return nullptr; }
+    virtual void Set_Buffer(_uint x, _uint y) {};
+    virtual _uint Get_Scalra() { return 0; };
   virtual _float check_BoxDist(_vector RayPos, _vector RayDir) { return _float(0xffff); }
 protected:
     class CGameInstance* m_pGameInstance = {nullptr};

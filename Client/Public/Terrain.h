@@ -6,7 +6,9 @@ BEGIN(Engine)
 class CShader;
 class CTexture;
 class CVIBuffer_Terrain;
+class CNavigation;
 END
+
 BEGIN(Client)
 class CTerrain : public CGameObject
 {
@@ -22,7 +24,6 @@ public:
 	virtual _int	Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
-	virtual CTransform* Get_Transform();
 	
 	virtual HRESULT Render() override;
 
@@ -42,6 +43,7 @@ private:
 	CTexture*					 m_pTextureCom = { nullptr };
 	CShader*					 m_pShaderCom = { nullptr };
 	CVIBuffer_Terrain*			 m_pVIBufferCom = { nullptr };
+	CNavigation*				 m_pNavigationCom = { nullptr };
 	_uint    m_pSize[2]{};
 private:
 	HRESULT Add_Components();

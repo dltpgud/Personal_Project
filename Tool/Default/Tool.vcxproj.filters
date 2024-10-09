@@ -43,6 +43,7 @@
     <ClInclude Include="..\Public\fabric.h" />
     <ClInclude Include="..\Public\Door.h" />
     <ClInclude Include="..\Public\Chest.h" />
+    <ClInclude Include="..\Public\Wall.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Tool.ico">
@@ -72,6 +73,7 @@
     <ClCompile Include="..\Private\fabric.cpp" />
     <ClCompile Include="..\Private\Door.cpp" />
     <ClCompile Include="..\Private\Chest.cpp" />
+    <ClCompile Include="..\Private\Wall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tool.rc">

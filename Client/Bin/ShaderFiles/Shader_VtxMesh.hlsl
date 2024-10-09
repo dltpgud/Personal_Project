@@ -7,7 +7,7 @@ float4			g_vLightAmbient;
 float4			g_vLightSpecular;
 
 texture2D		g_DiffuseTexture;
-float4			g_vMtrlAmbient = float4(0.4f, 0.4f, 0.4f, 1.f);
+float4			g_vMtrlAmbient = float4(0.6f, 0.6f, 0.6f, 1.f);
 float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
 float4			g_vCamPosition;
@@ -79,7 +79,7 @@ PS_OUT PS_MAIN(PS_IN In)
 	
 	vector		vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
 
-	float4		vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
+	float4		vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
 
 	float4		vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
 	float4		vLook = In.vWorldPos - g_vCamPosition;
@@ -92,11 +92,15 @@ PS_OUT PS_MAIN(PS_IN In)
 	return Out;
 }
 
+
+
+
 technique11 DefaultTechnique
 {
-	pass DefaultPass
-	{
-		VertexShader = compile vs_5_0 VS_MAIN();
-		PixelShader = compile ps_5_0 PS_MAIN();
-	}
+    pass DefaultPass
+    {
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN();
+    }
+
 }

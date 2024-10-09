@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "VIBuffer_Rect.h"
 #include "VIBuffer_Terrain.h"
+#include "Navigation.h"
 #include "Model.h"
 /* 보관하는역활. */
 /* 컴포넌트 원형을 보관한다. 사본은 클라에서 구현할 꺼니까 */
