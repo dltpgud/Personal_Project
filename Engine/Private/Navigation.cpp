@@ -5,7 +5,7 @@
 #include "GameInstance.h"
 
 
-_float4x4 CNavigation::m_WorldMatrix = {};
+const _float4x4* CNavigation::m_WorldMatrix = {};
 
 CNavigation::CNavigation(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CComponent{pDevice, pContext}
 {
@@ -27,7 +27,7 @@ CNavigation::CNavigation(const CNavigation& Prototype)
 
 HRESULT CNavigation::Initialize_Prototype(const _tchar* pNavigationFilePath)
 {
-    XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
+ //   XMStoreFloat4x4(m_WorldMatrix, XMMatrixIdentity());
 
     _ulong dwByte = {};
     HANDLE hFile = CreateFile(pNavigationFilePath, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -98,7 +98,7 @@ void CNavigation::SetUp_Neighbor()
 }
 _bool CNavigation::isMove(_fvector vWorldPos)
 {
-    _vector vLocalPos = XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix)));
+    _vector vLocalPos = XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
 
     _int iNeighborIndex = {-1};
 
@@ -133,7 +133,7 @@ _bool CNavigation::isMove(_fvector vWorldPos)
 HRESULT CNavigation::Render()
 {
 
-    if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
+    if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
@@ -146,6 +146,65 @@ HRESULT CNavigation::Render()
 
     return S_OK;
 }
+_bool CNavigation::Snap(_fvector vP1, _fvector vP2, _vector distance)
+{
+    // 각 요소별 차이를 계산
+    XMVECTOR difference = XMVectorAbs(XMVectorSubtract(vP1, vP2));
+
+    // 각 요소가 distance 범위 내에 있는지 확인
+      return XMVector3LessOrEqual(difference, distance);
+                                        
+}
+void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
+{
+    _float3 pPoints[3];
+      
+    pPoints[0] = p1;
+    pPoints[1] = p2;
+    pPoints[2] = p3;
+ 
+    _vector vP1 =XMLoadFloat3(&pPoints[0]);
+    _vector vP2 = XMLoadFloat3(&pPoints[1]);
+    _vector vP3 = XMLoadFloat3(&pPoints[2]);
+
+    _vector distance = { 0.2f,0.2f,0.2f,1.f };
+    if (m_Cells.size() != 0)
+    {
+        for (auto vec : m_Cells)
+        {
+            if (true == Snap(vec->Get_Point(CCell::POINT_A), vP1, distance))
+                pPoints[0] = { XMVectorGetX(vec->Get_Point(CCell::POINT_A)),XMVectorGetY(vec->Get_Point(CCell::POINT_A)),XMVectorGetZ(vec->Get_Point(CCell::POINT_A)) };
+            if (true == Snap(vec->Get_Point(CCell::POINT_B), vP1, distance))
+                pPoints[0] = { XMVectorGetX(vec->Get_Point(CCell::POINT_B)),XMVectorGetY(vec->Get_Point(CCell::POINT_B)),XMVectorGetZ(vec->Get_Point(CCell::POINT_B)) };
+            if (true == Snap(vec->Get_Point(CCell::POINT_C), vP1, distance))
+                pPoints[0] = { XMVectorGetX(vec->Get_Point(CCell::POINT_C)),XMVectorGetY(vec->Get_Point(CCell::POINT_C)),XMVectorGetZ(vec->Get_Point(CCell::POINT_C)) };
+
+            if (true == Snap(vec->Get_Point(CCell::POINT_A), vP2, distance))
+                pPoints[1] = { XMVectorGetX(vec->Get_Point(CCell::POINT_A)),XMVectorGetY(vec->Get_Point(CCell::POINT_A)),XMVectorGetZ(vec->Get_Point(CCell::POINT_A)) };
+            if (true == Snap(vec->Get_Point(CCell::POINT_B), vP2, distance))
+                pPoints[1] = { XMVectorGetX(vec->Get_Point(CCell::POINT_B)),XMVectorGetY(vec->Get_Point(CCell::POINT_B)),XMVectorGetZ(vec->Get_Point(CCell::POINT_B)) };
+            if (true == Snap(vec->Get_Point(CCell::POINT_C), vP2, distance))
+                pPoints[1] = { XMVectorGetX(vec->Get_Point(CCell::POINT_C)),XMVectorGetY(vec->Get_Point(CCell::POINT_C)),XMVectorGetZ(vec->Get_Point(CCell::POINT_C)) };
+
+            if (true == Snap(vec->Get_Point(CCell::POINT_A), vP3, distance))
+                pPoints[2] = { XMVectorGetX(vec->Get_Point(CCell::POINT_A)),XMVectorGetY(vec->Get_Point(CCell::POINT_A)),XMVectorGetZ(vec->Get_Point(CCell::POINT_A)) };
+            if (true == Snap(vec->Get_Point(CCell::POINT_B), vP3, distance))
+                pPoints[2] = { XMVectorGetX(vec->Get_Point(CCell::POINT_B)),XMVectorGetY(vec->Get_Point(CCell::POINT_B)),XMVectorGetZ(vec->Get_Point(CCell::POINT_B)) };
+            if (true == Snap(vec->Get_Point(CCell::POINT_C), vP3, distance))
+                pPoints[2] = { XMVectorGetX(vec->Get_Point(CCell::POINT_C)),XMVectorGetY(vec->Get_Point(CCell::POINT_C)),XMVectorGetZ(vec->Get_Point(CCell::POINT_C)) };
+
+        }
+    }
+
+    CCell* pCell = CCell::Create(m_pDevice, m_pContext, pPoints, m_Cells.size());
+    if (nullptr == pCell) {
+
+        MSG_BOX("Cell == NULL");
+        return;
+    }
+    m_Cells.push_back(pCell);
+}
+
 #endif
 
 CNavigation* CNavigation::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,

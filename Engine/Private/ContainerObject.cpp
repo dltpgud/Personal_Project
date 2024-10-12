@@ -23,7 +23,7 @@ HRESULT CContainerObject::Initialize(void * pArg)
 	m_iNumPartObjects = pDesc->iNumPartObjects;
 	m_PartObjects.resize(m_iNumPartObjects);
 	
-	if (FAILED(__super::Initialize(pArg)))
+	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
 
 	return S_OK;

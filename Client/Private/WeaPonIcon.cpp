@@ -24,6 +24,9 @@ HRESULT CWeaPonIcon::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
     
+    m_pTransformCom->Set_MoveSpeed(0.05f);
+    m_moveTime = 1.f;
+  
     return S_OK;
 }
 
@@ -41,6 +44,26 @@ void CWeaPonIcon::Update(_float fTimeDelta)
 {
     m_pTransformCom->Rotation_to_Player();
 
+
+    if (m_moveTime > 0.f)
+    {
+        m_moveTime -= fTimeDelta;
+
+        m_pTransformCom->Go_Up(fTimeDelta);
+
+    }
+    if (m_moveTime <= 0.f)
+    {
+        m_pTransformCom->Go_Down(fTimeDelta);
+
+
+        _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+        if (Y <= m_fY)
+        {
+            m_moveTime = 1.f;
+            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(m_fX, m_fY, m_fZ, 1.f));
+        }
+    }
    
     if (m_pGameInstance->Get_DIKeyDown(DIK_I))
     {
@@ -78,6 +101,12 @@ HRESULT CWeaPonIcon::Render()
     return S_OK;
 }
 
+void CWeaPonIcon::Set_WeaPone(const _uint& i)
+{
+    m_weaPon = i; 
+
+}
+
 HRESULT CWeaPonIcon::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
@@ -110,7 +139,7 @@ HRESULT CWeaPonIcon::Bind_ShaderResources()
 {
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
-
+   
     if (FAILED(
             m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;

@@ -80,6 +80,9 @@ public:
 	void Choose_Weapon(const _uint& WeaponNum);
 
 	_uint Get_State() { return m_iState; }
+
+	_float Get_fPlayerY() { return m_fPlayerY; }
+
 	void Mouse_Fix();
 private:
 	_uint					m_iState = {};
@@ -88,7 +91,7 @@ private:
 	_bool					m_bturn = { false };
 	_bool					m_bchange = { false };
 	_bool					m_bJump = { false };
-	_float					m_fTimeSum = { 0.f };
+	_float					m_fPlayerY{ 0.f };
 
 private:
 	HRESULT Add_Components();

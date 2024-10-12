@@ -16,6 +16,7 @@ xcopy	/y	.\Engine\ThirdPartyLib\Effects11d.lib	.\EngineSDK\Lib\
 
 
 xcopy	/y		.\Engine\Bin\ShaderFiles\*.*		.\Client\Bin\ShaderFiles\
+xcopy	/y		.\Engine\Bin\ShaderFiles\*.*		.\Tool\Bin\ShaderFiles\
 
 xcopy	/y		.\Engine\Bin\Engine.dll		.\Tool\Bin\	
 xcopy	/y/s	.\Engine\Public\*.*			  .\EngineSDK\Inc\

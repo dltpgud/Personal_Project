@@ -114,11 +114,15 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck)
     if (Position.y <= YPos)
     {
         Position.y = YPos;
-        cout << Position.x << "  " << Position.y << "   " << Position.z << endl;
        Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
         m_fTimeSum = 0.f;
         *Jumpcheck = false;
     }
+}
+
+void CTransform::Stop_Move()
+{
+    Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
 }
 
 void CTransform::Rotation_to_Player()
@@ -132,9 +136,9 @@ void CTransform::Rotation_to_Player()
    _float4x4 wmet{};
 
    XMStoreFloat4x4(&wmet, Wmet);
-   Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, XMVectorSet(wmet._11, wmet._12, wmet._13, wmet._14));
-   Set_TRANSFORM(CTransform::TRANSFORM_UP, XMVectorSet(wmet._21, wmet._22, wmet._23, wmet._24));
-   Set_TRANSFORM(CTransform::TRANSFORM_LOOK, XMVectorSet(wmet._31, wmet._32, wmet._33, wmet._34));
+   Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
+   Set_TRANSFORM(CTransform::TRANSFORM_UP, XMVectorSet(0.f, 1.f, 0.f, wmet._24));
+   Set_TRANSFORM(CTransform::TRANSFORM_LOOK, XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
 }
 
 
@@ -145,6 +149,10 @@ void CTransform::Turn(_fvector vAxis, _float fTimeDelta)
     _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
 
     _matrix RotationMatrix = XMMatrixRotationAxis(vAxis, m_fRotationPerSec * fTimeDelta);
+
+    _vector vNewUp = XMVector3TransformNormal(vUp, RotationMatrix);
+    if (XMVectorGetY(vNewUp) < 0)
+        return;
 
     Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
     Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(vUp, RotationMatrix));
@@ -198,7 +206,7 @@ HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 
         m_fSpeedPerSec = pDesc->fSpeedPerSec;
         m_fRotationPerSec = pDesc->fRotationPerSec;
-        m_JumpPower = pDesc->JumpPower;
+         m_JumpPower = pDesc->JumpPower;
     }
 
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());

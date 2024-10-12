@@ -28,26 +28,11 @@
     <Filter Include="97.ShaderFiles">
       <UniqueIdentifier>{e55fed78-457b-41b3-ab8f-bd256190d1a0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\UI">
-      <UniqueIdentifier>{40454579-50bf-4be3-b1f3-b0a8ea89e72c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\UI\Loading">
-      <UniqueIdentifier>{5940d87c-4ea6-4528-8e51-5e6814765deb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\UI\PlayerUI">
-      <UniqueIdentifier>{d347b102-99ba-45c5-a2ce-234a9a58e045}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Level\00.Menu">
       <UniqueIdentifier>{8a7da72e-fbb7-4e2e-aa42-5a75bdf86a17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\UI\Menu">
-      <UniqueIdentifier>{e0565434-56fa-4b7c-b7c6-c109cad6c642}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\99 Camera">
       <UniqueIdentifier>{49bfa067-1c64-4e64-988c-41758848ab25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\UI\Cursor">
-      <UniqueIdentifier>{c7717531-c94b-4f53-b4e1-c89c77310c34}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\01. Map">
       <UniqueIdentifier>{edefdc45-33f8-443a-878c-12c517405296}</UniqueIdentifier>
@@ -64,20 +49,47 @@
     <Filter Include="02.GameObjects\01. Map\Wall">
       <UniqueIdentifier>{904b1528-598e-4fce-a3fa-446eafa2204b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\Player">
-      <UniqueIdentifier>{ca79e80a-f4cb-48b4-9198-3b373697e1a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\Player\Body">
-      <UniqueIdentifier>{b3714dd1-c571-4890-bb9a-37830a175434}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\Player\Weapon">
-      <UniqueIdentifier>{d63ee020-c2aa-4e09-aecf-49b601153227}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\02.Item">
       <UniqueIdentifier>{97bd9f6e-047c-4ae6-9a8d-f0f1245d8fad}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\02.Item\WeaPonIcon">
       <UniqueIdentifier>{df8316f9-c884-4df1-b4e5-ce6fb5635cb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI">
+      <UniqueIdentifier>{40454579-50bf-4be3-b1f3-b0a8ea89e72c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\Loading">
+      <UniqueIdentifier>{5940d87c-4ea6-4528-8e51-5e6814765deb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI">
+      <UniqueIdentifier>{d347b102-99ba-45c5-a2ce-234a9a58e045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\Menu">
+      <UniqueIdentifier>{e0565434-56fa-4b7c-b7c6-c109cad6c642}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\Cursor">
+      <UniqueIdentifier>{c7717531-c94b-4f53-b4e1-c89c77310c34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor">
+      <UniqueIdentifier>{d8508f07-8951-45dc-a9d3-e7f94d4e9d9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player">
+      <UniqueIdentifier>{ca79e80a-f4cb-48b4-9198-3b373697e1a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player\Body">
+      <UniqueIdentifier>{b3714dd1-c571-4890-bb9a-37830a175434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player\Weapon">
+      <UniqueIdentifier>{d63ee020-c2aa-4e09-aecf-49b601153227}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster">
+      <UniqueIdentifier>{f7b301fe-14e2-4e27-a9fb-6547af681414}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\GunPawn">
+      <UniqueIdentifier>{38c4814b-355d-4a1a-a3e9-99db99392428}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\GunPawn\Body">
+      <UniqueIdentifier>{f985c137-4d68-46a0-9cf9-e696677d55ba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -112,22 +124,22 @@
       <Filter>01.Level\00.Menu</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Menu.h">
-      <Filter>02.GameObjects\UI\Menu</Filter>
+      <Filter>02.GameObjects\04.UI\Menu</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Loader.h">
       <Filter>01.Level\99.Loading\Loader</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Loading.h">
-      <Filter>02.GameObjects\UI\Loading</Filter>
+      <Filter>02.GameObjects\04.UI\Loading</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerUI.h">
-      <Filter>02.GameObjects\UI\PlayerUI</Filter>
+      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Camera_Free.h">
       <Filter>02.GameObjects\99 Camera</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Cursor.h">
-      <Filter>02.GameObjects\UI\Cursor</Filter>
+      <Filter>02.GameObjects\04.UI\Cursor</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Terrain.h">
       <Filter>02.GameObjects\01. Map\Terrain</Filter>
@@ -145,19 +157,25 @@
       <Filter>02.GameObjects\01. Map\AniObj</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_Player.h">
-      <Filter>02.GameObjects\Player\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Player.h">
-      <Filter>02.GameObjects\Player</Filter>
+      <Filter>02.GameObjects\03.Actor\Player</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Weapon.h">
-      <Filter>02.GameObjects\Player\Weapon</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\Weapon</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\WeaponUI.h">
-      <Filter>02.GameObjects\UI\PlayerUI</Filter>
+      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\WeaPonIcon.h">
       <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GunPawn.h">
+      <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_GunPawn.h">
+      <Filter>02.GameObjects\03.Actor\Monster\GunPawn\Body</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -183,19 +201,19 @@
       <Filter>01.Level\99.Loading\Loader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Menu.cpp">
-      <Filter>02.GameObjects\UI\Menu</Filter>
+      <Filter>02.GameObjects\04.UI\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Loading.cpp">
-      <Filter>02.GameObjects\UI\Loading</Filter>
+      <Filter>02.GameObjects\04.UI\Loading</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerUI.cpp">
-      <Filter>02.GameObjects\UI\PlayerUI</Filter>
+      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Camera_Free.cpp">
       <Filter>02.GameObjects\99 Camera</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Cursor.cpp">
-      <Filter>02.GameObjects\UI\Cursor</Filter>
+      <Filter>02.GameObjects\04.UI\Cursor</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Terrain.cpp">
       <Filter>02.GameObjects\01. Map\Terrain</Filter>
@@ -213,19 +231,25 @@
       <Filter>02.GameObjects\01. Map\AniObj</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Body_Player.cpp">
-      <Filter>02.GameObjects\Player\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Weapon.cpp">
-      <Filter>02.GameObjects\Player\Weapon</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\Weapon</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player.cpp">
-      <Filter>02.GameObjects\Player</Filter>
+      <Filter>02.GameObjects\03.Actor\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\WeaponUI.cpp">
-      <Filter>02.GameObjects\UI\PlayerUI</Filter>
+      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\WeaPonIcon.cpp">
       <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_GunPawn.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\GunPawn\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GunPawn.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -535,9 +535,9 @@ HRESULT CGameInstance::Add_Light(const LIGHT_DESC& LightDesc)
 
 
 #pragma region Calculator
-_float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _matrix Proj, _matrix view, CTransform* Transform)
+_float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis)
 {
-	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom, Proj, view, Transform);
+	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom,  RayPos,  RayDir, Transform, fDis);
 }
 
 void CGameInstance::Make_Ray(HWND hWnd, _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir)
@@ -561,7 +561,7 @@ _float CGameInstance::Compute_Random(_float fMin, _float fMax)
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
-	Safe_Release(m_pPlayer);
+
 	Safe_Release(m_pCalculator);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pPipeLine);

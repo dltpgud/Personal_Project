@@ -5,6 +5,7 @@
 #include "PlayerUI.h"
 #include "Camera_Free.h"
 #include "Player.h"
+
 CLevel_Stage1::CLevel_Stage1(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -18,6 +19,10 @@ HRESULT CLevel_Stage1::Initialize()
 
 	if (FAILED(Ready_Layer_Player(CGameObject::ACTOR)))
 		return E_FAIL;
+
+	if (FAILED(Ready_Layer_Monster(CGameObject::ACTOR)))
+		return E_FAIL;
+
 
 	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
 		return E_FAIL;
@@ -50,6 +55,20 @@ HRESULT CLevel_Stage1::Render()
 #ifdef _DEBUG
 	SetWindowText(g_hWnd, TEXT("스테이지 1 레벨입니다."));
 #endif
+
+	return S_OK;
+}
+
+HRESULT CLevel_Stage1::Ready_Layer_Monster(const _uint& pLayerTag)
+{
+	CContainerObject::CONTAINEROBJECT_DESC Desc{};
+	Desc.POSITION = XMVectorSet( - 13.f, 0.f, 90.f, 1.f );
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
+		TEXT("Prototype_GameObject_GunPawn"),nullptr,0 , &Desc)))
+		return E_FAIL;
+	
+
 
 	return S_OK;
 }
@@ -99,10 +118,10 @@ HRESULT CLevel_Stage1::Ready_Layer_UI(const _uint& pLayerTag)
 
 HRESULT CLevel_Stage1::Ready_Layer_Map(const _uint& pLayerTag)
 {
-	 //	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Stage1_terrain.dat", CGameObject::DATA_TERRAIN)))
-	//	return   E_FAIL;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Stage1_terrain.dat", CGameObject::DATA_TERRAIN)))
+		return   E_FAIL;
 
-	if(FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
  		return   E_FAIL;
 
 

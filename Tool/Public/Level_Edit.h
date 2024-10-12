@@ -6,6 +6,9 @@
 BEGIN(Engine)
 class CTransform;
 class CVIBuffer_Terrain;
+class CTerrain;
+class CGameObject;
+class CComponent;
 END
 
 BEGIN(Tool)
@@ -62,6 +65,10 @@ private:
 
 	void	ChsetWeapon();
 	void    Key_input(_float ftimedelta);
+
+
+
+
 	void    Update_Pos();
 	void    Update_Speed();
 
@@ -73,7 +80,7 @@ private:
 	void	re_setting();
 
 	void    Picking_Pos();
-
+	void	Picking_Cell(_uint i);
 private:
 	/*imgui 창 변수*/
 	_bool    m_bshow_Map_window	     = false;
@@ -100,7 +107,7 @@ private:
 	_int     m_CopyiItem_selected_idx{};
 	_int     m_CopyiIcomtem_selected_idx{};
 	_uint    m_iScene{};
-	_int  m_WeaPon{};
+	_int     m_WeaPon{};
 
 	/*float*/
 	_float	 m_fspped{};
@@ -108,21 +115,30 @@ private:
 	_float   m_fposition[3];
 	_float   m_fscale[3];
 
+	_float3  m_fCellPoint[3];
+	_bool    m_bCell = { false };
+	_uint    m_iCellCount;
+
 	POROTO_TYPE	m_pType{};
 
 	CTransform*        m_pObjTransform = { nullptr };
-	CVIBuffer_Terrain* m_pTerrainVT = { nullptr };
-	CTransform*        m_pTerrainTR = { nullptr };
+
 
 	_wstring           m_wPrototype_Key{};
 	const _tchar*      m_tFPath[4]{};
 
 	vector <_char*>    m_protokey[POROTO_TYPE_END];
 	vector <_char*>    m_protoComkey[POROTO_TYPE_END];
-	vector <CTransform*> m_TerrainVT;
+	
 
-	_bool m_Key = false;
+	vector <CGameObject*> m_vTerrain;
 
+	_bool m_Key = { false };
+
+     CGameObject* m_Terrain = { nullptr };
+     CComponent* m_pNavigation = { nullptr };
+     CGameObject* m_PicObj = { nullptr };
+	 _bool m_bSetCellW = false;
 public:
 	static CLevel_Edit* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void		Free() override;

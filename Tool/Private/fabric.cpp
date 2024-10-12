@@ -99,11 +99,13 @@ _tchar* Cfabric::Get_ProtoName()
 _float Cfabric::check_BoxDist(_vector RayPos, _vector RayDir)
 {
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix_Inverse();
-
+   
     _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
     _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
     CurRayDir = XMVector3Normalize(CurRayDir);
 
+
+    //RayDir = XMVector3Normalize(RayDir);
     _float Dist{};
     if (pBox.Intersects(RayPos, RayDir, Dist))
     {

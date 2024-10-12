@@ -32,6 +32,7 @@ HRESULT CModel::Initialize_Proto(TYPE eModelType, const TCHAR* pModelFilePath, _
 
     Ready_AniModel(pModelFilePath);
 
+
     return S_OK;
 }
 

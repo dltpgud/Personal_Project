@@ -105,14 +105,14 @@ public: /* For.Light_Manager */
 	HRESULT Add_Light(const LIGHT_DESC& LightDesc);
 
 public: /* For.Calculator */
-	_float3	Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _matrix Proj, _matrix view, CTransform* Transform);
+	_float3	Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis);
 	void Make_Ray(HWND hWnd, _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
 
 
 private:
-	CGameObject* m_pPlayer = {nullptr};
+	CGameObject* m_pPlayer = {nullptr};   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
 	class CInput_Device*			m_pInput_Device		 = { nullptr };
 	class CTimer_Manager*			m_pTimer_Manager	 = { nullptr };

@@ -45,7 +45,7 @@ VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
 {	
 	VS_OUT			Out = (VS_OUT)0;	
 	
-	vector			vPosition = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    vector vPosition = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
 	vPosition = mul(vPosition, g_ViewMatrix);
 	vPosition = mul(vPosition, g_ProjMatrix);	
 

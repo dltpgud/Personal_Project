@@ -18,7 +18,8 @@
 #include "Wall.h"
 #include "WeaPonIcon.h"
 #include "Navigation.h"
-
+#include "GunPawn.h"
+#include "Body_GunPawn.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -119,6 +120,10 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Bus Model_nonaniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Bus.dat"), PreTransformMatrix))))
 		return E_FAIL;
+
+
+
+
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
 
 	m_strLoadingText = TEXT("객체원형 로딩중입니다.");
@@ -141,9 +146,14 @@ HRESULT CLoader::Loading_For_Stage1Level()
 {
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Texture1_Terrain"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Terrain/Tile0.jpg")))))
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Terrain/Tile0.dds")))))
 		return E_FAIL;
-
+	
+		m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
+		/* For.Prototype_Component_Navigation*/
+		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+			CNavigation::Create(m_pDevice, m_pContext, TEXT("../Bin/Data/Navigation.dat")))))
+			return E_FAIL;
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Terrain"),
@@ -174,7 +184,7 @@ HRESULT CLoader::Loading_For_Stage1Level()
 
 
 		/*Prototype_Component_WeaponIcon*/
-		PreTransformMatrix =   XMMatrixRotationY((XMConvertToRadians(45.f)));
+		PreTransformMatrix = XMMatrixRotationY((XMConvertToRadians(45.f))) * XMMatrixRotationZ((XMConvertToRadians(25.f)));
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component ChestWeapon Model_AssaultRifle_NonAni"),
 			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/AssaultRifle_NonAni.dat"), PreTransformMatrix))))
 			return E_FAIL;
@@ -195,14 +205,23 @@ HRESULT CLoader::Loading_For_Stage1Level()
 			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/BossDoor.dat"), PreTransformMatrix))))
 			return E_FAIL;
 
+
+
+		//*Prototype_Component_Monster*//
+		PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f)*XMMatrixRotationY(XMConvertToRadians(180.f));
+		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto_Component_GunPawn_Model"),
+			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/GunPawn.dat"), PreTransformMatrix))))
+			return E_FAIL;
+
+
+
+
+
+
+
+
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
 
-
-	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
-	/* For.Prototype_Component_Navigation*/
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
-		CNavigation::Create(m_pDevice, m_pContext, TEXT("../Bin/Data/Navigation.dat")))))
-		return E_FAIL;
 
 
 
@@ -250,6 +269,23 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Weapon"),
 		CWeapon::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+
+	/* Prototype_GameObject_Monster_GunPawn */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_GunPawn"),
+		CGunPawn::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	/* Prototype_GameObject_Monster_Body_GunPawn */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_GunPawn"),
+		CBody_GunPawn::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+
+
+
+
+
+
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");

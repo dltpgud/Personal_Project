@@ -6,6 +6,7 @@ BEGIN(Engine)
 class CShader;
 class CTexture;
 class CVIBuffer_Terrain;
+class CNavigation;
 END
 
 BEGIN(Tool)
@@ -34,6 +35,9 @@ public:
 	virtual _wstring Get_ComPonentName() override { return m_wModel; }
 
 	virtual _tchar* Get_ProtoName() override;
+
+
+	void Create_Cell(_float3 p1, _float3 p2, _float3 p3);
  _uint Get_SizeX()  {
 		return m_pSize[0];
 	}
@@ -45,6 +49,7 @@ private:
 	CTexture*					 m_pTextureCom = { nullptr };
 	CShader*					 m_pShaderCom = { nullptr };
 	CVIBuffer_Terrain*			 m_pVIBufferCom = { nullptr };
+//	CNavigation*				 m_pNavigationCom = { nullptr };
 	_uint    m_pSize[2]{};
 	_wstring m_wModel;
 	_tchar* m_Proto = {nullptr};
