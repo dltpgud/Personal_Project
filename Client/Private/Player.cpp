@@ -35,7 +35,9 @@ HRESULT CPlayer::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-    return S_OK;
+
+    m_fPlayerY = 2.f;
+     return S_OK;
 }
 
 _int CPlayer::Priority_Update(_float fTimeDelta)
@@ -173,6 +175,8 @@ void CPlayer::Key_Input(_float fTimeDelta)
 
     if (true == m_bturn)
     {
+       _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_UP));
+      
         Mouse_Fix();
         _long MouseMove = {0};
 
@@ -182,10 +186,13 @@ void CPlayer::Key_Input(_float fTimeDelta)
         }
 
         if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
-        {
+        { 
             m_pTransformCom->Turn(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
-                                  fTimeDelta * MouseMove * 0.05f);
+                fTimeDelta* MouseMove * 0.05f);
+   
+         
         }
+
     }
    
 
@@ -242,7 +249,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
             m_Type == T00 ? m_iState = STATE_JUMP_RUN_HIGH : m_iState = STATE_JUMP_RUN_HIGH2;
         }
         m_Type == T00 ? m_iState = STATE_JUMP_RUN_LOOP : m_iState = STATE_JUMP_RUN_LOOP2;
-        m_pTransformCom->Go_jump(fTimeDelta, 2.f, &m_bJump);
+        m_pTransformCom->Go_jump(fTimeDelta, m_fPlayerY, &m_bJump);
     
         if (!m_bJump)
         {
@@ -250,6 +257,12 @@ void CPlayer::Key_Input(_float fTimeDelta)
             m_Type == T00 ? m_iState = STATE_IDLE : m_iState = STATE_IDLE2;
         }
     }
+
+
+
+  //  cout << XMVectorGetX(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) << " "
+  //      << XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) << " "
+  //     << XMVectorGetZ(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) << " " << endl;
 }
 
 void CPlayer::Choose_Weapon(const _uint& WeaponNum)

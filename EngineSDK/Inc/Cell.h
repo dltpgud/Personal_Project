@@ -24,7 +24,6 @@ public:
 		m_iNeighbors[eLine] = pNeighbor->m_iIndex;  // 라인에 따른 인덱스 설정..
 	}
 
-
 public:
 	HRESULT Initialize(const _float3* pPoints, _uint iIndex);
     _bool isIn(_fvector vLocalPos, _int* pNeighborIndex);

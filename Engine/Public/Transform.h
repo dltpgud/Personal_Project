@@ -47,7 +47,7 @@ public:
     void Go_Up(_float fTimeDelta);
     void Go_Down(_float fTimeDelta);
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck);
-
+    void Stop_Move();
     void Rotation_to_Player();
 
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
@@ -67,9 +67,10 @@ public:
         return XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix));
     }
 
-    const _float4x4* Get_WorldMatrixPtr() const {
+     _float4x4* Get_WorldMatrixPtr()  
+     {
         return &m_WorldMatrix;
-    }
+     }
 
     _matrix Get_WorldMatrix()
     {

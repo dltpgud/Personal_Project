@@ -46,6 +46,9 @@ public:
 
     void init_Loop();
 
+
+
+
 public:
     //   HRESULT Ready_Model(const _tchar* pModelFilePath);
     HRESULT Ready_AniModel(const _tchar* pModelFilePath);
@@ -65,7 +68,9 @@ private:
     _uint m_iCurrentAnimIndex = {};
     _uint m_iNumAnimations = {0};
     vector<class CAnimation*> m_Animations;
-    ;
+    
+
+
 
 public:
     static CModel* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, TYPE eModelType,

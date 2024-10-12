@@ -171,6 +171,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Public\Body_GunPawn.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\CHEST.h" />
     <ClInclude Include="..\Public\DOOR.h">
@@ -178,6 +179,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Camera_Free.h" />
     <ClInclude Include="..\Public\Cursor.h" />
+    <ClInclude Include="..\Public\GunPawn.h" />
     <ClInclude Include="..\Public\Menu.h" />
     <ClInclude Include="..\Public\Client_Defines.h" />
     <ClInclude Include="..\Public\Level_Stage1.h">
@@ -211,11 +213,13 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Private\Body_GunPawn.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />
     <ClCompile Include="..\Private\DOOR.cpp" />
     <ClCompile Include="..\Private\Camera_Free.cpp" />
     <ClCompile Include="..\Private\Cursor.cpp" />
+    <ClCompile Include="..\Private\GunPawn.cpp" />
     <ClCompile Include="..\Private\Menu.cpp" />
     <ClCompile Include="..\Private\Level_Stage1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

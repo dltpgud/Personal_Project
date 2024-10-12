@@ -36,7 +36,6 @@ _int CCHEST::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
-    Key_input(fTimeDelta);
     return OBJ_NOEVENT;
 }
 
@@ -51,10 +50,27 @@ void CCHEST::Update(_float fTimeDelta)
 
     // vDir =	XMVector3Normalize(vDir);
 
-    vDir = XMVector3Length(vDir);
+    _float fLength = XMVectorGetX(XMVector3Length(vDir));
 
-    if (XMVectorGetX(vDir) <= 5.f) {}
+    if (fLength <= 9.f) {
+        if (fLength >= 8.f) {
+            m_pModelCom[ANI]->Set_Animation(1, true);
+            m_bHover = true;
+        }  
+    }
+    else if (fLength > 9.f) {
+        if (fLength <= 10.f)
+            m_pModelCom[ANI]->Set_Animation(0, true);
+        m_bHover = false;
+    }
+    
+    if (m_bHover) {
+        if (m_pGameInstance->Get_DIKeyDown(DIK_F))
+            m_pModelCom[ANI]->Set_Animation(2, false);
+    }
 
+
+ 
     if (true == m_bOpen)
     {
         if (false == m_bIcon)
@@ -72,6 +88,7 @@ void CCHEST::Update(_float fTimeDelta)
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
                                                         XMVectorSet(fPos.x, fPos.y + 1.f, fPos.z, 1.f));
 
+            static_cast<CWeaPonIcon*>(pGameObject)->Set_PosSave(fPos.x, fPos.y + 1.f, fPos.z);
             m_bIcon = true;
         }
     }
@@ -142,17 +159,6 @@ void CCHEST::Set_Model(const _wstring& protoModel)
     m_pModelCom[ANI]->Set_Animation(0, true);
 }
 
-void CCHEST::Key_input(_float fTimeDelta)
-{
-    if (false == m_bOpen)
-    {
-
-        if (m_pGameInstance->Get_DIKeyDown(DIK_6))
-            m_pModelCom[ANI]->Set_Animation(1, true);
-        if (m_pGameInstance->Get_DIKeyDown(DIK_7))
-            m_pModelCom[ANI]->Set_Animation(2, false);
-    }
-}
 
 HRESULT CCHEST::Add_Components()
 {

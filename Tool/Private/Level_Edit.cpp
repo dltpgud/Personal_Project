@@ -6,6 +6,7 @@
 #include "Camera_Tool.h"
 #include "Terrain.h"
 #include "VIBuffer_Terrain.h"
+
 CLevel_Edit::CLevel_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CLevel{pDevice, pContext}
 {
     ZeroMemory(&m_iBufferCount, sizeof(_int) * 2);
@@ -13,6 +14,8 @@ CLevel_Edit::CLevel_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) :
     ZeroMemory(&m_fscale, sizeof(_float) * 3);
     ZeroMemory(&m_iItem_selected_idx, sizeof(_int) * 4);
     ZeroMemory(&m_iIcomtem_selected_idx, sizeof(_int) * 4);
+    ZeroMemory(&m_fCellPoint, sizeof(_float3) * 3);
+    ZeroMemory(&m_iCellCount, sizeof(_uint));
 }
 
 HRESULT CLevel_Edit::Initialize()
@@ -37,6 +40,7 @@ HRESULT CLevel_Edit::Initialize()
     Push_Proto_vec();
     Push_ProtoCom_vec();
 
+    m_pNavigation = m_pGameInstance->Clone_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
     return S_OK;
 }
 
@@ -52,12 +56,11 @@ void CLevel_Edit::Update(_float fTimeDelta)
 
     Msg_collection();
 
-
     if (m_pGameInstance->Get_DIKeyDown(DIK_F1))
         m_Key = true;
 
-
-    if (m_Key) {
+    if (m_Key)
+    {
         Key_input(fTimeDelta);
     }
     __super::Update(fTimeDelta);
@@ -66,6 +69,11 @@ void CLevel_Edit::Update(_float fTimeDelta)
 HRESULT CLevel_Edit::Render()
 {
     SetWindowText(g_hWnd, TEXT("편집 레벨입니다."));
+
+    if (nullptr != m_PicObj)
+    {
+        static_cast<CNavigation*>(m_pNavigation)->Render();
+    }
     __super::Render();
 
     return S_OK;
@@ -296,7 +304,6 @@ void CLevel_Edit::MapANIObj_ListBox()
 
     ChsetWeapon();
 
-
     Create_Leyer_Botton(ANIMAPOBJ, m_iItem_selected_idx[3], m_iIcomtem_selected_idx[3]);
 }
 void CLevel_Edit::Terrain_ListBox()
@@ -412,14 +419,18 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
 
         pTerrain->Set_Buffer(m_iBufferCount[0], m_iBufferCount[1]);
 
-        m_pTerrainVT = static_cast<CTerrain*>(pTerrain)->Get_buffer();
-
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, pTerrain);
 
-        m_pTerrainTR = m_pGameInstance->Recent_GameObject(CGameObject::MAP)->Get_Transform();
         Safe_Delete(protKey);
 
-        m_TerrainVT.push_back(m_pTerrainTR);
+        m_vTerrain.push_back(pTerrain);
+
+        if (false == m_bSetCellW)
+        {
+            m_Terrain = static_cast<CTerrain*>(pTerrain);
+            static_cast<CNavigation*>(m_pNavigation)->Update(pTerrain->Get_Transform()->Get_WorldMatrixPtr());
+            m_bSetCellW = true;
+        }
     }
     break;
     case Tool::CLevel_Edit::WALL:
@@ -452,7 +463,11 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
             pDec.DATA_TYPE = CGameObject::DATA_CHEST;
             CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
-             aObj->Set_Buffer(0, m_WeaPon);
+
+            if (m_WeaPon < 1 || m_WeaPon > 3)
+                m_WeaPon = m_WeaPon = rand() % 3 + 1;
+
+            aObj->Set_Buffer(0, m_WeaPon);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
         }
     }
@@ -784,12 +799,9 @@ void CLevel_Edit::Msg_ALL_Del_Box()
         {
             m_pGameInstance->ObjClear(LEVEL_EDIT);
 
-            
-
             if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
             {
                 re_setting();
-               
             }
             m_bshow_ALLDel_MessageBox = false; // 메시지 상자 닫기
         }
@@ -838,7 +850,7 @@ void CLevel_Edit::Msg_Load_box()
         // 버튼들: OK와 Cancel
         if (ImGui::Button("Load_Ok"))
         {
-           // Load_Terrain(m_tFPath[0]);
+            Load_Terrain(m_tFPath[0]);
             Load_Wall(m_tFPath[1]);
             Load_NonAniObj(m_tFPath[2]);
             Load_Ani(m_tFPath[3]);
@@ -890,10 +902,10 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-        if (Type == CGameObject::DATA_TERRAIN) {
+        if (Type == CGameObject::DATA_TERRAIN)
+        {
             TileX = static_cast<CTerrain*>(ObjList)->Get_SizeX();
             TileY = static_cast<CTerrain*>(ObjList)->Get_SizeY();
-
 
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
@@ -936,7 +948,7 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
     _vector LOOK = {0.f, 0.f, 0.f, 0.f};
     _vector POSITION = {0.f, 0.f, 0.f, 0.f};
     _uint Type = {0};
-    _wstring pModel ={};
+    _wstring pModel = {};
     _tchar* pPoroto = {};
 
     for (auto& ObjList : AllSave)
@@ -950,7 +962,8 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-        if (Type == CGameObject::DATA_NONANIMAPOBJ) {
+        if (Type == CGameObject::DATA_NONANIMAPOBJ)
+        {
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
@@ -967,8 +980,6 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
             DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
-
-      
         }
     }
     CloseHandle(hFile);
@@ -985,11 +996,11 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
-    _uint Type = { 0 };
+    _vector Right = {0.f, 0.f, 0.f, 0.f};
+    _vector UP = {0.f, 0.f, 0.f, 0.f};
+    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
+    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _uint Type = {0};
     _wstring pModel = {};
     _tchar* pPoroto = {};
 
@@ -1004,7 +1015,8 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-        if (Type == CGameObject::DATA_WALL) {
+        if (Type == CGameObject::DATA_WALL)
+        {
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
@@ -1037,11 +1049,11 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
-    _uint Type = { 0 };
+    _vector Right = {0.f, 0.f, 0.f, 0.f};
+    _vector UP = {0.f, 0.f, 0.f, 0.f};
+    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
+    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _uint Type = {0};
     _wstring pModel = {};
     _tchar* pPoroto = {};
     _uint WeaPonType = {};
@@ -1055,8 +1067,13 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
         Type = ObjList->Get_Data();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
-        WeaPonType =  ObjList->Get_Scalra();
-        if (Type == CGameObject::DATA_DOOR) {
+        WeaPonType = ObjList->Get_Scalra();
+
+        if (WeaPonType < 1 || WeaPonType > 3)
+            WeaPonType = rand() % 4 + 1;
+
+        if (Type == CGameObject::DATA_DOOR)
+        {
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
@@ -1074,7 +1091,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
         }
-        else if (Type == CGameObject::DATA_CHEST) 
+        else if (Type == CGameObject::DATA_CHEST)
         {
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
@@ -1093,9 +1110,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
 
-
             WriteFile(hFile, &WeaPonType, sizeof(_uint), &dwByte, nullptr);
-   
         }
     }
     CloseHandle(hFile);
@@ -1144,7 +1159,7 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
         DWORD Length;
         bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
         wchar_t* pPoroto = new wchar_t[Length + 1];
-        bFile = ReadFile(hFile, pPoroto, Length , &dwByte, nullptr);
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
         pPoroto[Length] = L'\0';
 
         if (0 == dwByte)
@@ -1153,29 +1168,26 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
             Safe_Delete_Array(pPoroto);
             break;
         }
-    
-            CGameObject::GAMEOBJ_DESC pDec;
-            pDec.fSpeedPerSec = m_fspped;
-            pDec.fRotationPerSec = m_fRotfspped;
-            pDec.ProtoName = pPoroto;
-            pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>( Type);
-            CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
-            pGameObject->Set_Buffer(TileX, TileY);
-            pGameObject->Set_Model(pModel);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
 
-            m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+        CGameObject::GAMEOBJ_DESC pDec;
+        pDec.fSpeedPerSec = m_fspped;
+        pDec.fRotationPerSec = m_fRotfspped;
+        pDec.ProtoName = pPoroto;
+        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
-            m_pTerrainVT = static_cast<CTerrain*>(pGameObject)->Get_buffer();
-            m_pTerrainTR = m_pGameInstance->Recent_GameObject(CGameObject::MAP)->Get_Transform();
-            m_TerrainVT.push_back(m_pTerrainTR);
-        
-            Safe_Delete_Array(pModel);
-            Safe_Delete_Array(pPoroto);
-        
+        pGameObject->Set_Buffer(TileX, TileY);
+        pGameObject->Set_Model(pModel);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+
+        m_Terrain = static_cast<CTerrain*>(pGameObject);
+        Safe_Delete_Array(pModel);
+        Safe_Delete_Array(pPoroto);
     }
     CloseHandle(hFile);
 }
@@ -1189,7 +1201,7 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
         return;
     }
 
- DWORD dwByte(0);
+    DWORD dwByte(0);
 
     _vector Right = {0.f, 0.f, 0.f, 0.f};
     _vector UP = {0.f, 0.f, 0.f, 0.f};
@@ -1221,7 +1233,7 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
         bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
 
         pPoroto = new _tchar[Length + 1];
-        bFile = ReadFile(hFile, pPoroto, Length , &dwByte, NULL);
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
         pPoroto[Length] = L'\0';
 
         if (0 == dwByte)
@@ -1230,26 +1242,25 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
             Safe_Delete_Array(pPoroto);
             break;
         }
-  
-            CGameObject::GAMEOBJ_DESC pDec;
-            pDec.fSpeedPerSec = m_fspped;
-            pDec.fRotationPerSec = m_fRotfspped;
-            pDec.ProtoName = pPoroto;
-            pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
-            CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
-            pGameObject->Set_Model(pModel);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+        CGameObject::GAMEOBJ_DESC pDec;
+        pDec.fSpeedPerSec = m_fspped;
+        pDec.fRotationPerSec = m_fRotfspped;
+        pDec.ProtoName = pPoroto;
+        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
-            m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
-        
+        pGameObject->Set_Model(pModel);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
-    }   
-
+    }
 
     CloseHandle(hFile);
 }
@@ -1265,11 +1276,11 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
-    _uint Type = { 0 };
+    _vector Right = {0.f, 0.f, 0.f, 0.f};
+    _vector UP = {0.f, 0.f, 0.f, 0.f};
+    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
+    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _uint Type = {0};
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
     while (true)
@@ -1317,20 +1328,19 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-         
+
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
 
-
     CloseHandle(hFile);
 }
 
 void CLevel_Edit::Load_Ani(const _tchar* tFPath)
 {
-   HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
     {
@@ -1339,11 +1349,11 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
-    _uint Type = { 0 };
+    _vector Right = {0.f, 0.f, 0.f, 0.f};
+    _vector UP = {0.f, 0.f, 0.f, 0.f};
+    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
+    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _uint Type = {0};
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
     _uint WaPonType = {};
@@ -1373,13 +1383,13 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
         pPoroto[Length] = L'\0';
 
-        if(Type ==CGameObject::DATA_CHEST)
-        bFile = ReadFile(hFile, &(WaPonType), sizeof(_uint), &dwByte, nullptr);
+        if (Type == CGameObject::DATA_CHEST)
+            bFile = ReadFile(hFile, &(WaPonType), sizeof(_uint), &dwByte, nullptr);
 
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
-           Safe_Delete_Array(pPoroto);
+            Safe_Delete_Array(pPoroto);
             break;
         }
 
@@ -1404,25 +1414,48 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
     CloseHandle(hFile);
 }
 
-
 void CLevel_Edit::ChsetWeapon()
 {
-    
+
     ImGui::Text("Set_weaPon");
     ImGui::SameLine(100, 0);
     ImGui::InputInt("##44", &m_WeaPon);
-
-   
 }
 
 void CLevel_Edit::Key_input(_float ftimedelta)
 {
     if (m_pGameInstance->Get_DIMouseDown(DIM_RB))
     {
-        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
-            return;
+        if (false == m_bCell)
+        {
+            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+                return;
+            else
+                Picking_Pos();
+        }
+        else if (true == m_bCell)
+        {
+
+            if (m_iCellCount < 0 || m_iCellCount > 2)
+            {
+                m_iCellCount = 0;
+            }
+            Picking_Cell(m_iCellCount);
+
+            cout << m_iCellCount << endl;
+            m_iCellCount++;
+        }
+    }
+
+    if (m_pGameInstance->Get_DIKeyDown(DIK_Y))
+    {
+
+        if (!m_bCell)
+        {
+            m_bCell = true;
+        }
         else
-            Picking_Pos();
+            m_bCell = false;
     }
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_DELETE))
@@ -1484,7 +1517,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
             {
                 m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
-                    ftimedelta * MouseMove * m_fRotfspped);
+                                      ftimedelta * MouseMove * m_fRotfspped);
             }
         }
     }
@@ -1508,20 +1541,46 @@ void CLevel_Edit::Key_input(_float ftimedelta)
 
     if (m_pGameInstance->Get_DIKeyState(DIK_P))
     {
+        if (m_pGameInstance->Get_DIKeyDown(DIK_O)) {
+            _vector RayPos{}, RayDir{};
+            m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
 
-        _vector RayPos, RayDir;
-        m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
-                                  m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+            _float3 PickPos{};
+            _float fdis{};
+            _float3 Pick{};
+            for (auto& vTerrin : m_vTerrain)
+            {
 
-        CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+                _float3 Picking = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
+                    RayPos, RayDir, vTerrin->Get_Transform(), &fdis);
 
-        if (Desc.pPickedObj)
+                if (Picking.x != 0.f || Picking.y != 0.f || Picking.z != 0.f)
+                {
+                    m_pObjTransform = vTerrin->Get_Transform();
+
+                    break;
+                }
+                else
+                    continue;
+            }
+        }
+        else
         {
+            _vector RayPos, RayDir;
+            m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                                      m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
 
-            m_pObjTransform = Desc.pPickedObj->Get_Transform();
+            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
 
-            Update_Pos();
-            Update_Speed();
+            if (Desc.pPickedObj)
+            {
+
+                m_pObjTransform = Desc.pPickedObj->Get_Transform();
+
+                Update_Pos();
+                Update_Speed();
+            }
         }
     }
 
@@ -1603,41 +1662,140 @@ void CLevel_Edit::Set_Speed()
 void CLevel_Edit::Picking_Pos()
 {
 
-    if (m_pTerrainTR == nullptr)
+    if (m_vTerrain.size() == 0)
+    {
+
+        MSG_BOX("m_vTerrain == NULL");
         return;
-    _float3 PickPos{};
-
-    _float3 Pick = m_pGameInstance->Picking_OnTerrain(
-        g_hWnd, m_pTerrainVT, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
-        m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), m_pTerrainTR);
-
-    _bool roop{};
-    if (Pick.x == 0.f && Pick.y == 0.f && Pick.z == 0.f)
-    {
-        roop = true;
     }
-    if (roop)
+
+    _vector RayPos{}, RayDir{};
+    m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                              m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+
+    _float3 PickPos{};
+    _float fdis{};
+    _float3 Pick{};
+    for (auto& vTerrin : m_vTerrain)
     {
-        for (auto& VT : m_TerrainVT)
+
+        _float3 Picking = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
+                                                             RayPos, RayDir, vTerrin->Get_Transform(), &fdis);
+
+        if (Picking.x != 0.f || Picking.y != 0.f || Picking.z != 0.f)
         {
-            _float3 Picking = m_pGameInstance->Picking_OnTerrain(
-                g_hWnd, m_pTerrainVT, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
-                m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), VT);
+            XMStoreFloat3(&Pick, XMLoadFloat3(&Picking));
 
-            if (Picking.x != 0.f || Picking.y != 0.f || Picking.z != 0.f)
-            {
-                XMStoreFloat3(&Pick, XMLoadFloat3(&Picking));
+            break;
+        }
+        else
+            continue;
+    }
 
-                break;
-            }
-            else
-                continue;
+    m_pObjTransform->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Pick.x, Pick.y, Pick.z, 1.f));
+    Update_Pos();
+}
+
+void CLevel_Edit::Picking_Cell(_uint i)
+{
+    if (m_vTerrain.size() == 0)
+    {
+
+        MSG_BOX("m_vTerrain == NULL");
+        return;
+    }
+
+    _vector RayPos{}, RayDir{};
+    _float fMashDis{-1.f};
+    m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                              m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+    CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+
+    _float fDist{};
+
+    _float3 Pick{};
+    for (auto& vTerrin : m_vTerrain)
+    {
+
+        _float3 PickTerrain = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
+                                                                 RayPos, RayDir, vTerrin->Get_Transform(), &fDist);
+
+        if (PickTerrain.x != 0.f || PickTerrain.y != 0.f || PickTerrain.z != 0.f)
+        {
+            Pick = PickTerrain;
+            break;
         }
     }
-    XMStoreFloat3(&PickPos, XMLoadFloat3(&Pick));
+    if (Desc.pPickedObj)
+    {
+        fMashDis = Desc.fDis;
+    }
 
-    m_pObjTransform->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(PickPos.x, PickPos.y, PickPos.z, 1.f));
-    Update_Pos();
+
+
+    if ( fDist > fMashDis  )
+    {
+        cout << fDist << " " << fMashDis << endl;
+        
+        m_PicObj = m_Terrain;
+        _vector P1{}, P2{}, P3{};
+
+        m_fCellPoint[i] = Pick;
+
+        if (i == 0)
+        {
+            P1 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[0].x, m_fCellPoint[0].y, m_fCellPoint[0].z, 1.f),
+                                         m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            XMStoreFloat3(&m_fCellPoint[0], P1);
+        }
+        if (i == 1)
+        {
+            P2 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[1].x, m_fCellPoint[1].y, m_fCellPoint[1].z, 1.f),
+                                         m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            XMStoreFloat3(&m_fCellPoint[1], P2);
+        }
+        if (i == 2)
+        {
+            P3 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[2].x, m_fCellPoint[2].y, m_fCellPoint[2].z, 1.f),
+                                         m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            XMStoreFloat3(&m_fCellPoint[2], P3);
+        }
+    }
+    else if (nullptr != Desc.pPickedObj)
+    {
+        _vector p1{}, p2{}, p3{};
+        m_PicObj = Desc.pPickedObj;
+        _float3 fMashPos{};
+        XMStoreFloat3(&fMashPos, Desc.pPickedObj->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+
+        _vector vPos = Desc.pPickedObj->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+       
+        m_fCellPoint[i] = fMashPos;
+
+        if (i == 0)
+        {
+            p1 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[0].x, m_fCellPoint[0].y, m_fCellPoint[0].z, 1.f),
+                                         m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            XMStoreFloat3(&m_fCellPoint[0], p1);
+        }
+        else if (i == 1)
+        {
+            p2 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[1].x, m_fCellPoint[1].y, m_fCellPoint[1].z, 1.f),
+                                         m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            XMStoreFloat3(&m_fCellPoint[1], p2);
+        }
+        else if (i == 2)
+        {
+            p3 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[2].x, m_fCellPoint[2].y, m_fCellPoint[2].z, 1.f),
+                                         m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            XMStoreFloat3(&m_fCellPoint[2], p3);
+        }
+    }
+
+    if (i == 2)
+    {
+            static_cast<CNavigation*>(m_pNavigation)->Create_Poly(m_fCellPoint[0], m_fCellPoint[1], m_fCellPoint[2]);
+    }
 }
 
 CLevel_Edit* CLevel_Edit::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -1670,4 +1828,6 @@ void CLevel_Edit::Free()
         m_protoComkey[i].clear();
         m_protoComkey[i].shrink_to_fit();
     }
+
+    Safe_Release(m_pNavigation);
 }

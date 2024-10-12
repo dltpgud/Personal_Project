@@ -17,8 +17,8 @@ private:
 public:
     void Make_Ray(HWND hWnd, _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir);
 
-    _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _matrix Proj, _matrix view,
-                              CTransform* Transform);
+    _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RaDir,
+                              CTransform* Transfor, _float* fDis);
 
     _float Compute_Random_Normal();
     _float Compute_Random(_float fMin, _float fMax);

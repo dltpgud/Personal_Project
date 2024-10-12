@@ -18,6 +18,8 @@ public:
 
 private: 
     	HRESULT Ready_Layer_Player(const _uint& pLayerTag);
+
+		HRESULT Ready_Layer_Monster(const _uint& pLayerTag);
 		HRESULT Ready_Layer_Camera(const _uint& pLayerTag);
 		HRESULT Ready_Layer_UI(const _uint& pLayerTag );
 		HRESULT Ready_Layer_Map(const _uint& pLayerTag);
