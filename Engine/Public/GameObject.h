@@ -22,7 +22,8 @@ public:
         DATA_WALL,
         DATA_NONANIMAPOBJ,
         DATA_DOOR,
-        DATA_CHEST
+        DATA_CHEST,
+        DATA_NAVIGATION
     };
 public:
     typedef struct GAMEOBJ_DESC : public CTransform::TRANSFORM_DESC

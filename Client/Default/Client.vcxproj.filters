@@ -91,6 +91,12 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\GunPawn\Body">
       <UniqueIdentifier>{f985c137-4d68-46a0-9cf9-e696677d55ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Level\01.GamePlay\Stage1">
+      <UniqueIdentifier>{97a7f06e-cfc2-47a0-b47d-3e1b418352de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Level\01.GamePlay\Stage2">
+      <UniqueIdentifier>{6896a576-0f2d-45c0-b777-3cfbefe69db8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -113,9 +119,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Client_Defines.h">
       <Filter>99.Defines</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Level_Stage1.h">
-      <Filter>01.Level\01.GamePlay</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Loading.h">
       <Filter>01.Level\99.Loading</Filter>
@@ -177,6 +180,12 @@
     <ClInclude Include="..\Public\Body_GunPawn.h">
       <Filter>02.GameObjects\03.Actor\Monster\GunPawn\Body</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Level_Stage1.h">
+      <Filter>01.Level\01.GamePlay\Stage1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Stage2.h">
+      <Filter>01.Level\01.GamePlay\Stage2</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -187,9 +196,6 @@
     </ClCompile>
     <ClCompile Include="..\private\MainApp.cpp">
       <Filter>00.MainApp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Level_Stage1.cpp">
-      <Filter>01.Level\01.GamePlay</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_Loading.cpp">
       <Filter>01.Level\99.Loading</Filter>
@@ -250,6 +256,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\GunPawn.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Stage1.cpp">
+      <Filter>01.Level\01.GamePlay\Stage1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Stage2.cpp">
+      <Filter>01.Level\01.GamePlay\Stage2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

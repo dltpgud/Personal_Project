@@ -72,6 +72,9 @@ HRESULT CLoader::Loading()
 	case LEVEL_STAGE1:
 		hr = Loading_For_Stage1Level();
 		break;
+	case LEVEL_STAGE2:
+		hr = Loading_For_Stage2Level();
+		break;
 	}
 
 	LeaveCriticalSection(&m_CriticalSection);
@@ -152,7 +155,7 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 		/* For.Prototype_Component_Navigation*/
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
-			CNavigation::Create(m_pDevice, m_pContext, TEXT("../Bin/Data/Navigation.dat")))))
+			CNavigation::Create(m_pDevice, m_pContext))))
 			return E_FAIL;
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");
@@ -280,11 +283,25 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		CBody_GunPawn::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 
+	m_strLoadingText = TEXT("로딩 완료되었습니다.");
 
+	m_bFinished = true;
+	return S_OK;
+}
 
+HRESULT CLoader::Loading_For_Stage2Level()
+{
+	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 
+	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
+	m_strLoadingText = TEXT("모델 로딩중입니다.");
+
+	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
+
+	m_strLoadingText = TEXT("객체원형 로딩중입니다.");
 
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 

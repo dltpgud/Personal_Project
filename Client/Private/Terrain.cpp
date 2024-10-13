@@ -17,13 +17,29 @@ HRESULT CTerrain::Initialize_Prototype()
 
 HRESULT CTerrain::Initialize(void* pArg)
 {
-    
-
+    if (nullptr != pArg) {
+        CGameObject::GAMEOBJ_DESC* pDesc = static_cast <CGameObject::GAMEOBJ_DESC*>(pArg);
+   
+        m_DATA_TYPE = pDesc->DATA_TYPE;
+        NavigationFath = pDesc->FilePath;
+    }
+  
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
+
+
+    if (CGameObject::GAMEOBJ_DATA::DATA_NAVIGATION == m_DATA_TYPE)
+    {
+        m_pNavigationCom->Load(NavigationFath);
+
+        m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
+    }
+
+
+
 
     return S_OK;
 }
@@ -35,7 +51,7 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
         return OBJ_DEAD;
     }
 
-    m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
+   // m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
 
     return OBJ_NOEVENT;
 }
@@ -88,7 +104,10 @@ HRESULT CTerrain::Render()
 
 
 #ifdef _DEBUG
-    m_pNavigationCom->Render();
+    if (nullptr != m_pNavigationCom)
+    {
+        m_pNavigationCom->Render();
+    }
 #endif
 
 

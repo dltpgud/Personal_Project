@@ -123,7 +123,7 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
         }
     }
 
-    return _float3(0.f, 0.f, 0.f);
+    return _float3(0xffff,0xffff,0xffff);
 }
 
 _float CCalculator::Compute_Random_Normal()

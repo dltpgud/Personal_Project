@@ -20,10 +20,10 @@ public:
 	HRESULT Render();
 	
 
-	HRESULT Load_to_Next_Map_terrain(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_NonaniObj(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_Wall(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& type ,const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
+	HRESULT Load_to_Next_Map_terrain(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
+	HRESULT Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
+	HRESULT Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
+	HRESULT Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& type ,const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
 	/*현재 게임에 보여줄 레벨객체의 주소를 저장한다. */
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };

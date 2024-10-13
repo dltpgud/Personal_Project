@@ -55,6 +55,7 @@ _int CWeaponUI::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+   
 
     if (m_IsShaking)
     {
@@ -96,7 +97,7 @@ _int CWeaponUI::Priority_Update(_float fTimeDelta)
 
 void CWeaponUI::Update(_float fTimeDelta)
 {
-    if (nullptr == m_pGameInstance->Get_Player())
+     if (nullptr == m_pGameInstance->Get_Player())
         return;
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F1))
@@ -181,7 +182,7 @@ void CWeaponUI::Late_Update(_float fTimeDelta)
 HRESULT CWeaponUI::Render()
 {
     for (_uint i = 0; i < 4; i++)
-    {
+    {if(m_bPrUpdate)
         Set_UI_Pos(&m_Desc[i]);
 
         if (m_WeaPonUI != i)
@@ -208,6 +209,7 @@ HRESULT CWeaponUI::Render()
 
     for (_uint i = 4; i < 6; i++)
     {
+        if (m_bPrUpdate)
         Set_UI_Pos(&m_Desc[i]);
 
         if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
@@ -233,6 +235,7 @@ HRESULT CWeaponUI::Render()
     {
         for (_uint i = 0; i < 4; i++)
         {
+            if (m_bPrUpdate)
             Set_UI_Pos(&m_ScecondDesc[i]);
 
             if (m_ScecondWeaPonUI != i)
@@ -258,7 +261,7 @@ HRESULT CWeaponUI::Render()
             m_pVIBufferCom->Render();
         }
     }
-
+    if (m_bPrUpdate)
     Set_UI_Pos(&m_ScecondDesc[4]);
     if (false == m_IsShaking)
     {
