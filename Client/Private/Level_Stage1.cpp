@@ -16,13 +16,11 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
-
 	if (FAILED(Ready_Layer_Player(CGameObject::ACTOR)))
 		return E_FAIL;
 
 	if (FAILED(Ready_Layer_Monster(CGameObject::ACTOR)))
 		return E_FAIL;
-
 
 	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
 		return E_FAIL;
@@ -30,20 +28,19 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Layer_Camera(CGameObject::CAMERA)))
 		return E_FAIL;
 
-
-
 	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
 		return E_FAIL;
-
-
-
-
 
 	return S_OK;
 }
 
 void CLevel_Stage1::Update(_float fTimeDelta)
 {
+
+	if (m_pGameInstance->Get_DIKeyDown(DIK_U))
+	{
+		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));
+	}
 	__super::Update(fTimeDelta);
 }
 
@@ -110,6 +107,7 @@ HRESULT CLevel_Stage1::Ready_Layer_UI(const _uint& pLayerTag)
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, true)))
 		return E_FAIL;
+
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
 		return S_OK;
 
@@ -145,7 +143,7 @@ HRESULT CLevel_Stage1::Ready_Light()
 	LightDesc.vDirection = _float4(0.f, -1.f, 1.f, 0.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 	LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vSpecular = _float4(0.2f, 0.2f, 0.2f, 0.2f);
 
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;

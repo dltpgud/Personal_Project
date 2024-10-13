@@ -29,6 +29,7 @@ HRESULT CLevel_Edit::Initialize()
     m_tFPath[1] = L"../Bin/Data/Map/SetMap_Stage1_Wall.dat";
     m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat";
     m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage1_ani.dat";
+    m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
     for (_uint i = 0; i < 3; i++) { m_fscale[i] = 1; }
 
     if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
@@ -70,7 +71,7 @@ HRESULT CLevel_Edit::Render()
 {
     SetWindowText(g_hWnd, TEXT("편집 레벨입니다."));
 
-    if (nullptr != m_PicObj)
+    if (nullptr != m_PicObj || true == m_bLoadCell)
     {
         static_cast<CNavigation*>(m_pNavigation)->Render();
     }
@@ -100,6 +101,7 @@ void CLevel_Edit::Tool()
             m_tFPath[1] = L"../Bin/Data/Map/SetMap_Stage1_Wall.dat";
             m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat";
             m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage1_ani.dat";
+            m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
         }
 
         if (m_iScene_Type == 1)
@@ -109,6 +111,7 @@ void CLevel_Edit::Tool()
             m_tFPath[1] = L"../Bin/Data/Map/SetMap_Stage2_Wall.dat";
             m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage2_Nonani.dat";
             m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage2_ani.dat";
+            m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage2.dat";
         }
         if (m_iScene_Type == 2)
         {
@@ -117,6 +120,7 @@ void CLevel_Edit::Tool()
             m_tFPath[1] = L"../Bin/Data/Map/SetMap_Boss_Wall.dat";
             m_tFPath[2] = L"../Bin/Data/Map/SetMap_Boss_Nonani.dat";
             m_tFPath[3] = L"../Bin/Data/Map/SetMap_Boss_ani.dat";
+            m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Boss.dat";
         }
     }
 
@@ -243,6 +247,7 @@ void CLevel_Edit::ComboType()
     }
 }
 
+#pragma region 종류별 리스트 상자
 void CLevel_Edit::MapNONANIObj_ListBox()
 {
     if (ImGui::BeginListBox("##listobj"))
@@ -370,6 +375,8 @@ void CLevel_Edit::Wall_ListBox()
     Create_Leyer_Botton(WALL, m_iItem_selected_idx[1], m_iIcomtem_selected_idx[1]);
 }
 
+#pragma endregion
+
 HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, _int Iindex, _uint Comindex)
 {
     if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::CAMERA))
@@ -377,6 +384,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
         if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
             return E_FAIL;
     }
+    // char로 변형했단 키값들을 다시 와일드 문자로 변형한다. 
     _tchar* protKey{}; // wstring을 _char로 변형하고 보관할 변수
 
     _char* key = m_protokey[type][Iindex];
@@ -405,6 +413,8 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     pDec.fRotationPerSec = m_fRotfspped;
     pDec.ProtoName = protKey;
 
+
+    // 타입에 따른 오브젝트들을 클론한다. cace문으로 각각 오브젝트들 마다 필요한 정보를 채워준다.
     switch (m_pType)
     {
     case Tool::CLevel_Edit::TERRAIN:
@@ -425,7 +435,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
 
         m_vTerrain.push_back(pTerrain);
 
-        if (false == m_bSetCellW)
+        if (false == m_bSetCellW && false == m_bLoadCell)
         {
             m_Terrain = static_cast<CTerrain*>(pTerrain);
             static_cast<CNavigation*>(m_pNavigation)->Update(pTerrain->Get_Transform()->Get_WorldMatrixPtr());
@@ -504,7 +514,7 @@ void CLevel_Edit::Push_Proto_vec()
         {
             token = strtok_s(NULL, "_", &next_token);
         }
-
+        // "_"기준으로 자른 문자열 뒤가 아래와 같다면 해당되는 벡터에 넣는다.
         if (false == lstrcmpA(token, "CameraTool"))
         {
             Safe_Delete(protKey);
@@ -573,6 +583,7 @@ void CLevel_Edit::Push_ProtoCom_vec()
             token = strtok_s(NULL, "_", &next_token);
         }
 
+        // "_"기준으로 자른 문자열 뒤가 아래와 같다면 해당되는 벡터에 넣는다.
         if (false == lstrcmpA(token, "Terrain"))
         {
 
@@ -628,15 +639,15 @@ void CLevel_Edit::Create_Leyer_Botton(POROTO_TYPE type, _uint Objnum, _uint Comn
     {
         if (type == TERRAIN)
         {
-            if (1 >= m_iBufferCount[0] || 1 >= m_iBufferCount[1])
+            if (1 >= m_iBufferCount[0] || 1 >= m_iBufferCount[1]) // 터레인을 생성할 때 최소값은 적어줘야함
             {
                 MSG_BOX("다 골랐어? 확실해?");
                 return;
             }
         }
 
-        m_CopyiItem_selected_idx = Objnum;
-        m_CopyiIcomtem_selected_idx = Comnum;
+        m_CopyiItem_selected_idx = Objnum; // 선택한 오브젝트 인덱스
+        m_CopyiIcomtem_selected_idx = Comnum; // 선택한 컴포넌트 인덱스
 
         re_setting();
 
@@ -646,11 +657,12 @@ void CLevel_Edit::Create_Leyer_Botton(POROTO_TYPE type, _uint Objnum, _uint Comn
 
 HRESULT CLevel_Edit::Ready_ToolCamera(const _uint& pLayerTag)
 {
+    //카메라 세팅..
     CCamera_Tool::CAMERA_Tool_DESC Desc{};
 
     Desc.vEye = _float4(0.f, 10.f, -8.f, 1.f);
     Desc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
-    Desc.fFovy = XMConvertToRadians(30.0f);
+    Desc.fFovy = XMConvertToRadians(30.0f); // 클라랑 같게 할것
     Desc.fNearZ = 0.1f;
     Desc.fFarZ = 500.f;
     Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
@@ -667,6 +679,7 @@ HRESULT CLevel_Edit::Ready_ToolCamera(const _uint& pLayerTag)
 
 void CLevel_Edit::Set_Tile()
 {
+    // 터레인의 크기를 입력받는다.
     _bool ret{};
     ImGui::Text("Buffer Count");
     ImGui::SameLine(100, 0);
@@ -675,7 +688,7 @@ void CLevel_Edit::Set_Tile()
 
 void CLevel_Edit::re_setting()
 {
-
+    // 모든 값들을 기본값으로 정한다.
     ZeroMemory(&m_fposition, sizeof(_float) * 3);
     ZeroMemory(&m_fscale, sizeof(_float) * 3);
     for (_uint i = 0; i < 3; i++) { m_fscale[i] = 1; }
@@ -685,6 +698,7 @@ void CLevel_Edit::re_setting()
 
 HRESULT CLevel_Edit::Ready_Light()
 {
+    // 조명을 세팅하고..
     LIGHT_DESC LightDesc{};
 
     LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
@@ -701,6 +715,7 @@ HRESULT CLevel_Edit::Ready_Light()
 
 void CLevel_Edit::Set_pos()
 {
+    // 설정된 값으로 위치를 지정한다
     _bool ret;
     ImGui::Text("float_Pos");
     ImGui::SameLine(100, 0);
@@ -723,6 +738,7 @@ void CLevel_Edit::Set_pos()
 
 void CLevel_Edit::Set_scale()
 {
+    // 스케일을 지정한다.
     _bool ret;
     ImGui::Text("Set_Scale");
     ImGui::SameLine(100, 0);
@@ -740,7 +756,7 @@ void CLevel_Edit::Set_scale()
 
         if (m_fscale[0] <= 0.01f || m_fscale[1] <= 0.01f || m_fscale[2] <= 0.01f)
         {
-            MSG_BOX("너무작아");
+            MSG_BOX("너무작아");  // 너무 작으면 사라져서 복구 불가,,
             return;
         }
 
@@ -750,6 +766,7 @@ void CLevel_Edit::Set_scale()
 
 void CLevel_Edit::Msg_collection()
 {
+    // 메세지 박스들의 위치를 고정시키고 호출한다.
     ImGui::SetNextWindowPos(ImVec2(g_iWinSizeX * 0.5f, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(200, 70), ImGuiCond_Always);
 
@@ -769,14 +786,13 @@ void CLevel_Edit::Msg_Del_Box()
         // 버튼들: OK와 Cancel
         if (ImGui::Button("Delete OK"))
         {
-            m_pGameInstance->Recent_GameObject(CGameObject::MAP)->Set_Dead(true);
+            m_pGameInstance->Recent_GameObject(CGameObject::MAP)->Set_Dead(true); // 가장 최근에 추가한 마지막 오브젝트를 삭제한다.
 
             if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
             {
                 re_setting();
             }
-
-            m_bshow_Del_MessageBox = false; // 메시지 상자 닫기
+                        m_bshow_Del_MessageBox = false; // 메시지 상자 닫기
         }
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
         if (ImGui::Button("Delete Cancel"))
@@ -790,21 +806,31 @@ void CLevel_Edit::Msg_Del_Box()
 void CLevel_Edit::Msg_ALL_Del_Box()
 {
     if (m_bshow_ALLDel_MessageBox)
-    {
+    { //씬의 모든 오브젝트를 삭제
         ImGui::Begin("ALL Delete Box", &m_bshow_ALLDel_MessageBox); // 제목이 "Message Box"인 창
         ImGui::Text("ALLLLLLLLLL Object Delete?");                  // 질문 텍스트
 
         // 버튼들: OK와 Cancel
         if (ImGui::Button("Delete OK"))
         {
-            m_pGameInstance->ObjClear(LEVEL_EDIT);
+            m_pGameInstance->ObjClear(LEVEL_EDIT); // 씬의 모든 오브젝들 삭제한다
 
-            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP)) // 다 지워 졌다면..
             {
-                re_setting();
+                re_setting(); // gui창의 데이터들을 기본값으로 
             }
+
+
+            m_bSetCellW = false;  //네비게이션 터레인을 다시설정할 수 있게 만들어주고
+            static_cast<CNavigation*>(m_pNavigation)->Delete_ALLCell(); // 네비컴 안의 모든 쎌들을 지우고
+            m_bLoadCell = false; // 네비의 렌더를 꺼준다.
+            m_vTerrain.clear();
+
             m_bshow_ALLDel_MessageBox = false; // 메시지 상자 닫기
         }
+
+
+
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
         if (ImGui::Button("Delete Cancel"))
         {
@@ -814,8 +840,9 @@ void CLevel_Edit::Msg_ALL_Del_Box()
     }
 }
 
+#pragma region 저장/ 로드 관련 함수
 void CLevel_Edit::Msg_Save_box()
-{
+{// 저장을 묻는 함수
     if (m_bshow_Save_MessageBox)
     {
         ImGui::Begin("Save Box", &m_bshow_Save_MessageBox); // 제목이 "Message Box"인 창
@@ -828,7 +855,7 @@ void CLevel_Edit::Msg_Save_box()
             Save_Wall(m_tFPath[1]);
             Save_NonAniObj(m_tFPath[2]);
             Save_Ani(m_tFPath[3]);
-
+            Save_Navigation(m_tFPath[4]);
             m_bshow_Save_MessageBox = false; // 메시지 상자 닫기
         }
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
@@ -841,7 +868,7 @@ void CLevel_Edit::Msg_Save_box()
 }
 
 void CLevel_Edit::Msg_Load_box()
-{
+{// 로드 상자 메세지 박스.
     if (m_bshow_Load_MessageBox)
     {
         ImGui::Begin("Load Box", &m_bshow_Load_MessageBox); // 제목이 "Message Box"인 창
@@ -850,11 +877,13 @@ void CLevel_Edit::Msg_Load_box()
         // 버튼들: OK와 Cancel
         if (ImGui::Button("Load_Ok"))
         {
+            Load_Navigation(m_tFPath[4]);
             Load_Terrain(m_tFPath[0]);
-            Load_Wall(m_tFPath[1]);
-            Load_NonAniObj(m_tFPath[2]);
-            Load_Ani(m_tFPath[3]);
-
+         //   Load_Wall(m_tFPath[1]);
+         //   Load_NonAniObj(m_tFPath[2]);
+         //   Load_Ani(m_tFPath[3]);
+          //  Load_Navigation(m_tFPath[4]);
+           // 로드가 완료되면 현재 오브젝트의 트랜스폼을 마지막으로 로드한 오브젝트의 트랜스 폼으로 정해준다.
             m_pObjTransform = m_pGameInstance->Recent_GameObject(CGameObject::MAP)->Get_Transform();
 
             m_bshow_Load_MessageBox = false; // 메시지 상자 닫기
@@ -1116,6 +1145,11 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
     CloseHandle(hFile);
 }
 
+void CLevel_Edit::Save_Navigation(const _tchar* tFPath)
+{
+   static_cast<CNavigation*>(m_pNavigation)->Save(tFPath);
+}
+
 void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
 {
     HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -1134,7 +1168,7 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
     _tchar* pPoroto{};
     _uint TileX{0};
     _uint TileY{0};
-
+    _bool bSetCellW = false;
     while (true)
     {
         _bool bFile(false);
@@ -1185,7 +1219,16 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
 
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
 
-        m_Terrain = static_cast<CTerrain*>(pGameObject);
+      
+        m_vTerrain.push_back(pGameObject);
+
+        if (false == bSetCellW)
+        {
+            m_Terrain = static_cast<CTerrain*>(pGameObject);
+            static_cast<CNavigation*>(m_pNavigation)->Update(pGameObject->Get_Transform()->Get_WorldMatrixPtr());
+            bSetCellW = true;
+        }
+
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
@@ -1414,9 +1457,17 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
     CloseHandle(hFile);
 }
 
+void CLevel_Edit::Load_Navigation(const _tchar* tFPath)
+{
+    static_cast<CNavigation*>(m_pNavigation)->Load(tFPath);
+    m_bLoadCell = true;
+}
+
+#pragma endregion
+
 void CLevel_Edit::ChsetWeapon()
 {
-
+    // 무기상자 아이템을 정해준다.
     ImGui::Text("Set_weaPon");
     ImGui::SameLine(100, 0);
     ImGui::InputInt("##44", &m_WeaPon);
@@ -1424,50 +1475,58 @@ void CLevel_Edit::ChsetWeapon()
 
 void CLevel_Edit::Key_input(_float ftimedelta)
 {
-    if (m_pGameInstance->Get_DIMouseDown(DIM_RB))
-    {
-        if (false == m_bCell)
-        {
-            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
-                return;
-            else
-                Picking_Pos();
-        }
-        else if (true == m_bCell)
-        {
-
-            if (m_iCellCount < 0 || m_iCellCount > 2)
-            {
-                m_iCellCount = 0;
-            }
-            Picking_Cell(m_iCellCount);
-
-            cout << m_iCellCount << endl;
-            m_iCellCount++;
-        }
-    }
-
-    if (m_pGameInstance->Get_DIKeyDown(DIK_Y))
-    {
-
-        if (!m_bCell)
-        {
-            m_bCell = true;
-        }
-        else
-            m_bCell = false;
-    }
-
-    if (m_pGameInstance->Get_DIKeyDown(DIK_DELETE))
+  
+#pragma region 삭제 단축키
+    if (m_pGameInstance->Get_DIKeyDown(DIK_DELETE))  //  전체 삭제
     {
         m_bshow_ALLDel_MessageBox = true;
     }
 
-    if (m_pGameInstance->Get_DIKeyDown(DIK_SUBTRACT)) // 뺴기 버튼
+    if (m_pGameInstance->Get_DIKeyDown(DIK_SUBTRACT)) // 뺴기 버튼, 하나만 삭제
     {
         m_bshow_Del_MessageBox = true;
     }
 
+    if (m_pGameInstance->Get_DIKeyState(DIK_C))
+    {
+        if (m_pGameInstance->Get_DIMouseDown(DIM_LB)) // 선택한 메쉬를 삭제한다.
+        {
+            _vector RayPos, RayDir;
+            m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+
+            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+
+            if (Desc.pPickedObj)
+            {
+                Desc.pPickedObj->Set_Dead(true);
+            }
+        }
+    }
+
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_J))
+    {
+        if (m_pGameInstance->Get_DIMouseDown(DIM_LB)) // 선택한 Cell을 삭제한다.  
+        {
+            if (nullptr == m_Terrain)
+                return;
+
+            _vector RayPos, RayDir;
+            m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+
+            _vector Pos = XMVector3TransformCoord(RayPos, m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+            _vector Dir = XMVector3TransformNormal(RayDir, m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+
+
+          static_cast<CNavigation*>(m_pNavigation)->Delete_Cell(Pos, Dir);
+
+        }
+    }
+#pragma endregion
+
+#pragma region 위치 이동 방향키
     if (m_pGameInstance->Get_DIKeyState(DIK_UP))
     {
         m_pObjTransform->Go_Straight(ftimedelta);
@@ -1503,48 +1562,69 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         m_pObjTransform->Go_Down(ftimedelta);
         Update_Pos();
     }
+#pragma endregion
 
     if (m_pGameInstance->Get_DIKeyState(DIK_R))
     {
         _long MouseMove = {0};
 
         if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_X))
-        {
+        { // 현제 오브젝트를 Y축 회전 한다.
             m_pObjTransform->Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), ftimedelta * MouseMove * m_fRotfspped);
         }
         if (m_pGameInstance->Get_DIKeyState(DIK_T))
         {
             if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
             {
+                // 현재 오브젝트를 X축 회전한다.
                 m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
                                       ftimedelta * MouseMove * m_fRotfspped);
             }
         }
     }
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_C))
+#pragma region 피킹 키
+    if (m_pGameInstance->Get_DIMouseDown(DIM_RB))
     {
-        if (m_pGameInstance->Get_DIMouseDown(DIM_LB))
+        if (false == m_bCell)
         {
-            _vector RayPos, RayDir;
-            m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
-                                      m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+                return;
+            else
+                Picking_Pos();
+        }
+        else if (true == m_bCell)
+        {
 
-            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
-
-            if (Desc.pPickedObj)
+            if (m_iCellCount < 0 || m_iCellCount > 2)
             {
-                Desc.pPickedObj->Set_Dead(true);
+                m_iCellCount = 0;
             }
+            Picking_Cell(m_iCellCount);
+
+            cout << m_iCellCount << endl;
+            m_iCellCount++;
         }
     }
 
+    if (m_pGameInstance->Get_DIKeyDown(DIK_Y))
+    {
+
+        if (!m_bCell)
+        {
+            m_bCell = true;
+        }
+        else
+            m_bCell = false;
+    }
+  
     if (m_pGameInstance->Get_DIKeyState(DIK_P))
     {
-        if (m_pGameInstance->Get_DIKeyDown(DIK_O)) {
+        if (m_pGameInstance->Get_DIKeyDown(DIK_O))
+        { // 레이 캐스팅을 통해 터레인 자체를 을 피킹한다.
             _vector RayPos{}, RayDir{};
             m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
-                m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
+                                      m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
 
             _float3 PickPos{};
             _float fdis{};
@@ -1552,13 +1632,13 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             for (auto& vTerrin : m_vTerrain)
             {
 
-                _float3 Picking = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
-                    RayPos, RayDir, vTerrin->Get_Transform(), &fdis);
+                _float3 Picking =
+                    m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(), RayPos,
+                                                       RayDir, vTerrin->Get_Transform(), &fdis);
 
-                if (Picking.x != 0.f || Picking.y != 0.f || Picking.z != 0.f)
+                if (Picking.x != 0xffff || Picking.y != 0xffff || Picking.z != 0xffff)
                 {
-                    m_pObjTransform = vTerrin->Get_Transform();
-
+                    m_pObjTransform = vTerrin->Get_Transform();  // 현재 오브젝트의 트랜스 폼을 터레인의 트렌스 폼으로..
                     break;
                 }
                 else
@@ -1567,6 +1647,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         }
         else
         {
+            // 레이 캐스팅을 통해 메쉬 자체를 피킹한다.
             _vector RayPos, RayDir;
             m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                                       m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
@@ -1576,7 +1657,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             if (Desc.pPickedObj)
             {
 
-                m_pObjTransform = Desc.pPickedObj->Get_Transform();
+                m_pObjTransform = Desc.pPickedObj->Get_Transform(); // 현재 오브젝트의 트랜스 폼을 메쉬의 트렌스 폼으로..
 
                 Update_Pos();
                 Update_Speed();
@@ -1586,7 +1667,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
 
     if (m_pGameInstance->Get_DIKeyState(DIK_L))
     {
-        if (m_pGameInstance->Get_DIMouseDown(DIM_LB))
+        if (m_pGameInstance->Get_DIMouseDown(DIM_LB)) // 터레인 위가 아니라 메쉬 피킹을 통해 피킹한 메쉬의 위치로 메쉬를 옮긴다.
         {
             _vector RayPos, RayDir;
             m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
@@ -1602,11 +1683,13 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             }
         }
     }
+
+#pragma endregion
 }
 
 void CLevel_Edit::Update_Pos()
 {
-
+    //imgui 창에 위치 값들을 갱신한다.
     _float3 vPos = {XMVectorGetX(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
                     XMVectorGetY(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
                     XMVectorGetZ(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION))};
@@ -1618,12 +1701,14 @@ void CLevel_Edit::Update_Pos()
 
 void CLevel_Edit::Update_Speed()
 {
+    //imgui 창에 스피드 값들을 갱신한다.
     m_fspped = m_pObjTransform->Get_MoveSpeed();
     m_fRotfspped = m_pObjTransform->Get_RotSpeed();
 }
 
 void CLevel_Edit::Set_Speed()
 {
+    // 현재 선택한 오브젝트 들의 스피드를 정해준다.
     _bool ret;
     ImGui::Text("Move_speed");
     ImGui::SameLine(100, 0);
@@ -1641,6 +1726,7 @@ void CLevel_Edit::Set_Speed()
         m_pObjTransform->Set_MoveSpeed(m_fspped);
     }
 
+    // 현재 선택한 오브젝트들의 회전 속도를 정해준다.
     _bool rt;
     ImGui::Text("Rot_speed");
     ImGui::SameLine(100, 0);
@@ -1660,15 +1746,13 @@ void CLevel_Edit::Set_Speed()
 }
 
 void CLevel_Edit::Picking_Pos()
-{
-
+{ // 터레인 위에 메쉬를 피킹한다.
     if (m_vTerrain.size() == 0)
     {
-
         MSG_BOX("m_vTerrain == NULL");
         return;
     }
-
+     // 레이 케스팅을 통해 피킹할 테라인을 검사한다.
     _vector RayPos{}, RayDir{};
     m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
@@ -1682,7 +1766,7 @@ void CLevel_Edit::Picking_Pos()
         _float3 Picking = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
                                                              RayPos, RayDir, vTerrin->Get_Transform(), &fdis);
 
-        if (Picking.x != 0.f || Picking.y != 0.f || Picking.z != 0.f)
+        if (Picking.x != 0xffff || Picking.y != 0xffff || Picking.z != 0xffff)  // 테라인 피킹에 성공했다면 반복문 탈출
         {
             XMStoreFloat3(&Pick, XMLoadFloat3(&Picking));
 
@@ -1691,7 +1775,7 @@ void CLevel_Edit::Picking_Pos()
         else
             continue;
     }
-
+    // 피킹된 좌표로 현재 선택한 오브젝트의 위치를 정해준다.
     m_pObjTransform->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Pick.x, Pick.y, Pick.z, 1.f));
     Update_Pos();
 }
@@ -1700,13 +1784,13 @@ void CLevel_Edit::Picking_Cell(_uint i)
 {
     if (m_vTerrain.size() == 0)
     {
-
         MSG_BOX("m_vTerrain == NULL");
         return;
     }
 
+    //레이를 만들고 매쉬 피킹과 터레인 피킹을 시작한다,
     _vector RayPos{}, RayDir{};
-    _float fMashDis{-1.f};
+    _float fMashDis{0xffff};
     m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
     CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
@@ -1714,29 +1798,54 @@ void CLevel_Edit::Picking_Cell(_uint i)
     _float fDist{};
 
     _float3 Pick{};
+
+    // 터레인들과 메쉬들 간의 거리 비교.
     for (auto& vTerrin : m_vTerrain)
     {
-
         _float3 PickTerrain = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
                                                                  RayPos, RayDir, vTerrin->Get_Transform(), &fDist);
 
-        if (PickTerrain.x != 0.f || PickTerrain.y != 0.f || PickTerrain.z != 0.f)
+        if (Desc.pPickedObj)
+        {
+            fDist = Desc.fDis;
+            fMashDis = Desc.fDis;
+        }
+
+        if (PickTerrain.x != 0xffff || PickTerrain.y != 0xffff || PickTerrain.z != 0xffff)
         {
             Pick = PickTerrain;
             break;
         }
     }
-    if (Desc.pPickedObj)
+
+    if (fDist < fMashDis)
     {
-        fMashDis = Desc.fDis;
-    }
+        if (0xffff == fMashDis)
+        {  // 메쉬와 터레인 거리비교 이후 메쉬의 거리가 없었다면, 터레인들의 거리 비교를 다시한번 시작한다.
+            _vector RayPos{}, RayDir{};
+            m_pGameInstance->Make_Ray(g_hWnd, m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
+                                      m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
 
+            _float fTerrainDist = {0xffff};
+            _float Dist{};
+            for (auto& vTerrin : m_vTerrain)
+            {
+                _float3 PickTerrain =
+                    m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(), RayPos,
+                                                       RayDir, vTerrin->Get_Transform(), &Dist);
 
+                if (PickTerrain.x != 0xffff || PickTerrain.y != 0xffff || PickTerrain.z != 0xffff)
+                {
+                    if (Dist < fTerrainDist)
+                    {
+                        fTerrainDist = Dist;
+                        Pick = PickTerrain;
+                    }
+                }
+            }
+        }
 
-    if ( fDist > fMashDis  )
-    {
-        cout << fDist << " " << fMashDis << endl;
-        
+        // Cell 정보 입력을 시작한다.
         m_PicObj = m_Terrain;
         _vector P1{}, P2{}, P3{};
 
@@ -1763,13 +1872,14 @@ void CLevel_Edit::Picking_Cell(_uint i)
     }
     else if (nullptr != Desc.pPickedObj)
     {
+        // 터레인이 없고 메쉬만 있었다면, 메쉬에 Cell 정점을 그린다.
         _vector p1{}, p2{}, p3{};
         m_PicObj = Desc.pPickedObj;
         _float3 fMashPos{};
         XMStoreFloat3(&fMashPos, Desc.pPickedObj->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
 
         _vector vPos = Desc.pPickedObj->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-       
+
         m_fCellPoint[i] = fMashPos;
 
         if (i == 0)
@@ -1794,7 +1904,7 @@ void CLevel_Edit::Picking_Cell(_uint i)
 
     if (i == 2)
     {
-            static_cast<CNavigation*>(m_pNavigation)->Create_Poly(m_fCellPoint[0], m_fCellPoint[1], m_fCellPoint[2]);
+        static_cast<CNavigation*>(m_pNavigation)->Create_Poly(m_fCellPoint[0], m_fCellPoint[1], m_fCellPoint[2]);
     }
 }
 

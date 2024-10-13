@@ -20,7 +20,7 @@ HRESULT CLEVEL_MENU::Initialize()
 
 	/*플레이어꺼 놓고*/
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
-		return S_OK;
+		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
 		return E_FAIL;
 
@@ -36,14 +36,7 @@ void CLEVEL_MENU::Update(_float fTimeDelta)
 
 	__super::Update(fTimeDelta);
 
-#ifdef _DEBUG
 
-	if (GetAsyncKeyState(VK_F1) & 0x8000)
-	{
-		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1, GORGE));
-		return;
-	}
-#endif // _DEBUG
 }
 
 HRESULT CLEVEL_MENU::Render()

@@ -37,7 +37,7 @@ HRESULT CLevel_Manager::Render()
     return m_pCurrentLevel->Render();
 }
 
-HRESULT CLevel_Manager::Load_to_Next_Map_terrain(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
+HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
                                                  const _tchar* strProtoMapPath, void* Arg)
 {
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -56,6 +56,26 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(_uint iLevelIndex, const _uint&
     _uint Type{0};
     _uint TileX{0};
     _uint TileY{0};
+   
+    CGameObject::GAMEOBJ_DESC Desc{};
+    Desc.DATA_TYPE = CGameObject::GAMEOBJ_DATA::DATA_NAVIGATION;
+
+    switch (iLevelIndex)
+    {
+    case 3 :
+        Desc.FilePath = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
+        break;
+    case 4:
+        Desc.FilePath = L"../Bin/Data/Navigation/Navigation_Stage2.dat";
+        break;
+    case 5:
+        Desc.FilePath = L"../Bin/Data/Navigation/Navigation_Boss.dat";
+        break;
+    default:
+        break;
+    }
+
+    _bool bMainTile = true;
 
     while (true)
     {
@@ -90,7 +110,13 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(_uint iLevelIndex, const _uint&
             break;
         }
 
-        CGameObject* pGameObject = ProtoObj->Clone(Arg);
+        CGameObject* pGameObject{};
+        if (bMainTile) {
+            pGameObject = ProtoObj->Clone(&Desc);
+            bMainTile = false;
+        }
+        else
+         pGameObject = ProtoObj->Clone(Arg);
 
         pGameObject->Set_Model(pModel);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
@@ -108,7 +134,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(_uint iLevelIndex, const _uint&
     return S_OK;
 }
 
-HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
+HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
                                                    const _tchar* strProtoMapPath, void* Arg)
 {
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -174,7 +200,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(_uint iLevelIndex, const _uin
     return S_OK;
 }
 
-HRESULT CLevel_Manager::Load_to_Next_Map_Wall(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
+HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
                                               const _tchar* strProtoMapPath, void* Arg)
 {
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -241,7 +267,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(_uint iLevelIndex, const _uint& st
     return S_OK;
 }
 
-HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& type, const _tchar* strProtoMapPath, void* Arg)
+HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& type, const _tchar* strProtoMapPath, void* Arg)
 {
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 

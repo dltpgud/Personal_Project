@@ -188,7 +188,7 @@ if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Co
 
 	/* For.Prototype_Component_Navigation*/
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
-		CNavigation::Create(m_pDevice, m_pContext, TEXT("../Bin/Data/Navigation/Navigation.dat")))))
+		CNavigation::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
 	///*Prototype_Component_Door*/

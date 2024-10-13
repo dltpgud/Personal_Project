@@ -25,32 +25,9 @@ CNavigation::CNavigation(const CNavigation& Prototype)
 #endif
 }
 
-HRESULT CNavigation::Initialize_Prototype(const _tchar* pNavigationFilePath)
+HRESULT CNavigation::Initialize_Prototype()
 {
- //   XMStoreFloat4x4(m_WorldMatrix, XMMatrixIdentity());
-
-    _ulong dwByte = {};
-    HANDLE hFile = CreateFile(pNavigationFilePath, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-    if (0 == hFile)
-        return E_FAIL;
-
-    while (true)
-    {
-        _float3 vPoints[3];
-
-        ReadFile(hFile, vPoints, sizeof(_float3) * 3, &dwByte, nullptr);
-
-        if (0 == dwByte)
-            break;
-
-        CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, m_Cells.size());
-        if (nullptr == pCell)
-            return E_FAIL;
-
-        m_Cells.push_back(pCell);
-    }
-
-    CloseHandle(hFile);
+ 
 
 #ifdef _DEBUG
     m_pShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_Cell.hlsl"), VTXPOS::Elements,
@@ -59,7 +36,6 @@ HRESULT CNavigation::Initialize_Prototype(const _tchar* pNavigationFilePath)
         return E_FAIL;
 #endif
 
-    SetUp_Neighbor();
 
     return S_OK;
 }
@@ -146,6 +122,8 @@ HRESULT CNavigation::Render()
 
     return S_OK;
 }
+
+#endif
 _bool CNavigation::Snap(_fvector vP1, _fvector vP2, _vector distance)
 {
     // 각 요소별 차이를 계산
@@ -155,6 +133,21 @@ _bool CNavigation::Snap(_fvector vP1, _fvector vP2, _vector distance)
       return XMVector3LessOrEqual(difference, distance);
                                         
 }
+_vector CNavigation::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
+{
+    _vector v1 = XMLoadFloat3(&fP1);
+    _vector v2 = XMLoadFloat3(&fP2);
+    _vector v3 = XMLoadFloat3(&fP3);
+
+    // 벡터 v1 -> v2와 v1 -> v3 차이 계산
+    _vector edge1 = v2 - v1;
+    _vector edge2 = v3 - v1;
+
+    // 두 벡터의 외적이 평면의 법선 벡터
+    return XMVector3Cross(edge1, edge2);
+
+}
+
 void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
 {
     _float3 pPoints[3];
@@ -167,10 +160,12 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
     _vector vP2 = XMLoadFloat3(&pPoints[1]);
     _vector vP3 = XMLoadFloat3(&pPoints[2]);
 
-    _vector distance = { 0.2f,0.2f,0.2f,1.f };
+
+    // 근처에 점이 있으면  그 점의 좌표를 사용한다.
+    _vector distance = { 0.2f,0.2f,0.2f,1.f }; // 오차범위 정하고
     if (m_Cells.size() != 0)
     {
-        for (auto vec : m_Cells)
+        for (auto vec : m_Cells) // 반복문 돌면서 검사.
         {
             if (true == Snap(vec->Get_Point(CCell::POINT_A), vP1, distance))
                 pPoints[0] = { XMVectorGetX(vec->Get_Point(CCell::POINT_A)),XMVectorGetY(vec->Get_Point(CCell::POINT_A)),XMVectorGetZ(vec->Get_Point(CCell::POINT_A)) };
@@ -196,6 +191,23 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
         }
     }
 
+
+    // 외적을 통해 법선을 구하고 
+    _vector vNomal = PointNomal(pPoints[0], pPoints[1], pPoints[2]);
+
+    _float vNomalY = XMVectorGetY(vNomal); // 법선의 Y값이 양수면 정점들이 시계 방향으로 잘 정렬되어 있음.
+  
+    if (vNomalY < 0.f) {
+        // 반시계 방향 -> 시계 방향으로 바꾸기 위해 두 번째와 세 번째 정점을 교환
+         swap(pPoints[1], pPoints[2]);
+
+    }
+#ifdef _DEBUG
+    cout << pPoints[0].x << " " <<  pPoints[0].y << " " << pPoints[0].z << endl;
+    cout << pPoints[1].x << " " << pPoints[1].y << " " << pPoints[1].z << endl;
+    cout << pPoints[2].x << " " << pPoints[2].y << " " << pPoints[2].z << endl;
+#endif
+
     CCell* pCell = CCell::Create(m_pDevice, m_pContext, pPoints, m_Cells.size());
     if (nullptr == pCell) {
 
@@ -203,16 +215,108 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
         return;
     }
     m_Cells.push_back(pCell);
+
+
+
+    SetUp_Neighbor();
 }
 
-#endif
+HRESULT CNavigation::Save(const _tchar* tFPath)
+{
+    _ulong		dwByte = { 0 };
+    HANDLE		hFile = CreateFile(tFPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    if (0 == hFile)
+        return E_FAIL;
 
-CNavigation* CNavigation::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
-                                 const _tchar* pNavigationFilePath)
+    _float3		vPoints[3];
+
+    for (auto& Cell : m_Cells)
+    {
+
+        XMStoreFloat3(&vPoints[0], Cell->Get_Point(CCell::POINT_A));
+        XMStoreFloat3(&vPoints[1], Cell->Get_Point(CCell::POINT_B));
+        XMStoreFloat3(&vPoints[2], Cell->Get_Point(CCell::POINT_C));
+        WriteFile(hFile, vPoints, sizeof(_float3) * 3, &dwByte, nullptr);
+
+    }
+
+    CloseHandle(hFile);
+    return S_OK;
+}
+
+HRESULT CNavigation::Load(const _tchar* tFPath)
+{
+    _ulong dwByte = {};
+    HANDLE hFile = CreateFile(tFPath, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    if (0 == hFile)
+        return E_FAIL;
+
+    while (true)
+    {
+        _bool Read = false;
+        _float3 vPoints[3];
+
+     Read = ReadFile(hFile, vPoints, sizeof(_float3) * 3, &dwByte, nullptr);
+
+        if (0 == dwByte)
+            break;
+
+        CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, m_Cells.size());
+        if (nullptr == pCell)
+            return E_FAIL;
+
+        m_Cells.push_back(pCell);
+    }
+
+    CloseHandle(hFile);
+
+    SetUp_Neighbor();
+
+    return S_OK;
+}
+
+HRESULT CNavigation::Delete_ALLCell()
+{
+
+    for (auto& pCell : m_Cells) Safe_Release(pCell);
+
+    m_Cells.clear();
+    return S_OK;
+}
+
+void CNavigation::Delete_Cell(_vector LocalRayPos, _vector LocalRayDir)
+{
+ // 와 ..이거 깊이 비교해서 하려니까 반복자 erase 하고 다음 반복자 잡아주기 좀 빢쎄네;;;
+// 범위기반 반복문 대신에 인덱스를 찾아서 지워주자..
+    _float CellDist = { 0xffff };
+    _int Index = {};
+
+    for (size_t i = 0; i < m_Cells.size(); ++i)
+    {
+        _float fDist{};
+        if (DirectX::TriangleTests::Intersects(LocalRayPos, LocalRayDir, m_Cells[i]->Get_Point(CCell::POINT_A), m_Cells[i]->Get_Point(CCell::POINT_B), m_Cells[i]->Get_Point(CCell::POINT_C),
+            fDist))
+        {
+            if (fDist < CellDist)
+            {
+                CellDist = fDist;
+                Index = i;
+            }
+
+        }
+    }
+    Safe_Release(*(m_Cells.begin() + Index));
+    m_Cells.erase(m_Cells.begin() + Index);
+
+}
+
+
+
+CNavigation* CNavigation::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CNavigation* pInstance = new CNavigation(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype(pNavigationFilePath)))
+    if (FAILED(pInstance->Initialize_Prototype()))
     {
         MSG_BOX("Failed To Created : CNavigation");
         Safe_Release(pInstance);

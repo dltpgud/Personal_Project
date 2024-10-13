@@ -41,7 +41,7 @@ void CUI_Manager::Priority_Update(_float fTimeDelta)
                     // 해당 몬스터의 태그를 받아와서 false로 바꿈
 
                     Safe_Release((*veciter));
-                    m_UIVec[i].erase(veciter);
+                    veciter= m_UIVec[i].erase(veciter);
                 }
             }
             veciter++;
@@ -88,7 +88,7 @@ HRESULT CUI_Manager::Set_OpenUI(const _uint& uid, _bool open)
         {
             if (vec->Get_UIID() == uid)
             {
-                vec->Set_Open(open);
+               vec->Set_Open(open);
             }
         }
     }

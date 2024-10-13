@@ -4,6 +4,7 @@
 #include "Loading.h"
 #include "LEVEL_MENU.h"
 #include "Level_Stage1.h"
+#include "Level_Stage2.h"
 #include "GameInstance.h"
 
 CLevel_Loading::CLevel_Loading(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CLevel{pDevice, pContext}
@@ -21,14 +22,11 @@ HRESULT CLevel_Loading::Initialize(LEVELID eNextLevelID, LOADINGID eLodingType)
     m_pLoader = CLoader::Create(m_pDevice, m_pContext, eNextLevelID);
     if (nullptr == m_pLoader)
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
-        return S_OK;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
-        return S_OK;
+
     if (m_eLodingType == LOADINGID_END)
         return S_OK;
 
-    if (FAILED(Ready_Clone_Layer(CGameObject::UI)))
+     if (FAILED(Ready_Clone_Layer(CGameObject::UI)))
         return E_FAIL;
 
     return S_OK;
@@ -52,8 +50,12 @@ void CLevel_Loading::Update(_float fTimeDelta)
             hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLEVEL_MENU::Create(m_pDevice, m_pContext));
             break;
         case LEVEL_STAGE1:
-            if (GetKeyState(VK_SPACE) & 0x8000)
+            if (m_pGameInstance->Get_DIKeyDown(DIK_SPACE))
                 hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage1::Create(m_pDevice, m_pContext));
+            break;
+        case LEVEL_STAGE2:
+            if (m_pGameInstance->Get_DIKeyDown(DIK_SPACE))
+                hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage2::Create(m_pDevice, m_pContext));
             break;
         }
 
@@ -84,8 +86,11 @@ HRESULT CLevel_Loading::Ready_Clone_Layer(const _uint& pLayerTag)
                                                         nullptr, 0, &Load)))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
-        return S_OK;
-
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
+        return E_FAIL;
     return S_OK;
 }
 
