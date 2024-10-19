@@ -1,47 +1,28 @@
 #pragma once
 #include "Client_Defines.h"
-#include "ContainerObject.h"
+#include "Actor.h"
 BEGIN(Engine)
-
+class CCollider;
 END
 
 BEGIN(Client)
 
-class CPlayer final : public CContainerObject
+class CPlayer final : public CActor
 {
 public:
 	enum PARTOBJID { PART_BODY, PART_WEAPON, PART_EFFECT, PART_END };
 	enum TYPE {T00, T01, T_END};
 	enum STATE {
-		//STATE_IDLE ,
-		//STATE_RUN ,
-		//STATE_STUN ,
-		//STATE_SPRINT,
-		//STATE_SWITCHIN,
-		//STATE_IDLE2,
-		//STATE_RUN2,
-		//STATE_STUN2,
-		//STATE_SPRINT2,
-		//STATE_SWITCHIN2,
-		//STATE_HENDGUN_RELOAD,
-		//STATE_HENDGUN_SHOOT,
-		//STATE_ASSAULTRIFlLE_RELOAD,
-		//STATE_ASSAULTRIFlLE_SHOOT,
-		//STATE_MissileGatling_RELOAD,
-		//STATE_MissileGatling_SHOOT,
-		//STATE_HEAVYCROSSBOW_RELOAD,
-		//STATE_HEAVYCROSSBOW_SHOOT
-
 		STATE_COOLING_LONG, STATE_COOLING_SHORT, STATE_DEATH, STATE_GENERIC_SECONDARY_SHOOT, STATE_GENERIC_STAP, STATE_IDLE, STATE_JUMP_RUN_HIGH
 		, STATE_JUMP_RUN_LOW, STATE_JUMP_RUN_MEDIUM, STATE_JUMP_FALL, STATE_JUMP_RUN_LOOP, STATE_JUMP_RUN_START, STATE_SPTINT_FALL, STATE_SPTINT_LOOP,
 		STATE_RUN, STATE_SPLINE_RIDE, STATE_SPRINT, STATE_STUN, STATE_SWITCHIN, STATE_WEAPON_THROW02, STATE_WEAPON_THROW0, STATE_HIT_BACK, STATE_HIT_FRONT,
-		STATE_HIT_HEAVY, STATE_HIT_LEFT, STATE_HIT_RIGHT, 
+		STATE_HIT_HEAVY, STATE_HIT_LEFT, STATE_HIT_RIGHT,
 
 		STATE_COOLING_LONG2, STATE_COOLING_SHORT2, STATE_DEATH2, STATE_GENERIC_SECONDARY_SHOOT2, STATE_GENERIC_STAP2, STATE_IDLE2, STATE_JUMP_RUN_HIGH2
 		, STATE_JUMP_RUN_LOW2, STATE_JUMP_RUN_MEDIUM2, STATE_JUMP_FALL2, STATE_JUMP_RUN_LOOP2, STATE_JUMP_RUN_START2, STATE_SPTINT_FALL2, STATE_SPTINT_LOOP2,
 		STATE_RUN2, STATE_SPLINE_RIDE2, STATE_SPRINT2, STATE_STUN2, STATE_SWITCHIN2, STATE_WEAPON_THROW022, STATE_WEAPON_THROW012, STATE_HIT_BACK2, STATE_HIT_FRONT2,
 		STATE_HIT_HEAVY2, STATE_HIT_LEFT2, STATE_HIT_RIGHT2,
-		
+
 		STATE_HENDGUN_RELOAD,
 		STATE_HENDGUN_SHOOT,
 		STATE_ASSAULTRIFlLE_RELOAD,
@@ -70,28 +51,29 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
+	virtual void HIt_Routine()override;
 
 	const _float4x4* Get_CameraBone();
 	void Key_Input(_float fTimeDelta);
 
-	void Set_State(CPlayer::STATE st) {
-		m_iState = st;
-	}
 	void Choose_Weapon(const _uint& WeaponNum);
-
-	_uint Get_State() { return m_iState; }
+	_uint Get_Bullet();
+	_uint Get_MaxBullte();
+	
 
 	_float Get_fPlayerY() { return m_fPlayerY; }
 
+	void Height_On_Cell();
+
 	void Mouse_Fix();
 private:
-	_uint					m_iState = {};
 	_uint					m_Type = {};
 	_uint					m_bWeaponType = {};
 	_bool					m_bturn = { false };
 	_bool					m_bchange = { false };
 	_bool					m_bJump = { false };
 	_float					m_fPlayerY{ 0.f };
+
 
 private:
 	HRESULT Add_Components();

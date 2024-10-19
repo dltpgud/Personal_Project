@@ -3,19 +3,19 @@
 #include "Transform.h"
 #include "Model.h"
 
-CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : m_pDevice{pDevice}, m_pContext{pContext}
+CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd)
+    : m_pDevice{pDevice}, m_pContext{pContext}, g_hWnd { hWnd }
 {
     Safe_AddRef(m_pDevice);
     Safe_AddRef(m_pContext);
 }
 
-void CCalculator::Make_Ray(HWND hWnd, _matrix Proj, _matrix view, _vector* RayPos, _vector* RaDir)
-{
+void CCalculator::Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RaDir)
+{   
     POINT ptMouse{};
     GetCursorPos(&ptMouse);
-    ScreenToClient(hWnd, &ptMouse);
-
+    ScreenToClient(g_hWnd, &ptMouse);
+    
     _float3 vMousePos;
 
     _uint iNumViewports = {1};
@@ -136,9 +136,9 @@ _float CCalculator::Compute_Random(_float fMin, _float fMax)
     return (fMax - fMin) * Compute_Random_Normal() + fMin;
 }
 
-CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd)
 {
-    CCalculator* pInstance = new CCalculator(pDevice, pContext);
+    CCalculator* pInstance = new CCalculator(pDevice, pContext, hWnd);
 
     return pInstance;
 }

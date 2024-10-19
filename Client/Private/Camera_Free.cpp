@@ -32,38 +32,38 @@ _int CCamera_Free::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
-   // _vector vEye = {
-   //          XMVectorGetX(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-   //          XMVectorGetY(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-   //          XMVectorGetZ(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) ,
-   //   static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44 };
-   //
-   // //_vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
-   //
-   // m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,  vEye);
-   //
-   //
-   //  _float4 At;
-   // XMStoreFloat4(&At, m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
-   //     + m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
-   // m_pTransformCom->LookAt(XMLoadFloat4(&At));
-   
+    //_vector vEye = {
+    //         XMVectorGetX(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+    //         XMVectorGetY(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+    //         XMVectorGetZ(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) ,
+    //  static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44 };
+    //
+    ////_vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
+    //
+    //m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,  vEye);
+    //
+    //
+    // _float4 At;
+    //XMStoreFloat4(&At, m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
+    //    + m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
+    //m_pTransformCom->LookAt(XMLoadFloat4(&At));
+    //
 
 
 
 
-    _vector vEye = { static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_41,
-                 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_42,
-                 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_43,
-                 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44 };
-   
-    _vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
-   
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Eye);
-    _float4 At;
-    XMStoreFloat4(&At, m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
-        + m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
-    m_pTransformCom->LookAt(XMLoadFloat4(&At));
+   _vector vEye = { static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_41,
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_42,
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_43,
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44 };
+  
+   _vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
+  
+   m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Eye);
+   _float4 At;
+   XMStoreFloat4(&At, m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
+       + m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
+   m_pTransformCom->LookAt(XMLoadFloat4(&At));
    
 
 
@@ -72,22 +72,24 @@ _int CCamera_Free::Priority_Update(_float fTimeDelta)
    // m_pTransformCom->Set_MoveSpeed(m_pGameInstance->Get_Player()->Get_Transform()->Get_MoveSpeed());
    // m_pTransformCom->Set_RotSpeed(m_pGameInstance->Get_Player()->Get_Transform()->Get_RotSpeed());
    //
-   // if (m_pGameInstance->Get_DIKeyState(DIK_W))
-   // {
-   //     m_pTransformCom->Go_Straight(fTimeDelta);
-   // }
-   // if (m_pGameInstance->Get_DIKeyState(DIK_S))
-   // {
-   //     m_pTransformCom->Go_Backward(fTimeDelta);
-   // }
+   //if (m_pGameInstance->Get_DIKeyState(DIK_W))
+   //{
+   //    m_pTransformCom->Go_Straight(fTimeDelta);
+   //}
+   //if (m_pGameInstance->Get_DIKeyState(DIK_S))
+   //{
+   //    m_pTransformCom->Go_Backward(fTimeDelta);
+   //}
    //
-   // if (m_pGameInstance->Get_DIKeyState(DIK_A))
-   // {
-   //     m_pTransformCom->Go_Left(fTimeDelta);
-   // }
+   //if (m_pGameInstance->Get_DIKeyState(DIK_A))
+   //{
+   //    m_pTransformCom->Go_Left(fTimeDelta);
+   //}
    //
-   // if (m_pGameInstance->Get_DIKeyState(DIK_D))
-   // {
+   //if (m_pGameInstance->Get_DIKeyState(DIK_D))
+   //{
+   //    m_pTransformCom->Go_Right(fTimeDelta);
+   //}
    //
    //     m_pTransformCom->Go_Right(fTimeDelta);
    // }

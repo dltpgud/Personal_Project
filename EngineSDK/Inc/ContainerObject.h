@@ -16,7 +16,8 @@ protected:
 	CContainerObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CContainerObject(const CContainerObject& Prototype);
 	virtual ~CContainerObject() = default;
-
+public:
+	virtual class CComponent* Find_PartObj_Component(const _wstring& strComponentTag, _uint iPartObjID = 0) ;
 public:
 	/* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
 	virtual HRESULT Initialize_Prototype();

@@ -3,7 +3,8 @@
 #include "Level_Loading.h"
 #include "GameInstance.h"
 #include "Menu.h"
-
+#include "SpriteTexture.h"
+#include "Aim.h"
 /*로보 퀘스트의 로고는 생략하고 이걸 메뉴 클래스로 사용하자.. 로고에 쓸만한 이미지가 없잔아..*/
 
 CLEVEL_MENU::CLEVEL_MENU(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
@@ -23,7 +24,8 @@ HRESULT CLEVEL_MENU::Initialize()
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
 		return E_FAIL;
-
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
+		return E_FAIL;
 //m_pGameInstance->PlayBGM(L"ST.ogg",1.f);
 
 
@@ -32,8 +34,8 @@ HRESULT CLEVEL_MENU::Initialize()
 
 void CLEVEL_MENU::Update(_float fTimeDelta)
 {	
-
-
+	if(m_pGameInstance->Get_DIKeyDown(DIK_U))
+	m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1, GORGE));
 	__super::Update(fTimeDelta);
 
 
@@ -68,6 +70,67 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Cursor")))
 		return E_FAIL;
+
+
+
+	CAim::CAim_DESC Desc{};
+	Desc.bshakingX = true;
+	Desc.bshakingY = false;
+	Desc.fSizeX = 10.f;
+	Desc.fSizeY = 4.f;
+	Desc.fX = g_iWinSizeX * 0.5f -10.f;
+	Desc.fY = g_iWinSizeY * 0.5f;
+	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
+	Desc.PrUpdate = true;
+	Desc.Update = true;
+	Desc.LateUpdate = true;
+	Desc.fpositive_OR_negative = -1.f;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr,0, &Desc)))
+		return E_FAIL;
+
+	Desc.bshakingX = true;
+	Desc.bshakingY = false;
+	Desc.fSizeX = 10.f;
+	Desc.fSizeY = 4.f;
+	Desc.fX = g_iWinSizeX * 0.5f +10.f;
+	Desc.fY = g_iWinSizeY * 0.5f;
+	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
+	Desc.PrUpdate = true;
+	Desc.Update = true;
+	Desc.LateUpdate = true;
+	Desc.fpositive_OR_negative = 1.f;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
+		return E_FAIL;
+
+
+	Desc.bshakingY = true;
+	Desc.bshakingX = false;
+	Desc.fSizeX = 4.f;
+	Desc.fSizeY = 10.f;
+	Desc.fX = g_iWinSizeX * 0.5f;
+	Desc.fY = g_iWinSizeY * 0.5f+10.f;
+	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
+	Desc.PrUpdate = true;
+	Desc.Update = true;
+	Desc.LateUpdate = true;
+	Desc.fpositive_OR_negative = -1.f;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
+		return E_FAIL;
+
+	Desc.bshakingY = true;
+	Desc.bshakingX = false;
+	Desc.fSizeX = 4.f;
+	Desc.fSizeY = 10.f;
+	Desc.fX = g_iWinSizeX * 0.5f ;
+	Desc.fY = g_iWinSizeY * 0.5f - 10.f;
+	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
+	Desc.PrUpdate = true;
+	Desc.Update = true;
+	Desc.LateUpdate = true;
+	Desc.fpositive_OR_negative = 1.f;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
+		return E_FAIL;
+
 
 	return S_OK;
 }

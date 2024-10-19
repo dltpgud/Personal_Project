@@ -20,6 +20,7 @@ HRESULT CCursor::Initialize(void* pArg)
     CUI_DESC Desc{};
     Desc.fX = g_iWinSizeX * 0.5f;
     Desc.fY = g_iWinSizeY * 0.5f;
+    Desc.fZ =  0.f;
     Desc.fSizeX = 60.f;
     Desc.fSizeY = 60.f;
     Desc.Update = true;

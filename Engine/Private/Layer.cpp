@@ -77,6 +77,7 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
 
     Desc.pPickedObj = nullptr;
     Desc.fDis = {0xffff};
+    _vector vPos{};
     _float fCurDIs{};
     for (size_t i = 0; i < m_iObjType; i++)
     {
@@ -88,14 +89,15 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
             if (nullptr == pGameObject->Get_Model())
                 continue;
 
-        // if (CGameObject::DATA_CHEST == pGameObject->Get_Data() ) 
-        //        fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
+         //if (CGameObject::DATA_CHEST == pGameObject->Get_Data() ) 
+         //      fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
         // else if (CGameObject::DATA_DOOR == pGameObject->Get_Data())
             fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
-        //   else
-        //    fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform());
+       //   else
+        //    fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform(), &vPos);
             if (fCurDIs < Desc.fDis)
             {
+                Desc.vPos = vPos;
                 Desc.fDis = fCurDIs;
                 Desc.pPickedObj = pGameObject;
             }

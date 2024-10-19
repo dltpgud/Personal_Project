@@ -7,6 +7,8 @@
 #include "PipeLine.h"
 #include "Input_Device.h"
 #include "Light_Manager.h"
+#include "Collider_Manager.h"
+#include "Font_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -63,9 +65,20 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pPipeLine)
 		return E_FAIL;
 
-	m_pCalculator = CCalculator::Create(*ppDevice, *ppContext);
-	if (nullptr == m_pPipeLine)
+	m_pCalculator = CCalculator::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
+	if (nullptr == m_pCalculator)
 		return E_FAIL;
+
+	m_pCollider_Manager = Collider_Manager::Create(EngineDesc.iNumLevels);
+	if (nullptr == m_pCollider_Manager)
+		return E_FAIL;
+
+
+	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext);
+	if (nullptr == m_pFont_Manager)
+		return E_FAIL;
+
+
 
 	return S_OK;
 }
@@ -87,6 +100,9 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pObject_Manager->Update(fTimeDelta);
 	m_pUI_Manager->Update(fTimeDelta);
 
+
+
+	m_pCollider_Manager->All_Collison_check();
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	m_pUI_Manager->Late_Update(fTimeDelta);
 
@@ -109,15 +125,17 @@ void CGameInstance::Clear(_uint iClearLevelID)
 	m_pUI_Manager->Clear(iClearLevelID);
 	m_pObject_Manager->Clear(iClearLevelID);
 	m_pComponent_Manager->Clear(iClearLevelID);
+	m_pCollider_Manager->Clear(iClearLevelID);
 
 }
 
 void CGameInstance::Set_Player(CGameObject* pPlayer)
 {
-	m_pPlayer = pPlayer;
+	m_pPlayer =  static_cast <CActor*>(pPlayer);
+
 }
 
-CGameObject* CGameInstance::Get_Player()
+CActor* CGameInstance::Get_Player()
 {
 	return m_pPlayer;
 }
@@ -175,6 +193,11 @@ _byte CGameInstance::Get_DIMouseDown(MOUSEKEYSTATE eMouse)
 _byte CGameInstance::Get_DIKeyDown(_ubyte byKeyID)
 {
 	return m_pInput_Device->Get_DIKeyDown(byKeyID);
+}
+
+_byte CGameInstance::Get_DIAnyKey()
+{
+	return m_pInput_Device->Get_DIAnyKey();
 }
 
 #pragma endregion
@@ -272,15 +295,17 @@ CGameObject::PICKEDOBJ_DESC CGameInstance::Pking_onMash(_vector RayPos, _vector 
 	return m_pObject_Manager->Pking_onMash(RayPos, RayDir);
 }
 
-CGameObject* CGameInstance::Recent_GameObject(const _uint& strLayerTag)
+CGameObject* CGameInstance::Recent_GameObject(_uint iLevelIndex, const _uint& strLayerTag)
 {
-	return m_pObject_Manager->Recent_GameObject(strLayerTag);
+	return m_pObject_Manager->Recent_GameObject(iLevelIndex ,strLayerTag);
 }
 
 list<class CGameObject*> CGameInstance::Get_ALL_GameObject(_uint iLevelIndex, const _uint& strLayerTag)
 {
 	return m_pObject_Manager->Get_ALL_GameObject(iLevelIndex, strLayerTag);
 }
+
+
 
 
 HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath , const _uint& DataType, void* pArg )
@@ -323,10 +348,7 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 	{
 		CGameObject* pGameObject = pPrototype->Clone(pArg);
 		if (nullptr == pGameObject)
-			return E_FAIL;
-
-		//if (L"Prototype_GameObject_Player" == strPrototypeTag)
-		//	Set_Player(pGameObject); 
+			return E_FAIL; 
 
 		if (strLayerTag == CGameObject::UI)
 			return m_pUI_Manager->Add_UI(pGameObject, iLevelIndex);
@@ -359,6 +381,20 @@ CGameObject* CGameInstance::Clone_Prototype(const _wstring& strPrototypeTag, voi
 
 	return m_pObject_Manager->Clone_Prototype(strPrototypeTag, pArg);
 }
+#pragma endregion
+
+
+#pragma region Collider_Manager
+HRESULT CGameInstance::Add_Monster(_uint iClearLevelID, CGameObject* Monster)
+{
+	return m_pCollider_Manager->Add_Monster(iClearLevelID,Monster);
+}
+
+HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
+{
+ 	return m_pCollider_Manager->Player_To_Monster_Ray_Collison_Check();
+}
+
 #pragma endregion
 
 #pragma region UI_Manager
@@ -540,9 +576,9 @@ _float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainB
 	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom,  RayPos,  RayDir, Transform, fDis);
 }
 
-void CGameInstance::Make_Ray(HWND hWnd, _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir)
+void CGameInstance::Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir)
 {
-	m_pCalculator->Make_Ray(hWnd, Proj, view, RayPos, RayDir);
+	m_pCalculator->Make_Ray( Proj, view, RayPos, RayDir);
 	return;
 }
 
@@ -555,13 +591,27 @@ _float CGameInstance::Compute_Random(_float fMin, _float fMax)
 {
 	return m_pCalculator->Compute_Random(fMin, fMax);
 }
+#pragma endregion
+
+
+#pragma region Font_Manager
+HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath)
+{
+	return m_pFont_Manager->Add_Font(strFontTag, pFontFilePath);
+}
+
+HRESULT CGameInstance::Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale, _float fRotation, const _float2& vPivot)
+{
+	return m_pFont_Manager->Render_Text(strFontTag, pText, vPosition, vColor, fScale, fRotation, vPivot);
+}
 
 #pragma endregion
 
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
-
+	Safe_Release(m_pFont_Manager);
+	Safe_Release(m_pCollider_Manager);
 	Safe_Release(m_pCalculator);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pPipeLine);

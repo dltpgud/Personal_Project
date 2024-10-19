@@ -15,14 +15,31 @@ private:
 	CBounding_AABB();
 	virtual ~CBounding_AABB() = default;
 
+
 public:
-	virtual HRESULT Initialize(void* pArg) override;
+	const BoundingBox* Get_Desc() const {
+		return m_pBoundDesc;
+	}
+
+
+public:
+	virtual HRESULT Initialize(const BOUND_DESC* pBoundDesc) override;
+	virtual void Update(_fmatrix WorldMatrix) override;
+	virtual _bool Intersect(CCollider::TYPE eType, CBounding* pTargetBounding) override;
+	virtual _bool RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)override;
+#ifdef _DEBUG
+public:
+	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor) override;
+#endif
 
 private:
-	BoundingBox*			m_pBoundDesc = { nullptr };
-	//BoundingBox*			m_pBoundDesc = { nullptr };
+	/* 충돌체를 위한 데이터. */
+	/* 충돌을 수행하려면 이 데이터들이 최소 월드 스페이스 가지는변환이 필요하다. */
+	BoundingBox* m_pBoundDesc_Original = { nullptr };
+	BoundingBox* m_pBoundDesc = { nullptr };
 
 public:
+	static CBounding_AABB* Create(const BOUND_DESC* pBoundDesc);
 	virtual void Free() override;
 };
 

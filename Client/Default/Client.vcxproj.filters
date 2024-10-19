@@ -97,6 +97,12 @@
     <Filter Include="01.Level\01.GamePlay\Stage2">
       <UniqueIdentifier>{6896a576-0f2d-45c0-b777-3cfbefe69db8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\01. Map\Sky">
+      <UniqueIdentifier>{c21e8047-4c3e-4eb5-8461-1008f3a2dc61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\SpriteTex">
+      <UniqueIdentifier>{873bdc97-3a15-42a9-b424-3a0bf3ac582f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -186,6 +192,15 @@
     <ClInclude Include="..\Public\Level_Stage2.h">
       <Filter>01.Level\01.GamePlay\Stage2</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Sky.h">
+      <Filter>02.GameObjects\01. Map\Sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SpriteTexture.h">
+      <Filter>02.GameObjects\04.UI\SpriteTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Aim.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -263,6 +278,15 @@
     <ClCompile Include="..\Private\Level_Stage2.cpp">
       <Filter>01.Level\01.GamePlay\Stage2</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Sky.cpp">
+      <Filter>02.GameObjects\01. Map\Sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SpriteTexture.cpp">
+      <Filter>02.GameObjects\04.UI\SpriteTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Aim.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -288,6 +312,9 @@
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh.hlsl">
+      <Filter>97.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxCube.hlsl">
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

@@ -36,8 +36,6 @@ public:
 
 	virtual _tchar* Get_ProtoName() override;
 
-
-	void Create_Cell(_float3 p1, _float3 p2, _float3 p3);
  _uint Get_SizeX()  {
 		return m_pSize[0];
 	}

@@ -26,7 +26,7 @@ public:
     HRESULT Bind_BoneMatrices(class CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName);
 
     _float3* Get_pPos(_int i);
-    _uint* Get_pIndices(_int i);
+    _uint Get_pIndices(_int i);
 
     _uint Get_iNumIndexices();
     _uint Get_iNumVertices();

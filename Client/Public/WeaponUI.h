@@ -65,6 +65,13 @@ private:
     _float m_fPrXPos2[5]{0.f};
     _float m_fPrYPos2[5]{0.f};
 
+
+    _int m_iPreBullet{};
+    _tchar m_wCurrentBullte[50] = {};
+    _uint m_iCurrentBullet = { 0 };
+    _tchar m_wMaxBullte[50] = {};
+    _uint m_iMaxBullet = { 0 };
+    _vector m_vColar{};
 private:
     HRESULT Add_Components();
 

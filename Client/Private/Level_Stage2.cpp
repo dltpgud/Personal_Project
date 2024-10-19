@@ -81,7 +81,7 @@ HRESULT CLevel_Stage2::Ready_Layer_Camera(const _uint& pLayerTag)
 	Desc.fRotationPerSec = m_pGameInstance->Get_Player()->Get_Transform()->Get_RotSpeed(); 
 	Desc.fMouseSensor = 0.05f;
 	Desc.JumpPower = m_pGameInstance->Get_Player()->Get_Transform()->Get_JumpPower();
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag,
 		TEXT("Prototype_GameObject_Camera_Free"),nullptr,0, &Desc)))
 		return E_FAIL;
 
@@ -94,6 +94,8 @@ HRESULT CLevel_Stage2::Ready_Layer_UI(const _uint& pLayerTag)
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, true)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, true)))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
 		return S_OK;

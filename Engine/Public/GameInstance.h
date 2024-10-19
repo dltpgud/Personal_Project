@@ -6,6 +6,7 @@
 #include "GameObject.h"
 #include "PipeLine.h"
 #include "Calculator.h"
+#include "Actor.h"
 /* CGameInstance : */
 /* 내 Engine에 유일하게 존재하는 싱글톤클래스다. */
 /* Client사용자가 엔진의 기능을 이용하고자한다면 CGameInstance를 통해서 기능을 수행할 수 있도록 하겠다. */
@@ -30,7 +31,7 @@ public:
 
 
 	void Set_Player(CGameObject* pPlayer);
-	CGameObject* Get_Player();
+ CActor* Get_Player();
 
 public: /* For.Graphic_Device */
 	HRESULT Render_Begin(_float4 Color);
@@ -43,7 +44,7 @@ public: /* For.Input_Device */
 	_long	Get_DIMouseMove(MOUSEMOVESTATE eMouseState);
 	_byte	Get_DIMouseDown(MOUSEKEYSTATE eMouse);
 	_byte   Get_DIKeyDown(_ubyte byKeyID);
-
+	_byte   Get_DIAnyKey();
 public: /* for.Timer_Manager */
 	_float  Get_TimeDelta(const _wstring& strTimerTag);
 	HRESULT	Add_Timer(const _wstring& strTimerTag);
@@ -67,8 +68,14 @@ public: /* For.Object_Manager*/
 	_bool IsGameObject(_uint iLevelIndex, const _uint& strLayerTag);
 	void ObjClear(_uint iLevelIndex);
 	CGameObject::PICKEDOBJ_DESC Pking_onMash(_vector RayPos, _vector RayDir);
-	CGameObject* Recent_GameObject(const _uint& strLayerTag);
+	CGameObject* Recent_GameObject(_uint iLevelIndex, const _uint& strLayerTag);
 	list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _uint& strLayerTag);
+
+public: /* For.Collider_Manager */
+	HRESULT Add_Monster(_uint iClearLevelID, class CGameObject* Monster);
+	HRESULT Player_To_Monster_Ray_Collison_Check();
+
+
 
 public: /* For.UI_Manager*/
 	HRESULT Set_OpenUI(const _uint& uID, _bool UIopen);
@@ -106,13 +113,18 @@ public: /* For.Light_Manager */
 
 public: /* For.Calculator */
 	_float3	Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis);
-	void Make_Ray(HWND hWnd, _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir);
+	void Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
 
 
+	public: /* For.Font_Manager */
+		HRESULT Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath);
+		HRESULT Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale = 1.f, _float fRotation = 0.f, const _float2& vPivot = _float2(0.f, 0.f));
+
 private:
-	CGameObject* m_pPlayer = {nullptr};   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
+ CActor* m_pPlayer = {nullptr};   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
+	class Collider_Manager*			m_pCollider_Manager = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
 	class CInput_Device*			m_pInput_Device		 = { nullptr };
 	class CTimer_Manager*			m_pTimer_Manager	 = { nullptr };
@@ -125,7 +137,8 @@ private:
 	class CSound*					m_pSound			 = { nullptr };
 	class CLight_Manager*			m_pLight_Manager	 = { nullptr };
 	class CCalculator*              m_pCalculator		 = { nullptr };
-public:
+	class CFont_Manager*			m_pFont_Manager		 = { nullptr };
+ public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;
 };

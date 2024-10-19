@@ -5,6 +5,7 @@
 BEGIN(Engine)
 class CShader;
 class CModel;
+
 END
 
 BEGIN(Tool)

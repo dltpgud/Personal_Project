@@ -40,13 +40,13 @@ public:
     }
     void Set_Scaling(_float fScaleX, _float fScaleY, _float fScaleZ);
     void LookAt(_fvector vAt);
-    void Go_Straight(_float fTimeDelta);
-    void Go_Left(_float fTimeDelta);
+    void Go_Straight(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
+    void Go_Left(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void Go_Backward(_float fTimeDelta);
-    void Go_Up(_float fTimeDelta);
-    void Go_Down(_float fTimeDelta);
-    void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck);
+    void Go_Backward(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
+    void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
+    void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
+    void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
     void Stop_Move();
     void Rotation_to_Player();
 

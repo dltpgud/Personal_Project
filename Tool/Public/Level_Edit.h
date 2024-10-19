@@ -82,6 +82,7 @@ private:
     void Set_pos();
     void Set_scale();
     void Set_Tile();
+    void Set_Cell_Type();
 
     void re_setting();
 
@@ -113,8 +114,9 @@ private:
     _int m_CopyiItem_selected_idx{};
     _int m_CopyiIcomtem_selected_idx{};
     _int m_WeaPon{};
+    _int m_iCellType{};
     _uint m_iScene{};
-    _uint m_iCellCount;
+    _uint m_iCellCount{};
     POROTO_TYPE m_pType{};
 
     /*float*/

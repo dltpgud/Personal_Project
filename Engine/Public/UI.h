@@ -14,6 +14,7 @@ public:
         UIID_Loading,
         UIID_PlayerHP,
         UIID_PlayerWeaPon,
+        UIID_PlayerWeaPon_Aim,
         UIID_Monster,
         UIID_END
     };
@@ -26,7 +27,7 @@ public:
 
     typedef struct CUI_DESC : CGameObject::GAMEOBJ_DESC
     {
-        _float fX{}, fY{}, fSizeX{}, fSizeY{};
+        _float fX{}, fY{}, fZ{}, fSizeX{}, fSizeY{};
         UIID UID{};
         _bool PrUpdate{}, Update{}, LateUpdate{};
         _uint iDepth{};
@@ -96,7 +97,7 @@ public:
     }
 
 protected:
-    _float m_fX{}, m_fY{}, m_fSizeX{}, m_fSizeY{};
+    _float m_fX{}, m_fY{}, m_fZ{}, m_fSizeX{}, m_fSizeY{};
     _float4x4 m_ViewMatrix{}, m_ProjMatrix{};
     UIID m_UIID{};
     Hover_STATE m_Hoverst;

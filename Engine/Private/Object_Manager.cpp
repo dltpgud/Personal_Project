@@ -85,6 +85,29 @@ void CObject_Manager::Clear(_uint iClearLevelID)
 	m_pLayers[iClearLevelID].clear();
 }
 
+HRESULT CObject_Manager::Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* clone)
+{
+	
+		/*레이어를 탐색한다*/
+		CLayer* pLayer = Find_Layer(iLevelIndex, strLayerTag);
+
+		if (nullptr == pLayer)
+		{
+			/*레이어가 비어 있으면 최초 생성한다*/
+			pLayer = CLayer::Create();
+			if (nullptr == pLayer)
+				return E_FAIL;
+
+			/*생성된 레이어에 사본을 추가한다*/
+			pLayer->Add_GameObject(clone, strLayerTag);
+			m_pLayers[iLevelIndex].emplace(strLayerTag, pLayer);
+		}
+		else /*최초 생성이 아니라면*/
+			pLayer->Add_GameObject(clone, strLayerTag);
+		return S_OK;
+	
+}
+
 CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)
 {
 	auto iter = m_Prototypes.find(strPrototypeTag);
@@ -137,20 +160,12 @@ CGameObject::PICKEDOBJ_DESC CObject_Manager::Pking_onMash(_vector RayPos, _vecto
 	return{};
 }
 
-CGameObject* CObject_Manager::Recent_GameObject(const _uint& strLayerTag)
+CGameObject* CObject_Manager::Recent_GameObject(_uint iLevelIndex, const _uint& strLayerTag)
 {
-	for (size_t i = 0; i < m_iNumLevels; i++)
-	{
-		for (auto& Pair : m_pLayers[i])
-		{
-			if (nullptr != Pair.second)
-			{
-				return	Pair.second->Recent_GameObject(strLayerTag);
-			}
-		}
-	}
-
-	return nullptr;
+	CLayer* pLayer = Find_Layer(iLevelIndex, strLayerTag);
+	if (nullptr == pLayer)
+		MSG_BOX("못 가져옴");
+	return  pLayer->Recent_GameObject(strLayerTag);
 }
 
 list<class CGameObject*> CObject_Manager::Get_ALL_GameObject(_uint iLevelIndex, const _uint& strLayerTag)

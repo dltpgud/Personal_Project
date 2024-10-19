@@ -10,10 +10,10 @@ CCell::CCell(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	Safe_AddRef(m_pContext);
 }
 
-HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex)
+HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex, const _uint& Type)
 {
 	m_iIndex = iIndex;
-
+	m_Type = static_cast<TYPE> (Type);
 	for (size_t i = 0; i < POINT_END; i++)	
 		m_vPoints[i] = pPoints[i];
 
@@ -27,22 +27,58 @@ HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex)
 	return S_OK;
 }
 
-_bool CCell::isIn(_fvector vLocalPos, _int* pNeighborIndex)
+_bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeighborIndex ,_vector* Slide )
 {
 	for (size_t i = 0; i < LINE_END; i++)
 	{
 		_vector		vLine = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]) - XMLoadFloat3(&m_vPoints[i]);  // 점과 점의 방향벡터(라인)을 그린다. 앞에 나누기 연산을 한건 없는 4번째 점을 찾을까봐..
 		_vector		vNormal = XMVectorSet(XMVectorGetZ(vLine) * -1.f, 0.f, XMVectorGetX(vLine), 0.f);// 선들의 법선을 구한다.
+		_vector		vDir = vAfterLocalPos - XMLoadFloat3(&m_vPoints[i]);
 
-		_vector		vDir = vLocalPos - XMLoadFloat3(&m_vPoints[i]); 
-
-		if (0 < XMVectorGetX(XMVector3Dot(XMVector3Normalize(vNormal), XMVector3Normalize(vDir))))
+		if ( 0 < XMVectorGetX(XMVector3Dot(XMVector3Normalize(vNormal), XMVector3Normalize(vDir))))
 		{
 			*pNeighborIndex = m_iNeighbors[i];
+
+			_vector MoveDir = vAfterLocalPos - vBeforeLocalPos;
+
+			_vector vReflectDir = XMVector3Dot(XMVector3Normalize(vNormal) * -1, MoveDir);
+
+			_float vReflectLength = XMVectorGetX(vReflectDir);
+			if (vReflectLength < 0)
+				vReflectLength *= -1;
+			_vector Slid{};
+			 Slid = MoveDir - vReflectLength * XMVector3Normalize(vNormal);
+
+
+			// // 목표 점(슬라이딩 방향의 끝점)
+			// _vector targetPoint = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]);
+			//
+			// // 현재 위치와 목표 지점의 거리를 계산하여 멈출지 결정
+			// _vector diff = targetPoint - vAfterLocalPos;  // 목표 지점과 현재 위치의 차이
+			// const float stopThreshold = 0.10f;  // 임계값
+			//
+			// _float3 a{};
+			// XMStoreFloat3(&a, diff);
+			// cout << a.x << "  " << a.y << " " << a.z << endl;
+			//
+			//
+			//
+			// // 목표 지점에 거의 닿으면 슬라이딩을 멈추게 설정
+			// if (XMVectorGetX(XMVector3Length(diff)) < stopThreshold)
+			// {
+			//	 *Slide = XMVectorZero();  // 슬라이딩 벡터를 0으로 만들어 물체가 멈추게 함
+			//
+			//	 return true;
+			// }
+			// else
+			// {
+			//	 *Slide = Slid;  // 슬라이딩 유지
+			// }
+
 			return false;
 		}
 	}
-
+	
 	return true;
 }
 
@@ -80,6 +116,7 @@ _bool CCell::Compare_Points(_fvector vSour, _fvector vDest)
 #ifdef _DEBUG
 HRESULT CCell::Render()
 {
+
 #ifdef _DEBUG
 	m_pVIBuffer->Bind_Buffers();
 
@@ -87,11 +124,11 @@ HRESULT CCell::Render()
 #endif
 }
 #endif
-CCell * CCell::Create(ID3D11Device * pDevice, ID3D11DeviceContext * pContext, const _float3 * pPoints, _uint iIndex)
+CCell * CCell::Create(ID3D11Device * pDevice, ID3D11DeviceContext * pContext, const _float3 * pPoints, _uint iIndex, const _uint& Type )
 {
 	CCell*		pInstance = new CCell(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize(pPoints, iIndex)))
+	if (FAILED(pInstance->Initialize(pPoints, iIndex, Type)))
 	{
 		MSG_BOX("Failed To Created : CCell");
 		Safe_Release(pInstance);

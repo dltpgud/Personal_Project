@@ -29,22 +29,38 @@ void CTransform::LookAt(_fvector vAt)
     Set_TRANSFORM(TRANSFORM_LOOK, XMVector3Normalize(vLook) * vScaled.z);
 }
 
-void CTransform::Go_Straight(_float fTimeDelta)
+void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
 {
     _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
 
-    vPosition += XMVector3Normalize(vLook) * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + XMVector3Normalize(vLook) * m_fSpeedPerSec * fTimeDelta;
 
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
+        vPosition += Slide;
+    }
+    else
+        vPosition = vAfterPos;
+  
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Left(_float fTimeDelta)
+void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation)
 {
     _vector vRight = Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
-    vPosition -= XMVector3Normalize(vRight) * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + XMVector3Normalize(-vRight) * m_fSpeedPerSec * fTimeDelta;
+
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
+        if (XMVector3Equal(Slide, XMVectorZero()))
+            return;
+        vPosition += Slide;
+    }
+    else
+        vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
@@ -54,58 +70,100 @@ void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation)
     _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
 
-    vPosition += XMVector3Normalize(vRight) * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + XMVector3Normalize(vRight) * m_fSpeedPerSec * fTimeDelta;
 
-
-    if (nullptr != pNavigation && false == pNavigation->isMove(vPosition)) // 아마 이 안에서 슬라이드 구현하면 될듯..?
-        return;
-
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
+        {
+            if (XMVector3Equal(Slide, XMVectorZero()))
+                return;
+            vPosition += Slide;
+        }
+    else
+        vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Backward(_float fTimeDelta)
+void CTransform::Go_Backward(_float fTimeDelta, CNavigation* pNavigation)
 {
     _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
-    vPosition -= XMVector3Normalize(vLook) * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + XMVector3Normalize(-vLook) * m_fSpeedPerSec * fTimeDelta;
+
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
+    {
+        if (XMVector3Equal(Slide, XMVectorZero()))
+            return;
+        vPosition += Slide;
+    }
+    else
+        vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Up(_float fTimeDelta)
+void CTransform::Go_Up(_float fTimeDelta, CNavigation* pNavigation)
 {
     _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
-    vPosition += XMVector3Normalize(vUp) * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * m_fSpeedPerSec * fTimeDelta;
+
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
+    {
+        if (XMVector3Equal(Slide, XMVectorZero()))
+            return;
+        vPosition += Slide;
+    }
+    else
+        vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Down(_float fTimeDelta)
+void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation)
 {
     _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
-    vPosition -= XMVector3Normalize(vUp) * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + XMVector3Normalize(-vUp) * m_fSpeedPerSec * fTimeDelta;
+
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
+    {
+        if (XMVector3Equal(Slide, XMVectorZero()))
+            return;
+        vPosition += Slide;
+    }
+    else
+        vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck)
+void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNavigation* pNavigation)
 {
+
     m_fTimeSum += fTimeDelta * 9.8f;
-
-    Go_Straight(fTimeDelta);
+ 
 
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+      Go_Straight(fTimeDelta, pNavigation);
 
     _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
 
+ /*
     vPosition += XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
-
+  if (nullptr != pNavigation && false == pNavigation->isMove(vPosition)) {
+        return;
+    }
+    
+   */   
      Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vPosition);
 
 

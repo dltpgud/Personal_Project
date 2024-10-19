@@ -112,28 +112,33 @@ void CModel::Set_Animation(_uint index, _bool IsLoop)
 
 }
 
-_float CModel::Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform)
+
+
+_float CModel::Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform, _vector* vPos)
 {
-    _matrix matWorld = pTransform->Get_WorldMatrix();
+    _matrix matWorld = pTransform->Get_WorldMatrix_Inverse();
 
     _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
     _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
 
+    CurRayDir = XMVector3Normalize(CurRayDir);
+
     for (_uint i = 0; i < m_iNumMeshes; i++)
     {
-
-        for (_uint j = 0; j < m_Meshes[i]->Get_iNumIndexices(); j++)
+        _uint NumIndexices = m_Meshes[i]->Get_iNumIndexices();
+        for (_uint j = 0; j < NumIndexices; j++)
         {
-            _float3 v0 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(i)[j++]];
-            _float3 v1 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(i)[j++]];
-            _float3 v2 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(i)[j++]];
+            _float3 v0 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(j++)]; 
+            _float3 v1 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(j++)];
+            _float3 v2 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(j)];
 
-            //     _float3 v2 =        m_pPos[i][m_pIndex[i][j++]];
             _float fDist{};
 
             if (DirectX::TriangleTests::Intersects(CurRayPos, CurRayDir, XMLoadFloat3(&v0), XMLoadFloat3(&v1),
                                                    XMLoadFloat3(&v2), fDist))
             {
+                _vector LoclPos = CurRayPos + CurRayDir * fDist;
+                *vPos = XMVector3TransformCoord(LoclPos, pTransform->Get_WorldMatrix());
                 return fDist;
             }
         }
@@ -146,6 +151,42 @@ void CModel::init_Loop()
 {
 
     m_Animations[m_iCurrentAnimIndex]->init_Loop();
+}
+
+void CModel::Center_Ext(_float3* Center, _float3* extend)
+{
+    _float3 minPoint(FLT_MAX, FLT_MAX, FLT_MAX);
+    _float3 maxPoint(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+
+    for (_uint i = 0; i < m_iNumMeshes; i++)
+    {
+        _uint NumIndexces = m_Meshes[i]->Get_iNumVertices();
+        for (_uint j = 0; j < NumIndexces; j++)
+        {
+            // 최소값 갱신
+            minPoint.x = min(minPoint.x, m_Meshes[i]->Get_pPos(j)->x);
+            minPoint.y = min(minPoint.y, m_Meshes[i]->Get_pPos(j)->y);
+            minPoint.z = min(minPoint.z, m_Meshes[i]->Get_pPos(j)->z);
+
+            // 최대값 갱신
+            maxPoint.x = max(maxPoint.x, m_Meshes[i]->Get_pPos(j)->x);
+            maxPoint.y = max(maxPoint.y, m_Meshes[i]->Get_pPos(j)->y);
+            maxPoint.z = max(maxPoint.z, m_Meshes[i]->Get_pPos(j)->z);
+        }
+    }
+
+    *Center = {
+    (minPoint.x + maxPoint.x) / 2.0f,
+    (minPoint.y + maxPoint.y) / 2.0f,
+    (minPoint.z + maxPoint.z) / 2.0f
+    };
+
+    *extend   = {
+        (maxPoint.x - minPoint.x) / 2.0f,
+        (maxPoint.y - minPoint.y) / 2.0f,
+        (maxPoint.z - minPoint.z) / 2.0f
+    };
 }
 
 HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)
@@ -226,8 +267,6 @@ HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)
     }
 
     CloseHandle(hFile);
-
-    return S_OK;
 
     return S_OK;
 }

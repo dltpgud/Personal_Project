@@ -20,6 +20,9 @@
 #include "Navigation.h"
 #include "GunPawn.h"
 #include "Body_GunPawn.h"
+#include "Sky.h"
+#include "SpriteTexture.h"
+#include "Aim.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -100,6 +103,10 @@ HRESULT CLoader::Loading_For_MenuLevel()
 		CLoading::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_SpriteTexture"),
+		CSpriteTexture::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_PlayerHP_UI"),
 		CPlayerUI::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
@@ -110,6 +117,10 @@ HRESULT CLoader::Loading_For_MenuLevel()
 		CCursor::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	/* Prototype_GameObject_Player_Aim */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Player_Aim"),
+		CAim::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	/* For.Prototype_Component_Texture_Menu */
@@ -155,7 +166,7 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 		/* For.Prototype_Component_Navigation*/
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
-			CNavigation::Create(m_pDevice, m_pContext))))
+			CNavigation::Create(m_pDevice, m_pContext, L"../Bin/Data/Navigation/Navigation_Stage1.dat"))))
 			return E_FAIL;
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");
@@ -218,11 +229,6 @@ HRESULT CLoader::Loading_For_Stage1Level()
 
 
 
-
-
-
-
-
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
 
 
@@ -259,6 +265,11 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		CWall::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 	
+	/* Prototype_GameObject_Sky */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Sky"),
+		CSky::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
 
 	/* Prototype_GameObject_Player */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Player"),
@@ -272,7 +283,6 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Weapon"),
 		CWeapon::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
-
 
 	/* Prototype_GameObject_Monster_GunPawn */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_GunPawn"),
@@ -294,8 +304,11 @@ HRESULT CLoader::Loading_For_Stage1Level()
 HRESULT CLoader::Loading_For_Stage2Level()
 {
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
-
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
+	/* For.Prototype_Component_Navigation*/
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE2, TEXT("Prototype_Component_Navigation2"),
+		CNavigation::Create(m_pDevice, m_pContext, L"../Bin/Data/Navigation/Navigation_Stage2.dat"))))
+		return E_FAIL;
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");
 
@@ -309,6 +322,29 @@ HRESULT CLoader::Loading_For_Stage2Level()
 
 	m_bFinished = true;
 	return S_OK;
+}
+
+HRESULT CLoader::Loading_For_BossLevel()
+{
+	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
+	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
+	/* For.Prototype_Component_Navigation*/
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Prototype_Component_Navigation3"),
+		CNavigation::Create(m_pDevice, m_pContext, L"../Bin/Data/Navigation/Navigation_Boss.dat"))))
+		return E_FAIL;
+
+	m_strLoadingText = TEXT("모델 로딩중입니다.");
+
+	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
+
+	m_strLoadingText = TEXT("객체원형 로딩중입니다.");
+
+	m_strLoadingText = TEXT("사운드 로딩중입니다.");
+
+	m_strLoadingText = TEXT("로딩 완료되었습니다.");
+
+	m_bFinished = true;
+	return E_NOTIMPL;
 }
 
 

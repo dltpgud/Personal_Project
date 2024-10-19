@@ -1,4 +1,4 @@
-#include "..\Public\PartObject.h"
+#include "PartObject.h"
 
 CPartObject::CPartObject(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CGameObject { pDevice, pContext }

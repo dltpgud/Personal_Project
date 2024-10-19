@@ -16,7 +16,7 @@ public:
 	typedef struct CLoading_DESC : public CUI::CUI_DESC
 	{
 		LOADINGID LoadingID{};
-		_float x{};
+		_int TexIndex{};
 
 	}CLoading_DESC;
 
@@ -36,17 +36,16 @@ public:
 
 private : 
 	 HRESULT Initialize_GORGE();
-	 HRESULT Set_LoadPos();
-	 HRESULT Set_LoadPos2();
+	 HRESULT Set_LoadPos(CLoading_DESC* pArg);
 	 void Roop(const _uint& i, CLoading_DESC desc[], CLoading_DESC pdesc[]);
 private:
 	LOADINGID		m_pLoadingID = {};
 	CTexture*	    m_pTextureCom = {};
 	CShader*		m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
-	CLoading_DESC  Desc[6];
-	CLoading_DESC  pDesc[6];
-
+	_int m_iTexIndex{};
+	_float m_fFirstX{ 0.f };
+	CLoading_DESC Desc{};
 private:
 	HRESULT Add_Components();
 	

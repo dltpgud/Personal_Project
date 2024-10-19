@@ -1,3 +1,4 @@
+ #include "Engine_Shader_Defines.hlsli"
 
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float4 g_vLightDir;
@@ -6,6 +7,9 @@ float4 g_vLightAmbient;
 float4 g_vLightSpecular;
 
 texture2D g_DiffuseTexture;
+
+//texture2D g_DiffuseTexture[2];
+//texture2D g_MaskTexture;
 float4 g_vMtrlAmbient = float4(0.4f, 0.4f, 0.4f, 1.f);
 float4 g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
@@ -76,6 +80,11 @@ PS_OUT PS_MAIN(PS_IN In)
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord * 30.f);
 	
+    //vector vSourDiffuse = g_DiffuseTexture[0].Sample(LinearSampler, In.vTexcoord * 30.f);
+    //vector vDestDiffuse = g_DiffuseTexture[1].Sample(LinearSampler, In.vTexcoord * 30.f);
+    //vector vMask = g_MaskTexture.Sample(LinearSampler, In.vTexcoord);
+	//
+    //vector vMtrlDiffuse = vDestDiffuse * vMask + vSourDiffuse * (1.f - vMask);
 	
 	/*빛의 역방향을 정규화하고 법선을 정규화하고  이둘을 내적하면 범위가 정해짐, 최소는 0 거기에 환경광을 더하면 픽셀 색이 정해진다. 법선벡터로 색을 정한다.*/
     float4 vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
@@ -95,7 +104,11 @@ PS_OUT PS_MAIN(PS_IN In)
 technique11 DefaultTechnique
 {
 	pass DefaultPass
-	{
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
 		VertexShader = compile vs_5_0 VS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN();
 	}

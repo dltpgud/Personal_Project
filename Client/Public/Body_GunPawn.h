@@ -32,14 +32,22 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
-
+	virtual CModel* Get_Model() override {
+		return m_pModelCom;
+	};
 	_bool Get_Finish() { return m_bFinishAni; }
+
+
+
 public:
 	const _float4x4* Get_SocketMatrix(const _char* pBoneName);
 
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
+
+
+
 	const _uint* m_pParentState = { nullptr };
 	_uint m_iCurMotion = {};
 	_bool m_bFinishAni = { false };

@@ -2,6 +2,7 @@
 
 #include "Component.h"
 
+
 BEGIN(Engine)
 
 class ENGINE_DLL CCollider final : public CComponent
@@ -14,17 +15,38 @@ protected:
 	CCollider(const CCollider& Prototype);
 	virtual ~CCollider() = default;
 
+
+
 public:
 	virtual HRESULT Initialize_Prototype(TYPE eColliderType);
 	virtual HRESULT Initialize(void* pArg) override;
 
+public:
+	_bool Intersect(CCollider* pTargetCollider);
+	_bool RayIntersects(_vector RayPos, _vector RayDir, _float& fDis);
+#ifdef _DEBUG
+public:
+	HRESULT Render();
+#endif
+
+#ifdef _DEBUG
+private:
+	PrimitiveBatch<VertexPositionColor>* m_pBatch = { nullptr };
+	BasicEffect* m_pEffect = { nullptr };  // 툴킷에서 제공해주는 기본 쉐이더. 패스는 하나만 존재
+	ID3D11InputLayout* m_pInputLayout = { nullptr };
+
+#endif
+
+public:
+	void Update(_fmatrix WorldMatrix);
+
 private:
 	TYPE				m_eColliderType = { TYPE_END };
 
-	class CBounding*			m_pBounding = { nullptr };
+	class CBounding* m_pBounding = { nullptr };
+	_bool				m_isColl = { false };
 
-	
-	
+
 
 
 public:

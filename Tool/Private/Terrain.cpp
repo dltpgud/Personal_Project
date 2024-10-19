@@ -39,7 +39,7 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
     {
         return OBJ_DEAD;
     }
-   //  m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
+   
     return OBJ_NOEVENT;
 }
 
@@ -122,14 +122,6 @@ _tchar* CTerrain::Get_ProtoName()
     return m_Proto;
 }
 
-void CTerrain::Create_Cell(_float3 p1, _float3 p2, _float3 p3)
-{
-
-  //  m_pNavigationCom->Create_Poly(p1, p2, p3);
-
-}
-
-
 
 HRESULT CTerrain::Add_Components()
 {
@@ -142,10 +134,6 @@ HRESULT CTerrain::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
 
-    /* For.Com_Navigation */
-   // if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
-   //     TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
-    //    return E_FAIL;
 
 
     return S_OK;

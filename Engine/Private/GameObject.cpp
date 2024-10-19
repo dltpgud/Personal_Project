@@ -50,14 +50,26 @@ _int CGameObject::Priority_Update(_float fTimeDelta)
 
 void CGameObject::Update(_float fTimeDelta)
 {
+    if (m_pColliderCom) {
+        m_pColliderCom->Update(m_pTransformCom->Get_WorldMatrix());
+    }
 }
 
 void CGameObject::Late_Update(_float fTimeDelta)
 {
+#ifdef _DEBUG
+    if (m_pColliderCom) {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
+    }
+#endif
 }
 
 HRESULT CGameObject::Render()
 {
+    if (m_pColliderCom) {
+        m_pColliderCom->Render();
+    }
     return S_OK;
 }
 
@@ -102,7 +114,7 @@ void CGameObject::Free()
 
     for (auto& Pair : m_Components) Safe_Release(Pair.second);
     m_Components.clear();
-
+    Safe_Release(m_pColliderCom);
     Safe_Release(m_pTransformCom);
     Safe_Release(m_pGameInstance);
     Safe_Release(m_pContext);

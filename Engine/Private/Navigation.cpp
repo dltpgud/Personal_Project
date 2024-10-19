@@ -25,12 +25,16 @@ CNavigation::CNavigation(const CNavigation& Prototype)
 #endif
 }
 
-HRESULT CNavigation::Initialize_Prototype()
+HRESULT CNavigation::Initialize_Prototype(const _tchar* pNavigationFilePath)
 {
  
+    if(nullptr != pNavigationFilePath)
+    {
+         Load(pNavigationFilePath);
+    }
 
 #ifdef _DEBUG
-    m_pShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_Cell.hlsl"), VTXPOS::Elements,
+     m_pShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_Cell.hlsl"), VTXPOS::Elements,
                                 VTXPOS::iNumElements);
     if (nullptr == m_pShader)
         return E_FAIL;
@@ -72,43 +76,46 @@ void CNavigation::SetUp_Neighbor()
         }
     }
 }
-_bool CNavigation::isMove(_fvector vWorldPos)
+_bool CNavigation::isMove(_fvector vAfterWorldPos , _fvector vBeforeMoveWorldPos, _vector* Slide)
 {
-    _vector vLocalPos = XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
+    _vector vAfterLocalPos = XMVector3TransformCoord(vAfterWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
+    _vector vBeforeLocalPos = XMVector3TransformCoord(vBeforeMoveWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
 
     _int iNeighborIndex = {-1};
 
     /* 현재 이동하고 난 결과위치가 원래 존재하고 있던 쎌 바깥으로 나갔다. */
-    if (false == m_Cells[m_iCurrentCellIndex]->isIn(vLocalPos, &iNeighborIndex))
+    if (false == m_Cells[m_iCurrentCellIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex , Slide))
     {	/* 나간 방향에 이웃이 있었다면. */
         if (-1 != iNeighborIndex)
         {
             while (true)  // 반복하자 계속
             {
-                if (true == m_Cells[iNeighborIndex]->isIn(vLocalPos, &iNeighborIndex))  // 이웃이 있을때 까지
+                if (true == m_Cells[iNeighborIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, Slide))  // 이웃이 있을때 까지
                     break;
-
+                
                 if (-1 == iNeighborIndex)  // 여기까지 오면 없는거고
-                    return false;
+                { 
+                   return false;
+                }
             }
-                m_iCurrentCellIndex = iNeighborIndex;  //반복문 탈출에 성공했으면 그 좌표를 현재 셀 인덱스로 잡자  
-                return true;
+     
+            m_iCurrentCellIndex = iNeighborIndex;  //반복문 탈출에 성공했으면 그 좌표를 현재 셀 인덱스로 잡자      
+            return true;
         }
         else /* 나간 방향에 이웃이 없었다면. */
         {
             return false;
         }
-        
     }
 
     return true;
-  
-}
+}   
+
 #ifdef _DEBUG
 
 HRESULT CNavigation::Render()
 {
-
+    
     if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
@@ -116,14 +123,42 @@ HRESULT CNavigation::Render()
     if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
-    m_pShader->Begin(0);
-
-    for (auto& pCell : m_Cells) pCell->Render();
+    if (-1 == m_iCurrentCellIndex)
+    {
+        if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
+            return E_FAIL;
+        _float4  TerrainCol = { 0.f, 1.f, 0.f, 1.f };
+        m_pShader->Bind_RawValue("g_vColor", &TerrainCol, sizeof(_float4));
+    
+        m_pShader->Begin(0);
+    
+        for (auto& pCell : m_Cells)
+            pCell->Render();
+    }
+    
+    else
+    {
+        _float4x4		WorldMatrix = *m_WorldMatrix;
+        WorldMatrix.m[3][1] += 0.001f;
+        if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &WorldMatrix)))
+            return E_FAIL;
+        _float4   Obj_on_Terrain = { 1.f, 0.f, 0.f, 1.f };
+        m_pShader->Bind_RawValue("g_vColor", &Obj_on_Terrain, sizeof(_float4));
+    
+        m_pShader->Begin(0);
+    
+        m_Cells[m_iCurrentCellIndex]->Render();
+    }
+    
 
     return S_OK;
 }
 
 #endif
+_uint CNavigation::Get_CurrentCell_Type()
+{
+    return  m_Cells[m_iCurrentCellIndex]->Get_Type();
+}
 _bool CNavigation::Snap(_fvector vP1, _fvector vP2, _vector distance)
 {
     // 각 요소별 차이를 계산
@@ -148,7 +183,7 @@ _vector CNavigation::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 
 }
 
-void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
+void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type)
 {
     _float3 pPoints[3];
       
@@ -162,7 +197,7 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
 
 
     // 근처에 점이 있으면  그 점의 좌표를 사용한다.
-    _vector distance = { 0.2f,0.2f,0.2f,1.f }; // 오차범위 정하고
+    _vector distance = { 0.5f,0.5f,0.5f,1.f }; // 오차범위 정하고
     if (m_Cells.size() != 0)
     {
         for (auto vec : m_Cells) // 반복문 돌면서 검사.
@@ -208,7 +243,7 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
     cout << pPoints[2].x << " " << pPoints[2].y << " " << pPoints[2].z << endl;
 #endif
 
-    CCell* pCell = CCell::Create(m_pDevice, m_pContext, pPoints, m_Cells.size());
+    CCell* pCell = CCell::Create(m_pDevice, m_pContext, pPoints, m_Cells.size(), Type);
     if (nullptr == pCell) {
 
         MSG_BOX("Cell == NULL");
@@ -221,6 +256,26 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3)
     SetUp_Neighbor();
 }
 
+
+_float CNavigation::Compute_HeightOnCell(_float3* fPos)
+{
+    _vector v1 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_A);
+    _vector v2 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_B);
+    _vector v3 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_C);
+
+    v1 = XMVector3TransformCoord(v1, XMLoadFloat4x4(m_WorldMatrix));
+    v2 = XMVector3TransformCoord(v2, XMLoadFloat4x4(m_WorldMatrix));
+    v3 = XMVector3TransformCoord(v3, XMLoadFloat4x4(m_WorldMatrix));
+
+    _vector Plane =  XMPlaneFromPoints(v1,v2,v3);
+
+    _float4 fPlane{};
+    XMStoreFloat4(&fPlane, Plane);
+
+
+    return  (-fPlane.x * fPos->x - fPlane.z * fPos->z - fPlane.w) / fPlane.y;
+}
+
 HRESULT CNavigation::Save(const _tchar* tFPath)
 {
     _ulong		dwByte = { 0 };
@@ -229,14 +284,16 @@ HRESULT CNavigation::Save(const _tchar* tFPath)
         return E_FAIL;
 
     _float3		vPoints[3];
-
+    _uint       Type;
     for (auto& Cell : m_Cells)
     {
-
+        
         XMStoreFloat3(&vPoints[0], Cell->Get_Point(CCell::POINT_A));
         XMStoreFloat3(&vPoints[1], Cell->Get_Point(CCell::POINT_B));
         XMStoreFloat3(&vPoints[2], Cell->Get_Point(CCell::POINT_C));
+        Type = Cell->Get_Type();
         WriteFile(hFile, vPoints, sizeof(_float3) * 3, &dwByte, nullptr);
+        WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
     }
 
@@ -255,13 +312,17 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
     {
         _bool Read = false;
         _float3 vPoints[3];
-
+        _uint Type;
      Read = ReadFile(hFile, vPoints, sizeof(_float3) * 3, &dwByte, nullptr);
-
+     Read = ReadFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
         if (0 == dwByte)
             break;
 
-        CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, m_Cells.size());
+        if (0 > Type || 2 < Type || Type ==NULL)
+        {
+            Type = CCell::TYPE::NOMAL;
+        }
+        CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, m_Cells.size(),Type);
         if (nullptr == pCell)
             return E_FAIL;
 
@@ -273,6 +334,33 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
     SetUp_Neighbor();
 
     return S_OK;
+}
+
+void CNavigation::Set_Type(_uint Type)
+{
+    m_Cells[m_iCurrentCellIndex]->Set_Type(Type);
+}
+
+void CNavigation::Set_Type_From_Ray(_vector LocalRayPos, _vector LocalRayDir, _uint Type)
+{
+    _float CellDist = { 0xffff };
+    size_t Index = {};
+
+    for (size_t i = 0; i < m_Cells.size(); ++i)
+    {
+        _float fDist{};
+        if (DirectX::TriangleTests::Intersects(LocalRayPos, LocalRayDir, m_Cells[i]->Get_Point(CCell::POINT_A), m_Cells[i]->Get_Point(CCell::POINT_B), m_Cells[i]->Get_Point(CCell::POINT_C),
+            fDist))
+        {
+            if (fDist < CellDist)
+            {
+                CellDist = fDist;
+                Index = i;
+            }
+
+        }
+    }
+    m_Cells[Index]->Set_Type(Type);
 }
 
 HRESULT CNavigation::Delete_ALLCell()
@@ -289,7 +377,7 @@ void CNavigation::Delete_Cell(_vector LocalRayPos, _vector LocalRayDir)
  // 와 ..이거 깊이 비교해서 하려니까 반복자 erase 하고 다음 반복자 잡아주기 좀 빢쎄네;;;
 // 범위기반 반복문 대신에 인덱스를 찾아서 지워주자..
     _float CellDist = { 0xffff };
-    _int Index = {};
+    size_t Index = {};
 
     for (size_t i = 0; i < m_Cells.size(); ++i)
     {
@@ -312,11 +400,13 @@ void CNavigation::Delete_Cell(_vector LocalRayPos, _vector LocalRayDir)
 
 
 
-CNavigation* CNavigation::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+
+
+CNavigation* CNavigation::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pNavigationFilePath )
 {
     CNavigation* pInstance = new CNavigation(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype()))
+    if (FAILED(pInstance->Initialize_Prototype(pNavigationFilePath)))
     {
         MSG_BOX("Failed To Created : CNavigation");
         Safe_Release(pInstance);
