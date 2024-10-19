@@ -1,4 +1,4 @@
-
+ #include "Engine_Shader_Defines.hlsli"
 /* 0 1 2 0 2 3 */
 
 /* 전역변수들 : 컨스턴트 테이블 */
@@ -129,11 +129,19 @@ technique11 DefaultTechnique
   /* Pass는 셰이더 실행의 단위로, 정점 셰이더, 픽셀 셰이더 등의 그래픽 파이프라인 단계에서 실행될 셰이더들을 정의함*/
     pass DefaultPass
     {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
         VertexShader = compile vs_5_0 VS_MAIN();
         PixelShader = compile ps_5_0 PS_MAIN();
     }
     pass DefaultPass1
-	{
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f,0.f, 0.f, 0.f), 0xffffffff);
+
 		VertexShader = compile vs_5_0 VS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN_HP();
 	}

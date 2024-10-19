@@ -237,7 +237,12 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 		bMotionChange = true;
 		bLoop = false;
 	}
-
+	if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_HENDPOSE && m_iCurMotion != CPlayer::STATE_HEAVYCROSSBOW_HENDPOSE)
+	{
+		m_iCurMotion = CPlayer::STATE_HEAVYCROSSBOW_HENDPOSE;
+		bMotionChange = true;
+		bLoop = false;
+	}
 	if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD && m_iCurMotion != CPlayer::STATE_HEAVYCROSSBOW_RELOAD)
 	{
 		m_iCurMotion = CPlayer::STATE_HEAVYCROSSBOW_RELOAD;
@@ -253,7 +258,7 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 	
 
 	if (bMotionChange)
-		m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
+ 		m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
 	if (true == m_pModelCom->Play_Animation(fTimeDelta))
 	{

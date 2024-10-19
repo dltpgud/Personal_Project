@@ -17,7 +17,7 @@ private:
 	virtual ~CNavigation() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype();
+	virtual HRESULT Initialize_Prototype(const _tchar* pNavigationFilePath = nullptr);
 	virtual HRESULT Initialize(void* pArg) override;
 
 	void Update(const _float4x4* pWorldMatrix) {
@@ -25,21 +25,27 @@ public:
 	}
 public:
         void SetUp_Neighbor();
-    _bool isMove(_fvector vWorldPos);
+    _bool isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr);
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render();
 #endif
 
+
+	_uint Get_CurrentCell_Type();
 	_bool Snap(_fvector vP1, _fvector vP2, _vector distance);
 	_vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
-	void Create_Poly(_float3 p1, _float3 p2, _float3 p3);
+	void Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type = 0);
 
-
+	_float Compute_HeightOnCell(_float3* fPos);
 	HRESULT Save(const _tchar* tFPath);
 	HRESULT Load(const _tchar* tFPath);
+	void Set_Type(_uint Type);
+	void Set_Type_From_Ray(_vector LocalRayPos, _vector LocalRayDir,_uint Type = 0);
 	HRESULT Delete_ALLCell();
 	void Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
+
+	_bool NowMove(_fvector vAfterMoveWorldPos);
 private:
 	_int					m_iCurrentCellIndex = { -1 };
 	vector<class CCell*>	m_Cells;
@@ -51,7 +57,7 @@ private:
 #endif
 
 public:
-	static CNavigation* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CNavigation* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pNavigationFilePath = nullptr);
 	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 };

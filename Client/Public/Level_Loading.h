@@ -32,8 +32,8 @@ private:
 	class CLoader*				m_pLoader	   = { nullptr };
 	LEVELID						m_eNextLevelID = { LEVEL_END };
 	LOADINGID					m_eLodingType  = { LOADINGID_END };
-
-
+	_float						 m_fTimeSum{};
+	_float     m_fFinishSum{};
 public:
 	static CLevel_Loading* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVELID eNextLevelID, LOADINGID eLodingType = LOADINGID_END);
 	virtual void Free() override;

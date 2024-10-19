@@ -20,6 +20,7 @@ HRESULT CUI::Initialize(void* pArg)
         CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
         m_fX = pDesc->fX;
         m_fY = pDesc->fY;
+        m_fZ = pDesc->fZ;
         m_fSizeX = pDesc->fSizeX;
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
@@ -78,6 +79,7 @@ void CUI::Set_UI_Pos(void* pArg)
 
         m_fX = pDesc->fX;
         m_fY = pDesc->fY;
+        m_fZ = pDesc->fZ;
         m_fSizeX = pDesc->fSizeX;
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
@@ -94,7 +96,7 @@ void CUI::Set_UI_Pos(void* pArg)
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
     m_pTransformCom->Set_TRANSFORM(
         CTransform::TRANSFORM_POSITION,
-        XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, 0.f, 1.f));
+        XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 }
 
 void CUI::Set_UI_shaking(_float fShakingTime, _float fPowerX, _float fPowerY)

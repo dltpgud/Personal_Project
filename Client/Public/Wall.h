@@ -11,6 +11,7 @@ BEGIN(Client)
 
 class CWall final : public CGameObject
 {
+
 private:
     CWall(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CWall(const CWall& Prototype);

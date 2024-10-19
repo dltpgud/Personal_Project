@@ -127,7 +127,7 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     {
         m_iCurMotion = CGunPawn::ST_STUN_START;
         bMotionChange = true;
-        bLoop = true;
+        bLoop = false;
     }
     if (*m_pParentState == CGunPawn::ST_HIT_BACK && m_iCurMotion != CGunPawn::ST_HIT_BACK)
     {
@@ -188,11 +188,13 @@ void CBody_GunPawn::Update(_float fTimeDelta)
 
     if (true == m_pModelCom->Play_Animation(fTimeDelta))
     {
+        
         m_bFinishAni = true;
         m_iCurMotion = CGunPawn::ST_IDLE;
         m_pModelCom->Set_Animation(m_iCurMotion, true);
+
     }
-    else
+    else 
     {
         m_bFinishAni = false;
     }
@@ -204,12 +206,15 @@ void CBody_GunPawn::Late_Update(_float fTimeDelta)
     XMStoreFloat4x4(&m_WorldMatrix, XMLoadFloat4x4(m_pParentMatrix) *
                                         m_pTransformCom->Get_WorldMatrix()); // 부모행렬과 내 월드랑 곱해서 그린다
 
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 }
 
 HRESULT CBody_GunPawn::Render()
 {
+
+
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -248,6 +253,7 @@ HRESULT CBody_GunPawn::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto_Component_GunPawn_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
+
 
     return S_OK;
 }

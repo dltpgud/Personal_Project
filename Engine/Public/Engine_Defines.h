@@ -14,7 +14,11 @@
 
 #include "DirectXTK/DDSTextureLoader.h"
 #include "DirectXTK/WICTextureLoader.h"
-
+#include "DirectXTK\VertexTypes.h"
+#include "DirectXTK\PrimitiveBatch.h"
+#include "DirectXTK\SpriteBatch.h"
+#include "DirectXTK\SpriteFont.h"
+#include "DirectXTK\Effects.h"     // 툴킷에서 기본제공 해주는 쉐이더. 하나의 패스를 사용
 #include "Effects11/d3dx11effect.h"
 
 

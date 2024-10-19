@@ -89,7 +89,6 @@ _int CWeaponUI::Priority_Update(_float fTimeDelta)
             }
         }
     }
-    
    
 
     return OBJ_NOEVENT;
@@ -99,6 +98,20 @@ void CWeaponUI::Update(_float fTimeDelta)
 {
      if (nullptr == m_pGameInstance->Get_Player())
         return;
+     
+     m_iPreBullet = m_iCurrentBullet;
+
+      m_iCurrentBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Bullet();
+     swprintf_s(m_wCurrentBullte,50, L"%u",m_iCurrentBullet);
+
+     if (m_iPreBullet != m_iCurrentBullet)
+         m_vColar = { 1.f, 0.f, 0.f,1.f };
+     else 
+         m_vColar = { 1.f, 1.f, 1.f,1.f };
+      m_iMaxBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_MaxBullte();
+     swprintf_s(m_wMaxBullte, 50, L"%u", m_iMaxBullet);
+ 
+     
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F1))
     {
@@ -124,9 +137,6 @@ void CWeaponUI::Update(_float fTimeDelta)
         m_WeaPonUI = CWeapon::HeavyCrossbow;
         m_bChooseWeaPon = true;
     }
-
-    if (m_pGameInstance->Get_DIKeyDown(DIK_F6))
-        Set_ScecondWeapon(CWeapon::HeavyCrossbow);
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_C))
     {
@@ -181,6 +191,66 @@ void CWeaponUI::Late_Update(_float fTimeDelta)
 
 HRESULT CWeaponUI::Render()
 {
+    if (m_bPrUpdate)
+        Set_UI_Pos(&m_Desc[4]);
+    if (false == m_IsShaking)
+    {
+        m_pTransformCom->Set_Scaling(m_Desc[4].fSizeX, m_Desc[4].fSizeY, 1.f);
+        m_pTransformCom->Set_TRANSFORM(
+            CTransform::TRANSFORM_POSITION,
+            XMVectorSet(m_Desc[4].fX - ViewportDesc.Width * 0.5f, -m_Desc[4].fY + ViewportDesc.Height * 0.5f, 0.5f, 1.f));
+
+
+    }
+
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+    ;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+        return E_FAIL;
+
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 4)))
+        return E_FAIL;
+
+    m_pShaderCom->Begin(0);
+
+    m_pVIBufferCom->Bind_Buffers();
+
+    m_pVIBufferCom->Render();
+
+    if (m_bPrUpdate)
+        Set_UI_Pos(&m_ScecondDesc[4]);
+    if (false == m_IsShaking)
+    {
+        m_pTransformCom->Set_Scaling(m_ScecondDesc[4].fSizeX, m_ScecondDesc[4].fSizeY, 1.f);
+        m_pTransformCom->Set_TRANSFORM(
+            CTransform::TRANSFORM_POSITION,
+            XMVectorSet(m_ScecondDesc[4].fX - ViewportDesc.Width * 0.5f, -m_ScecondDesc[4].fY + ViewportDesc.Height * 0.5f, 0.5f, 1.f));
+   
+   
+    }
+   
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+    ;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+        return E_FAIL;
+   
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+        return E_FAIL;
+   
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 4)))
+        return E_FAIL;
+   
+    m_pShaderCom->Begin(0);
+   
+    m_pVIBufferCom->Bind_Buffers();
+   
+    m_pVIBufferCom->Render();
+
     for (_uint i = 0; i < 4; i++)
     {if(m_bPrUpdate)
         Set_UI_Pos(&m_Desc[i]);
@@ -261,36 +331,23 @@ HRESULT CWeaponUI::Render()
             m_pVIBufferCom->Render();
         }
     }
-    if (m_bPrUpdate)
-    Set_UI_Pos(&m_ScecondDesc[4]);
-    if (false == m_IsShaking)
-    {
-        m_pTransformCom->Set_Scaling(m_ScecondDesc[4].fSizeX, m_ScecondDesc[4].fSizeY, 1.f);
-        m_pTransformCom->Set_TRANSFORM(
-            CTransform::TRANSFORM_POSITION,
-            XMVectorSet(m_ScecondDesc[4].fX - ViewportDesc.Width * 0.5f, -m_ScecondDesc[4].fY + ViewportDesc.Height * 0.5f, 0.f, 1.f));
 
 
-    }
+    //최대 탄창
 
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
-    ;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-        return E_FAIL;
+    if(m_iMaxBullet>10)
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_wMaxBullte, _float2(m_Desc[5].fX - 3.f, m_Desc[5].fY - 13.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.4f);
+    else
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_wMaxBullte, _float2(m_Desc[5].fX + 3.f, m_Desc[5].fY - 13.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.4f);
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-        return E_FAIL;
+    m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("/"), _float2(m_Desc[5].fX-13.f, m_Desc[5].fY-23.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.4f);
 
-    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 4)))
-        return E_FAIL;
+    //현재 탄
 
-    m_pShaderCom->Begin(0);
-
-    m_pVIBufferCom->Bind_Buffers();
-
-    m_pVIBufferCom->Render();
-
+    if(m_iCurrentBullet >=10)
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_wCurrentBullte, _float2(m_Desc[5].fX - 58.f, m_Desc[5].fY - 48.f), m_vColar, 0.6f);
+    else 
+        m_pGameInstance->Render_Text(TEXT("Robo"), m_wCurrentBullte, _float2(m_Desc[5].fX - 38.f, m_Desc[5].fY - 48.f), m_vColar, 0.6f);
     return S_OK;
 }
 
@@ -300,6 +357,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[0].UID = UIID_PlayerWeaPon;
     m_Desc[0].fX = m_fXPos;
     m_Desc[0].fY = 650.f;
+    m_Desc[0].fZ = 0.4f;
     m_Desc[0].fSizeX = 220.f;
     m_Desc[0].fSizeY = 75.f;
     m_Desc[0].PrUpdate = true;
@@ -311,6 +369,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[1].UID = UIID_PlayerWeaPon;
     m_Desc[1].fX = m_fXPos;
     m_Desc[1].fY = 650.f;
+    m_Desc[1].fZ = 0.4f;
     m_Desc[1].fSizeX = 200.f;
     m_Desc[1].fSizeY = 75.f;
     m_Desc[1].PrUpdate = true;
@@ -322,6 +381,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[2].UID = UIID_PlayerWeaPon;
     m_Desc[2].fX = m_fXPos;
     m_Desc[2].fY = 650.f;
+    m_Desc[2].fZ = 0.4f;
     m_Desc[2].fSizeX = 200.f;
     m_Desc[2].fSizeY = 70.f;
     m_Desc[2].PrUpdate = true;
@@ -333,6 +393,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[3].UID = UIID_PlayerWeaPon;
     m_Desc[3].fX = m_fXPos;
     m_Desc[3].fY = 650.f;
+    m_Desc[3].fZ = 0.4f;
     m_Desc[3].fSizeX = 200.f;
     m_Desc[3].fSizeY = 70.f;
     m_Desc[3].PrUpdate = true;
@@ -344,6 +405,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[4].UID = UIID_PlayerWeaPon;
     m_Desc[4].fX = m_fXPos;
     m_Desc[4].fY = 650.f;
+    m_Desc[4].fZ = 0.5f;
     m_Desc[4].fSizeX = 200.f;
     m_Desc[4].fSizeY = 95.f;
     m_Desc[4].PrUpdate = true;
@@ -355,6 +417,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[5].UID = UIID_PlayerWeaPon;
     m_Desc[5].fX = 1000.f;
     m_Desc[5].fY = 670.f;
+    m_Desc[5].fZ = 0.5f;
     m_Desc[5].fSizeX = 70.f;
     m_Desc[5].fSizeY = 55.f;
     m_Desc[5].PrUpdate = true;
@@ -377,6 +440,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[0].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[0].fX = m_fXPos + 40.f;
     m_ScecondDesc[0].fY = 580.f;
+    m_ScecondDesc[0].fZ = 0.4f;
     m_ScecondDesc[0].fSizeX = 110.f;
     m_ScecondDesc[0].fSizeY = 35.f;
     m_ScecondDesc[0].PrUpdate = true;
@@ -388,6 +452,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[1].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[1].fX = m_fXPos + 40.f;
     m_ScecondDesc[1].fY = 580.f;
+    m_ScecondDesc[1].fZ = 0.4f;
     m_ScecondDesc[1].fSizeX = 110.f;
     m_ScecondDesc[1].fSizeY = 35.f;
     m_ScecondDesc[1].PrUpdate = true;
@@ -399,6 +464,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[2].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[2].fX = m_fXPos + 40.f;
     m_ScecondDesc[2].fY = 580.f;
+    m_ScecondDesc[2].fZ = 0.4f;
     m_ScecondDesc[2].fSizeX = 110.f;
     m_ScecondDesc[2].fSizeY = 35.f;
     m_ScecondDesc[2].PrUpdate = true;
@@ -410,6 +476,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[3].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[3].fX = m_fXPos + 40.f;
     m_ScecondDesc[3].fY = 580.f;
+    m_ScecondDesc[3].fZ = 0.4f;
     m_ScecondDesc[3].fSizeX = 120.f;
     m_ScecondDesc[3].fSizeY = 45.f;
     m_ScecondDesc[3].PrUpdate = true;
@@ -421,6 +488,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[4].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[4].fX = m_fXPos + 40.f;
     m_ScecondDesc[4].fY = 580.f;
+    m_ScecondDesc[4].fZ = 0.5f;
     m_ScecondDesc[4].fSizeX = 120.f;
     m_ScecondDesc[4].fSizeY = 45.f;
     m_ScecondDesc[4].PrUpdate = true;

@@ -134,7 +134,7 @@ HRESULT CShader::Bind_Matrix(const _char* pConstantName, const _float4x4* pMatri
 
     /*세팅 후 반환..부동 소수점 행렬을 설정합니다*/
     return pMatrixVariable->SetMatrix(reinterpret_cast<const _float*>(pMatrix));
-    ;
+    
 }
 
 HRESULT CShader::Bind_Float(const _char* pConstantName, const _float pfloat)
@@ -200,6 +200,22 @@ HRESULT CShader::Bind_Matrices(const _char* pConstantName, const _float4x4* pMat
         return E_FAIL;
 
     return pMatrixVariable->SetMatrixArray(reinterpret_cast<const _float*>(pMatrices), 0, iNumMatrices);
+}
+
+HRESULT CShader::Bind_SRVArray(const _char* pConstantName, ID3D11ShaderResourceView** ppSRVs, _uint iNumSRVs)
+{
+    if (nullptr == m_pEffect)
+        return E_FAIL;
+
+    ID3DX11EffectVariable* pVariable = m_pEffect->GetVariableByName(pConstantName);
+    if (nullptr == pVariable)
+        return E_FAIL;
+
+    ID3DX11EffectShaderResourceVariable* pSRVariable = pVariable->AsShaderResource();
+    if (nullptr == pSRVariable)
+        return E_FAIL;
+
+    return pSRVariable->SetResourceArray(ppSRVs, 0, iNumSRVs);
 }
 
 CShader* CShader::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pShaderFilePath,

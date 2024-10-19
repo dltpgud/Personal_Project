@@ -25,6 +25,7 @@ HRESULT CWall::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
+   
     return S_OK;
 }
 
@@ -36,6 +37,7 @@ _int CWall::Priority_Update(_float fTimeDelta)
     }
 
     return OBJ_NOEVENT;
+
 }
 
 void CWall::Update(_float fTimeDelta)

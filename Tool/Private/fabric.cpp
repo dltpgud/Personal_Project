@@ -40,29 +40,27 @@ _int Cfabric::Priority_Update(_float fTimeDelta)
     {
         return OBJ_DEAD;
     }
-
-    _float3 Center;
-    XMStoreFloat3(&Center, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
-    pBox.Center = Center;
-    pBox.Extents = { 1,1,1 };
-
+    __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
 }
 
 void Cfabric::Update(_float fTimeDelta)
 {
+    __super::Update(fTimeDelta);
 }
 
 void Cfabric::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+    __super::Late_Update(fTimeDelta);
 }
 
 HRESULT Cfabric::Render()
 {
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
+
 
     _uint iNumMesh = m_pModelCom->Get_NumMeshes();
 
@@ -77,6 +75,8 @@ HRESULT Cfabric::Render()
 
         m_pModelCom->Render(i);
     }
+    __super::Render();
+    
     return S_OK;
 }
 
@@ -89,6 +89,17 @@ void Cfabric::Set_Model(const _wstring& protoModel)
         MSG_BOX("Set_Model failed");
         return;
     }
+
+
+
+    CBounding_OBB::BOUND_OBB_DESC		OBBDesc{};
+    m_pModelCom->Center_Ext(&OBBDesc.vCenter, &OBBDesc.vExtents);
+    OBBDesc.vRotation = { 0.f,0.f,0.f };
+    //AABBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
+    //AABBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
+        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return ;
 }
 
 _tchar* Cfabric::Get_ProtoName()
@@ -104,10 +115,8 @@ _float Cfabric::check_BoxDist(_vector RayPos, _vector RayDir)
     _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
     CurRayDir = XMVector3Normalize(CurRayDir);
 
-
-    //RayDir = XMVector3Normalize(RayDir);
     _float Dist{};
-    if (pBox.Intersects(RayPos, RayDir, Dist))
+    if (m_pColliderCom->RayIntersects(RayPos, RayDir, Dist))
     {
         return Dist;
     }
@@ -120,7 +129,7 @@ _float Cfabric::check_BoxDist(_vector RayPos, _vector RayDir)
 HRESULT Cfabric::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
-                                      reinterpret_cast<CComponent**>(&m_pShaderCom))))
+        reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
     return S_OK;

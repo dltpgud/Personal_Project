@@ -6,7 +6,7 @@ CBounding::CBounding()
 {
 }
 
-HRESULT CBounding::Initialize(void* pArg)
+HRESULT CBounding::Initialize(const BOUND_DESC* pBoundDesc)
 {
 	return S_OK;
 }

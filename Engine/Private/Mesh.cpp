@@ -151,9 +151,9 @@ _float3* CMesh::Get_pPos(_int i)
     return &m_pPos[i];
 }
 
-_uint* CMesh::Get_pIndices(_int i)
+_uint CMesh::Get_pIndices(_int i)
 {
-    return &m_pIndices[i];
+    return m_pIndices[i];
 }
 
 _uint CMesh::Get_iNumIndexices()

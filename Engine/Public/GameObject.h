@@ -3,6 +3,7 @@
 
 BEGIN(Engine)
 class CModel;
+class CCollider;
 class ENGINE_DLL CGameObject abstract : public CBase // 독립적인 객체 생성은 막아도 자식 생성시에는 불릴 수 있도록
 {
 public:
@@ -22,8 +23,7 @@ public:
         DATA_WALL,
         DATA_NONANIMAPOBJ,
         DATA_DOOR,
-        DATA_CHEST,
-        DATA_NAVIGATION
+        DATA_CHEST
     };
 public:
     typedef struct GAMEOBJ_DESC : public CTransform::TRANSFORM_DESC
@@ -37,6 +37,7 @@ public:
     {
         CGameObject* pPickedObj{};
         _float fDis{};
+        _vector vPos{};
     } PICKEDOBJ_DESC;
 
 
@@ -60,6 +61,7 @@ public:
         return nullptr;
     };
 
+    class CComponent* Find_Component(const _wstring& strComponentTag);
     CTransform* Get_Transform()
     {
         return m_pTransformCom;
@@ -94,6 +96,10 @@ public:
     virtual void Set_Buffer(_uint x, _uint y) {};
     virtual _uint Get_Scalra() { return 0; };
   virtual _float check_BoxDist(_vector RayPos, _vector RayDir) { return _float(0xffff); }
+
+  virtual CCollider* Get_Collider() { return m_pColliderCom; };
+
+
 protected:
     class CGameInstance* m_pGameInstance = {nullptr};
     ID3D11Device* m_pDevice = {nullptr};
@@ -107,7 +113,9 @@ protected:
     GAMEOBJ_DATA m_DATA_TYPE{};
    
     _bool m_bClone{};
-    BoundingBox pBox;
+
+    CCollider* m_pColliderCom = { nullptr };
+
 protected:
     /*컴포넌트 사본을 저장하는 맵컨테이너*/
     map<const _wstring, class CComponent*> m_Components;
@@ -115,7 +123,7 @@ protected:
 protected:
     HRESULT Add_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, const _wstring& strComponentTag,
                           CComponent** ppOut, void* pArg = nullptr);
-    class CComponent* Find_Component(const _wstring& strComponentTag);
+
 
 public:
     virtual CGameObject* Clone(void* pArg) = 0;

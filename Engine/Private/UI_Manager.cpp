@@ -161,7 +161,7 @@ HRESULT CUI_Manager::Set_UI_shaking(const _uint& uID, _float fShakingTime, _floa
             if (vec->Get_UIID() == uID)
             {
                 vec->Set_UI_shaking(fShakingTime, fPowerX, fPowerY);
-                return S_OK;
+     
             }
         }
     }

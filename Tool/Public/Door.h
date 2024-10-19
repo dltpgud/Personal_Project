@@ -6,6 +6,7 @@
 BEGIN(Engine)
 class CShader;
 class CModel;
+
 END
 
 BEGIN(Tool)
@@ -38,7 +39,6 @@ private:
 
 	CShader*					m_pShaderCom = { nullptr };
 	CModel*						m_pModelCom = { nullptr };
-
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

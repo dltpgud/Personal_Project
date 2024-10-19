@@ -32,6 +32,13 @@ public:
 		return !m_PreKeyState[byKeyID] && m_byKeyState[byKeyID];
 	}
 
+	_byte	Get_DIAnyKey() {
+		for (_uint i = 0; i < 256; ++i) {
+			if (!m_PreKeyState[i] && m_byKeyState[i]) { return !m_PreKeyState[i] && m_byKeyState[i]; }
+		}
+		return false;
+	}
+
 	_long	Get_DIMouseMove(MOUSEMOVESTATE eMouseState)	
 	{	
 		return *(((_long*)&m_tMouseState) + eMouseState);	

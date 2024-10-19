@@ -36,7 +36,7 @@ HRESULT CChest::Initialize(void* pArg)
 
 
 
-  pBox.Extents = { 1,1,1 };
+
     return S_OK;
 }
 
@@ -49,26 +49,23 @@ _int CChest::Priority_Update(_float fTimeDelta)
         m_istate++;
 
     m_pModelCom->Set_Animation(m_istate, false);
-  
+    __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
 }
 
 void CChest::Update(_float fTimeDelta)
 {
-    _float3 Center;
-    XMStoreFloat3(&Center, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
-    pBox.Center = Center;
-
-     cout <<" X"<< pBox.Extents.x << " Y" << pBox.Extents.y << " Z" << pBox.Extents.z << endl;
    
     if (true == m_pModelCom->Play_Animation(fTimeDelta))
         _uint iData = 10;
+    __super::Update(fTimeDelta);
 }
 
 void CChest::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+    __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CChest::Render()
@@ -93,6 +90,7 @@ HRESULT CChest::Render()
 
         m_pModelCom->Render(i);
     }
+    __super::Render();
 
     return S_OK;
 }
@@ -106,6 +104,19 @@ void CChest::Set_Model(const _wstring& protoModel)
         return;
     m_istate = 0;
     m_pModelCom->Set_Animation(m_istate, true);
+
+
+
+    CBounding_OBB::BOUND_OBB_DESC		OBBDesc{};
+
+    OBBDesc.vRotation = { 0.f,0.f,0.f };
+    OBBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
+    OBBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
+    //AABBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
+    //AABBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
+        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return;
 
 }
 
@@ -122,8 +133,10 @@ _float CChest::check_BoxDist(_vector RayPos, _vector RayDir)
     _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
     CurRayDir = XMVector3Normalize(CurRayDir);
 
+
+    //RayDir = XMVector3Normalize(RayDir);
     _float Dist{};
-    if (pBox.Intersects(RayPos, RayDir, Dist))
+    if (m_pColliderCom->RayIntersects(RayPos, RayDir, Dist))
     {
         return Dist;
     }

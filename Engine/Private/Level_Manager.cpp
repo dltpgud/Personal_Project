@@ -57,24 +57,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
     _uint TileX{0};
     _uint TileY{0};
    
-    CGameObject::GAMEOBJ_DESC Desc{};
-    Desc.DATA_TYPE = CGameObject::GAMEOBJ_DATA::DATA_NAVIGATION;
-
-    switch (iLevelIndex)
-    {
-    case 3 :
-        Desc.FilePath = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
-        break;
-    case 4:
-        Desc.FilePath = L"../Bin/Data/Navigation/Navigation_Stage2.dat";
-        break;
-    case 5:
-        Desc.FilePath = L"../Bin/Data/Navigation/Navigation_Boss.dat";
-        break;
-    default:
-        break;
-    }
-
     _bool bMainTile = true;
 
     while (true)
@@ -110,13 +92,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
             break;
         }
 
-        CGameObject* pGameObject{};
-        if (bMainTile) {
-            pGameObject = ProtoObj->Clone(&Desc);
-            bMainTile = false;
-        }
-        else
-         pGameObject = ProtoObj->Clone(Arg);
+        CGameObject* pGameObject = ProtoObj->Clone(Arg);
 
         pGameObject->Set_Model(pModel);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
@@ -309,9 +285,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
         pPoroto[Length] = L'\0';
 
-
         if (Type == CGameObject::DATA_CHEST)
             bFile = ReadFile(hFile, &(WType), sizeof(_uint), &dwByte, nullptr);
+
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);

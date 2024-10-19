@@ -47,6 +47,15 @@ public:
 	void Type2_Update(_float fTimeDelta);
 
 	void Choose_Weapon(const _uint& WeaponNum);
+	_uint  Get_Bullte() {
+		return m_iMaxBullet[m_iBullet];
+	}
+
+	_uint  Get_MaxBullte() {
+		return m_iFirstBullet[m_pWeapon];
+	}
+
+
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CModel* m_pModelCom[WeaPoneType_END] = {nullptr};
@@ -56,6 +65,7 @@ private:
 	_int m_iCurMotion{};
 	_uint m_pWeapon{};
 	_uint m_iMaxBullet[WeaPoneType_END]{0};
+	_uint m_iFirstBullet[WeaPoneType_END]{ 0 };
 	WeaPoneType	m_iBullet{};
 private:
 	HRESULT Add_Components();

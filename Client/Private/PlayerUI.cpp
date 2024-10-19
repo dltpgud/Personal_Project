@@ -20,8 +20,8 @@ HRESULT CPlayerUI::Initialize(void* pArg)
 
     Desc.fX = 175.f;
     Desc.fY = 640.f;
-    Desc.fSizeX = 500.f;
-    Desc.fSizeY = 100.f;
+    Desc.fSizeX = 550.f;
+    Desc.fSizeY = 150.f;
     Desc.UID = CUI::UIID_PlayerHP;
     Desc.PrUpdate = true;
     Desc.Update = true;
@@ -47,19 +47,19 @@ _int CPlayerUI::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
-    if (m_IsShaking) {
-        if (m_fShakingTime > 0.f)
-        {
-            m_fX += m_fShaking_X;
-            m_fY += m_fShaking_Y;
-
-        }
-        if (m_fShakingTime <= 0.f)
-        {
-            m_fX = m_fPrXPos;
-            m_fY = m_fPrYPos;
-        }
-    }
+  if (m_IsShaking) {
+      if (m_fShakingTime > 0.f)
+      {
+          m_fX += m_fShaking_X;
+          m_fY += m_fShaking_Y;
+  
+      }
+      if (m_fShakingTime <= 0.f)
+      {
+          m_fX = m_fPrXPos;
+          m_fY = m_fPrYPos;
+      }
+  }
     return OBJ_NOEVENT;
 }
 

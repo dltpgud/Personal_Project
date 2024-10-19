@@ -3,11 +3,11 @@
 #include "GameInstance.h"
 #include "Body_Player.h"
 #include "Weapon.h"
-CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CContainerObject{pDevice, pContext}
+CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
 {
 }
 
-CPlayer::CPlayer(const CPlayer& Prototype) : CContainerObject{Prototype}
+CPlayer::CPlayer(const CPlayer& Prototype) : CActor{Prototype}
 {
 }
 
@@ -18,12 +18,16 @@ HRESULT CPlayer::Initialize_Prototype()
 
 HRESULT CPlayer::Initialize(void* pArg)
 {
-    CContainerObject::CONTAINEROBJECT_DESC Desc{};
+    CActor::Actor_DESC Desc{};
 
     Desc.iNumPartObjects = PART_END;
     Desc.fSpeedPerSec = 10.f;
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
     Desc.JumpPower = 3.f;
+    Desc.fMAXHP =100.f;
+    Desc.fHP = 10.f;
+   
+
     m_Type = T00;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(&Desc)))
@@ -35,8 +39,9 @@ HRESULT CPlayer::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-
     m_fPlayerY = 2.f;
+
+
      return S_OK;
 }
 
@@ -64,12 +69,23 @@ void CPlayer::Update(_float fTimeDelta)
 
 void CPlayer::Late_Update(_float fTimeDelta)
 {
+   if(false == m_bJump)
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
+        if (false == m_bJump)
+        Height_On_Cell();
     __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CPlayer::Render()
 {
+
+    __super::Render();
     return S_OK;
+}
+
+void CPlayer::HIt_Routine()
+{
 }
 
 const _float4x4* CPlayer::Get_CameraBone()
@@ -93,10 +109,8 @@ void CPlayer::Key_Input(_float fTimeDelta)
         {
             if (m_iState != STATE_SWITCHIN && m_iState != STATE_SWITCHIN2)
             {
-              
                     if (false == m_bJump)
                         m_Type == T00 ? m_iState = STATE_IDLE : m_iState = STATE_IDLE2;
-                
             }
         }
     } 
@@ -113,7 +127,9 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-        m_pTransformCom->Go_Straight(fTimeDelta);
+   if(false == m_bJump )
+            m_pTransformCom->Go_Straight(fTimeDelta, m_pNavigationCom);
+        
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_S))
     {
@@ -128,7 +144,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
             }
        
         }
-        m_pTransformCom->Go_Backward(fTimeDelta);
+        m_pTransformCom->Go_Backward(fTimeDelta, m_pNavigationCom);
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_A))
@@ -144,7 +160,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
             }
             
         }
-        m_pTransformCom->Go_Left(fTimeDelta);
+        m_pTransformCom->Go_Left(fTimeDelta, m_pNavigationCom);
 
     } 
 
@@ -160,7 +176,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-        m_pTransformCom->Go_Right(fTimeDelta);
+        m_pTransformCom->Go_Right(fTimeDelta, m_pNavigationCom);
     }
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_TAB))
@@ -250,14 +266,13 @@ void CPlayer::Key_Input(_float fTimeDelta)
         }
         m_Type == T00 ? m_iState = STATE_JUMP_RUN_LOOP : m_iState = STATE_JUMP_RUN_LOOP2;
         m_pTransformCom->Go_jump(fTimeDelta, m_fPlayerY, &m_bJump);
-    
+
         if (!m_bJump)
         {
             if (m_iState != STATE_SPRINT && m_iState != STATE_SPRINT2)
-            m_Type == T00 ? m_iState = STATE_IDLE : m_iState = STATE_IDLE2;
+                m_Type == T00 ? m_iState = STATE_IDLE : m_iState = STATE_IDLE2;
         }
     }
-
 
 
   //  cout << XMVectorGetX(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) << " "
@@ -272,7 +287,24 @@ void CPlayer::Choose_Weapon(const _uint& WeaponNum)
     static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Choose_Weapon(WeaponNum);
 }
 
+_uint CPlayer::Get_Bullet()
+{
+    return     static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_Bullte();
+}
 
+_uint CPlayer::Get_MaxBullte()
+{
+    return  static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_MaxBullte();
+}
+
+void CPlayer::Height_On_Cell()
+{
+    _float3 fPos{};
+    XMStoreFloat3(&fPos,m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    _float PlayerY = m_pNavigationCom->Compute_HeightOnCell(&fPos);
+    m_fPlayerY = PlayerY+2.f;
+    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(fPos.x, m_fPlayerY, fPos.z, 1.f));
+}
 
 void CPlayer::Mouse_Fix()
 {
@@ -283,7 +315,24 @@ void CPlayer::Mouse_Fix()
 }
 
 HRESULT CPlayer::Add_Components()
-{
+{	/* For.Com_Collider_AABB */
+    CBounding_AABB::BOUND_AABB_DESC		AABBDesc{};
+
+    AABBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
+    AABBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
+        TEXT("Com_Collider_AABB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
+        return E_FAIL;
+
+
+    CNavigation::NAVIGATION_DESC		Desc{};
+
+    Desc.iCurrentCellIndex = 0;
+
+    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom),&Desc)))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -348,4 +397,5 @@ CGameObject* CPlayer::Clone(void* pArg)
 void CPlayer::Free()
 {
     __super::Free();
+
 }

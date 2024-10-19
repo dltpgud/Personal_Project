@@ -17,6 +17,13 @@ HRESULT CContainerObject::Initialize_Prototype()
 	return S_OK;
 }
 
+
+CComponent* CContainerObject::Find_PartObj_Component(const _wstring& strComponentTag, _uint iPartObjID)
+{
+	return m_PartObjects[iPartObjID]->Find_Component(strComponentTag);
+}
+
+
 HRESULT CContainerObject::Initialize(void * pArg)
 {
 	CONTAINEROBJECT_DESC*		pDesc = static_cast<CONTAINEROBJECT_DESC*>(pArg);
@@ -37,6 +44,7 @@ _int CContainerObject::Priority_Update(_float fTimeDelta)
 			pPartObject->Priority_Update(fTimeDelta);
 	}
 
+	__super::Priority_Update(fTimeDelta);
 	return OBJ_NOEVENT;
 }
 
@@ -47,6 +55,7 @@ void CContainerObject::Update(_float fTimeDelta)
 		if (nullptr != pPartObject)
 			pPartObject->Update(fTimeDelta);
 	}
+	__super::Update(fTimeDelta);
 }
 
 void CContainerObject::Late_Update(_float fTimeDelta)
@@ -56,10 +65,12 @@ void CContainerObject::Late_Update(_float fTimeDelta)
 		if (nullptr != pPartObject)
 			pPartObject->Late_Update(fTimeDelta);
 	}
+	__super::Late_Update(fTimeDelta);
 }
 
 HRESULT CContainerObject::Render()
 {
+	__super::Render();
 	return S_OK;
 }
 

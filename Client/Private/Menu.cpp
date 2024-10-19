@@ -95,6 +95,26 @@ void CMenu::Late_Update(_float fTimeDelta)
 
 HRESULT CMenu::Render()
 {
+
+	Set_UI_Pos(&Desc[2]);
+
+	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+		return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		return E_FAIL;
+
+
+	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 2)))
+		return E_FAIL;
+
+	m_pShaderCom->Begin(0);
+
+	m_pVIBufferCom->Bind_Buffers();
+
+	m_pVIBufferCom->Render();
+
 	for (_uint i = 0; i < 3; i++)
 	{
 		Set_UI_Pos(&Desc[i]);
@@ -118,6 +138,9 @@ HRESULT CMenu::Render()
 		m_pVIBufferCom->Render();
 	}
 
+
+	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 시작"), _float2(160.f, 435.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 종료"), _float2(160.f, 525.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
 	return S_OK;
 }
 
@@ -126,8 +149,9 @@ HRESULT CMenu::Set_MenuPos()
 	Desc[0].UID = UIID_Menu;
 	Desc[0].fX = 255.f;
 	Desc[0].fY = 475.f;
+	Desc[0].fZ = 0.1f;
 	Desc[0].fSizeX = 255.f;
-	Desc[0].fSizeY = 55.f;
+	Desc[0].fSizeY = 45.f;
 	Desc[0].PrUpdate = true;
 	Desc[0].Update = true;
 	Desc[0].LateUpdate = false;
@@ -139,8 +163,9 @@ HRESULT CMenu::Set_MenuPos()
 	Desc[1].UID = UIID_Menu;
 	Desc[1].fX = 255.f;
 	Desc[1].fY = 565.f;
+	Desc[1].fZ = 0.2f;
 	Desc[1].fSizeX = 255.f;
-	Desc[1].fSizeY = 55.f;
+	Desc[1].fSizeY = 45.f;
 	Desc[1].PrUpdate = true;
 	Desc[1].Update = true;
 	Desc[1].LateUpdate = false;
@@ -152,6 +177,7 @@ HRESULT CMenu::Set_MenuPos()
 	Desc[2].UID = UIID_Menu;
 	Desc[2].fX = g_iWinSizeX * 0.5f;
 	Desc[2].fY = g_iWinSizeY * 0.5f;
+	Desc[2].fZ = 0.3f;
 	Desc[2].fSizeX = g_iWinSizeX;
 	Desc[2].fSizeY = g_iWinSizeY;
 	Desc[2].PrUpdate = true;

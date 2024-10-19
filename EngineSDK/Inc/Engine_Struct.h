@@ -62,6 +62,18 @@ namespace Engine
 		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
 	}VTXPOSTEX;
 
+
+	typedef struct ENGINE_DLL VTXCUBE
+	{
+		/* 정점의 위치 (Position)*/
+		XMFLOAT3		vPosition;
+		/* 텍스쳐의 색을 가져오기위한 좌표.(Texcoord) */
+		XMFLOAT3		vTexcoord;
+
+		static const unsigned int		iNumElements = 2;
+		static const D3D11_INPUT_ELEMENT_DESC	Elements[2];
+	}VTXCUBE;
+
 	typedef struct ENGINE_DLL VTXNORTEX
 	{
 

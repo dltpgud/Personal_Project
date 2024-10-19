@@ -25,8 +25,8 @@ private:
 	vector<_uint>			m_iChannelKeyFrameIndices;
 
 	//테스트용
-        _float m_fChangingTime{};
-        _float m_fMotionChangingTIme{4.f};
+	_float m_fChangingTime{};
+	_float m_fMotionChangingTIme{ 4.f };
 
 public:
 	static CAnimation* Create(HANDLE& hFile);

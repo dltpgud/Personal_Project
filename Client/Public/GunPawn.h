@@ -1,13 +1,13 @@
 #pragma once
 #include "Client_Defines.h"
-#include "ContainerObject.h"
+#include "Actor.h"
 BEGIN(Engine)
-
+class CNavigation;
 END
 
 BEGIN(Client)
 
-class CGunPawn final : public CContainerObject
+class CGunPawn final : public CActor
 {
 public:
     enum PARTOBJID
@@ -60,20 +60,16 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
+    virtual void HIt_Routine()override;
+    void NON_intersect(_float fTimedelta);
 
-    void Set_State(CGunPawn::STATE st)
-    {
-        m_iState = st;
-    }
 
-private:
-    _uint m_iState = {};
 
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
     HRESULT Bind_ShaderResources();
-
+    CNavigation* m_pNavigationCom = { nullptr };
 public:
     static CGunPawn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

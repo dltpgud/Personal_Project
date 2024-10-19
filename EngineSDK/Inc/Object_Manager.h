@@ -26,26 +26,8 @@ public:
 	void Clear(_uint iClearLevelID);
 
 	/*사본을 레이어에 추가 한다.*/
-	HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* clone)
-	{
-		/*레이어를 탐색한다*/
-		CLayer* pLayer = Find_Layer(iLevelIndex, strLayerTag);
-
-		if (nullptr == pLayer)
-		{
-			/*레이어가 비어 있으면 최초 생성한다*/
-			pLayer = CLayer::Create();
-			if (nullptr == pLayer)
-				return E_FAIL;
-
-			/*생성된 레이어에 사본을 추가한다*/
-			pLayer->Add_GameObject(clone, strLayerTag);
-			m_pLayers[iLevelIndex].emplace(strLayerTag, pLayer);
-		}
-		else /*최초 생성이 아니라면*/
-			pLayer->Add_GameObject(clone, strLayerTag);
-		return S_OK;
-	}
+	HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* clone);
+	
 
 	/*원본을 탐색한다*/
 	class CGameObject* Find_Prototype(const _wstring& strPrototypeTag); 
@@ -59,7 +41,7 @@ private:
 public: /*편집씬을 위한 함수*/
 	_bool IsGameObject(_uint iLevelIndex, const _uint& strLayerTag);
 	CGameObject::PICKEDOBJ_DESC Pking_onMash(_vector RayPos, _vector RayDir);
-	CGameObject* Recent_GameObject( const _uint& strLayerTag);
+	CGameObject* Recent_GameObject(_uint iLevelIndex,  const _uint& strLayerTag);
 	list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _uint& strLayerTag);
 
 private:

@@ -42,11 +42,11 @@ public:
 
     void Set_Animation(_uint index, _bool IsLoop = false);
 
-    _float Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform);
+    _float Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform, _vector* vPos);
 
     void init_Loop();
 
-
+    void Center_Ext(_float3* Center, _float3* extend);
 
 
 public:

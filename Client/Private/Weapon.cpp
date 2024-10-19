@@ -30,6 +30,11 @@ HRESULT CWeapon::Initialize(void* pArg)
     m_iMaxBullet[CWeapon::AssaultRifle] = 30;
     m_iMaxBullet[CWeapon::MissileGatling] = 20;
     m_iMaxBullet[CWeapon::HeavyCrossbow] = 7;
+
+    m_iFirstBullet[CWeapon::HendGun] = 15;
+    m_iFirstBullet[CWeapon::AssaultRifle] = 30;
+    m_iFirstBullet[CWeapon::MissileGatling] = 20;
+    m_iFirstBullet[CWeapon::HeavyCrossbow] = 7;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
@@ -56,6 +61,7 @@ void CWeapon::Update(_float fTimeDelta)
 
         m_pGameInstance->UI_shaking(CUI::UIID_PlayerHP, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon, fTimeDelta);
+    m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon_Aim, fTimeDelta);
 }
 
 void CWeapon::Late_Update(_float fTimeDelta)
@@ -112,9 +118,10 @@ void CWeapon::Type0_Update(_float fTimeDelta)
     if (*m_pParentState == CPlayer::STATE_HENDGUN_SHOOT && m_iCurMotion != Shoot)
     {
         m_iMaxBullet[m_iBullet] -= 1;
+
         if (0 >= m_iMaxBullet[m_iBullet])
         {
-            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_HENDGUN_RELOAD);
+            m_pGameInstance->Get_Player()->Set_State(CPlayer::STATE_HENDGUN_RELOAD);
         }
         else
         {
@@ -123,19 +130,23 @@ void CWeapon::Type0_Update(_float fTimeDelta)
 
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.2f, 0.2f);
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.2f, 0.2f);
+        m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.2f, -0.2f);
         bMotionChange = true;
         bLoop = false;
     }
 
 
 
-    cout << m_iMaxBullet[m_iBullet] << endl;
+   // cout << m_iMaxBullet[m_iBullet] << endl;
 
     if (bMotionChange)
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, bLoop);
 
     if (true == m_pModelCom[m_pWeapon]->Play_Animation(fTimeDelta))
     {
+        if (m_iCurMotion == Shoot)
+            m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
+
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE);
         m_iCurMotion = Idle;
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, true);
@@ -168,6 +179,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.5f, 0.5f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.5f, 0.5f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.5f, -0.5f);
             bMotionChange = true;
             bLoop = false;
         }
@@ -193,6 +205,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.7f, 0.7f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.7f, 0.7f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.7f, -0.7f);
             bMotionChange = true;
             bLoop = false;
         }
@@ -219,12 +232,14 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -1.f, 1.f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 1.f, -1.f);
+           
             bMotionChange = true;
             bLoop = false;
         }
     }
 
-    cout << m_iMaxBullet[m_iBullet] << endl;
+  //  cout << m_iMaxBullet[m_iBullet] << endl;
 
 
     if (bMotionChange)
@@ -232,6 +247,9 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
     if (true == m_pModelCom[m_pWeapon]->Play_Animation(fTimeDelta))
     {
+        if (m_iCurMotion == Shoot)
+            m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
+   
    
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
 
