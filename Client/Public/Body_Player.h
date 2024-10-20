@@ -3,8 +3,7 @@
 #include "PartObject.h"
 
 BEGIN(Engine)
-class CShader;
-class CModel;
+
 END
 
 BEGIN(Client)
@@ -38,15 +37,12 @@ public:
 	void Type0_Update(_float fTimeDelta);
 	void Type2_Update(_float fTimeDelta);
 
-public:
-	const _float4x4* Get_SocketMatrix(const _char* pBoneName);
+
 
 private:
-	CShader* m_pShaderCom = { nullptr };
-	CModel* m_pModelCom = { nullptr };
-	const _uint* m_pParentState = { nullptr };
+
 	const _uint* m_pType = { nullptr };
-	_uint m_iCurMotion = {};
+
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

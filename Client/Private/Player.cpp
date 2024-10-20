@@ -24,9 +24,7 @@ HRESULT CPlayer::Initialize(void* pArg)
     Desc.fSpeedPerSec = 10.f;
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
     Desc.JumpPower = 3.f;
-    Desc.fMAXHP =100.f;
-    Desc.fHP = 10.f;
-   
+
 
     m_Type = T00;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
@@ -79,7 +77,6 @@ void CPlayer::Late_Update(_float fTimeDelta)
 
 HRESULT CPlayer::Render()
 {
-
     __super::Render();
     return S_OK;
 }
@@ -87,6 +84,13 @@ HRESULT CPlayer::Render()
 void CPlayer::HIt_Routine()
 {
 }
+
+_float CPlayer::Weapon_Damage()
+{
+    return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Damage();
+}
+
+
 
 const _float4x4* CPlayer::Get_CameraBone()
 {

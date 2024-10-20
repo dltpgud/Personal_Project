@@ -39,7 +39,7 @@ HRESULT CGunPawn::Initialize(void* pArg)
     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Desc->POSITION);
 
 
-    m_fMAXHP = 10.f;
+    m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     return S_OK;
 }
@@ -49,7 +49,8 @@ _int CGunPawn::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
-    m_pTransformCom->Rotation_to_Player();
+    if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
+       m_pTransformCom->Rotation_to_Player();
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
 }
@@ -59,7 +60,7 @@ void CGunPawn::Update(_float fTimeDelta)
     if (static_cast <CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_Finish())
         m_iState = ST_IDLE;
 
-        if(m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
+    if(m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
     NON_intersect(fTimeDelta);
     
 
@@ -79,9 +80,14 @@ HRESULT CGunPawn::Render()
 
 void CGunPawn::HIt_Routine()
 {
-
+ 
     m_iState = ST_STUN_START;
 
+}
+
+void CGunPawn::Dead_Routine()
+{
+    m_iState = ST_PRESHOOT;
 }
 
 void CGunPawn::NON_intersect(_float fTimedelta)
@@ -117,6 +123,8 @@ void CGunPawn::NON_intersect(_float fTimedelta)
         }
         if (m_iState == ST_RUN_RIGHT)
         {
+
+
             m_pTransformCom->Go_Right(fTimedelta);
         }
 
@@ -139,13 +147,12 @@ HRESULT CGunPawn::Add_Components()
 
 
     _float3 Center{}, Extents{};
-    OBBDesc.vExtents = _float3(0.5f, 1.3f, 0.5f);
+    OBBDesc.vExtents = _float3(1.f, 1.3f, 0.5f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = { 0.f,0.f,0.f };
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
         TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
-
 
 
     return S_OK;

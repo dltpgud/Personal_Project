@@ -12,6 +12,8 @@ public:
   //  HRESULT Initialize(_uint* iNumTexture, const _tchar*** pTextureFilePath);
     HRESULT Bind_ShaderResource(class CShader* pShader, aiTextureType eTextureType, _uint iIndex,
                                 const _char* pConstantName);
+
+
     HRESULT Initialize(HANDLE& hFile);
 private:
     ID3D11Device* m_pDevice = {nullptr};

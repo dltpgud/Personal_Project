@@ -74,6 +74,8 @@ HRESULT CModel::Bind_Material_ShaderResource(CShader* pShader, _uint iMeshIndex,
     return m_Materials[iMaterialIndex]->Bind_ShaderResource(pShader, eType, iIndex, pConstantName);
 }
 
+
+
 HRESULT CModel::Render(_uint iMeshIndex)
 {
     m_Meshes[iMeshIndex]->Bind_Buffers();

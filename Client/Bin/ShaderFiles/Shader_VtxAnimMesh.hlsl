@@ -14,8 +14,8 @@ float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 float4			g_vCamPosition;
 
 float4x4		g_BoneMatrices[512];   /*뼈 메트릭스 개수*/
-
-
+bool g_TagetBool;
+bool g_TagetDeadBool;
 sampler LinearSampler = sampler_state
 {
 	Filter = MIN_MAG_MIP_LINEAR;
@@ -103,6 +103,7 @@ PS_OUT PS_MAIN(PS_IN In)
 	
 	vector		vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);	
 
+
 	if (vMtrlDiffuse.a <= 0.3f)
 		discard;
 
@@ -120,6 +121,42 @@ PS_OUT PS_MAIN(PS_IN In)
 	return Out;
 }
 
+PS_OUT PS_MAIN_MONSTER(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+
+	if(true == g_TagetBool)
+    {
+        vector WHite = { 0.5f, 0.5f, 0.5f, 0.1f };
+        vMtrlDiffuse += WHite;
+    }
+	
+    if (true == g_TagetDeadBool)
+    {
+        vector Black = { 0.3f, 0.3f, 0.3f, 0.1f };
+        vMtrlDiffuse -= Black;
+    }
+	
+    if (vMtrlDiffuse.a <= 0.3f)
+        discard;
+
+
+    float4 vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
+
+    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
+    float4 vLook = In.vWorldPos - g_vCamPosition;
+
+    float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
+
+    Out.vColor = (g_vLightDiffuse * vMtrlDiffuse) * saturate(vShade) +
+		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
+
+    return Out;
+}
+
+
 technique11 DefaultTechnique
 {
 	pass DefaultPass
@@ -131,4 +168,14 @@ technique11 DefaultTechnique
 		VertexShader = compile vs_5_0 VS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN();
 	}
+
+    pass DefaultPass1
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_MONSTER();
+    }
 }

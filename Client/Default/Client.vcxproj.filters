@@ -103,6 +103,12 @@
     <Filter Include="02.GameObjects\04.UI\SpriteTex">
       <UniqueIdentifier>{873bdc97-3a15-42a9-b424-3a0bf3ac582f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\JetFly">
+      <UniqueIdentifier>{72c149fe-d61e-4db9-bda3-070b7a27b561}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\JetFly\Body">
+      <UniqueIdentifier>{68706e6c-4bc6-458e-a9be-36ef4f867cfb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -201,6 +207,12 @@
     <ClInclude Include="..\Public\Aim.h">
       <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\JetFly.h">
+      <Filter>02.GameObjects\03.Actor\Monster\JetFly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_JetFly.h">
+      <Filter>02.GameObjects\03.Actor\Monster\JetFly\Body</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -286,6 +298,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Aim.cpp">
       <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\JetFly.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\JetFly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_JetFly.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\JetFly\Body</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

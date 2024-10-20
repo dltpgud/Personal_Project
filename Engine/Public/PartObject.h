@@ -1,9 +1,10 @@
 #pragma once
 
 #include "GameObject.h"
-
+#include "Component_Manager.h"
 BEGIN(Engine)
-
+class CShader;
+class CModel;
 class ENGINE_DLL CPartObject abstract : public CGameObject
 {
 public:
@@ -27,10 +28,22 @@ public:
 	virtual void Update(_float fTimeDelta);
 	virtual void Late_Update(_float fTimeDelta);
 	virtual HRESULT Render();
+	virtual CModel* Get_Model() {
+		return m_pModelCom;
+	};
+	_bool Get_Finish() { return m_bFinishAni; }
 
+	const _float4x4* Get_SocketMatrix(const _char* pBoneName);
 protected:
 	const _float4x4*				m_pParentMatrix = { nullptr };
 	_float4x4						m_WorldMatrix = {};   
+
+
+	CShader* m_pShaderCom = { nullptr };
+	CModel* m_pModelCom = { nullptr };
+	const _uint* m_pParentState = { nullptr };  // 부모 파츠의 상태
+	_uint m_iCurMotion = {}; // 현재 내 모션 상태
+	_bool m_bFinishAni = { false }; // 애니메이션이 끝났는지 판단.
 public:
 	virtual CGameObject* Clone(void* pArg) = 0;
 	virtual void Free() override;

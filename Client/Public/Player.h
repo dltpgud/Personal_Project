@@ -52,7 +52,8 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 	virtual void HIt_Routine()override;
-
+	virtual _float Weapon_Damage() override;
+\
 	const _float4x4* Get_CameraBone();
 	void Key_Input(_float fTimeDelta);
 

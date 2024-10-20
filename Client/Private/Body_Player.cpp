@@ -51,8 +51,7 @@ void CBody_Player::Update(_float fTimeDelta)
 void CBody_Player::Late_Update(_float fTimeDelta)
 {
 
- 	XMStoreFloat4x4(&m_WorldMatrix, XMLoadFloat4x4(m_pParentMatrix) * m_pTransformCom->Get_WorldMatrix());  //부모행렬과 내 월드랑 곱해서 그린다
-
+	__super::Late_Update(fTimeDelta);
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
 		return;
 }
@@ -268,10 +267,7 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 	}
 }
 
-const _float4x4* CBody_Player::Get_SocketMatrix(const _char* pBoneName)
-{
-	return m_pModelCom->Get_BoneMatrix(pBoneName);
-}
+
 
 HRESULT CBody_Player::Add_Components()
 {
@@ -329,7 +325,7 @@ CBody_Player* CBody_Player::Create(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	return pInstance;
 }
-
+ 
 CGameObject* CBody_Player::Clone(void* pArg)
 {
 	CBody_Player* pInstance = new CBody_Player(*this);
@@ -347,6 +343,4 @@ void CBody_Player::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pModelCom);
-	Safe_Release(m_pShaderCom);
 }

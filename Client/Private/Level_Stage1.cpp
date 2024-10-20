@@ -67,6 +67,14 @@ HRESULT CLevel_Stage1::Ready_Layer_Monster(const _uint& pLayerTag)
 	
 	m_pGameInstance->Add_Monster(LEVEL_STAGE1,m_pGameInstance->Recent_GameObject(LEVEL_STAGE1,pLayerTag));
 
+	Desc.POSITION = XMVectorSet(13.f, 5.f, 90.f, 1.f);
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
+		TEXT("Prototype_GameObject_JetFly"), nullptr, 0, &Desc)))
+		return E_FAIL;
+
+	m_pGameInstance->Add_Monster(LEVEL_STAGE1, m_pGameInstance->Recent_GameObject(LEVEL_STAGE1, pLayerTag));
+
 
 	return S_OK;
 }

@@ -35,6 +35,8 @@ public:
 
     HRESULT Bind_Material_ShaderResource(class CShader* pShader, _uint iMeshIndex, aiTextureType eType, _uint iIndex,
                                          const _char* pConstantName);
+
+
     HRESULT Render(_uint iMeshIndex);
 
     HRESULT Bind_Mesh_BoneMatrices(class CShader* pShader, _uint iMeshIndex, const _char* pConstantName);
