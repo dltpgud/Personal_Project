@@ -39,6 +39,9 @@ void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
         vPosition += Slide;
+
+
+
     }
     else
         vPosition = vAfterPos;
@@ -60,7 +63,7 @@ void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation)
         vPosition += Slide;
     }
     else
-        vPosition = vAfterPos;
+             vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }

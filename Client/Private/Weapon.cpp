@@ -126,6 +126,7 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         else
         {
             m_iCurMotion = Shoot;
+            m_fDamage = 16;
         }
 
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.2f, 0.2f);
@@ -134,10 +135,6 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-
-
-
-   // cout << m_iMaxBullet[m_iBullet] << endl;
 
     if (bMotionChange)
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, bLoop);
@@ -174,9 +171,10 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_iMaxBullet[m_iBullet] -= 3;
             if (0 >= m_iMaxBullet[m_iBullet])
                 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_ASSAULTRIFlLE_RELOAD);
-            else
+            else {
                 m_iCurMotion = Shoot;
-
+                m_fDamage = 18.f;
+            }
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.5f, 0.5f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.5f, 0.5f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.5f, -0.5f);
@@ -200,9 +198,10 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_iMaxBullet[m_iBullet] -= 4;
             if (0 >= m_iMaxBullet[m_iBullet])
                 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_MissileGatling_RELOAD);
-            else
+            else {
                 m_iCurMotion = Shoot;
-
+                m_fDamage = 20.f;
+            }
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.7f, 0.7f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.7f, 0.7f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.7f, -0.7f);
@@ -227,9 +226,10 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
             if (0 >= m_iMaxBullet[m_iBullet])
                 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_HEAVYCROSSBOW_RELOAD);
-            else
+            else {
                 m_iCurMotion = Shoot;
-
+                m_fDamage = 50.f;
+            }
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 1.f, -1.f);
@@ -238,8 +238,6 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             bLoop = false;
         }
     }
-
-  //  cout << m_iMaxBullet[m_iBullet] << endl;
 
 
     if (bMotionChange)
@@ -357,5 +355,4 @@ void CWeapon::Free()
 
     for (size_t i = 0; i < WeaPoneType_END; i++) Safe_Release(m_pModelCom[i]);
 
-    Safe_Release(m_pShaderCom);
 }

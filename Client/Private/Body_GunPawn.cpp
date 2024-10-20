@@ -181,31 +181,30 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     {
         m_iCurMotion = CGunPawn::ST_PRESHOOT;
         bMotionChange = true;
-        bLoop = true;
+        bLoop = false;
     }
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
     if (true == m_pModelCom->Play_Animation(fTimeDelta))
     {
-        
+
         m_bFinishAni = true;
         m_iCurMotion = CGunPawn::ST_IDLE;
         m_pModelCom->Set_Animation(m_iCurMotion, true);
-
     }
-    else 
+    else
     {
         m_bFinishAni = false;
+        if (m_iCurMotion == CGunPawn::ST_PRESHOOT)
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
 }
 
 void CBody_GunPawn::Late_Update(_float fTimeDelta)
 {
 
-    XMStoreFloat4x4(&m_WorldMatrix, XMLoadFloat4x4(m_pParentMatrix) *
-                                        m_pTransformCom->Get_WorldMatrix()); // 부모행렬과 내 월드랑 곱해서 그린다
-
+    __super::Late_Update(fTimeDelta);
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
@@ -214,7 +213,6 @@ void CBody_GunPawn::Late_Update(_float fTimeDelta)
 HRESULT CBody_GunPawn::Render()
 {
 
-
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -222,25 +220,25 @@ HRESULT CBody_GunPawn::Render()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
+
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
+        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_iCurMotion == CGunPawn::ST_STUN_START)))
+            return E_FAIL;
+        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CGunPawn::ST_PRESHOOT)))
+            return E_FAIL;
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(0)))
+        if (FAILED(m_pShaderCom->Begin(1)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
     }
 
     return S_OK;
-}
-
-const _float4x4* CBody_GunPawn::Get_SocketMatrix(const _char* pBoneName)
-{
-    return m_pModelCom->Get_BoneMatrix(pBoneName);
 }
 
 HRESULT CBody_GunPawn::Add_Components()
@@ -253,7 +251,6 @@ HRESULT CBody_GunPawn::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto_Component_GunPawn_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
-
 
     return S_OK;
 }
@@ -318,7 +315,4 @@ CGameObject* CBody_GunPawn::Clone(void* pArg)
 void CBody_GunPawn::Free()
 {
     __super::Free();
-
-    Safe_Release(m_pModelCom);
-    Safe_Release(m_pShaderCom);
 }

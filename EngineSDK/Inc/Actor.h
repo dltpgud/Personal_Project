@@ -9,8 +9,7 @@ class ENGINE_DLL CActor abstract : public CContainerObject
     public:
         typedef struct Actor_DESC : public CContainerObject::CONTAINEROBJECT_DESC
         {
-            _float fHP{};
-            _float fMAXHP{};
+         
         }Actor_DESC;
 
     protected:
@@ -26,9 +25,10 @@ class ENGINE_DLL CActor abstract : public CContainerObject
         virtual void Late_Update(_float fTimeDelta);
         virtual HRESULT Render();
         void Set_bColl(_bool Coll) { m_bColl = Coll; }
-        virtual void HIt_Routine();
-
-
+        virtual void HIt_Routine() {};
+        virtual void Dead_Routine() {};
+        virtual _float Weapon_Damage() { return 0.f; }
+        void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
         void Set_State(_uint st)
         {
             m_iState = st;

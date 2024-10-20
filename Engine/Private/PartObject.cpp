@@ -41,7 +41,9 @@ void CPartObject::Update(_float fTimeDelta)
 
 void CPartObject::Late_Update(_float fTimeDelta)
 {
-	
+	XMStoreFloat4x4(&m_WorldMatrix, XMLoadFloat4x4(m_pParentMatrix) *
+		m_pTransformCom->Get_WorldMatrix()); // 부모행렬과 내 월드랑 곱해서 그린다
+
 }
 
 HRESULT CPartObject::Render()
@@ -49,9 +51,16 @@ HRESULT CPartObject::Render()
 	return S_OK;
 }
 
+const _float4x4* CPartObject::Get_SocketMatrix(const _char* pBoneName)
+{
+	return m_pModelCom->Get_BoneMatrix(pBoneName);
+}
+
 void CPartObject::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pModelCom);
+	Safe_Release(m_pShaderCom);
 
 }

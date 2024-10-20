@@ -49,7 +49,7 @@ _bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeig
 			_vector Slid{};
 			 Slid = MoveDir - vReflectLength * XMVector3Normalize(vNormal);
 
-
+			 *Slide = Slid;
 			// // 목표 점(슬라이딩 방향의 끝점)
 			// _vector targetPoint = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]);
 			//

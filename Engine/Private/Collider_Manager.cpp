@@ -92,7 +92,8 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
 
     if (pPickedObj)
     {
-       pPickedObj->Set_bColl(true);
+        pPickedObj->Set_CurrentHP(m_pGameInstance->Get_Player()->Weapon_Damage());
+        pPickedObj->Set_bColl(true);
     }
 
     return S_OK;

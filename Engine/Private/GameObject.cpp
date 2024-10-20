@@ -67,9 +67,12 @@ void CGameObject::Late_Update(_float fTimeDelta)
 
 HRESULT CGameObject::Render()
 {
+#ifdef _DEBUG
     if (m_pColliderCom) {
+
         m_pColliderCom->Render();
     }
+#endif
     return S_OK;
 }
 
