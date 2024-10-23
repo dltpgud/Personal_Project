@@ -44,36 +44,13 @@ _bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeig
 			_vector vReflectDir = XMVector3Dot(XMVector3Normalize(vNormal) * -1, MoveDir);
 
 			_float vReflectLength = XMVectorGetX(vReflectDir);
-			if (vReflectLength < 0)
-				vReflectLength *= -1;
+			if (vReflectLength < 0.f)
+				vReflectLength *= -1.f;
+
 			_vector Slid{};
 			 Slid = MoveDir - vReflectLength * XMVector3Normalize(vNormal);
-
 			 *Slide = Slid;
-			// // 목표 점(슬라이딩 방향의 끝점)
-			// _vector targetPoint = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]);
-			//
-			// // 현재 위치와 목표 지점의 거리를 계산하여 멈출지 결정
-			// _vector diff = targetPoint - vAfterLocalPos;  // 목표 지점과 현재 위치의 차이
-			// const float stopThreshold = 0.10f;  // 임계값
-			//
-			// _float3 a{};
-			// XMStoreFloat3(&a, diff);
-			// cout << a.x << "  " << a.y << " " << a.z << endl;
-			//
-			//
-			//
-			// // 목표 지점에 거의 닿으면 슬라이딩을 멈추게 설정
-			// if (XMVectorGetX(XMVector3Length(diff)) < stopThreshold)
-			// {
-			//	 *Slide = XMVectorZero();  // 슬라이딩 벡터를 0으로 만들어 물체가 멈추게 함
-			//
-			//	 return true;
-			// }
-			// else
-			// {
-			//	 *Slide = Slid;  // 슬라이딩 유지
-			// }
+			
 
 			return false;
 		}

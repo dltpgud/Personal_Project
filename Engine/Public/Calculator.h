@@ -15,7 +15,7 @@ private:
     virtual ~CCalculator() = default;
 
 public:
-    void Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir);
+    void Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir, _bool forPlayer = false);
 
     _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RaDir,
                               CTransform* Transfor, _float* fDis);

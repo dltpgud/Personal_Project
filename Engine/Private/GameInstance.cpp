@@ -576,9 +576,9 @@ _float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainB
 	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom,  RayPos,  RayDir, Transform, fDis);
 }
 
-void CGameInstance::Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir)
+void CGameInstance::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir , _bool forPlayer)
 {
-	m_pCalculator->Make_Ray( Proj, view, RayPos, RayDir);
+    m_pCalculator->Make_Ray(Proj, view, RayPos, RayDir, forPlayer);
 	return;
 }
 

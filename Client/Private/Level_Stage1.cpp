@@ -76,6 +76,15 @@ HRESULT CLevel_Stage1::Ready_Layer_Monster(const _uint& pLayerTag)
 	m_pGameInstance->Add_Monster(LEVEL_STAGE1, m_pGameInstance->Recent_GameObject(LEVEL_STAGE1, pLayerTag));
 
 
+	
+	Desc.POSITION = XMVectorSet(13.f, 0.f, 45.f, 1.f);
+
+        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
+                                                            TEXT("Prototype_GameObject_BoomBot"), nullptr, 0, &Desc)))
+            return E_FAIL;
+
+        m_pGameInstance->Add_Monster(LEVEL_STAGE1, m_pGameInstance->Recent_GameObject(LEVEL_STAGE1, pLayerTag));
+
 	return S_OK;
 }
 
@@ -83,20 +92,23 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _uint& pLayerTag)
 {
 	CCamera_Free::CAMERA_FREE_DESC			Desc{};
 
-	 _vector vEye = {static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_41,
-	 	    	 static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_42,
-	 	         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_43,
-	 	         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44};
-	 
-	 XMStoreFloat4(&Desc.vEye , XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix()));
-	 
-	 _float4 At;
-	 XMStoreFloat4(&At, m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
-	 	+ m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
-	 
+_vector vEye = {static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_41,
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_42,
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_43,
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44};
+
+ _vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
+
+ _float4 fEye{};
+ XMStoreFloat4(&fEye, Eye);
+
+  Desc.vEye = fEye; 
+
+  _float4 At{};
+  XMStoreFloat4(&At, Eye + +m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
 	 
 	Desc.vAt = At;
-	Desc.fFovy = XMConvertToRadians(30.0f);
+	Desc.fFovy = XMConvertToRadians(47.0f);
 	Desc.fNearZ = 0.1f;
 	Desc.fFarZ = 500.f;
 	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;

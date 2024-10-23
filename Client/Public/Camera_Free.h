@@ -23,7 +23,6 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
-	void             Mouse_Fix();
 
 private:
 	_float					m_fMouseSensor = { 0.f };
