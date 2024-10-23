@@ -36,7 +36,7 @@ HRESULT Collider_Manager::Add_Wall(_uint Ilevel, CGameObject* wall)
 
 void Collider_Manager::All_Collison_check()
 {
-
+  
     Player_To_Monster_Collison_Check();
 
 }
@@ -55,7 +55,7 @@ HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
         {
             if (nullptr == Monster)
                 continue;
-            Monster-> Get_Collider()->Intersect(pPlayer->Get_Collider());
+                Monster-> Get_Collider()->Intersect(pPlayer->Get_Collider());
         }
     }
     return S_OK;
@@ -65,26 +65,29 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
 {
     _vector RayPos{}, RayDir{};
 
-     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ), m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
-    CActor* pPickedObj{};
-
+     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ), m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
+    
+     CActor* pPickedObj{};
+    _bool intersects{};
     for (_uint i = 0; i < m_iLevel; i++) {
         if (0 == m_MonsterList[i].size())
             continue;
 
         _float fDist{};
         _float fNewDist = {0xffff};
+        
         for (auto& Monster : m_MonsterList[i])
         {
             if (nullptr == Monster)
                 continue;
-            Monster->Get_Collider()->RayIntersects(RayPos, RayDir,fDist);
+             Monster->Get_Collider()->RayIntersects(RayPos, RayDir, fDist);
 
             if (fDist < fNewDist)
             {
                 if (fDist != 0) {
                     fNewDist = fDist;
                     pPickedObj = Monster;
+           
                 }
             }
         }

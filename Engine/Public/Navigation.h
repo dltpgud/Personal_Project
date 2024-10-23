@@ -26,6 +26,7 @@ public:
 public:
         void SetUp_Neighbor();
     _bool isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr);
+        _bool isMove2(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide = nullptr);
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render();

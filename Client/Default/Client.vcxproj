@@ -172,9 +172,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Aim.h" />
+    <ClInclude Include="..\Public\Body_BoomBot.h" />
     <ClInclude Include="..\Public\Body_GunPawn.h" />
     <ClInclude Include="..\Public\Body_JetFly.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
+    <ClInclude Include="..\Public\BoomBot.h" />
     <ClInclude Include="..\Public\CHEST.h" />
     <ClInclude Include="..\Public\DOOR.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -220,9 +222,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Aim.cpp" />
+    <ClCompile Include="..\Private\Body_BoomBot.cpp" />
     <ClCompile Include="..\Private\Body_GunPawn.cpp" />
     <ClCompile Include="..\Private\Body_JetFly.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
+    <ClCompile Include="..\Private\BoomBot.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />
     <ClCompile Include="..\Private\DOOR.cpp" />
     <ClCompile Include="..\Private\Camera_Free.cpp" />

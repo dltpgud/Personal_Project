@@ -71,15 +71,13 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Cursor")))
 		return E_FAIL;
 
-
-
 	CAim::CAim_DESC Desc{};
 	Desc.bshakingX = true;
 	Desc.bshakingY = false;
 	Desc.fSizeX = 10.f;
 	Desc.fSizeY = 4.f;
 	Desc.fX = g_iWinSizeX * 0.5f -10.f;
-	Desc.fY = g_iWinSizeY * 0.5f;
+	Desc.fY = g_iWinSizeY * 0.5f+60.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
 	Desc.Update = true;
@@ -93,7 +91,7 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.fSizeX = 10.f;
 	Desc.fSizeY = 4.f;
 	Desc.fX = g_iWinSizeX * 0.5f +10.f;
-	Desc.fY = g_iWinSizeY * 0.5f;
+	Desc.fY = g_iWinSizeY * 0.5f +60.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
 	Desc.Update = true;
@@ -102,18 +100,17 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;
 
-
 	Desc.bshakingY = true;
 	Desc.bshakingX = false;
 	Desc.fSizeX = 4.f;
 	Desc.fSizeY = 10.f;
 	Desc.fX = g_iWinSizeX * 0.5f;
-	Desc.fY = g_iWinSizeY * 0.5f+10.f;
+	Desc.fY = g_iWinSizeY * 0.5f +50.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
 	Desc.Update = true;
 	Desc.LateUpdate = true;
-	Desc.fpositive_OR_negative = -1.f;
+	Desc.fpositive_OR_negative = +1.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;
 
@@ -122,12 +119,12 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.fSizeX = 4.f;
 	Desc.fSizeY = 10.f;
 	Desc.fX = g_iWinSizeX * 0.5f ;
-	Desc.fY = g_iWinSizeY * 0.5f - 10.f;
+	Desc.fY = g_iWinSizeY * 0.5f + 70.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
 	Desc.Update = true;
 	Desc.LateUpdate = true;
-	Desc.fpositive_OR_negative = 1.f;
+	Desc.fpositive_OR_negative = -1.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;
 
