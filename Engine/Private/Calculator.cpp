@@ -10,23 +10,40 @@ CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  
     Safe_AddRef(m_pContext);
 }
 
-void CCalculator::Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RaDir)
+void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RaDir, _bool forPlayer )
 {   
-    POINT ptMouse{};
-    GetCursorPos(&ptMouse);
-    ScreenToClient(g_hWnd, &ptMouse);
-    
-    _float3 vMousePos;
-
     _uint iNumViewports = {1};
-    D3D11_VIEWPORT ViewportDesc{};
+       D3D11_VIEWPORT ViewportDesc{};
+ _float3 vMousePos;
+    if (false == forPlayer)
+    {
+        POINT ptMouse{};
+        GetCursorPos(&ptMouse);
+        ScreenToClient(g_hWnd, &ptMouse);
 
-    m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
+        m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
 
-    // 뷰 포트 -> 투영
-    vMousePos.x = ptMouse.x / (ViewportDesc.Width * 0.5f) - 1.f;
-    vMousePos.y = ptMouse.y / -(ViewportDesc.Height * 0.5f) + 1.f;
-    vMousePos.z = 0.f;
+        // 뷰 포트 -> 투영
+        vMousePos.x = ptMouse.x / (ViewportDesc.Width * 0.5f) - 1.f;
+        vMousePos.y = ptMouse.y / -(ViewportDesc.Height * 0.5f) + 1.f;
+        vMousePos.z = 0.f;
+    }
+    else if (true == forPlayer)
+    { 
+         POINT ptPlayerAim{};
+         ptPlayerAim.x = 640;
+         ptPlayerAim.y = 420;
+
+         m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
+
+        // 뷰 포트 -> 투영
+         vMousePos.x = ptPlayerAim.x / (ViewportDesc.Width * 0.5f) - 1.f;
+         vMousePos.y = ptPlayerAim.y / -(ViewportDesc.Height * 0.5f) + 1.f;
+         vMousePos.z = 0.f;
+
+
+    }
+
 
     // 투영 -> 뷰 스페이스
     _float4x4 matProj;

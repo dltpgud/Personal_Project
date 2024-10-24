@@ -94,7 +94,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos , _fvector vBeforeMoveWorldPos
                     break;
                 
                 if (-1 == iNeighborIndex)  // 여기까지 오면 없는거고
-                { 
+                {
                    return false;
                 }
             }
@@ -109,6 +109,44 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos , _fvector vBeforeMoveWorldPos
     }
 
     return true;
+}
+
+_bool CNavigation::isMove2(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide)
+{
+    // 초기화
+    _vector vCurrentPos = vBeforeMoveWorldPos;                                 // 현재 위치
+    _vector vDirection = XMVector3Normalize(vAfterMoveWorldPos - vBeforeMoveWorldPos); // 이동 방향 (정규화)
+    float fDistanceMoved = 0.0f;                                               // 이동한 거리 누적
+    const float fMaxDistance = XMVectorGetX(XMVector3Length(vAfterMoveWorldPos - vBeforeMoveWorldPos)); // 최대 이동 거리
+    const float fStepSize = 1.0f; // 최소 이동 단위 (예: 1)
+
+    // 최소 단위로 이동하며 셀 경계 확인
+    while (fDistanceMoved < fMaxDistance)
+    {
+        // 다음 위치 계산
+        vCurrentPos += vDirection * fStepSize;
+        fDistanceMoved += fStepSize;
+
+        // 다음 위치가 셀 내부에 있는지 확인
+        int iNeighborIndex = -1;
+        if (!m_Cells[m_iCurrentCellIndex]->isIn(vCurrentPos, vBeforeMoveWorldPos, &iNeighborIndex, Slide))
+        {
+            // 셀 내부에 없고 인접 셀이 없는 경우: 이동 중단
+            if (iNeighborIndex == -1)
+            {
+                if (Slide)
+                    *Slide = XMVectorZero(); // 이동 취소
+                return false;                // 이동 실패
+            }
+            // 인접 셀로 이동 가능한 경우: 셀 인덱스 갱신
+            m_iCurrentCellIndex = iNeighborIndex;
+        }
+    }
+
+    // 최종 위치를 갱신
+    if (Slide)
+        *Slide = vDirection * (fMaxDistance - fDistanceMoved); // 남은 거리를 슬라이딩으로 처리
+    return true;                                               // 이동 성공
 }   
 
 #ifdef _DEBUG

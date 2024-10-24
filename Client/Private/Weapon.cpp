@@ -127,6 +127,7 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         {
             m_iCurMotion = Shoot;
             m_fDamage = 16;
+            m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
         }
 
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.2f, 0.2f);
@@ -141,8 +142,6 @@ void CWeapon::Type0_Update(_float fTimeDelta)
 
     if (true == m_pModelCom[m_pWeapon]->Play_Animation(fTimeDelta))
     {
-        if (m_iCurMotion == Shoot)
-            m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
 
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE);
         m_iCurMotion = Idle;
@@ -174,6 +173,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             else {
                 m_iCurMotion = Shoot;
                 m_fDamage = 18.f;
+                m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
             }
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.5f, 0.5f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.5f, 0.5f);
@@ -201,6 +201,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             else {
                 m_iCurMotion = Shoot;
                 m_fDamage = 20.f;
+                m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
             }
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.7f, 0.7f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.7f, 0.7f);
@@ -229,6 +230,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             else {
                 m_iCurMotion = Shoot;
                 m_fDamage = 50.f;
+                m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
             }
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -1.f, 1.f);
@@ -245,12 +247,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
     if (true == m_pModelCom[m_pWeapon]->Play_Animation(fTimeDelta))
     {
-        if (m_iCurMotion == Shoot)
-            m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
-   
-   
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
-
         m_iCurMotion = Idle;
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, true);
     }

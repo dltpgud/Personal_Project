@@ -102,7 +102,6 @@ void CGunPawn::NON_intersect(_float fTimedelta)
     if (50.f > fLength)
     {
         if (20.f < fLength) {
-            _float fRad = XMVectorGetX(XMVectorACos(XMVector3Dot(_vector{ 0.f, 0.f, 1.f,0.f }, XMVector3Normalize(vDir))));
 
             _float3 fDir{};
             XMStoreFloat3(&fDir, vDir);
