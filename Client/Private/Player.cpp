@@ -131,9 +131,9 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-   if(false == m_bJump )
-            m_pTransformCom->Go_Straight(fTimeDelta, m_pNavigationCom);
-        
+
+       m_pTransformCom->Go_Straight(fTimeDelta, m_pNavigationCom);
+
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_S))
     {

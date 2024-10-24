@@ -52,11 +52,10 @@ void CActor::Late_Update(_float fTimeDelta)
 		{
 			Dead_Routine();
 		}
-
-		m_bColl = false;
+                m_bColl = false;
 	}
 
-	__super::Late_Update(fTimeDelta);
+   __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CActor::Render()
@@ -68,8 +67,8 @@ HRESULT CActor::Render()
 	}
 
 #endif
-
 	__super::Render();
+
 	return S_OK;
 }
 

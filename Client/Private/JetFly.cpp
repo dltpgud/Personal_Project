@@ -21,7 +21,7 @@ HRESULT CJetFly::Initialize(void* pArg)
 
     CActor::Actor_DESC* Desc = static_cast<Actor_DESC*>(pArg);
     Desc->iNumPartObjects = PART_END;
-    Desc->fSpeedPerSec = 3.f;
+    Desc->fSpeedPerSec = 5.f;
     Desc->fRotationPerSec = XMConvertToRadians(60.f);
     Desc->JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
@@ -48,8 +48,10 @@ _int CJetFly::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
     if (m_iState != ST_Hit_Front && m_iState != ST_Sragger)
         m_pTransformCom->Rotation_to_Player();
+
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
 }
@@ -61,7 +63,8 @@ void CJetFly::Update(_float fTimeDelta)
 
     if(m_iState != ST_Hit_Front && m_iState != ST_Sragger)
         NON_intersect(fTimeDelta);
-    
+
+  
     if (m_iState == ST_Hit_Front) {
         if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= 0.f) {
             m_pTransformCom->Set_MoveSpeed(10.f);
@@ -87,7 +90,7 @@ void CJetFly::HIt_Routine()
 {
    
     m_iState = ST_Sragger;
-
+    m_bHit = true;
 }
 
 void CJetFly::Dead_Routine()
@@ -104,40 +107,26 @@ void CJetFly::NON_intersect(_float fTimedelta)
     _vector vDir = vPlayerPos - vPos;
 
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
-    if (50.f > fLength)
+    if (40.f > fLength)
     {
-        if (20.f < fLength) {
-            _float fRad = XMVectorGetX(XMVectorACos(XMVector3Dot(_vector{ 0.f, 0.f, 1.f,0.f }, XMVector3Normalize(vDir))));
-
+        if (25.f < fLength) {
+            
             _float3 fDir{};
             XMStoreFloat3(&fDir, vDir);
 
-            m_iState = ST_Walk_Front;
-        }
-        if (m_iState == ST_Walk_Front)
-        {
+                m_iState = ST_Walk_Front;
             m_pTransformCom->Go_Straight(fTimedelta);
         }
-        if (m_iState == ST_Walk_Back)
-        {
-            m_pTransformCom->Go_Backward(fTimedelta);
-        }
-        if (m_iState == ST_Walk_Left)
-        {
-            m_pTransformCom->Go_Left(fTimedelta);
-        }
-        if (m_iState == ST_Walk_Right)
-        {
-            m_pTransformCom->Go_Right(fTimedelta);
-        }
 
-        if (20.f > fLength)
+        if (25.f > fLength)
         {
             m_iState = ST_Shoot;
-
-
-            if (12.f > fLength)
-                m_iState = ST_BarrelRoll_Right;
+           
+            if (15.f > fLength)
+            {
+                m_iState = ST_Walk_Back;
+                m_pTransformCom->Go_Backward(fTimedelta);
+            }
         }
     }
     else

@@ -39,9 +39,7 @@ void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
         vPosition += Slide;
-
-
-
+    
     }
     else
         vPosition = vAfterPos;
@@ -58,8 +56,7 @@ void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation)
 
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
-        if (XMVector3Equal(Slide, XMVectorZero()))
-            return;
+ 
         vPosition += Slide;
     }
     else
@@ -78,8 +75,6 @@ void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation)
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
         {
-            if (XMVector3Equal(Slide, XMVectorZero()))
-                return;
             vPosition += Slide;
         }
     else
@@ -98,8 +93,6 @@ void CTransform::Go_Backward(_float fTimeDelta, CNavigation* pNavigation)
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
     {
-        if (XMVector3Equal(Slide, XMVectorZero()))
-            return;
         vPosition += Slide;
     }
     else
@@ -118,8 +111,6 @@ void CTransform::Go_Up(_float fTimeDelta, CNavigation* pNavigation)
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
     {
-        if (XMVector3Equal(Slide, XMVectorZero()))
-            return;
         vPosition += Slide;
     }
     else
@@ -138,8 +129,6 @@ void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation)
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
     {
-        if (XMVector3Equal(Slide, XMVectorZero()))
-            return;
         vPosition += Slide;
     }
     else
@@ -153,22 +142,19 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNav
 
     m_fTimeSum += fTimeDelta * 9.8f;
  
-
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-      Go_Straight(fTimeDelta, pNavigation);
 
     _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
 
- /*
-    vPosition += XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
-  if (nullptr != pNavigation && false == pNavigation->isMove(vPosition)) {
-        return;
-    }
-    
-   */   
-     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vPosition);
+    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
 
+    _vector slide{}; 
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &slide))
+    {
+       return;
+    }
+          
+     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vAfterPos);
 
     _float3 Position;
     XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));

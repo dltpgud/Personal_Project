@@ -109,6 +109,12 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\JetFly\Body">
       <UniqueIdentifier>{68706e6c-4bc6-458e-a9be-36ef4f867cfb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\BoomBot">
+      <UniqueIdentifier>{bd243b8e-af26-4dab-a993-74e9e0845e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\BoomBot\Body">
+      <UniqueIdentifier>{57a3b578-378c-4374-8b18-59d88a08d3fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -213,6 +219,12 @@
     <ClInclude Include="..\Public\Body_JetFly.h">
       <Filter>02.GameObjects\03.Actor\Monster\JetFly\Body</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BoomBot.h">
+      <Filter>02.GameObjects\03.Actor\Monster\BoomBot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_BoomBot.h">
+      <Filter>02.GameObjects\03.Actor\Monster\BoomBot\Body</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -304,6 +316,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Body_JetFly.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\JetFly\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BoomBot.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\BoomBot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_BoomBot.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\BoomBot\Body</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

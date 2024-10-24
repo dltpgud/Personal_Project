@@ -113,7 +113,7 @@ public: /* For.Light_Manager */
 
 public: /* For.Calculator */
 	_float3	Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis);
-	void Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir);
+    void Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir ,_bool forPlayer = false);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
 
