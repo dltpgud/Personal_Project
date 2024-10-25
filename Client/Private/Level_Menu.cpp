@@ -19,12 +19,15 @@ HRESULT CLEVEL_MENU::Initialize()
 		return E_FAIL;
 
 
-	/*플레이어꺼 놓고*/
+	/*플레이어 UI꺼 놓고*/
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
+		return E_FAIL;
+	/*Interactive UI꺼 놓고*/
+    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false)))
 		return E_FAIL;
 //m_pGameInstance->PlayBGM(L"ST.ogg",1.f);
 
@@ -69,6 +72,9 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 		return E_FAIL;
 
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Cursor")))
+		return E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_InteractiveUI")))
 		return E_FAIL;
 
 	CAim::CAim_DESC Desc{};

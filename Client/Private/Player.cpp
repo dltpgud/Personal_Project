@@ -323,7 +323,7 @@ HRESULT CPlayer::Add_Components()
     CBounding_AABB::BOUND_AABB_DESC		AABBDesc{};
 
     AABBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
-    AABBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
+    AABBDesc.vCenter = _float3(0.f, 0.f, 0.f);
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
         TEXT("Com_Collider_AABB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
         return E_FAIL;

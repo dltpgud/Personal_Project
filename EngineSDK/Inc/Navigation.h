@@ -26,7 +26,7 @@ public:
 public:
         void SetUp_Neighbor();
     _bool isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr);
-        _bool isMove2(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide = nullptr);
+
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render();
@@ -46,7 +46,7 @@ public:
 	HRESULT Delete_ALLCell();
 	void Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
 
-	_bool NowMove(_fvector vAfterMoveWorldPos);
+
 private:
 	_int					m_iCurrentCellIndex = { -1 };
 	vector<class CCell*>	m_Cells;

@@ -63,15 +63,7 @@ void CLoading::Late_Update(_float fTimeDelta)
 	_float3 vPos{};
 	XMStoreFloat3(&vPos, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
 
-	//if (0 == m_iTexIndex )
-	//{
-	//	if (vPos.x < m_fFirstX * -4.f) {
-	//
-	//		Set_UI_Pos(&Desc);
-	//		Desc.fX -= Desc.fSpeedPerSec;
-	//	}
-	//}
-	//else
+
 	if (vPos.x < m_fFirstX *-2) {
 
 		Set_UI_Pos(&Desc);

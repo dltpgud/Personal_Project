@@ -108,14 +108,10 @@ _vector vEye = {static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Camera
   XMStoreFloat4(&At, Eye + +m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
 	 
 	Desc.vAt = At;
-	Desc.fFovy = XMConvertToRadians(47.0f);
+	Desc.fFovy = XMConvertToRadians(50.0f);
 	Desc.fNearZ = 0.1f;
 	Desc.fFarZ = 500.f;
 	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
-	Desc.fSpeedPerSec = m_pGameInstance->Get_Player()->Get_Transform()->Get_MoveSpeed();
-	Desc.fRotationPerSec = m_pGameInstance->Get_Player()->Get_Transform()->Get_RotSpeed(); 
-	Desc.fMouseSensor = 0.05f;
-	Desc.JumpPower = m_pGameInstance->Get_Player()->Get_Transform()->Get_JumpPower();
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
 		TEXT("Prototype_GameObject_Camera_Free"),nullptr,0, &Desc)))
 		return E_FAIL;
@@ -133,8 +129,9 @@ HRESULT CLevel_Stage1::Ready_Layer_UI(const _uint& pLayerTag)
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
-		return S_OK;
-
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false)))
+		return E_FAIL;
 	return S_OK;
 }
 

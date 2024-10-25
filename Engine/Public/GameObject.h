@@ -73,7 +73,7 @@ public:
         m_bDead = Dead;
     }
 
-    _bool Get_Dead(_bool Dead)
+    _bool Get_Dead()
     {
         return  m_bDead;
     }

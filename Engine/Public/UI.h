@@ -16,6 +16,7 @@ public:
         UIID_PlayerWeaPon,
         UIID_PlayerWeaPon_Aim,
         UIID_Monster,
+        UIID_InteractiveUI,
         UIID_END
     };
     enum Hover_STATE

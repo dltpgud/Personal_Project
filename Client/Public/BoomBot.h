@@ -19,7 +19,30 @@ public:
     };
     enum STATE
     {
-   
+     ST_Idle, 
+     ST_PreShoot,
+     ST_Run_Back,
+     ST_Run_Front,
+     ST_Run_Left,
+     ST_Run_Left_Back,
+     ST_Run_Right,
+     ST_Run_Right_Back,
+     ST_Shoot,
+     ST_Stun_Loop,
+     ST_Stun_Start,
+     ST_Aim_Down,
+     ST_Aim_Middle,
+     ST_Aim_Down_Left,
+     ST_Aim_Down_Right,
+     ST_Aim_Left,
+     ST_Aim_Right,
+     ST_Aim_Top,
+     ST_Aim_Top_Left,
+     ST_Aim_Top_Right,
+     ST_Hit_Back,
+     ST_Hit_Front,
+     ST_Hit_Left, 
+     ST_Hit_Right
     };                   
 
 private:

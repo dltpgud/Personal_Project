@@ -239,7 +239,9 @@ if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Co
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Wall3 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Wall3.dat"), PreTransformMatrix))))
 		return E_FAIL;
-
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component DoorRock Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/DoorRock.dat"), PreTransformMatrix))))
+		return E_FAIL;
 
 
 
@@ -256,7 +258,9 @@ if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Co
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component BossDoor Model_aniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/BossDoor.dat"), PreTransformMatrix))))
 		return E_FAIL;
-
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component ItemDoor Model_aniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/WPDoor.dat"), PreTransformMatrix))))
+		return E_FAIL;
 	///*Prototype_Component_Chest*/
 	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) *XMMatrixRotationY((XMConvertToRadians(180.f)));
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component ChestWeapon Model_aniObj"),

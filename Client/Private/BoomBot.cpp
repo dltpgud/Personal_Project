@@ -38,7 +38,7 @@ HRESULT CBoomBot::Initialize(void* pArg)
 
     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Desc->POSITION);
 
-
+    m_iState = ST_Idle;
     m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     return S_OK;
@@ -49,7 +49,7 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
-   // if (m_iState != ST_Hit_Front && m_iState != ST_Sragger)
+    if (m_iState != ST_Hit_Front && m_iState != ST_Aim_Down)
         m_pTransformCom->Rotation_to_Player();
 
     __super::Priority_Update(fTimeDelta);
@@ -58,18 +58,16 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
 
 void CBoomBot::Update(_float fTimeDelta)
 {
-   // if (static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->Get_Finish())
-   
-//    if(m_iState != ST_Hit_Front && m_iState != ST_Sragger)
- //       NON_intersect(fTimeDelta);
+    if (m_PartObjects[PART_BODY]->Get_Finish())
+    {
+            m_iState = ST_Idle;
+    }
 
-  
-//    if (m_iState == ST_Hit_Front) {
- //       if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= 0.f) {
-   //         m_pTransformCom->Set_MoveSpeed(10.f);
-  //          m_pTransformCom->Go_Down(fTimeDelta);
-   //     }
-   /// }
+   if(m_iState != ST_Hit_Front && m_iState != ST_Aim_Down) 
+        NON_intersect(fTimeDelta);
+
+
+
 
     __super::Update(fTimeDelta);
 }
@@ -87,12 +85,12 @@ HRESULT CBoomBot::Render()
 
 void CBoomBot::HIt_Routine()
 {
-  
+    m_iState = ST_Hit_Front;
 }
 
 void CBoomBot::Dead_Routine()
 {
-    
+    m_iState = ST_Aim_Down;
 }
 
 void CBoomBot::NON_intersect(_float fTimedelta)
@@ -104,30 +102,38 @@ void CBoomBot::NON_intersect(_float fTimedelta)
     _vector vDir = vPlayerPos - vPos;
 
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
-    if (40.f > fLength)
+
+   
+
+    if (20.f > fLength)
     {
-        if (25.f < fLength) {
-            
+
+        if (15.f < fLength)
+        {
             _float3 fDir{};
             XMStoreFloat3(&fDir, vDir);
 
-          
-            m_pTransformCom->Go_Straight(fTimedelta);
+            m_iState = ST_Run_Front;
+           m_pTransformCom->Go_Straight(fTimedelta);
+       
         }
-
-        if (25.f > fLength)
+        if (15.f > fLength)
         {
-          
-           
-            if (15.f > fLength)
-            {
-     
-                m_pTransformCom->Go_Backward(fTimedelta);
-            }
+            m_iState = ST_Shoot;
+            m_pTransformCom->Go_Backward(fTimedelta);       
         }
     }
+    else {
+            m_iState = ST_Idle;
+    }
 
- 
+
+
+    if (true == static_cast <CBody_BoomBot*>(m_PartObjects[PART_BODY])->Get_HitAttackMotion())
+    {
+        m_iState = ST_Shoot;
+
+    }
 }
 
 HRESULT CBoomBot::Add_Components()

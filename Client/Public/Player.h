@@ -60,7 +60,7 @@ public:
 	void Choose_Weapon(const _uint& WeaponNum);
 	_uint Get_Bullet();
 	_uint Get_MaxBullte();
-	
+	_bool Get_jump() { return m_bJump; }
 
 	_float Get_fPlayerY() { return m_fPlayerY; }
 

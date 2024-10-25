@@ -43,6 +43,9 @@ HRESULT CWeapon::Initialize(void* pArg)
         return E_FAIL;
 
     m_pTransformCom->Set_Scaling(0.01f, 0.01f, 0.01f);
+
+
+       
     return S_OK;
 }
 

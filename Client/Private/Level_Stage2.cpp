@@ -77,10 +77,6 @@ HRESULT CLevel_Stage2::Ready_Layer_Camera(const _uint& pLayerTag)
 	Desc.fNearZ = 0.1f;
 	Desc.fFarZ = 500.f;
 	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
-	Desc.fSpeedPerSec = m_pGameInstance->Get_Player()->Get_Transform()->Get_MoveSpeed();
-	Desc.fRotationPerSec = m_pGameInstance->Get_Player()->Get_Transform()->Get_RotSpeed(); 
-	Desc.fMouseSensor = 0.05f;
-	Desc.JumpPower = m_pGameInstance->Get_Player()->Get_Transform()->Get_JumpPower();
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag,
 		TEXT("Prototype_GameObject_Camera_Free"),nullptr,0, &Desc)))
 		return E_FAIL;
@@ -105,20 +101,20 @@ HRESULT CLevel_Stage2::Ready_Layer_UI(const _uint& pLayerTag)
 
 HRESULT CLevel_Stage2::Ready_Layer_Map(const _uint& pLayerTag)
 {
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Stage1_terrain.dat", CGameObject::DATA_TERRAIN)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Stage2_terrain.dat", CGameObject::DATA_TERRAIN)))
 	//	return   E_FAIL;
 	//
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Stage2_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
  	//	return   E_FAIL;
 	//
 	//
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,L"Prototype GameObject_CHEST", L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_CHEST)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,L"Prototype GameObject_CHEST", L"../Bin/Data/Map/SetMap_Stage2_ani.dat", CGameObject::DATA_CHEST)))
 	//	return   E_FAIL;
 	//
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_WALL", L"../Bin/Data/Map/SetMap_Stage1_Wall.dat", CGameObject::DATA_WALL)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_WALL", L"../Bin/Data/Map/SetMap_Stage2_Wall.dat", CGameObject::DATA_WALL)))
 	//	return   E_FAIL;
 	//
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_DOOR", L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_DOOR)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_DOOR", L"../Bin/Data/Map/SetMap_Stage2_ani.dat", CGameObject::DATA_DOOR)))
 	//	return   E_FAIL;
 
 	return S_OK;
