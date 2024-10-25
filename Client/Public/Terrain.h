@@ -50,7 +50,7 @@ private:
     CVIBuffer_Terrain* m_pVIBufferCom = {nullptr};
     CNavigation* m_pNavigationCom = {nullptr};
     _uint m_pSize[2]{};
-    _bool m_bMain = {false};
+    _bool m_bMain = {false};  // 이건 타일 수정할 떄 꼭 하자
     const _tchar* NavigationFath = { nullptr };
 private:
     HRESULT Add_Components();

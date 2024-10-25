@@ -29,6 +29,7 @@ HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex, const _uint& Ty
 
 _bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeighborIndex ,_vector* Slide )
 {
+
 	for (size_t i = 0; i < LINE_END; i++)
 	{
 		_vector		vLine = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]) - XMLoadFloat3(&m_vPoints[i]);  // 점과 점의 방향벡터(라인)을 그린다. 앞에 나누기 연산을 한건 없는 4번째 점을 찾을까봐..
@@ -44,13 +45,13 @@ _bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeig
 			_vector vReflectDir = XMVector3Dot(XMVector3Normalize(vNormal) * -1, MoveDir);
 
 			_float vReflectLength = XMVectorGetX(vReflectDir);
-			if (vReflectLength < 0.f)
-				vReflectLength *= -1.f;
+		 	if (vReflectLength < 0.f)
+		 		vReflectLength *= -1.f;
 
-			_vector Slid{};
-			 Slid = MoveDir - vReflectLength * XMVector3Normalize(vNormal);
-			 *Slide = Slid;
-			
+		     _vector Slid{};
+		 	 Slid = MoveDir - vReflectLength * XMVector3Normalize(vNormal);
+
+		 	 *Slide = Slid;
 
 			return false;
 		}

@@ -72,6 +72,8 @@ private:
     _tchar m_wMaxBullte[50] = {};
     _uint m_iMaxBullet = { 0 };
     _vector m_vColar{};
+
+
 private:
     HRESULT Add_Components();
 

@@ -9,12 +9,13 @@ class CModel;
 END
 
 BEGIN(Client)
-
+class CInteractiveUI;
+class CPlayer;
 class CCHEST final : public CGameObject
 {
 public : 
 	enum chestType { ANI, NONANI, CHEST_END};
-
+	enum State { IDLE, HOVDER, OPEN};
 private:
 	CCHEST(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CCHEST(const CCHEST& Prototype);
@@ -32,10 +33,9 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
 	virtual void Set_Model(const _wstring& protoModel) override;
-	virtual void Set_Buffer(_uint x, _uint y)override { m_pWeaPonType = y;}
+	virtual void Set_Buffer(_uint x, _uint y)override;
 
-
-	//virtual CModel* Get_Model() override { return m_pModelCom; }
+	void Interactive(_float fTimeDelta);
 	
 private:
 	CShader*					m_pShaderCom[CHEST_END] = {nullptr};
@@ -43,8 +43,14 @@ private:
 	_bool						m_bOpen = { false };
 	_bool						m_bIcon = { false };
 	_bool						m_bHover = { false };
+	_bool						m_bState = { false };
 	_uint						m_pWeaPonType{};
-	_uint						m_istate{0};
+	_tchar*					    m_pWeaPonNumName = {};
+
+	 _tchar m_WeaPonName[50]{};
+	CInteractiveUI* m_InteractiveUI ;
+	CPlayer* m_pPlayer;
+
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources(_int i);

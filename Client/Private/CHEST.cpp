@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "CHEST.h"
-#include "WeaPonIcon.h"
 #include "GameInstance.h"
-
+#include "WeaPonIcon.h"
+#include "InteractiveUI.h"
+#include "Player.h"
 CCHEST::CCHEST(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -28,6 +29,10 @@ HRESULT CCHEST::Initialize(void* pArg)
 
     if (FAILED(Add_Components()))
         return E_FAIL;
+
+    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
+    m_InteractiveUI->Set_Text(L"상자 열기");
+    m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
     return S_OK;
 }
 
@@ -41,64 +46,7 @@ _int CCHEST::Priority_Update(_float fTimeDelta)
 
 void CCHEST::Update(_float fTimeDelta)
 {
-
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vDir = vPos - vPlayerPos;
-
-    // vDir =	XMVector3Normalize(vDir);
-
-    _float fLength = XMVectorGetX(XMVector3Length(vDir));
-
-    if (fLength <= 9.f) {
-        if (fLength >= 8.f) {
-            m_pModelCom[ANI]->Set_Animation(1, true);
-            m_bHover = true;
-        }  
-    }
-    else if (fLength > 9.f) {
-        if (fLength <= 10.f)
-            m_pModelCom[ANI]->Set_Animation(0, true);
-        m_bHover = false;
-    }
-    
-    if (m_bHover) {
-        if (m_pGameInstance->Get_DIKeyDown(DIK_F))
-            m_pModelCom[ANI]->Set_Animation(2, false);
-    }
-
-
- 
-    if (true == m_bOpen)
-    {
-        if (false == m_bIcon)
-        {
-
-            CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_WeaPonIcon");
-
-            static_cast<CWeaPonIcon*>(pGameObject)->Set_WeaPone(m_pWeaPonType);
-            m_pGameInstance->Add_Clon_to_Layers(LEVEL_STATIC, CGameObject::MAP, pGameObject);
-
-            _float3 fPos{};
-
-            XMStoreFloat3(&fPos, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
-
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
-                                                        XMVectorSet(fPos.x, fPos.y + 1.f, fPos.z, 1.f));
-
-            static_cast<CWeaPonIcon*>(pGameObject)->Set_PosSave(fPos.x, fPos.y + 1.f, fPos.z);
-            m_bIcon = true;
-        }
-    }
-    if (false == m_bOpen)
-    {
-        if (true == m_pModelCom[ANI]->Play_Animation(fTimeDelta))
-        {
-            m_bOpen = true;
-        }
-    }
+    Interactive(fTimeDelta);   
 }
 
 void CCHEST::Late_Update(_float fTimeDelta)
@@ -156,7 +104,107 @@ void CCHEST::Set_Model(const _wstring& protoModel)
         MSG_BOX("Set_Model failed");
         return;
     }
-    m_pModelCom[ANI]->Set_Animation(0, true);
+
+}
+
+void CCHEST::Set_Buffer(_uint x, _uint y)
+{  m_pWeaPonType = y; 
+       
+switch (m_pWeaPonType)
+{
+case CWeapon::WeaPoneType::HendGun:
+    m_pWeaPonNumName = L"HendGun ";
+    break;
+case CWeapon::WeaPoneType::AssaultRifle:
+    m_pWeaPonNumName = L"Assault Rifle ";
+    break;
+case CWeapon::WeaPoneType::MissileGatling:
+    m_pWeaPonNumName = L"Missile Gatling ";
+    break;
+case CWeapon::WeaPoneType::HeavyCrossbow:
+    m_pWeaPonNumName = L"Heavy Crossbow ";
+    break;
+}
+
+  lstrcatW(m_WeaPonName, m_pWeaPonNumName);
+  lstrcatW(m_WeaPonName, L"장착");
+
+}
+
+void CCHEST::Interactive(_float fTimeDelta)
+{
+    _vector vPlayerPos = m_pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vDir = vPos - vPlayerPos;
+
+
+    _float fLength = XMVectorGetX(XMVector3Length(vDir));
+
+    if (fLength <= 6.f && m_bState == true) {
+        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, true);
+        m_pModelCom[ANI]->Set_Animation(State::HOVDER, true);
+        m_bHover = true;
+        m_bState = false;
+
+    }
+    if (fLength > 6.f && m_bState == false) {
+
+        m_pModelCom[ANI]->Set_Animation(State::IDLE, true);
+        m_bHover = false;
+        m_bState = true;
+    }
+
+    if (m_bHover && false == m_bOpen) {
+
+        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false);
+        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, true);
+        if (true == m_InteractiveUI->Get_Interactive())
+        {
+            m_pModelCom[ANI]->Set_Animation(State::OPEN, false);
+            m_InteractiveUI->Set_Interactive(false);
+        }
+
+    }
+
+    if (false == m_bHover || fLength > 6.f) {
+ 
+            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true);
+            m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
+       
+    }
+
+
+    if (true == m_bOpen)
+    {
+        if (false == m_bIcon)
+        {
+            CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_WeaPonIcon");
+            static_cast<CWeaPonIcon*>(pGameObject)->Set_WeaPone(m_pWeaPonType);
+            m_pGameInstance->Add_Clon_to_Layers(LEVEL_STATIC, CGameObject::MAP, pGameObject);
+
+            _float3 fPos{};
+
+            XMStoreFloat3(&fPos, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+
+            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
+                XMVectorSet(fPos.x, fPos.y + 1.f, fPos.z, 1.f));
+
+            static_cast<CWeaPonIcon*>(pGameObject)->Set_PosSave(fPos.x, fPos.y + 1.f, fPos.z);
+            m_bIcon = true;
+        }
+
+    }
+
+    if (true == m_pModelCom[ANI]->Play_Animation(fTimeDelta))
+    {
+        if (false == m_bOpen)
+        {
+            m_bOpen = true;
+            m_InteractiveUI->Set_Text(m_WeaPonName);
+        }
+    }
 }
 
 
@@ -245,4 +293,5 @@ void CCHEST::Free()
         Safe_Release(m_pModelCom[i]);
         Safe_Release(m_pShaderCom[i]);
     }
+
 }

@@ -32,13 +32,14 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-
+	void Set_HitAttackMotion(_bool motion) { m_bHitAttackMotion = motion; }
+	_bool Get_HitAttackMotion() { return m_bHitAttackMotion; }
 private:
 
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-
+	_bool m_bHitAttackMotion = false;
 public:
         static CBody_BoomBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

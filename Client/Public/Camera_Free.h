@@ -3,12 +3,12 @@
 #include "Camera.h"
 
 BEGIN(Client)
+class CPlayer;
 class CCamera_Free final: public CCamera
 {
  public:
 	typedef struct CAMERA_FREE_DESC : public CCamera::CAMERA_DESC
 	{
-		_float				fMouseSensor{};
 	}CAMERA_FREE_DESC;
 private:
 	CCamera_Free(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -25,10 +25,7 @@ public:
 	virtual HRESULT Render() override;
 
 private:
-	_float					m_fMouseSensor = { 0.f };
-	_bool m_bturn{};
-	_float m_fTimeSum{};
-	_bool m_bjump{};
+	CPlayer* m_pPlayer = { nullptr };
 public:
 	static CCamera_Free* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

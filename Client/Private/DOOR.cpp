@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "DOOR.h"
-
+#include "InteractiveUI.h"
 #include "GameInstance.h"
-
+#include "Player.h"
 CDOOR::CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -28,6 +28,9 @@ HRESULT CDOOR::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
+
+    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
+    m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
     return S_OK;
 }
 
@@ -36,28 +39,62 @@ _int CDOOR::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
-    if (m_pGameInstance->Get_DIKeyDown(DIK_0))
-    {
-        m_pModelCom->Set_Animation(0, false);
-    }
-
-    if (m_pGameInstance->Get_DIKeyDown(DIK_1))
-    {
-        m_pModelCom->Set_Animation(1, false);
-    }
-
-    if (m_pGameInstance->Get_DIKeyDown(DIK_2))
-    {
-        m_pModelCom->Set_Animation(2, false);
-    }
-
     return OBJ_NOEVENT;
 }
 
 void CDOOR::Update(_float fTimeDelta)
 {
-    m_pModelCom->Play_Animation(fTimeDelta);
-    _uint iData = 10;
+    _vector vPlayerPos = m_pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vDir = vPos - vPlayerPos;
+
+    _float fLength = XMVectorGetX(XMVector3Length(vDir));
+
+    if (fLength <= 6.f && m_bState == false ) {
+        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false);
+        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, true);
+        m_InteractiveUI->Set_Text(L"¹® ¿­±â");
+        if (true == m_InteractiveUI->Get_Interactive())
+        {
+
+            if (m_pModelName != L"Proto Component ItemDoor Model_aniObj")
+                m_iState = State::OPEN;
+            else
+                m_iState = State2::OPEN2;
+
+            m_pModelCom->Set_Animation(m_iState, false);
+            m_InteractiveUI->Set_Interactive(false);
+            m_bState = true;
+        }
+    }
+ 
+    if (fLength > 6.f && m_bState == true) {
+
+        if(m_pModelName != L"Proto Component ItemDoor Model_aniObj")
+        m_iState = State::ClOSE;
+        else
+            m_iState = State2::ClOSE2;
+
+        m_pModelCom->Set_Animation(m_iState, false);
+        m_bState = false;
+
+    }
+    if (true == m_bOpen)
+    {
+        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
+        m_bOpen = false;
+    }
+ 
+
+ 
+    if (true == m_pModelCom->Play_Animation(fTimeDelta))
+    {
+        if (m_pModelName != L"Proto Component ItemDoor Model_aniObj" && m_iState != State::ClOSE)
+        m_bOpen = true;
+    }
+  
 }
 
 void CDOOR::Late_Update(_float fTimeDelta)
@@ -94,14 +131,21 @@ HRESULT CDOOR::Render()
 
 void CDOOR::Set_Model(const _wstring& protoModel)
 {
-
+    m_pModelName = protoModel;
     if (FAILED(__super::Add_Component(LEVEL_STAGE1, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
     {
         MSG_BOX("Set_Model failed");
         return;
     }
-    m_pModelCom->Set_Animation(0, true);
+
+    if(m_pModelName == L"Proto Component ItemDoor Model_aniObj")
+        m_pModelCom->Set_Animation(2, false);
+    else {
+
+        m_iState = State::ClOSE;
+        m_pModelCom->Set_Animation(m_iState, true);
+    }
 }
 
 HRESULT CDOOR::Add_Components()

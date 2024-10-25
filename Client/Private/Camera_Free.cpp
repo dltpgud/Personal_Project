@@ -19,11 +19,9 @@ HRESULT CCamera_Free::Initialize(void* pArg)
 {
     CAMERA_FREE_DESC* pDesc = static_cast<CAMERA_FREE_DESC*>(pArg);
 
-    m_fMouseSensor = pDesc->fMouseSensor;
-
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
-
+    m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
     return S_OK;
 }
 
@@ -31,10 +29,11 @@ _int CCamera_Free::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
-  _vector vEye = { static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_41,
-               static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_42,
-               static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_43,
-               static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44 };
+  _vector vEye = { 
+               m_pPlayer->Get_CameraBone()->_41,
+               m_pPlayer->Get_CameraBone()->_42,
+               m_pPlayer->Get_CameraBone()->_43,
+               m_pPlayer->Get_CameraBone()->_44 };
  
   _vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
   

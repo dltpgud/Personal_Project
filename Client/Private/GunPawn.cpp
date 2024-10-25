@@ -57,7 +57,7 @@ _int CGunPawn::Priority_Update(_float fTimeDelta)
 
 void CGunPawn::Update(_float fTimeDelta)
 {
-    if (static_cast <CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_Finish())
+    if (m_PartObjects[PART_BODY]->Get_Finish())
         m_iState = ST_IDLE;
 
     if(m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)

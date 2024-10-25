@@ -27,6 +27,7 @@
 #include "Body_JetFly.h"
 #include "Body_BoomBot.h"
 #include "BoomBot.h"
+#include "InteractiveUI.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -102,21 +103,28 @@ void CLoader::Output_LoadingState()
 #endif
 
 HRESULT CLoader::Loading_For_MenuLevel()
-{
+{	
+	/* Prototype_GameObject_Loading */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Loading"),
 		CLoading::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	/* Prototype_GameObject_SpriteTexture */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_SpriteTexture"),
 		CSpriteTexture::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	/* Prototype_GameObject_PlayerHP_UI */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_PlayerHP_UI"),
 		CPlayerUI::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+	/* Prototype_GameObject_WeaponUI_UI */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_WeaponUI_UI"),
 		CWeaponUI::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+	/* Prototype_GameObject_Cursor */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Cursor"),
 		CCursor::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
@@ -124,6 +132,11 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	/* Prototype_GameObject_Player_Aim */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Player_Aim"),
 		CAim::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+	/* Prototype_GameObject_InteractiveUI */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_InteractiveUI"),
+		CInteractiveUI::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
@@ -222,6 +235,9 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component BossDoor Model_aniObj"),
 			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/BossDoor.dat"), PreTransformMatrix))))
 			return E_FAIL;
+		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component ItemDoor Model_aniObj"),
+			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/WPDoor.dat"), PreTransformMatrix))))
+			return E_FAIL;
 
 
 
@@ -234,7 +250,7 @@ HRESULT CLoader::Loading_For_Stage1Level()
 			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/JetFly.dat"), PreTransformMatrix))))
 			return E_FAIL;
         if (FAILED(m_pGameInstance->Add_Prototype_Component( LEVEL_STAGE1, TEXT("Proto_Component_BoomBot_Model"),
-            CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/BoomBot.dat"),PreTransformMatrix))))
+            CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_BoomBot.dat"),PreTransformMatrix))))
             return E_FAIL;
 
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");

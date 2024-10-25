@@ -58,7 +58,7 @@ _int CJetFly::Priority_Update(_float fTimeDelta)
 
 void CJetFly::Update(_float fTimeDelta)
 {
-    if (static_cast <CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_Finish())
+    if (m_PartObjects[PART_BODY]->Get_Finish())
         m_iState = ST_Idle;
 
     if(m_iState != ST_Hit_Front && m_iState != ST_Sragger)
@@ -90,7 +90,7 @@ void CJetFly::HIt_Routine()
 {
    
     m_iState = ST_Sragger;
-    m_bHit = true;
+
 }
 
 void CJetFly::Dead_Routine()

@@ -82,72 +82,49 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos , _fvector vBeforeMoveWorldPos
     _vector vBeforeLocalPos = XMVector3TransformCoord(vBeforeMoveWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
 
     _int iNeighborIndex = {-1};
+    _bool m_breturn = { true };
 
+
+    _vector Slid{};
     /* 현재 이동하고 난 결과위치가 원래 존재하고 있던 쎌 바깥으로 나갔다. */
-    if (false == m_Cells[m_iCurrentCellIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex , Slide))
+    if (false == m_Cells[m_iCurrentCellIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex , &Slid))
     {	/* 나간 방향에 이웃이 있었다면. */
         if (-1 != iNeighborIndex)
         {
             while (true)  // 반복하자 계속
             {
-                if (true == m_Cells[iNeighborIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, Slide))  // 이웃이 있을때 까지
-                    break;
-                
+                if (true == m_Cells[iNeighborIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &Slid))  // 이웃이 있을때 까지
+                      break;
+               
                 if (-1 == iNeighborIndex)  // 여기까지 오면 없는거고
                 {
-                   return false;
+                    Slid = XMVectorZero();
+                 
+                    m_breturn = false;
                 }
             }
-     
+           
             m_iCurrentCellIndex = iNeighborIndex;  //반복문 탈출에 성공했으면 그 좌표를 현재 셀 인덱스로 잡자      
-            return true;
+         
+            m_breturn = true;
+
+
+        
+
         }
         else /* 나간 방향에 이웃이 없었다면. */
         {
-            return false;
+
+            m_breturn = false;
         }
     }
+   
 
-    return true;
+    *Slide = Slid;
+
+    return m_breturn;
 }
 
-_bool CNavigation::isMove2(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide)
-{
-    // 초기화
-    _vector vCurrentPos = vBeforeMoveWorldPos;                                 // 현재 위치
-    _vector vDirection = XMVector3Normalize(vAfterMoveWorldPos - vBeforeMoveWorldPos); // 이동 방향 (정규화)
-    float fDistanceMoved = 0.0f;                                               // 이동한 거리 누적
-    const float fMaxDistance = XMVectorGetX(XMVector3Length(vAfterMoveWorldPos - vBeforeMoveWorldPos)); // 최대 이동 거리
-    const float fStepSize = 1.0f; // 최소 이동 단위 (예: 1)
-
-    // 최소 단위로 이동하며 셀 경계 확인
-    while (fDistanceMoved < fMaxDistance)
-    {
-        // 다음 위치 계산
-        vCurrentPos += vDirection * fStepSize;
-        fDistanceMoved += fStepSize;
-
-        // 다음 위치가 셀 내부에 있는지 확인
-        int iNeighborIndex = -1;
-        if (!m_Cells[m_iCurrentCellIndex]->isIn(vCurrentPos, vBeforeMoveWorldPos, &iNeighborIndex, Slide))
-        {
-            // 셀 내부에 없고 인접 셀이 없는 경우: 이동 중단
-            if (iNeighborIndex == -1)
-            {
-                if (Slide)
-                    *Slide = XMVectorZero(); // 이동 취소
-                return false;                // 이동 실패
-            }
-            // 인접 셀로 이동 가능한 경우: 셀 인덱스 갱신
-            m_iCurrentCellIndex = iNeighborIndex;
-        }
-    }
-
-    // 최종 위치를 갱신
-    if (Slide)
-        *Slide = vDirection * (fMaxDistance - fDistanceMoved); // 남은 거리를 슬라이딩으로 처리
-    return true;                                               // 이동 성공
-}   
 
 #ifdef _DEBUG
 

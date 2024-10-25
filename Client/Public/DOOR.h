@@ -9,9 +9,12 @@ class CModel;
 END
 
 BEGIN(Client)
-
+class CInteractiveUI;
+class CPlayer;
 class CDOOR final : public CGameObject
 {
+	enum State {ClOSE, OPEN };
+	enum State2 { OPEN2, IDLE,ClOSE2};
 private:
 	CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CDOOR(const CDOOR& Prototype);
@@ -38,7 +41,12 @@ private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
 
-
+	_wstring m_pModelName{};
+	CInteractiveUI* m_InteractiveUI = { nullptr };
+	CPlayer* m_pPlayer = { nullptr };
+	_bool m_bState = { false };
+	_bool m_bOpen = { false };
+	_uint m_iState = { 0 };
 public:
 	static CDOOR* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

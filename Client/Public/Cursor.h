@@ -9,7 +9,7 @@ class CTransform;
 class CTexture;
 
 END
-
+BEGIN(Client)
 class CCursor : public CUI
 {
 private:
@@ -38,4 +38,4 @@ public:
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void		 Free() override;
 };
-
+END

@@ -68,6 +68,8 @@ private:
 	_uint m_iFirstBullet[WeaPoneType_END]{ 0 };
 	WeaPoneType	m_iBullet{};
 	_float m_fDamage{};
+
+
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

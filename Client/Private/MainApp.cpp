@@ -144,6 +144,10 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Loading/Loading.png")))))
 		return E_FAIL;
 
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_KeyBoard_F"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/InteractiveUI/T_Keyboard_Black_F.dds")))))
+		return E_FAIL;
+	
 
 	/* For.Prototype_Component_Collider_AABB */
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
@@ -228,6 +232,10 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Wall3 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Wall3.dat"), PreTransformMatrix))))
 		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component DoorRock Model_Wall"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/DoorRock.dat"), PreTransformMatrix))))
+		return E_FAIL;
+
 
 	///*Prototype_Component_Ve*/
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Cactus Model_nonaniObj"),

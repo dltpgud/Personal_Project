@@ -115,6 +115,9 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\BoomBot\Body">
       <UniqueIdentifier>{57a3b578-378c-4374-8b18-59d88a08d3fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\04.UI\InteractiveUI">
+      <UniqueIdentifier>{78f16647-2133-4cc7-a390-87a5586c3dba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -225,6 +228,9 @@
     <ClInclude Include="..\Public\Body_BoomBot.h">
       <Filter>02.GameObjects\03.Actor\Monster\BoomBot\Body</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\InteractiveUI.h">
+      <Filter>02.GameObjects\04.UI\InteractiveUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -322,6 +328,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Body_BoomBot.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\BoomBot\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\InteractiveUI.cpp">
+      <Filter>02.GameObjects\04.UI\InteractiveUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

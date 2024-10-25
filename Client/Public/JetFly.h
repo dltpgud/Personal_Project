@@ -60,7 +60,7 @@ private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
     HRESULT Bind_ShaderResources();
-    _bool m_bHit = false;
+   
 
 public:
     static CJetFly* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -65,11 +65,12 @@ void CWeaPonIcon::Update(_float fTimeDelta)
         }
     }
    
-    if (m_pGameInstance->Get_DIKeyDown(DIK_I))
+    if (m_pGameInstance->Get_DIKeyDown(DIK_F))
     {
         static_cast<CWeaponUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerWeaPon))
             ->Set_ScecondWeapon(m_weaPon);
         m_bDead = true;
+        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
     }
 }
 
