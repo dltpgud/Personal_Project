@@ -5,7 +5,7 @@
 #include "PlayerUI.h"
 #include "Camera_Free.h"
 #include "Player.h"
-
+#include "Actor.h"
 CLevel_Stage1::CLevel_Stage1(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -31,6 +31,14 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
 		return E_FAIL;
 
+
+	if (FAILED(Ready_Layer_NPC(CGameObject::NPC)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Find_cell()))
+		return E_FAIL;
+
+	
 	return S_OK;
 }
 
@@ -58,32 +66,18 @@ HRESULT CLevel_Stage1::Render()
 
 HRESULT CLevel_Stage1::Ready_Layer_Monster(const _uint& pLayerTag)
 {
-	CActor::Actor_DESC Desc{};
-	Desc.POSITION = XMVectorSet( - 13.f, 0.f, 90.f, 1.f );
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
-		TEXT("Prototype_GameObject_GunPawn"),nullptr,0 , &Desc)))
-		return E_FAIL;
-	
-	m_pGameInstance->Add_Monster(LEVEL_STAGE1,m_pGameInstance->Recent_GameObject(LEVEL_STAGE1,pLayerTag));
-
-	Desc.POSITION = XMVectorSet(13.f, 5.f, 90.f, 1.f);
-
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
-		TEXT("Prototype_GameObject_JetFly"), nullptr, 0, &Desc)))
-		return E_FAIL;
-
-	m_pGameInstance->Add_Monster(LEVEL_STAGE1, m_pGameInstance->Recent_GameObject(LEVEL_STAGE1, pLayerTag));
-
-
-	
-	Desc.POSITION = XMVectorSet(13.f, 0.f, 45.f, 1.f);
-
-        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
-                                                            TEXT("Prototype_GameObject_BoomBot"), nullptr, 0, &Desc)))
-            return E_FAIL;
-
-        m_pGameInstance->Add_Monster(LEVEL_STAGE1, m_pGameInstance->Recent_GameObject(LEVEL_STAGE1, pLayerTag));
+  if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_GunPawn",
+	  L"../Bin/Data/Monster/Stage1_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_GUN_PAWN)))
+  	return   E_FAIL;
+  
+  if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
+	  L"../Bin/Data/Monster/Stage1_Monster.dat" , CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_JET_FLY)))
+  	return   E_FAIL;
+  
+  if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_BoomBot", 
+	  L"../Bin/Data/Monster/Stage1_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOOM_BOT)))
+	return   E_FAIL;
 
 	return S_OK;
 }
@@ -137,20 +131,26 @@ HRESULT CLevel_Stage1::Ready_Layer_UI(const _uint& pLayerTag)
 
 HRESULT CLevel_Stage1::Ready_Layer_Map(const _uint& pLayerTag)
 {
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Stage1_terrain.dat", CGameObject::DATA_TERRAIN)))
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Proto GameObject_Terrain", 
+		L"../Bin/Data/Map/SetMap_Stage1_terrain.dat", CGameObject::DATA_TERRAIN)))
 		return   E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj",
+		L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
  		return   E_FAIL;
 
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,L"Prototype GameObject_CHEST", L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_CHEST)))
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,L"Prototype GameObject_CHEST",
+		L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_CHEST)))
 		return   E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_WALL", L"../Bin/Data/Map/SetMap_Stage1_Wall.dat", CGameObject::DATA_WALL)))
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_WALL",
+		L"../Bin/Data/Map/SetMap_Stage1_Wall.dat", CGameObject::DATA_WALL)))
 		return   E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_DOOR", L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_DOOR)))
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_DOOR",
+		L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_DOOR)))
 		return   E_FAIL;
 
 
@@ -159,6 +159,26 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _uint& pLayerTag)
 		TEXT("Prototype_GameObject_Sky"))))
 		return E_FAIL;
 
+
+
+	return S_OK;
+}
+
+HRESULT CLevel_Stage1::Ready_Layer_NPC(const _uint& pLayerTag)
+{
+
+	
+   if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_HealthBot", 
+	   L"../Bin/Data/NPC/Stage1_NPC.dat", CGameObject::DATA_NPC, nullptr, CActor::TYPE_HEALTH_BOT)))
+		return   E_FAIL;
+		
+
+	return S_OK;
+}
+
+HRESULT CLevel_Stage1::Ready_Find_cell()
+{
+m_pGameInstance->Find_Cell(LEVEL_STAGE1);
 	return S_OK;
 }
 
@@ -186,7 +206,6 @@ HRESULT CLevel_Stage1::Ready_Layer_Player(const _uint& pLayerTag)
 	m_pGameInstance->Set_Player(m_pGameInstance->Recent_GameObject(LEVEL_STATIC, pLayerTag));
 
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(25.f, 2.f, -12.f, 1.f));
-
 
 	return S_OK;
 }

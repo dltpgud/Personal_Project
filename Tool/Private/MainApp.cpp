@@ -9,6 +9,8 @@
 #include "Door.h"
 #include "Chest.h"
 #include "Wall.h"
+#include "Monster.h"
+#include "NPC.h"
 CMainApp::CMainApp()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
 {
@@ -269,6 +271,23 @@ if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Co
 
 
 	
+	///*Prototype_Component_Monster*/
+	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component GunPawn_Monster"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/GunPawn.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component JetFly_Monster"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/JetFly.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component BoomBot_Monster"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_BoomBot.dat"), PreTransformMatrix))))
+		return E_FAIL;
+
+
+	///*Prototype_Component_NPC*/
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component HealthBot_NPC"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/HealthBot.dat"), PreTransformMatrix))))
+		return E_FAIL;
 	return S_OK;
 }
 
@@ -294,6 +313,16 @@ HRESULT CMainApp::Ready_Prototype_For_GameObject()
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject Chest_aniObj"), CChest::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+	/*Proto GameObject Monster_Monster*/
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject Monster_Monster"),  CMonster::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+
+	/*Proto GameObject NPC_NPC*/
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject NPC_NPC"), CNPC::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
 	return S_OK;
 }
 

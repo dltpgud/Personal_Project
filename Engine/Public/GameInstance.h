@@ -58,7 +58,7 @@ public: /* for.Level_Manager */
 
 public: /* For.Object_Manager*/
 	HRESULT Add_Prototype(const _wstring& strPrototypeTag, class CGameObject* pPrototype);
-	HRESULT Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath = nullptr, const _uint& DataType =0, void* pArg = nullptr);
+	HRESULT Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath = nullptr, const _uint& DataType =0, void* pArg = nullptr, const _uint& ProtoTag = 0);
 	HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, class CGameObject* pGameObject);
     CGameObject* Find_Prototype(const _wstring& strPrototypeTag);
 	class CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg = nullptr);
@@ -74,7 +74,7 @@ public: /* For.Object_Manager*/
 public: /* For.Collider_Manager */
 	HRESULT Add_Monster(_uint iClearLevelID, class CGameObject* Monster);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
-
+	HRESULT Find_Cell(_uint Ilevel);
 
 
 public: /* For.UI_Manager*/
@@ -85,6 +85,10 @@ public: /* For.UI_Manager*/
 	CGameObject* Get_UI(const _uint& iLevel, const _uint& uID);
     HRESULT UI_shaking(const _uint& uID, _float fTimeDelta);    
 	HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY);
+	HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
+
+
+
     public: /* For.Component_Manager */
 	HRESULT Add_Prototype_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, class CComponent* pPrototype);
 	class CComponent* Clone_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, void* pArg = nullptr);
@@ -116,11 +120,11 @@ public: /* For.Calculator */
     void Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir ,_bool forPlayer = false);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
+	HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 
-
-	public: /* For.Font_Manager */
-		HRESULT Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath);
-		HRESULT Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale = 1.f, _float fRotation = 0.f, const _float2& vPivot = _float2(0.f, 0.f));
+public: /* For.Font_Manager */
+	HRESULT Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath);
+	HRESULT Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale = 1.f, _float fRotation = 0.f, const _float2& vPivot = _float2(0.f, 0.f));
 
 private:
  CActor* m_pPlayer = {nullptr};   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.

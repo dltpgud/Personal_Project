@@ -22,6 +22,8 @@ public:
         WALL,
         NONANIMAPOBJ,
         ANIMAPOBJ,
+        MONSTER,
+        NPC,
         POROTO_TYPE_END
     };
 
@@ -44,7 +46,8 @@ private:
     void MapANIObj_ListBox();
     void Terrain_ListBox();
     void Wall_ListBox();
-
+    void Monster_ListBox();
+    void NPC_ListBox();
     HRESULT Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, _int Iindex, _uint Comindex);
 
     void Push_Proto_vec();
@@ -64,13 +67,16 @@ private:
     void Save_Wall(const _tchar* tFPath);
     void Save_Ani(const _tchar* tFPath);
     void Save_Navigation (const _tchar* tFPath);
+    void Save_Monster(const _tchar* tFPath);
+    void Save_NPC(const _tchar* tFPath);
 
     void Load_Terrain(const _tchar* tFPath);
     void Load_NonAniObj(const _tchar* tFPath);
     void Load_Wall(const _tchar* tFPath);
     void Load_Ani(const _tchar* tFPath);
     void Load_Navigation(const _tchar* tFPath);
-
+    void Load_Monster(const _tchar* tFPath);
+    void Load_NPC(const _tchar* tFPath);
 
     void ChsetWeapon();
     void Key_input(_float ftimedelta);
@@ -97,6 +103,8 @@ private:
     _bool m_bshow_win_Wall = false;
     _bool m_bshow_win_NONaniObj = false;
     _bool m_bshow_win_aniObj = false;
+    _bool m_bshow_win_Monster = false;
+    _bool m_bshow_win_NPC = false;
     /*메세지 박스*/
     _bool m_bshow_Del_MessageBox = false;
     _bool m_bshow_Save_MessageBox = false;
@@ -108,8 +116,8 @@ private:
     /*int */
     _int m_iMapObj_Type{};
     _int m_iScene_Type{};
-    _int m_iItem_selected_idx[4]{};
-    _int m_iIcomtem_selected_idx[4]{};
+    _int m_iItem_selected_idx[6]{};
+    _int m_iIcomtem_selected_idx[6]{};
     _int m_iBufferCount[2]{};
     _int m_CopyiItem_selected_idx{};
     _int m_CopyiIcomtem_selected_idx{};
@@ -135,7 +143,7 @@ private:
     CTransform* m_pObjTransform = {nullptr};
 
     _wstring m_wPrototype_Key{};
-    const _tchar* m_tFPath[5]{};
+    const _tchar* m_tFPath[7]{};
 
     vector<_char*> m_protokey[POROTO_TYPE_END];
     vector<_char*> m_protoComkey[POROTO_TYPE_END];

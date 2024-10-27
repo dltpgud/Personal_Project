@@ -108,13 +108,16 @@ PS_OUT PS_MAIN_HP(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    if (In.vTexcoord.x < g_hp || In.vTexcoord.x == g_hp_pluse)
+    if (In.vTexcoord.x < g_hp )
         Out.vColor = g_Texture1.Sample(LinearSampler, In.vTexcoord);
     else if (In.vTexcoord.x < g_hp_pluse)
         Out.vColor = g_Texture2.Sample(LinearSampler, In.vTexcoord);
     else 
         Out.vColor = g_Texture0.Sample(LinearSampler, In.vTexcoord);
     
+    
+    
+
     if (Out.vColor.a == 0.f)   
         discard;
     
@@ -145,6 +148,5 @@ technique11 DefaultTechnique
 		VertexShader = compile vs_5_0 VS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN_HP();
 	}
-  
 
 }

@@ -41,21 +41,26 @@ void CActor::Update(_float fTimeDelta)
 
 void CActor::Late_Update(_float fTimeDelta)
 {
+	if (m_bOnCell) {
+		_float3 fPos{};
+		Height_On_Cell(&fPos);
+		m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(fPos.x, m_fY, fPos.z, 1.f));
+	}
 	if (m_bColl)
 	{
-
+		
 		if (m_fHP > 0.f)
 		{
-			HIt_Routine();
+			HIt_Routine(fTimeDelta);
 		}
+
 		if (m_fHP <= 0.f)
 		{
-			Dead_Routine();
+			Dead_Routine(fTimeDelta);
 		}
                 m_bColl = false;
 	}
-
-   __super::Late_Update(fTimeDelta);
+   __super::Late_Update(fTimeDelta);	
 }
 
 HRESULT CActor::Render()
@@ -70,6 +75,28 @@ HRESULT CActor::Render()
 	__super::Render();
 
 	return S_OK;
+}
+
+
+
+
+
+void CActor::Set_NavigationType(_uint i)
+{
+	m_pNavigationCom->Set_Type(i);
+}
+
+void CActor::Find_CurrentCell()
+{
+	m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+}
+
+void CActor::Height_On_Cell(_float3* fPos)
+{
+
+	m_pGameInstance->Compute_Y(m_pNavigationCom, m_pTransformCom, fPos);
+	m_fY = fPos->y + m_FixY;
+	
 }
 
 void CActor::Free()

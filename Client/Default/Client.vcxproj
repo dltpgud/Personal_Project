@@ -174,6 +174,7 @@
     <ClInclude Include="..\Public\Aim.h" />
     <ClInclude Include="..\Public\Body_BoomBot.h" />
     <ClInclude Include="..\Public\Body_GunPawn.h" />
+    <ClInclude Include="..\Public\Body_HealthBot.h" />
     <ClInclude Include="..\Public\Body_JetFly.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="..\Public\Camera_Free.h" />
     <ClInclude Include="..\Public\Cursor.h" />
     <ClInclude Include="..\Public\GunPawn.h" />
+    <ClInclude Include="..\Public\HealthBot.h" />
     <ClInclude Include="..\Public\InteractiveUI.h" />
     <ClInclude Include="..\Public\JetFly.h" />
     <ClInclude Include="..\Public\Level_Stage2.h" />
@@ -199,6 +201,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\MainApp.h" />
+    <ClInclude Include="..\Public\MonsterHP.h" />
     <ClInclude Include="..\Public\NonAniObj.h" />
     <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\PlayerUI.h">
@@ -225,6 +228,7 @@
     <ClCompile Include="..\Private\Aim.cpp" />
     <ClCompile Include="..\Private\Body_BoomBot.cpp" />
     <ClCompile Include="..\Private\Body_GunPawn.cpp" />
+    <ClCompile Include="..\Private\Body_HealthBot.cpp" />
     <ClCompile Include="..\Private\Body_JetFly.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
@@ -233,6 +237,7 @@
     <ClCompile Include="..\Private\Camera_Free.cpp" />
     <ClCompile Include="..\Private\Cursor.cpp" />
     <ClCompile Include="..\Private\GunPawn.cpp" />
+    <ClCompile Include="..\Private\HealthBot.cpp" />
     <ClCompile Include="..\Private\InteractiveUI.cpp" />
     <ClCompile Include="..\Private\JetFly.cpp" />
     <ClCompile Include="..\Private\Level_Stage2.cpp" />
@@ -247,6 +252,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\MainApp.cpp" />
+    <ClCompile Include="..\Private\MonsterHP.cpp" />
     <ClCompile Include="..\Private\NonAniObj.cpp" />
     <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\PlayerUI.cpp">
@@ -286,6 +292,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex_Inverse.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

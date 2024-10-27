@@ -83,12 +83,17 @@ HRESULT CCollider::Initialize(void* pArg)
 
 _bool CCollider::Intersect(CCollider* pTargetCollider)
 {
+
 	return m_isColl = m_pBounding->Intersect(pTargetCollider->m_eColliderType, pTargetCollider->m_pBounding);
 }
 
 _bool CCollider::RayIntersects(_vector RayPos, _vector RayDir, _float& fDis)
 {
-	return m_isColl = m_pBounding->RayIntersect(RayPos, RayDir, fDis);
+
+
+	m_isColl = m_pBounding->RayIntersect(RayPos, RayDir, fDis);
+
+	return m_isColl;
 }
 
 #ifdef _DEBUG
@@ -112,8 +117,10 @@ HRESULT CCollider::Render()
 	m_pBatch->Begin();
 
 	m_pBounding->Render(m_pBatch, false == m_isColl ? XMVectorSet(0.f, 0.f, 1.f, 1.f) : XMVectorSet(1.f, 0.f, 0.f, 1.f));
-	//cout << m_isColl << endl;
+	
 	m_pBatch->End();
+
+
 
 	return S_OK;
 }

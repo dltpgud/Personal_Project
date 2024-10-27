@@ -37,7 +37,7 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+     m_iInteractiveType = INTERACTIVE_STATE::IS_END;
     return S_OK;
 }
 
@@ -48,7 +48,7 @@ _int CInteractiveUI::Priority_Update(_float fTimeDelta)
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F))
     {
-        m_bInteractive = true;
+        m_bInteractive[m_iInteractiveType] = true;
         m_vColor = { 0.f,1.f,0.f,1.f };
     }
     else
@@ -92,6 +92,16 @@ HRESULT CInteractiveUI::Render()
     m_pGameInstance->Render_Text(TEXT("Robo"), m_pText, _float2(g_iWinSizeX * 0.5f-40.f , g_iWinSizeY * 0.5f + 40.f), m_vColor, 0.4f);
 
     return S_OK;
+}
+
+_bool CInteractiveUI::Get_Interactive()
+{
+    return m_bInteractive[m_iInteractiveType]; 
+}
+
+void CInteractiveUI::Set_Interactive(_bool Interactive)
+{
+    m_bInteractive[m_iInteractiveType] = Interactive;
 }
 
 HRESULT CInteractiveUI::Add_Components()

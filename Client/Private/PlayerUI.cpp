@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "PlayerUI.h"
 #include "GameInstance.h"
+
 CPlayerUI::CPlayerUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{pDevice, pContext}
 {
 }
@@ -40,6 +41,8 @@ HRESULT CPlayerUI::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
+
+    m_fHealthHP = 1.f;
     return S_OK;
 }
 
@@ -60,6 +63,7 @@ _int CPlayerUI::Priority_Update(_float fTimeDelta)
           m_fY = m_fPrYPos;
       }
   }
+
     return OBJ_NOEVENT;
 }
 
@@ -68,12 +72,19 @@ void CPlayerUI::Update(_float fTimeDelta)
 
     if (GetAsyncKeyState(VK_F8) & 0x8000)
     {
-        m_HP -= 10.f;
-        m_HP_Pluse = m_HP / m_MaxHP + 0.1f;
+        m_fHP -= 10.f;
+        m_fHP_Pluse = m_fHP / m_fMaxHP + 0.1f;
     }
-    if (GetAsyncKeyState(VK_F7) & 0x8000)
+
+    if (m_iGageCount != -1)
     {
-        m_HP = m_HP + m_HP / m_MaxHP + 0.01f;
+        m_iGageCount--;
+        m_fHP += m_fHealthHP;
+   
+        m_pGameInstance->Get_Player()->Set_HealthCurrentHP(m_fHealthHP);
+
+        if (true == m_pGameInstance->Get_Player()->IsFullHP() || m_iGageCount == 0)
+                m_iGageCount = -1;  
     }
 }
 
@@ -90,9 +101,9 @@ HRESULT CPlayerUI::Render()
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Float("g_hp", m_HP / m_MaxHP)))
+    if (FAILED(m_pShaderCom->Bind_Float("g_hp", m_fHP / m_fMaxHP)))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Float("g_hp_pluse", m_HP_Pluse)))
+    if (FAILED(m_pShaderCom->Bind_Float("g_hp_pluse", m_fHP_Pluse)))
         return E_FAIL;
     ;
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
@@ -115,6 +126,7 @@ HRESULT CPlayerUI::Render()
 
     return S_OK;
 }
+
 
 HRESULT CPlayerUI::Add_Components()
 {

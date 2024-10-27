@@ -28,6 +28,9 @@
 #include "Body_BoomBot.h"
 #include "BoomBot.h"
 #include "InteractiveUI.h"
+#include "Body_HealthBot.h"
+#include "HealthBot.h"
+#include "MonsterHP.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -139,6 +142,11 @@ HRESULT CLoader::Loading_For_MenuLevel()
 		CInteractiveUI::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	/* Prototype_GameObject_MonsterHP */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_MonsterHP"),
+	 	CMonsterHP::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	/* For.Prototype_Component_Texture_Menu */
  	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_MENU, TEXT("Prototype_Component_Texture_Menu"),
@@ -238,9 +246,9 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component ItemDoor Model_aniObj"),
 			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/WPDoor.dat"), PreTransformMatrix))))
 			return E_FAIL;
-
-
-
+		 
+	
+		 
 		//*Prototype_Component_Monster*//
 		PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f)*XMMatrixRotationY(XMConvertToRadians(180.f));
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto_Component_GunPawn_Model"),
@@ -252,6 +260,14 @@ HRESULT CLoader::Loading_For_Stage1Level()
         if (FAILED(m_pGameInstance->Add_Prototype_Component( LEVEL_STAGE1, TEXT("Proto_Component_BoomBot_Model"),
             CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_BoomBot.dat"),PreTransformMatrix))))
             return E_FAIL;
+
+
+
+
+		//*Prototype_Component_NPC*//
+		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component HealthBot_Model"),
+			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/HealthBot.dat"), PreTransformMatrix))))
+			return E_FAIL;
 
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
 
@@ -308,6 +324,16 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		CWeapon::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+	/* Prototype_GameObject_NPC_HealthBot */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_HealthBot"),
+		CHealthBot::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	/* Prototype_GameObject_NPC_Body_HealthBot */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_HealthBot"),
+	 	CBody_HealthBot::Create(m_pDevice, m_pContext))))
+	 	return E_FAIL;
+
+
 	/* Prototype_GameObject_Monster_GunPawn */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_GunPawn"),
 		CGunPawn::Create(m_pDevice, m_pContext))))
@@ -316,22 +342,24 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_GunPawn"),
 		CBody_GunPawn::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
-
+	/* Prototype_GameObject_Monster_JetFly */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_JetFly"),
 		CJetFly::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
-
+	/* Prototype_GameObject_Monster_Body_JetFly */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_JetFly"),
 		CBody_JetFly::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
-
+	/* Prototype_GameObject_Monster_BoomBot */
     if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_BoomBot"),
         CBoomBot::Create(m_pDevice, m_pContext))))
         return E_FAIL;
-
+	/* Prototype_GameObject_Monster_Body_BoomBot */
     if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_BoomBot"),
         CBody_BoomBot::Create(m_pDevice, m_pContext))))
         return E_FAIL;
+
+
 
 
 

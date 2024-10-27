@@ -84,12 +84,8 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 {
 	_bool bMotionChange = { false }, bLoop = { false };
 	
-	if (*m_pParentState == CPlayer::STATE_HIT_FRONT && m_iCurMotion != CPlayer::STATE_HIT_FRONT)
-	{
-		m_iCurMotion = CPlayer::STATE_HIT_FRONT;
-		bMotionChange = true;
-		bLoop = false;
-	}
+
+
 	if (*m_pParentState == CPlayer::STATE_SPRINT && m_iCurMotion != CPlayer::STATE_SPRINT)
 	{
 		m_iCurMotion = CPlayer::STATE_SPRINT;
@@ -154,6 +150,7 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 
 	if (true == m_pModelCom->Play_Animation(fTimeDelta))
 	{
+		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_HitLock(false);
 		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE);
 		m_iCurMotion = CPlayer::STATE_IDLE;
 		m_pModelCom->Set_Animation(m_iCurMotion, true);
@@ -204,9 +201,10 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 		bLoop = false;
 	}
 
-	if (*m_pParentState == CPlayer::STATE_HIT_FRONT2 && m_iCurMotion != CPlayer::STATE_HIT_FRONT2)
+
+	if (*m_pParentState == CPlayer::STATE_STUN2 && m_iCurMotion != CPlayer::STATE_STUN2)
 	{
-		m_iCurMotion = CPlayer::STATE_HIT_FRONT2;
+		m_iCurMotion = CPlayer::STATE_STUN2;
 		bMotionChange = true;
 		bLoop = false;
 	}
@@ -261,10 +259,14 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (true == m_pModelCom->Play_Animation(fTimeDelta))
 	{
-		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
-		m_iCurMotion = CPlayer::STATE_IDLE2;
+	    	static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_HitLock(false);
+			static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
+			m_iCurMotion = CPlayer::STATE_IDLE2;
+		
 		m_pModelCom->Set_Animation(m_iCurMotion, true);
 	}
+
+
 }
 
 

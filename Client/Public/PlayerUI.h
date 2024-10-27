@@ -5,9 +5,10 @@ BEGIN(Engine)
 	class CShader;
 	class CTexture;
 	class CVIBuffer_Rect;
-END
+	END
 
 BEGIN(Client)
+
 class CPlayerUI: public CUI
 {
 public:
@@ -30,7 +31,20 @@ public:
 	virtual void    Update_for_Edit(_float fTimeDelta) override {};
 	virtual HRESULT Render() override;
 
-private:
+public:
+	void Set_PlayerMaxHP(_float fMaxHP) { m_fMaxHP = fMaxHP; }
+	void Set_PlayerHP(_float fHP) { m_fHP = fHP; }
+
+	void Set_HPGage(_int GageCount) {
+		if (GageCount < -1)
+			return;
+		
+		if(m_fMaxHP == m_fHP)
+			return;
+
+		m_iGageCount = GageCount;
+	};
+
 
 
 private:
@@ -39,10 +53,12 @@ private:
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
 private:
 	HRESULT Add_Components();
-	_float m_HP = 100.f;
-	_float m_MaxHP = 100.f;
-	_float m_HP_Pluse = 0.f;
+	_float m_fHP{};
+	_float m_fMaxHP{};
+	_float m_fHP_Pluse = { 0.f };
 	_float m_fPrXPos{}, m_fPrYPos{};
+	_int   m_iGageCount = {-1};
+	_float m_fHealthHP{};
 public:	
 	static CPlayerUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

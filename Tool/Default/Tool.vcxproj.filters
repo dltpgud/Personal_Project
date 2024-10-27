@@ -13,6 +13,30 @@
     <Filter Include="LEVEL_EDIT">
       <UniqueIdentifier>{f7dc8337-c365-4f6e-825c-677c0ada8de5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{77e48d8c-8662-46d0-8317-862324b30d66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Chest">
+      <UniqueIdentifier>{fb6c7257-c09a-400f-8e54-c6116d83f933}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Door">
+      <UniqueIdentifier>{89437b1b-ef95-486e-8997-e389a0f40814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\fabric">
+      <UniqueIdentifier>{e43ef1e2-55c4-42a4-9f9d-825029f7a8e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Terrain">
+      <UniqueIdentifier>{fd14b992-68cb-4385-81e5-768affd8c983}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Wall">
+      <UniqueIdentifier>{9152fd05-ca65-4b8b-8bee-d4b2823473df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Monster">
+      <UniqueIdentifier>{9652ccef-6656-4355-895a-6ad6cb5f2451}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\NPC">
+      <UniqueIdentifier>{37f84bc8-59d7-41fe-9da2-01cef3acae08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Tool.h">
@@ -27,7 +51,6 @@
     <ClInclude Include="stdafx.h">
       <Filter>99.Tool</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Terrain.h" />
     <ClInclude Include="..\Public\MainApp.h">
       <Filter>Main</Filter>
     </ClInclude>
@@ -40,10 +63,27 @@
     <ClInclude Include="Tool_Defines.h">
       <Filter>99.Tool</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\fabric.h" />
-    <ClInclude Include="..\Public\Door.h" />
-    <ClInclude Include="..\Public\Chest.h" />
-    <ClInclude Include="..\Public\Wall.h" />
+    <ClInclude Include="..\Public\Chest.h">
+      <Filter>Object\Chest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Door.h">
+      <Filter>Object\Door</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\fabric.h">
+      <Filter>Object\fabric</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Terrain.h">
+      <Filter>Object\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Wall.h">
+      <Filter>Object\Wall</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Monster.h">
+      <Filter>Object\Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\NPC.h">
+      <Filter>Object\NPC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Tool.ico">
@@ -60,7 +100,6 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>99.Tool</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Terrain.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp">
       <Filter>Main</Filter>
     </ClCompile>
@@ -70,10 +109,27 @@
     <ClCompile Include="..\Private\Level_Edit.cpp">
       <Filter>LEVEL_EDIT</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\fabric.cpp" />
-    <ClCompile Include="..\Private\Door.cpp" />
-    <ClCompile Include="..\Private\Chest.cpp" />
-    <ClCompile Include="..\Private\Wall.cpp" />
+    <ClCompile Include="..\Private\Chest.cpp">
+      <Filter>Object\Chest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Door.cpp">
+      <Filter>Object\Door</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\fabric.cpp">
+      <Filter>Object\fabric</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Terrain.cpp">
+      <Filter>Object\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Wall.cpp">
+      <Filter>Object\Wall</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Monster.cpp">
+      <Filter>Object\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\NPC.cpp">
+      <Filter>Object\NPC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tool.rc">

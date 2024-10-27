@@ -6,7 +6,7 @@ BEGIN(Engine)
 END
 
 BEGIN(Client)
-
+class CMonsterHP;
 class CBoomBot final : public CActor
 {
 public:
@@ -14,6 +14,7 @@ public:
     {
         PART_BODY,
         PART_WEAPON,
+        PART_HP,
         PART_EFFECT,
         PART_END
     };
@@ -61,8 +62,9 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-    virtual void HIt_Routine()override;
-    virtual void Dead_Routine() override;
+
+    virtual void HIt_Routine(_float fTimeDelta)override;
+    virtual void Dead_Routine(_float fTimeDelta) override;
     void NON_intersect(_float fTimedelta);
 
 
@@ -72,6 +74,7 @@ private:
     HRESULT Add_PartObjects();
     HRESULT Bind_ShaderResources();
 
+    CMonsterHP* m_pPartHP = { nullptr };
 
 public:
     static CBoomBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

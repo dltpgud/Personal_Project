@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include "GameInstance.h"
 #include "Level.h"
-
+#include "Actor.h"
 CLevel_Manager::CLevel_Manager() : m_pGameInstance{CGameInstance::GetInstance()}
 {
     Safe_AddRef(m_pGameInstance);
@@ -92,14 +92,32 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
             break;
         }
 
-        CGameObject* pGameObject = ProtoObj->Clone(Arg);
+        CGameObject* pGameObject{};
+
+        if (nullptr == Arg)
+        {
+            CGameObject::GAMEOBJ_DESC DESC{};
+
+            if (true == bMainTile)
+            {
+                DESC.DATA_TYPE = 0;
+            }
+
+            pGameObject = ProtoObj->Clone(&DESC);
+        }
+        else
+        pGameObject = ProtoObj->Clone(Arg);
 
         pGameObject->Set_Model(pModel);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-        pGameObject->Set_Buffer(TileX, TileY);
+
+
+            pGameObject->Set_Buffer(TileX, TileY);
+            bMainTile = false;
+        
         m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
 
         Safe_Delete_Array(pModel);
@@ -312,6 +330,182 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
         Safe_Delete_Array(pPoroto);
     }
     CloseHandle(hFile);
+
+    return S_OK;
+}
+
+HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& ProtoTag, const _tchar* strProtoMapPath, void* Arg)
+{
+    HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
+    {
+        return E_FAIL;
+    }
+
+    DWORD dwByte(0);
+    DWORD dwStrByte(0);
+    _vector Right = { 0.f, 0.f, 0.f, 0.f };
+    _vector UP = { 0.f, 0.f, 0.f, 0.f };
+    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
+    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _uint Type = { 0 };
+
+    while (true)
+    {
+        _bool bFile(false);
+
+        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
+
+        // wstring 문자열 길이
+        DWORD strLength;
+        bFile = ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+        // wstring 데이터 읽기
+        wchar_t* pModel = new wchar_t[strLength + 1]; // NULL 종단 추가
+        bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
+        pModel[strLength] = L'\0';
+
+        DWORD Length;
+        bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
+        wchar_t* pPoroto = new wchar_t[Length + 1];
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
+        pPoroto[Length] = L'\0';
+
+  
+
+        if (0 == dwByte)
+        {
+            Safe_Delete_Array(pModel);
+            Safe_Delete_Array(pPoroto);
+            break;
+        }
+        CGameObject* pGameObject{}; 
+
+        switch (ProtoTag)
+        {
+        case CActor::TYPE_BOOM_BOT:
+            if (false == lstrcmpW(pModel, L"Proto Component BoomBot_Monster")) {
+                pGameObject = ProtoObj->Clone(Arg);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            }
+            break;
+
+        case CActor::TYPE_GUN_PAWN:
+            if (false == lstrcmpW(pModel, L"Proto Component GunPawn_Monster")) {
+                pGameObject = ProtoObj->Clone(Arg);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            }
+            break;
+
+
+        case CActor::TYPE_JET_FLY:
+            if (false == lstrcmpW(pModel, L"Proto Component JetFly_Monster")) {
+                pGameObject = ProtoObj->Clone(Arg);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            }
+            break;
+        }
+
+        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        m_pGameInstance->Add_Monster(iLevelIndex, m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag));
+       
+      
+        Safe_Delete_Array(pModel);
+        Safe_Delete_Array(pPoroto);
+    }
+    CloseHandle(hFile);
+    return S_OK;
+}
+
+HRESULT CLevel_Manager::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& ProtoTag, const _tchar* strProtoMapPath, void* Arg)
+{
+    HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
+    {
+        return E_FAIL;
+    }
+
+    DWORD dwByte(0);
+    DWORD dwStrByte(0);
+    _vector Right = { 0.f, 0.f, 0.f, 0.f };
+    _vector UP = { 0.f, 0.f, 0.f, 0.f };
+    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
+    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _uint Type = { 0 };
+
+    while (true)
+    {
+        _bool bFile(false);
+
+        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
+
+        // wstring 문자열 길이
+        DWORD strLength;
+        bFile = ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+        // wstring 데이터 읽기
+        wchar_t* pModel = new wchar_t[strLength + 1]; // NULL 종단 추가
+        bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
+        pModel[strLength] = L'\0';
+
+        DWORD Length;
+        bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
+        wchar_t* pPoroto = new wchar_t[Length + 1];
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
+        pPoroto[Length] = L'\0';
+
+
+
+        if (0 == dwByte)
+        {
+            Safe_Delete_Array(pModel);
+            Safe_Delete_Array(pPoroto);
+            break;
+        }
+        CGameObject* pGameObject{};
+
+        switch (ProtoTag)
+        {
+        case CActor::TYPE_HEALTH_BOT:
+            if (false == lstrcmpW(pModel, L"Proto Component HealthBot_NPC")) {
+                pGameObject = ProtoObj->Clone(Arg);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            }
+            break;
+
+        }
+
+        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        m_pGameInstance->Add_Monster(iLevelIndex, m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag));
+
+
+        Safe_Delete_Array(pModel);
+        Safe_Delete_Array(pPoroto);
+    }
+    CloseHandle(hFile);
+
 
     return S_OK;
 }

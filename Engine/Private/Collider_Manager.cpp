@@ -27,23 +27,24 @@ HRESULT Collider_Manager::Add_Monster(_uint Ilevel, CGameObject* Monster)
     return S_OK;
 }
 
-HRESULT Collider_Manager::Add_Wall(_uint Ilevel, CGameObject* wall)
-{
-    m_Wall[Ilevel].push_back(wall);
-    return S_OK;
-}
-
 
 void Collider_Manager::All_Collison_check()
-{
-  
+{    
     Player_To_Monster_Collison_Check();
+    
+    if (m_bIsColl)
+    {
+        Player_To_Monster_Ray_Collison_Check();
+        m_bIsColl = false;
+    }
+
 
 }
 
 HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
 {
-	CGameObject* pPlayer = m_pGameInstance->Get_Player();
+  
+     CActor* pPlayer = m_pGameInstance->Get_Player();
 	if (false == pPlayer)
 		return E_FAIL;
 
@@ -55,9 +56,17 @@ HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
         {
             if (nullptr == Monster)
                 continue;
-                Monster-> Get_Collider()->Intersect(pPlayer->Get_Collider());
+
+            if (true == Monster->Get_Collider()->Intersect(pPlayer->Get_Collider()))
+            {
+                pPlayer->Set_bColl(true);
+                pPlayer->Set_CurrentHP(10.f);
+            }
+           
         }
     }
+
+
     return S_OK;
 }
 
@@ -106,6 +115,22 @@ void Collider_Manager::Clear(_uint Ilevel)
 {
     m_MonsterList[Ilevel].clear();
 
+}
+
+HRESULT Collider_Manager::Find_Cell(_uint Ilevel)
+{
+    m_pGameInstance->Get_Player()->Find_CurrentCell();
+
+
+    for (auto& Monster : m_MonsterList[Ilevel])
+    {
+
+
+        Monster->Find_CurrentCell();
+
+    }
+
+    return S_OK;
 }
 
 

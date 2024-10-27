@@ -3,6 +3,7 @@
 #include "GameInstance.h"
 #include "Body_GunPawn.h"
 #include "Weapon.h"
+#include "MonsterHP.h"
 CJetFly::CJetFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
 {
 }
@@ -19,28 +20,32 @@ HRESULT CJetFly::Initialize_Prototype()
 HRESULT CJetFly::Initialize(void* pArg)
 {
 
-    CActor::Actor_DESC* Desc = static_cast<Actor_DESC*>(pArg);
-    Desc->iNumPartObjects = PART_END;
-    Desc->fSpeedPerSec = 5.f;
-    Desc->fRotationPerSec = XMConvertToRadians(60.f);
-    Desc->JumpPower = 3.f;
+    CActor::Actor_DESC Desc{};
+    Desc.iNumPartObjects = PART_END;
+    Desc.fSpeedPerSec = 5.f;
+    Desc.fRotationPerSec = XMConvertToRadians(60.f);
+    Desc.JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
-                if (FAILED(__super::Initialize(Desc)))
+    if (FAILED(__super::Initialize(&Desc)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
+    m_fMAXHP = 100.f;       
+    m_fHP = m_fMAXHP;
+    m_bOnCell = { false };
+
 
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
     m_iState = ST_Idle;
 
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Desc->POSITION);
 
 
-    m_fMAXHP = 100.f;
-    m_fHP = m_fMAXHP;
+
+
+    m_pPartHP = static_cast <CMonsterHP*>(m_PartObjects[PART_HP]);
     return S_OK;
 }
 
@@ -48,6 +53,11 @@ _int CJetFly::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
+    if (m_pPartHP != nullptr ) {
+        m_pPartHP->Set_Monster_HP(m_fHP);
+        m_pTransformCom->Other_set_Pos(m_pPartHP->Get_Transform(), CTransform::FIX_Y, 2.f);
+    }
 
     if (m_iState != ST_Hit_Front && m_iState != ST_Sragger)
         m_pTransformCom->Rotation_to_Player();
@@ -58,21 +68,28 @@ _int CJetFly::Priority_Update(_float fTimeDelta)
 
 void CJetFly::Update(_float fTimeDelta)
 {
-    if (m_PartObjects[PART_BODY]->Get_Finish())
+    if (m_PartObjects[PART_BODY]->Get_Finish()) {
+        if (m_pPartHP != nullptr)
+            m_pPartHP->Set_Hit(false);
         m_iState = ST_Idle;
+    }
 
     if(m_iState != ST_Hit_Front && m_iState != ST_Sragger)
         NON_intersect(fTimeDelta);
 
   
     if (m_iState == ST_Hit_Front) {
-        if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= 0.f) {
+
+        _float3 fPos{};
+         Height_On_Cell(&fPos);
+
+        if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= m_fY) {
             m_pTransformCom->Set_MoveSpeed(10.f);
-            m_pTransformCom->Go_Down(fTimeDelta);
+            m_pTransformCom->Go_Down(fTimeDelta, m_pNavigationCom);
         }
     }
 
-    __super::Update(fTimeDelta);
+        __super::Update(fTimeDelta);
 }
 
 void CJetFly::Late_Update(_float fTimeDelta)
@@ -86,16 +103,22 @@ HRESULT CJetFly::Render()
     return S_OK; 
 }
 
-void CJetFly::HIt_Routine()
+void CJetFly::HIt_Routine(_float fTimeDelta)
 {
    
     m_iState = ST_Sragger;
 
+    m_pPartHP->Set_HitStart(true);
+    m_pPartHP->Set_Hit(true);
+    m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CJetFly::Dead_Routine()
+void CJetFly::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_Hit_Front;
+
+    Erase_PartObj(PART_HP);
+    m_pPartHP = nullptr;
 }
 
 void CJetFly::NON_intersect(_float fTimedelta)
@@ -112,10 +135,10 @@ void CJetFly::NON_intersect(_float fTimedelta)
         if (25.f < fLength) {
             
             _float3 fDir{};
-            XMStoreFloat3(&fDir, vDir);
+             XMStoreFloat3(&fDir, vDir);
 
                 m_iState = ST_Walk_Front;
-            m_pTransformCom->Go_Straight(fTimedelta);
+            m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
         }
 
         if (25.f > fLength)
@@ -125,7 +148,7 @@ void CJetFly::NON_intersect(_float fTimedelta)
             if (15.f > fLength)
             {
                 m_iState = ST_Walk_Back;
-                m_pTransformCom->Go_Backward(fTimedelta);
+                m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
             }
         }
     }
@@ -147,6 +170,12 @@ HRESULT CJetFly::Add_Components()
         return E_FAIL;
 
 
+    CNavigation::NAVIGATION_DESC		Desc{};
+
+    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -162,13 +191,17 @@ HRESULT CJetFly::Add_PartObjects()
   if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_JetFly"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 
+  CMonsterHP::CMonsterHP_DESC HpDesc{};
+  HpDesc.fMaxHP = m_fMAXHP;
+  HpDesc.fHP = m_fHP;
+
+  if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
+      return E_FAIL;
+
+
     return S_OK;
 }
 
-HRESULT CJetFly::Bind_ShaderResources()
-{
-    return S_OK;
-}
 
 CJetFly* CJetFly::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

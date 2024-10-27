@@ -38,6 +38,8 @@ void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
 
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
+        if (XMVector3Equal(Slide, XMVectorZero()))
+            return;
         vPosition += Slide;
     
     }
@@ -151,7 +153,7 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNav
     _vector slide{}; 
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &slide))
     {
-       return;
+       vAfterPos += slide;
     }
           
      Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vAfterPos);
@@ -186,6 +188,52 @@ void CTransform::Rotation_to_Player()
    Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
    Set_TRANSFORM(CTransform::TRANSFORM_UP, XMVectorSet(0.f, 1.f, 0.f, wmet._24));
    Set_TRANSFORM(CTransform::TRANSFORM_LOOK, XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
+}
+
+void CTransform::Other_set_Pos(CTransform* Other, FIX FixPosWhere, _float FixPos, _float3* Ouput)
+{
+    _vector OtherPos{};  
+    switch (FixPosWhere)
+    {
+    case FIX_X:
+     OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION))+ FixPos,
+        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) ,
+        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)), 1.f);
+        break;
+
+    case FIX_Y:
+    OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) + FixPos,
+        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)), 1.f);
+        break;
+
+    case FIX_Z:
+    OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION))+ FixPos, 1.f);
+        break;
+    case  FIX_END:
+    OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
+        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)), 1.f);
+        break;
+    }
+
+
+    Other->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, OtherPos);
+
+    if (Ouput != nullptr)
+    {
+        _float3 fPos{};
+
+        XMStoreFloat3(&fPos, OtherPos);
+      
+        Ouput->x = fPos.x;
+        Ouput->y = fPos.y;
+        Ouput->z = fPos.z;
+
+    }
+
 }
 
 

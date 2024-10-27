@@ -308,7 +308,7 @@ list<class CGameObject*> CGameInstance::Get_ALL_GameObject(_uint iLevelIndex, co
 
 
 
-HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath , const _uint& DataType, void* pArg )
+HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath , const _uint& DataType, void* pArg,  const _uint& ProtoTag)
 {
 	if (nullptr == m_pObject_Manager)
 		return E_FAIL;
@@ -336,7 +336,14 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 		case CGameObject::DATA_WALL:
 			    return m_pLevel_Manager->Load_to_Next_Map_Wall(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
 			break;
-	
+
+		case  CGameObject::DATA_MONSTER:
+				return m_pLevel_Manager->Load_to_Next_Map_Monster(iLevelIndex, strLayerTag, pPrototype, ProtoTag, strProtoMapPath, pArg);
+			break;
+
+		case  CGameObject::DATA_NPC:
+			    return m_pLevel_Manager->Load_to_Next_Map_NPC(iLevelIndex, strLayerTag, pPrototype, ProtoTag, strProtoMapPath, pArg);
+			break;
 		default:
 			      return m_pLevel_Manager->Load_to_Next_Map_AniOBj(iLevelIndex, strLayerTag, pPrototype, DataType, strProtoMapPath, pArg);
 			break;
@@ -392,7 +399,12 @@ HRESULT CGameInstance::Add_Monster(_uint iClearLevelID, CGameObject* Monster)
 
 HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
 {
- 	return m_pCollider_Manager->Player_To_Monster_Ray_Collison_Check();
+ 	return m_pCollider_Manager->Set_Collison(true);
+}
+
+HRESULT CGameInstance::Find_Cell(_uint Ilevel)
+{
+	return m_pCollider_Manager->Find_Cell(Ilevel);
 }
 
 #pragma endregion
@@ -452,6 +464,13 @@ HRESULT CGameInstance::Set_UI_shaking(const _uint& uID, _float fShakingTime, _fl
         return E_FAIL;
 
     return m_pUI_Manager->Set_UI_shaking(uID, fShakingTime, fPowerX, fPowerY);
+}
+
+HRESULT CGameInstance::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)
+{
+	if (nullptr == m_pUI_Manager)
+		return E_FAIL;
+	return m_pUI_Manager->Set_OpenUI_Inverse(Openuid,Cloaseduid);
 }
 
 
@@ -590,6 +609,10 @@ _float CGameInstance::Compute_Random_Normal()
 _float CGameInstance::Compute_Random(_float fMin, _float fMax)
 {
 	return m_pCalculator->Compute_Random(fMin, fMax);
+}
+HRESULT CGameInstance::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
+{
+	return m_pCalculator->Compute_Y(pNavigation, Transform, Pos);
 }
 #pragma endregion
 

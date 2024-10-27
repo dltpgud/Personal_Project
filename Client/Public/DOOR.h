@@ -44,9 +44,10 @@ private:
 	_wstring m_pModelName{};
 	CInteractiveUI* m_InteractiveUI = { nullptr };
 	CPlayer* m_pPlayer = { nullptr };
-	_bool m_bState = { false };
+	_bool m_bState = { false }; // 애니설정을 한번만 해주는 변수
 	_bool m_bOpen = { false };
-	_uint m_iState = { 0 };
+	_bool Go_Move = { false };
+	_uint m_iState = { 0 }; // 현재 문 상태 체크
 public:
 	static CDOOR* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

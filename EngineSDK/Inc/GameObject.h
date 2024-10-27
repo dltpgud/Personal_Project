@@ -13,6 +13,7 @@ public:
         SKILL,
         MAP,
         ITEM,
+        NPC,
         UI,
         CAMERA,
         GAMEOBJ_TYPE_END
@@ -23,12 +24,14 @@ public:
         DATA_WALL,
         DATA_NONANIMAPOBJ,
         DATA_DOOR,
-        DATA_CHEST
+        DATA_CHEST,
+        DATA_MONSTER,
+        DATA_NPC
     };
 public:
     typedef struct GAMEOBJ_DESC : public CTransform::TRANSFORM_DESC
     {
-        GAMEOBJ_DATA  DATA_TYPE{};
+        _int  DATA_TYPE{};
         const _tchar* FilePath{};
         _tchar* ProtoName{};
     }GAMEOBJ_DESC;
@@ -87,7 +90,7 @@ public:
     virtual void Set_Model(const _wstring& protoModel)
     {
     }
-    GAMEOBJ_DATA Get_Data()
+     _int  Get_Data()
     {
         return m_DATA_TYPE;
     }
@@ -110,7 +113,7 @@ protected:
 
     _bool m_bDead{};
 
-    GAMEOBJ_DATA m_DATA_TYPE{};
+    _int m_DATA_TYPE{-1};
    
     _bool m_bClone{};
 

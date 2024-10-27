@@ -125,6 +125,26 @@ HRESULT CUI_Manager::Set_UpdateUI(const _uint& uid, _bool open)
     return S_OK;
 }
 
+HRESULT CUI_Manager::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)
+{
+    for (size_t i = 0; i < m_iLevel; i++)
+    {
+        for (auto& vec : m_UIVec[i])
+        {
+            if (vec->Get_UIID() == Openuid)
+            {
+                vec->Set_Open(true);
+            }
+
+            if (vec->Get_UIID() == Cloaseduid)
+            {
+                vec->Set_Open(false);
+            }
+        }
+    }
+    return S_OK;
+}
+
 HRESULT CUI_Manager::Set_LateUpdateUI(const _uint& uid, _bool open)
 {
     for (size_t i = 0; i < m_iLevel; i++)

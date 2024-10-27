@@ -13,6 +13,10 @@ END
 BEGIN(Client)
 class CInteractiveUI : public CUI
 {
+public:
+	enum INTERACTIVE_STATE {
+		IS_CHEST, IS_DOOR, IS_HEALTH, IS_END
+	};
 private:
 	CInteractiveUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CInteractiveUI(const CInteractiveUI& Prototype);
@@ -26,11 +30,12 @@ public:
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual void    Update_for_Edit(_float fTimeDelta) override {};
 	virtual HRESULT Render() override;
-	void Set_Text(const _tchar* pText){
+	void Set_Text(const _tchar* pText, _uint Type){
 	 	m_pText = pText;
+		m_iInteractiveType = static_cast<INTERACTIVE_STATE>(Type);
 	}
-	_bool Get_Interactive() { return m_bInteractive; }
-	void  Set_Interactive(_bool Interactive) { m_bInteractive = Interactive; }
+	_bool Get_Interactive();
+	void  Set_Interactive(_bool Interactive);
 private:
 	HRESULT				Add_Components();
 
@@ -42,7 +47,9 @@ private:
 	_vector m_vColor = {
 		1.f,1.f,1.f,1.f
 	};
-	_bool m_bInteractive = { false };
+
+	INTERACTIVE_STATE m_iInteractiveType{};
+	_bool m_bInteractive[INTERACTIVE_STATE::IS_END] = {false};
 public:
 	static CInteractiveUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
