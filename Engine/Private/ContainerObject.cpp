@@ -74,6 +74,14 @@ HRESULT CContainerObject::Render()
 	return S_OK;
 }
 
+void CContainerObject::Erase_PartObj(_uint Part)
+{
+	if (m_PartObjects[Part] != nullptr) {
+		Safe_Release(*(m_PartObjects.begin() + Part));
+		m_PartObjects.erase(m_PartObjects.begin() + Part);
+	}
+}
+
 
 HRESULT CContainerObject::Add_PartObject( const _wstring & strPrototypeTag, _uint iPartObjectIndex, void * pArg)
 {

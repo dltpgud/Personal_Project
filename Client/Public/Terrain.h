@@ -12,6 +12,7 @@ END
 BEGIN(Client)
 class CTerrain : public CGameObject
 {
+    enum Terrain_TYPE { TYPE_MAIN};
 
 private:
     CTerrain(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -28,7 +29,7 @@ public:
     virtual HRESULT Render() override;
 
     virtual void Set_Model(const _wstring& protoModel) override;
-    virtual void Set_Buffer(_uint x, _uint y) override;
+    virtual void Set_Buffer(_uint x, _uint y)override;
     CVIBuffer_Terrain* Get_buffer()
     {
         return m_pVIBufferCom;

@@ -27,6 +27,7 @@ public:
     HRESULT Set_OpenUI(const _uint& uid, _bool open);
     HRESULT Set_PreUpdateUI(const _uint& uid, _bool open);
     HRESULT Set_UpdateUI(const _uint& uid, _bool open);
+    HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
     HRESULT Set_LateUpdateUI(const _uint& uid, _bool open);
 
 

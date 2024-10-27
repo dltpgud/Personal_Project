@@ -55,7 +55,7 @@ _bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
 
 	_float Dist{};
 	isColl = m_pBoundDesc->Intersects(RayPos, RayDir, Dist);
-			fDis = Dist;
+    fDis = Dist;
 
 	return isColl;
 }

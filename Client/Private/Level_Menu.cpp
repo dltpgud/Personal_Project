@@ -82,7 +82,7 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.bshakingY = false;
 	Desc.fSizeX = 10.f;
 	Desc.fSizeY = 4.f;
-	Desc.fX = g_iWinSizeX * 0.5f -10.f;
+	Desc.fX = g_iWinSizeX * 0.5f +5.f;
 	Desc.fY = g_iWinSizeY * 0.5f+60.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
@@ -96,7 +96,7 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.bshakingY = false;
 	Desc.fSizeX = 10.f;
 	Desc.fSizeY = 4.f;
-	Desc.fX = g_iWinSizeX * 0.5f +10.f;
+	Desc.fX = g_iWinSizeX * 0.5f +25.f;
 	Desc.fY = g_iWinSizeY * 0.5f +60.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
@@ -110,7 +110,7 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.bshakingX = false;
 	Desc.fSizeX = 4.f;
 	Desc.fSizeY = 10.f;
-	Desc.fX = g_iWinSizeX * 0.5f;
+	Desc.fX = g_iWinSizeX * 0.5f+15.f;
 	Desc.fY = g_iWinSizeY * 0.5f +50.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;
@@ -124,7 +124,7 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.bshakingX = false;
 	Desc.fSizeX = 4.f;
 	Desc.fSizeY = 10.f;
-	Desc.fX = g_iWinSizeX * 0.5f ;
+	Desc.fX = g_iWinSizeX * 0.5f+15.f;
 	Desc.fY = g_iWinSizeY * 0.5f + 70.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
 	Desc.PrUpdate = true;

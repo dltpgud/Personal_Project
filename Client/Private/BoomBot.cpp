@@ -3,6 +3,7 @@
 #include "GameInstance.h"
 #include "Body_BoomBot.h"
 #include "Weapon.h"
+#include "MonsterHP.h"
 CBoomBot::CBoomBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
 {
 }
@@ -19,14 +20,20 @@ HRESULT CBoomBot::Initialize_Prototype()
 HRESULT CBoomBot::Initialize(void* pArg)
 {
 
-    CActor::Actor_DESC* Desc = static_cast<Actor_DESC*>(pArg);
-    Desc->iNumPartObjects = PART_END;
-    Desc->fSpeedPerSec = 5.f;
-    Desc->fRotationPerSec = XMConvertToRadians(60.f);
-    Desc->JumpPower = 3.f;
+    CActor::Actor_DESC Desc{};
+    Desc.iNumPartObjects = PART_END;
+    Desc.fSpeedPerSec =  5.f;
+    Desc.fRotationPerSec = XMConvertToRadians(60.f);
+    Desc.JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
-                if (FAILED(__super::Initialize(Desc)))
+    if (FAILED(__super::Initialize(&Desc)))
         return E_FAIL;
+
+   m_iState = ST_Idle;
+   m_fMAXHP = 100.f;
+   m_fHP = m_fMAXHP;
+   m_bOnCell = true;
+
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -34,13 +41,9 @@ HRESULT CBoomBot::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-   
+ 
 
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Desc->POSITION);
-
-    m_iState = ST_Idle;
-    m_fMAXHP = 100.f;
-    m_fHP = m_fMAXHP;
+    m_pPartHP = static_cast <CMonsterHP*>(m_PartObjects[PART_HP]);
     return S_OK;
 }
 
@@ -48,6 +51,12 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
+    if (m_pPartHP != nullptr) {
+        m_pPartHP->Set_Monster_HP(m_fHP);
+        m_pTransformCom->Other_set_Pos(m_pPartHP->Get_Transform(), CTransform::FIX_Y, 2.f);
+    }
+
 
     if (m_iState != ST_Hit_Front && m_iState != ST_Aim_Down)
         m_pTransformCom->Rotation_to_Player();
@@ -60,6 +69,9 @@ void CBoomBot::Update(_float fTimeDelta)
 {
     if (m_PartObjects[PART_BODY]->Get_Finish())
     {
+        if (m_pPartHP != nullptr)
+            m_pPartHP->Set_Hit(false);
+
             m_iState = ST_Idle;
     }
 
@@ -83,14 +95,22 @@ HRESULT CBoomBot::Render()
     return S_OK; 
 }
 
-void CBoomBot::HIt_Routine()
+void CBoomBot::HIt_Routine(_float fTimeDelta)
 {
     m_iState = ST_Hit_Front;
+
+
+    m_pPartHP->Set_HitStart(true);
+    m_pPartHP->Set_Hit(true);
+    m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CBoomBot::Dead_Routine()
+void CBoomBot::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_Aim_Down;
+
+   Erase_PartObj(PART_HP);
+   m_pPartHP = nullptr;
 }
 
 void CBoomBot::NON_intersect(_float fTimedelta)
@@ -114,13 +134,13 @@ void CBoomBot::NON_intersect(_float fTimedelta)
             XMStoreFloat3(&fDir, vDir);
 
             m_iState = ST_Run_Front;
-           m_pTransformCom->Go_Straight(fTimedelta);
+           m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
        
         }
         if (15.f > fLength)
         {
             m_iState = ST_Shoot;
-            m_pTransformCom->Go_Backward(fTimedelta);       
+            m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
         }
     }
     else {
@@ -149,6 +169,13 @@ HRESULT CBoomBot::Add_Components()
         TEXT("Com_Collider_Sphere"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
         return E_FAIL;
 
+
+    CNavigation::NAVIGATION_DESC		Desc{};
+
+    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -161,8 +188,17 @@ HRESULT CBoomBot::Add_PartObjects()
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
 
-  if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_BoomBot"), PART_BODY, &BodyDesc)))
+    if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_BoomBot"), PART_BODY, &BodyDesc)))
         return E_FAIL;
+
+
+    CMonsterHP::CMonsterHP_DESC HpDesc{};
+    HpDesc.fMaxHP = m_fMAXHP;
+    HpDesc.fHP = m_fHP;
+
+  if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
+      return E_FAIL;
+
 
     return S_OK;
 }

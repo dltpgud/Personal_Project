@@ -6,6 +6,14 @@ class CNavigation;
 class CCollider;
 class ENGINE_DLL CActor abstract : public CContainerObject
 {
+public:
+    enum ACTOR_MONSTER_TYPE {
+        TYPE_BOOM_BOT, TYPE_GUN_PAWN, TYPE_JET_FLY, TYPE_END
+        
+    };
+
+    enum ACTOR_NPC_TYPE { TYPE_HEALTH_BOT };
+
     public:
         typedef struct Actor_DESC : public CContainerObject::CONTAINEROBJECT_DESC
         {
@@ -24,23 +32,43 @@ class ENGINE_DLL CActor abstract : public CContainerObject
         virtual void Update(_float fTimeDelta);
         virtual void Late_Update(_float fTimeDelta);
         virtual HRESULT Render();
+
+public:
+        //상태 관련
         void Set_bColl(_bool Coll) { m_bColl = Coll; }
-        virtual void HIt_Routine() {};
-        virtual void Dead_Routine() {};
-        virtual _float Weapon_Damage() { return 0.f; }
-        void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
         void Set_State(_uint st)
         {
             m_iState = st;
         }
         _uint Get_State() { return m_iState; }
+        virtual void HIt_Routine(_float fTimeDelta) {};
+        virtual void Dead_Routine(_float fTimeDelta) {};
+        virtual void Stun_Routine() {};
+      
+
+
+        //Cell 관련
+        void Set_NavigationType(_uint i);
+        void Find_CurrentCell();
+        _float Get_fY() { return m_fY; }
+        void Height_On_Cell(_float3* fPos);
+
+        //체력관련
+        void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
+        void Set_HealthCurrentHP(_float Health) { m_fHP += Health; }
+        _bool IsFullHP() const { return m_fHP == m_fMAXHP; }
+        virtual _float Weapon_Damage() { return 0.f; }
+     
     protected:
 
-        CNavigation* m_pNavigationCom = { nullptr };
+         CNavigation* m_pNavigationCom = { nullptr };
         _float m_fHP;
         _float m_fMAXHP;
         _bool m_bColl = { false };
         _uint m_iState = {};
+        _float					m_fY{ 0.f };
+        _float                  m_FixY{ 0.f };
+        _bool    m_bOnCell = { false };
     public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;

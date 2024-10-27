@@ -196,6 +196,11 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     else
     {
         m_bFinishAni = false;
+
+        if (m_iCurMotion == CGunPawn::ST_GRENADE_PRESHOOT)
+            m_bRUN = true;
+        else
+            m_bRUN = false;
         if (m_iCurMotion == CGunPawn::ST_PRESHOOT)
             m_pModelCom->Set_Animation(m_iCurMotion, false);
     }

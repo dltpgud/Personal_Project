@@ -2,6 +2,7 @@
 #include "VIBuffer_Terrain.h"
 #include "Transform.h"
 #include "Model.h"
+#include "Navigation.h"
 
 CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd)
     : m_pDevice{pDevice}, m_pContext{pContext}, g_hWnd { hWnd }
@@ -31,7 +32,7 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     else if (true == forPlayer)
     { 
          POINT ptPlayerAim{};
-         ptPlayerAim.x = 640;
+         ptPlayerAim.x = 655;
          ptPlayerAim.y = 420;
 
          m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
@@ -40,8 +41,6 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
          vMousePos.x = ptPlayerAim.x / (ViewportDesc.Width * 0.5f) - 1.f;
          vMousePos.y = ptPlayerAim.y / -(ViewportDesc.Height * 0.5f) + 1.f;
          vMousePos.z = 0.f;
-
-
     }
 
 
@@ -141,6 +140,19 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
     }
 
     return _float3(0xffff,0xffff,0xffff);
+}
+
+HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
+{
+   _float3 fPos{};
+   XMStoreFloat3(&fPos, Transform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    _float fY =  pNavigation->Compute_HeightOnCell(&fPos);
+    
+
+    *Pos = { fPos.x, fY, fPos.z };
+
+
+    return S_OK;
 }
 
 _float CCalculator::Compute_Random_Normal()

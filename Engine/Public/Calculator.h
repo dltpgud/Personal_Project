@@ -4,6 +4,7 @@
 BEGIN(Engine)
 class CVIBuffer_Terrain;
 class CTransform;
+class CNavigation;
 class CVIBuffer;
 class CModel;
 class ENGINE_DLL CCalculator final : public CBase
@@ -18,7 +19,10 @@ public:
     void Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir, _bool forPlayer = false);
 
     _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RaDir,
-                              CTransform* Transfor, _float* fDis);
+                              CTransform* Transform, _float* fDis);
+
+
+    HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 
     _float Compute_Random_Normal();
     _float Compute_Random(_float fMin, _float fMax);

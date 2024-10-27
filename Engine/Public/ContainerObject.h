@@ -30,6 +30,7 @@ public:
 	virtual void Late_Update(_float fTimeDelta);
 	virtual HRESULT Render();
 
+	void Erase_PartObj(_uint Part);
 protected:
 	_uint								m_iNumPartObjects = { 0 };
 	vector<class CPartObject*>			m_PartObjects;

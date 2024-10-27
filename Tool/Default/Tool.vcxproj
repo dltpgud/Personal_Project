@@ -144,6 +144,8 @@
     <ClInclude Include="..\Public\fabric.h" />
     <ClInclude Include="..\Public\Level_Edit.h" />
     <ClInclude Include="..\Public\MainApp.h" />
+    <ClInclude Include="..\Public\Monster.h" />
+    <ClInclude Include="..\Public\NPC.h" />
     <ClInclude Include="..\Public\Terrain.h" />
     <ClInclude Include="..\Public\Wall.h" />
     <ClInclude Include="Resource.h" />
@@ -159,6 +161,8 @@
     <ClCompile Include="..\Private\fabric.cpp" />
     <ClCompile Include="..\Private\Level_Edit.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
+    <ClCompile Include="..\Private\Monster.cpp" />
+    <ClCompile Include="..\Private\NPC.cpp" />
     <ClCompile Include="..\Private\Terrain.cpp" />
     <ClCompile Include="..\Private\Wall.cpp" />
     <ClCompile Include="stdafx.cpp" />

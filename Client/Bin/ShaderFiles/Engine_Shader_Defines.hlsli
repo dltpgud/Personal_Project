@@ -8,6 +8,13 @@ RasterizerState RS_Default
 	FrontCounterClockwise = false;
 };
 
+RasterizerState RS_Clockwise
+{
+    FillMode = Solid;
+    CullMode = Back;
+    FrontCounterClockwise = true;
+};
+
 RasterizerState RS_Sky
 {
 	FillMode = Solid;

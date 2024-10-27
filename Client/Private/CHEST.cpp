@@ -31,7 +31,7 @@ HRESULT CCHEST::Initialize(void* pArg)
         return E_FAIL;
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
-    m_InteractiveUI->Set_Text(L"»óÀÚ ¿­±â");
+    m_InteractiveUI->Set_Text(L"»óÀÚ ¿­±â", CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
     return S_OK;
 }
@@ -113,22 +113,18 @@ void CCHEST::Set_Buffer(_uint x, _uint y)
 switch (m_pWeaPonType)
 {
 case CWeapon::WeaPoneType::HendGun:
-    m_pWeaPonNumName = L"HendGun ";
+    m_pWeaPonNumName = L"HendGun ÀåÂø";
     break;
 case CWeapon::WeaPoneType::AssaultRifle:
-    m_pWeaPonNumName = L"Assault Rifle ";
+    m_pWeaPonNumName = L"Assault Rifle ÀåÂø";
     break;
 case CWeapon::WeaPoneType::MissileGatling:
-    m_pWeaPonNumName = L"Missile Gatling ";
+    m_pWeaPonNumName = L"Missile Gatling ÀåÂø";
     break;
 case CWeapon::WeaPoneType::HeavyCrossbow:
-    m_pWeaPonNumName = L"Heavy Crossbow ";
+    m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø";
     break;
 }
-
-  lstrcatW(m_WeaPonName, m_pWeaPonNumName);
-  lstrcatW(m_WeaPonName, L"ÀåÂø");
-
 }
 
 void CCHEST::Interactive(_float fTimeDelta)
@@ -142,12 +138,15 @@ void CCHEST::Interactive(_float fTimeDelta)
 
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
 
-    if (fLength <= 6.f && m_bState == true) {
-        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, true);
-        m_pModelCom[ANI]->Set_Animation(State::HOVDER, true);
-        m_bHover = true;
-        m_bState = false;
+    if (false == m_bOpen) {
+        if (fLength <= 6.f && m_bState == true) {
+            m_InteractiveUI->Set_Text(L"»óÀÚ ¿­±â", CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
+            m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
+            m_pModelCom[ANI]->Set_Animation(State::HOVDER, true);
+            m_bHover = true;
+            m_bState = false;
 
+        }
     }
     if (fLength > 6.f && m_bState == false) {
 
@@ -158,8 +157,7 @@ void CCHEST::Interactive(_float fTimeDelta)
 
     if (m_bHover && false == m_bOpen) {
 
-        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false);
-        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, true);
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
         if (true == m_InteractiveUI->Get_Interactive())
         {
             m_pModelCom[ANI]->Set_Animation(State::OPEN, false);
@@ -170,9 +168,7 @@ void CCHEST::Interactive(_float fTimeDelta)
 
     if (false == m_bHover || fLength > 6.f) {
  
-            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true);
-            m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
-       
+            m_pGameInstance->Set_OpenUI_Inverse( CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
     }
 
 
@@ -185,13 +181,10 @@ void CCHEST::Interactive(_float fTimeDelta)
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_STATIC, CGameObject::MAP, pGameObject);
 
             _float3 fPos{};
+           
+            m_pTransformCom->Other_set_Pos(pGameObject->Get_Transform(), CTransform::FIX_Y, 1.f, &fPos);
 
-            XMStoreFloat3(&fPos, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
-
-            pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
-                XMVectorSet(fPos.x, fPos.y + 1.f, fPos.z, 1.f));
-
-            static_cast<CWeaPonIcon*>(pGameObject)->Set_PosSave(fPos.x, fPos.y + 1.f, fPos.z);
+            static_cast<CWeaPonIcon*>(pGameObject)->Set_PosSave(fPos.x, fPos.y , fPos.z);
             m_bIcon = true;
         }
 
@@ -202,7 +195,7 @@ void CCHEST::Interactive(_float fTimeDelta)
         if (false == m_bOpen)
         {
             m_bOpen = true;
-            m_InteractiveUI->Set_Text(m_WeaPonName);
+            m_InteractiveUI->Set_Text(m_pWeaPonNumName, CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
         }
     }
 }

@@ -118,6 +118,18 @@
     <Filter Include="02.GameObjects\04.UI\InteractiveUI">
       <UniqueIdentifier>{78f16647-2133-4cc7-a390-87a5586c3dba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\03.Actor\NPC">
+      <UniqueIdentifier>{ae52ede4-97f4-4dae-89e2-f4ee211d33bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\NPC\HealthBot">
+      <UniqueIdentifier>{aea053b6-84c9-4a1f-bc0e-11df88b50f70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\NPC\HealthBot\Body">
+      <UniqueIdentifier>{776463e0-3f2d-404e-b3a9-648d7cac8a22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\MonsterHP">
+      <UniqueIdentifier>{4933a1e9-3351-425e-acf7-f5b4ba58b32b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -231,6 +243,15 @@
     <ClInclude Include="..\Public\InteractiveUI.h">
       <Filter>02.GameObjects\04.UI\InteractiveUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\HealthBot.h">
+      <Filter>02.GameObjects\03.Actor\NPC\HealthBot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_HealthBot.h">
+      <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MonsterHP.h">
+      <Filter>02.GameObjects\03.Actor\Monster\MonsterHP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -332,6 +353,15 @@
     <ClCompile Include="..\Private\InteractiveUI.cpp">
       <Filter>02.GameObjects\04.UI\InteractiveUI</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\HealthBot.cpp">
+      <Filter>02.GameObjects\03.Actor\NPC\HealthBot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_HealthBot.cpp">
+      <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterHP.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\MonsterHP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -360,6 +390,9 @@
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxCube.hlsl">
+      <Filter>97.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex_Inverse.hlsl">
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

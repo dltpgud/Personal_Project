@@ -6,7 +6,7 @@ BEGIN(Engine)
 END
 
 BEGIN(Client)
-
+class CMonsterHP;
 class CJetFly final : public CActor
 {
 public:
@@ -15,6 +15,7 @@ public:
         PART_BODY,
         PART_WEAPON,
         PART_EFFECT,
+        PART_HP,
         PART_END
     };
     enum STATE
@@ -50,8 +51,8 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-    virtual void HIt_Routine()override;
-    virtual void Dead_Routine() override;
+    virtual void HIt_Routine(_float fTimeDelta)override;
+    virtual void Dead_Routine(_float fTimeDelta) override;
     void NON_intersect(_float fTimedelta);
 
 
@@ -59,7 +60,7 @@ public:
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
-    HRESULT Bind_ShaderResources();
+    CMonsterHP* m_pPartHP = { nullptr };
    
 
 public:

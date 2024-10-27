@@ -215,7 +215,7 @@ CGameObject* CDoor::Clone(void* pArg)
 
     if (FAILED(pInstance->Initialize(pArg)))
     {
-        MSG_BOX("Failed to Created : CMonster");
+        MSG_BOX("Failed to Created : CDoor");
         Safe_Release(pInstance);
     }
 

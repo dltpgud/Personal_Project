@@ -6,14 +6,14 @@
 #include "Camera_Tool.h"
 #include "Terrain.h"
 #include "VIBuffer_Terrain.h"
-
+#include "Actor.h"
 CLevel_Edit::CLevel_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CLevel{pDevice, pContext}
 {
     ZeroMemory(&m_iBufferCount, sizeof(_int) * 2);
     ZeroMemory(&m_fposition, sizeof(_float) * 3);
     ZeroMemory(&m_fscale, sizeof(_float) * 3);
-    ZeroMemory(&m_iItem_selected_idx, sizeof(_int) * 4);
-    ZeroMemory(&m_iIcomtem_selected_idx, sizeof(_int) * 4);
+    ZeroMemory(&m_iItem_selected_idx, sizeof(_int) * 6);
+    ZeroMemory(&m_iIcomtem_selected_idx, sizeof(_int) * 6);
     ZeroMemory(&m_fCellPoint, sizeof(_float3) * 3);
     ZeroMemory(&m_iCellCount, sizeof(_uint));
     ZeroMemory(&m_iCellType, sizeof(int));
@@ -32,6 +32,9 @@ HRESULT CLevel_Edit::Initialize()
     m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat";
     m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage1_ani.dat";
     m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
+    m_tFPath[5] = L"../Bin/Data/Monster/Stage1_Monster.dat";
+    m_tFPath[6] = L"../Bin/Data/NPC/Stage1_NPC.dat";
+    
     for (_uint i = 0; i < 3; i++) { m_fscale[i] = 1; }
 
     if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
@@ -104,6 +107,8 @@ void CLevel_Edit::Tool()
             m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat";
             m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage1_ani.dat";
             m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
+            m_tFPath[5] = L"../Bin/Data/Monster/Stage1_Monster.dat";
+            m_tFPath[6] = L"../Bin/Data/NPC/Stage1_NPC.dat";
         }
 
         if (m_iScene_Type == 1)
@@ -114,6 +119,8 @@ void CLevel_Edit::Tool()
             m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage2_Nonani.dat";
             m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage2_ani.dat";
             m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage2.dat";
+            m_tFPath[5] = L"../Bin/Data/Monster/Stage2_Monster.dat";
+            m_tFPath[6] = L"../Bin/Data/NPC/Stage2_NPC.dat";
         }
         if (m_iScene_Type == 2)
         {
@@ -123,6 +130,8 @@ void CLevel_Edit::Tool()
             m_tFPath[2] = L"../Bin/Data/Map/SetMap_Boss_Nonani.dat";
             m_tFPath[3] = L"../Bin/Data/Map/SetMap_Boss_ani.dat";
             m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Boss.dat";
+            m_tFPath[5] = L"../Bin/Data/Monster/BossStage_Monster.dat";
+            m_tFPath[6] = L"../Bin/Data/NPC/BossStage_NPC.dat";
         }
     }
 
@@ -163,6 +172,14 @@ void CLevel_Edit::Map()
     if (true == m_bshow_win_aniObj)
     {
         MapANIObj_ListBox();
+    }
+    if (true == m_bshow_win_Monster)
+    {
+         Monster_ListBox();
+    }
+    if (true == m_bshow_win_NPC)
+    {
+        NPC_ListBox();
     }
     ImGui::Separator();
     Set_Cell_Type();
@@ -214,7 +231,7 @@ void CLevel_Edit::ComboType()
     ImGui::Text("MapObj_Type");
     ImGui::SameLine(50.f, 50.f);
     _bool MapObj_Type = false;
-    const char* Obj_Type[] = {"Terrein", "Wall", "NonAniObj", "AniObj"}; // 콤보 상자
+    const char* Obj_Type[] = {"Terrein", "Wall", "NonAniObj", "AniObj", "Monster", "NPC"}; // 콤보 상자
     MapObj_Type = ImGui::Combo("##0", &m_iMapObj_Type, Obj_Type, IM_ARRAYSIZE(Obj_Type));
 
     if (MapObj_Type)
@@ -225,6 +242,8 @@ void CLevel_Edit::ComboType()
             m_bshow_win_Wall = false;
             m_bshow_win_NONaniObj = false;
             m_bshow_win_aniObj = false;
+            m_bshow_win_Monster = false;
+            m_bshow_win_NPC = false;
         }
 
         if (m_iMapObj_Type == 1)
@@ -233,6 +252,8 @@ void CLevel_Edit::ComboType()
             m_bshow_win_Wall = true;
             m_bshow_win_NONaniObj = false;
             m_bshow_win_aniObj = false;
+            m_bshow_win_Monster = false;
+            m_bshow_win_NPC = false;
         }
         if (m_iMapObj_Type == 2)
         {
@@ -240,6 +261,8 @@ void CLevel_Edit::ComboType()
             m_bshow_win_Wall = false;
             m_bshow_win_NONaniObj = true;
             m_bshow_win_aniObj = false;
+            m_bshow_win_Monster = false;
+            m_bshow_win_NPC = false;
         }
         if (m_iMapObj_Type == 3)
         {
@@ -247,6 +270,27 @@ void CLevel_Edit::ComboType()
             m_bshow_win_Wall = false;
             m_bshow_win_NONaniObj = false;
             m_bshow_win_aniObj = true;
+            m_bshow_win_Monster = false;
+            m_bshow_win_NPC = false;
+        }
+
+        if (m_iMapObj_Type == 4)
+        {
+            m_bshow_win_Terrian = false;
+            m_bshow_win_Wall = false;
+            m_bshow_win_NONaniObj = false;
+            m_bshow_win_aniObj = false;
+            m_bshow_win_Monster = true;
+            m_bshow_win_NPC = false;
+        }
+        if (m_iMapObj_Type == 5)
+        {
+            m_bshow_win_Terrian = false;
+            m_bshow_win_Wall = false;
+            m_bshow_win_NONaniObj = false;
+            m_bshow_win_aniObj = false;
+            m_bshow_win_Monster = false;
+            m_bshow_win_NPC = true;
         }
     }
 }
@@ -378,11 +422,70 @@ void CLevel_Edit::Wall_ListBox()
         ImGui::EndListBox();
     }
 
-
-
-
-
     Create_Leyer_Botton(WALL, m_iItem_selected_idx[1], m_iIcomtem_selected_idx[1]);
+}
+
+void CLevel_Edit::Monster_ListBox()
+{
+    if (ImGui::BeginListBox("##listMonster"))
+    {
+        for (_int i = 0; i < m_protokey[MONSTER].size(); i++)
+        {
+            const _bool is_selected = (m_iItem_selected_idx[4] == i);
+            if (ImGui::Selectable(m_protokey[MONSTER][i], is_selected))
+            {
+                m_iItem_selected_idx[4] = i;
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    if (ImGui::BeginListBox("##listMONSTERcom"))
+    {
+        for (_int i = 0; i < m_protoComkey[MONSTER].size(); i++)
+        {
+            const _bool is_selected = (m_iIcomtem_selected_idx[4] == i);
+            if (ImGui::Selectable(m_protoComkey[MONSTER][i], is_selected))
+            {
+                m_iIcomtem_selected_idx[4] = i;
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    Create_Leyer_Botton(MONSTER, m_iItem_selected_idx[4], m_iIcomtem_selected_idx[4]);
+}
+
+void CLevel_Edit::NPC_ListBox()
+{
+
+    if (ImGui::BeginListBox("##listNPC"))
+    {
+        for (_int i = 0; i < m_protokey[NPC].size(); i++)
+        {
+            const _bool is_selected = (m_iItem_selected_idx[5] == i);
+            if (ImGui::Selectable(m_protokey[NPC][i], is_selected))
+            {
+                m_iItem_selected_idx[5] = i;
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    if (ImGui::BeginListBox("##listNPCcom"))
+    {
+        for (_int i = 0; i < m_protoComkey[NPC].size(); i++)
+        {
+            const _bool is_selected = (m_iIcomtem_selected_idx[5] == i);
+            if (ImGui::Selectable(m_protoComkey[NPC][i], is_selected))
+            {
+                m_iIcomtem_selected_idx[5] = i;
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    Create_Leyer_Botton(NPC, m_iItem_selected_idx[5], m_iIcomtem_selected_idx[5]);
 }
 
 #pragma endregion
@@ -491,6 +594,28 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
         }
     }
     break;
+    case Tool::CLevel_Edit::MONSTER:
+    {
+        if (false == lstrcmpW(protKey, L"Proto GameObject Monster_Monster"))
+        {
+            pDec.DATA_TYPE = CGameObject::DATA_MONSTER;
+            CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
+            aObj->Set_Model(protcomKey);
+            m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
+        }
+    }
+    break;
+    case Tool::CLevel_Edit::NPC:
+    {
+        if (false == lstrcmpW(protKey, L"Proto GameObject NPC_NPC"))
+        {
+            pDec.DATA_TYPE = CGameObject::DATA_NPC;
+            CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
+            aObj->Set_Model(protcomKey);
+            m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
+        }
+    }
+    break;
     }
 
     m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, CGameObject::MAP)->Get_Transform();
@@ -562,7 +687,22 @@ void CLevel_Edit::Push_Proto_vec()
 
             m_protokey[ANIMAPOBJ].push_back(restore_key);
         }
+        else if (false == lstrcmpA(token, "Monster"))
+        {
+            strcpy_s(restore_key, 256, protKey);
+            strcat_s(restore_key, 256, "_");
+            strcat_s(restore_key, 256, token);
 
+            m_protokey[MONSTER].push_back(restore_key);
+        }
+        else if (false == lstrcmpA(token, "NPC"))
+        {
+            strcpy_s(restore_key, 256, protKey);
+            strcat_s(restore_key, 256, "_");
+            strcat_s(restore_key, 256, token);
+
+            m_protokey[NPC].push_back(restore_key);
+        }
         Safe_Delete(protKey);
     }
 }
@@ -626,6 +766,22 @@ void CLevel_Edit::Push_ProtoCom_vec()
             strcat_s(restore_key, 256, token);
 
             m_protoComkey[ANIMAPOBJ].push_back(restore_key);
+        }
+        else if (false == lstrcmpA(token, "Monster"))
+        {
+            strcpy_s(restore_key, 256, protKey);
+            strcat_s(restore_key, 256, "_");
+            strcat_s(restore_key, 256, token);
+
+            m_protoComkey[MONSTER].push_back(restore_key);
+        }
+        else if (false == lstrcmpA(token, "NPC"))
+        {
+            strcpy_s(restore_key, 256, protKey);
+            strcat_s(restore_key, 256, "_");
+            strcat_s(restore_key, 256, token);
+
+            m_protoComkey[NPC].push_back(restore_key);
         }
         else
         {
@@ -871,6 +1027,8 @@ void CLevel_Edit::Msg_Save_box()
             Save_NonAniObj(m_tFPath[2]);
             Save_Ani(m_tFPath[3]);
             Save_Navigation(m_tFPath[4]);
+            Save_Monster(m_tFPath[5]);
+            Save_NPC(m_tFPath[6]);
             m_bshow_Save_MessageBox = false; // 메시지 상자 닫기
         }
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
@@ -895,9 +1053,10 @@ void CLevel_Edit::Msg_Load_box()
             Load_Navigation(m_tFPath[4]);
             Load_Terrain(m_tFPath[0]);
             Load_Wall(m_tFPath[1]);
-            Load_NonAniObj(m_tFPath[2]);
+            Load_Monster(m_tFPath[5]);
             Load_Ani(m_tFPath[3]);
-
+            Load_NonAniObj(m_tFPath[2]);
+            Load_NPC(m_tFPath[6]);
             // 로드가 완료되면 현재 오브젝트의 트랜스폼을 마지막으로 로드한 오브젝트의 트랜스 폼으로 정해준다.
             m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, CGameObject::MAP)->Get_Transform();
 
@@ -1163,6 +1322,118 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
 void CLevel_Edit::Save_Navigation(const _tchar* tFPath)
 {
     static_cast<CNavigation*>(m_pNavigation)->Save(tFPath);
+}
+
+void CLevel_Edit::Save_Monster(const _tchar* tFPath)
+{
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+
+    HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile)
+        return;
+
+    DWORD dwByte(0);
+
+    _vector Right = { 0.f, 0.f, 0.f, 0.f };
+    _vector UP = { 0.f, 0.f, 0.f, 0.f };
+    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
+    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _uint Type = { 0 };
+    _wstring pModel = {};
+    _tchar* pPoroto = {};
+    for (auto& ObjList : AllSave)
+    {
+
+        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
+        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
+        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
+        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+        Type = ObjList->Get_Data();
+        pModel = ObjList->Get_ComPonentName();
+        pPoroto = ObjList->Get_ProtoName();
+
+
+
+        if (Type == CGameObject::DATA_MONSTER)
+        {
+            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
+
+            DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
+            WriteFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+            // wstring 데이터 쓰기
+            WriteFile(hFile, pModel.c_str(), strLength * sizeof(_tchar), &dwByte, NULL);
+
+            // tchar 자료형 쓰기
+            DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
+            WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+            WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+        }
+       
+    }
+    CloseHandle(hFile);
+}
+
+void CLevel_Edit::Save_NPC(const _tchar* tFPath)
+{
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+
+    HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile)
+        return;
+
+    DWORD dwByte(0);
+
+    _vector Right = { 0.f, 0.f, 0.f, 0.f };
+    _vector UP = { 0.f, 0.f, 0.f, 0.f };
+    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
+    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _uint Type = { 0 };
+    _wstring pModel = {};
+    _tchar* pPoroto = {};
+    for (auto& ObjList : AllSave)
+    {
+
+        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
+        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
+        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
+        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+        Type = ObjList->Get_Data();
+        pModel = ObjList->Get_ComPonentName();
+        pPoroto = ObjList->Get_ProtoName();
+
+
+
+        if (Type == CGameObject::DATA_NPC)
+        {
+            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
+
+            DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
+            WriteFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+            // wstring 데이터 쓰기
+            WriteFile(hFile, pModel.c_str(), strLength * sizeof(_tchar), &dwByte, NULL);
+
+            // tchar 자료형 쓰기
+            DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
+            WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+            WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+        }
+
+    }
+    CloseHandle(hFile);
+
+
 }
 
 void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
@@ -1475,6 +1746,154 @@ void CLevel_Edit::Load_Navigation(const _tchar* tFPath)
 {
     static_cast<CNavigation*>(m_pNavigation)->Load(tFPath);
     m_bLoadCell = true;
+}
+
+void CLevel_Edit::Load_Monster(const _tchar* tFPath)
+{
+    HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
+    {
+        return;
+    }
+
+    DWORD dwByte(0);
+
+    _vector Right = { 0.f, 0.f, 0.f, 0.f };
+    _vector UP = { 0.f, 0.f, 0.f, 0.f };
+    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
+    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _uint Type = { 0 };
+    wchar_t* pModel = {};
+    _tchar* pPoroto = {};
+
+    while (true)
+    {
+        _bool bFile(false);
+
+        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
+
+        // wstring 문자열 길이
+        DWORD strLength;
+        bFile = ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+        // wstring 데이터 읽기
+        pModel = new wchar_t[strLength + 1]; // NULL 종단 추가
+        bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
+        pModel[strLength] = L'\0';
+
+        DWORD Length;
+        bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+
+        pPoroto = new _tchar[Length + 1];
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
+        pPoroto[Length] = L'\0';
+
+
+        if (0 == dwByte)
+        {
+            Safe_Delete_Array(pModel);
+            Safe_Delete_Array(pPoroto);
+            break;
+        }
+
+        CGameObject::GAMEOBJ_DESC pDec;
+        pDec.fSpeedPerSec = m_fspped;
+        pDec.fRotationPerSec = m_fRotfspped;
+        pDec.ProtoName = pPoroto;
+        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
+
+        pGameObject->Set_Model(pModel);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+
+        Safe_Delete_Array(pModel);
+        Safe_Delete_Array(pPoroto);
+    }
+    CloseHandle(hFile);
+}
+
+void CLevel_Edit::Load_NPC(const _tchar* tFPath)
+{
+    HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
+    {
+        return;
+    }
+
+    DWORD dwByte(0);
+
+    _vector Right = { 0.f, 0.f, 0.f, 0.f };
+    _vector UP = { 0.f, 0.f, 0.f, 0.f };
+    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
+    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _uint Type = { 0 };
+    wchar_t* pModel = {};
+    _tchar* pPoroto = {};
+
+    while (true)
+    {
+        _bool bFile(false);
+
+        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
+
+        // wstring 문자열 길이
+        DWORD strLength;
+        bFile = ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
+
+        // wstring 데이터 읽기
+        pModel = new wchar_t[strLength + 1]; // NULL 종단 추가
+        bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
+        pModel[strLength] = L'\0';
+
+        DWORD Length;
+        bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+
+        pPoroto = new _tchar[Length + 1];
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
+        pPoroto[Length] = L'\0';
+
+
+        if (0 == dwByte)
+        {
+            Safe_Delete_Array(pModel);
+            Safe_Delete_Array(pPoroto);
+            break;
+        }
+
+        CGameObject::GAMEOBJ_DESC pDec;
+        pDec.fSpeedPerSec = m_fspped;
+        pDec.fRotationPerSec = m_fRotfspped;
+        pDec.ProtoName = pPoroto;
+        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
+
+        pGameObject->Set_Model(pModel);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+
+        Safe_Delete_Array(pModel);
+        Safe_Delete_Array(pPoroto);
+    }
+    CloseHandle(hFile);
 }
 
 #pragma endregion

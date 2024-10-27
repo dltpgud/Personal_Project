@@ -6,7 +6,7 @@ class CCollider;
 END
 
 BEGIN(Client)
-
+class CPlayerUI;
 class CPlayer final : public CActor
 {
 public:
@@ -51,7 +51,9 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
-	virtual void HIt_Routine()override;
+	virtual void HIt_Routine(_float fTimeDelta)override;
+	virtual void Stun_Routine()override;
+	
 	virtual _float Weapon_Damage() override;
 \
 	const _float4x4* Get_CameraBone();
@@ -61,10 +63,7 @@ public:
 	_uint Get_Bullet();
 	_uint Get_MaxBullte();
 	_bool Get_jump() { return m_bJump; }
-
-	_float Get_fPlayerY() { return m_fPlayerY; }
-
-	void Height_On_Cell();
+	void Set_HitLock(_bool Lock);
 
 	void Mouse_Fix();
 private:
@@ -73,13 +72,14 @@ private:
 	_bool					m_bturn = { false };
 	_bool					m_bchange = { false };
 	_bool					m_bJump = { false };
-	_float					m_fPlayerY{ 0.f };
+	_bool					m_bHitLock = { false };
+	CPlayerUI*				m_pPlayerUI = { nullptr };
 
 
 private:
 	HRESULT Add_Components();
 	HRESULT Add_PartObjects();
-	HRESULT Bind_ShaderResources();
+	;
 
 public:
 	static CPlayer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

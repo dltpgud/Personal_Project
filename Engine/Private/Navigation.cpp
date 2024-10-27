@@ -51,8 +51,10 @@ HRESULT CNavigation::Initialize(void* pArg)
 
     NAVIGATION_DESC* pDesc = static_cast<NAVIGATION_DESC*>(pArg);
 
-   m_iCurrentCellIndex = pDesc->iCurrentCellIndex;
-
+    if (nullptr != pDesc)
+        m_iCurrentCellIndex = pDesc->iCurrentCellIndex;
+    else
+        m_iCurrentCellIndex = 0;
     return S_OK;
 }
 void CNavigation::SetUp_Neighbor()
@@ -94,22 +96,24 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos , _fvector vBeforeMoveWorldPos
             while (true)  // 반복하자 계속
             {
                 if (true == m_Cells[iNeighborIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &Slid))  // 이웃이 있을때 까지
-                      break;
+                {
+                    if (1 == m_Cells[iNeighborIndex]->Get_Type())
+                    {
+                        m_iNonMoveCellIndex = iNeighborIndex;
+                        Slid = XMVectorZero();
+                        return false;
+                    }
+                    break;
+                }
                
                 if (-1 == iNeighborIndex)  // 여기까지 오면 없는거고
                 {
-                    Slid = XMVectorZero();
-                 
-                    m_breturn = false;
+                    return false;
                 }
             }
-           
+   
             m_iCurrentCellIndex = iNeighborIndex;  //반복문 탈출에 성공했으면 그 좌표를 현재 셀 인덱스로 잡자      
-         
-            m_breturn = true;
-
-
-        
+            m_breturn =  true;
 
         }
         else /* 나간 방향에 이웃이 없었다면. */
@@ -119,6 +123,42 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos , _fvector vBeforeMoveWorldPos
         }
     }
    
+    _vector vNewLocalPos = vBeforeLocalPos + Slid;  // 슬라이딩 벡터를 구한뒤 더이상 슬라이딩 가능한지 아닌지 한번 더 검사하자.
+    if (false == m_Cells[m_iCurrentCellIndex]->isIn(vNewLocalPos, vAfterLocalPos, &iNeighborIndex, &Slid))
+    {	/* 나간 방향에 이웃이 있었다면. */
+        if (-1 != iNeighborIndex)
+        {
+            while (true)  // 반복하자 계속
+            {
+                if (true == m_Cells[iNeighborIndex]->isIn(vNewLocalPos, vAfterLocalPos, &iNeighborIndex, &Slid))  // 이웃이 있을때 까지
+                {
+                    if (1 == m_Cells[iNeighborIndex]->Get_Type())
+                    {
+                        m_iNonMoveCellIndex = iNeighborIndex;
+                        Slid = XMVectorZero();
+                        return false;
+                    }
+                    break;
+                }
+
+                if (-1 == iNeighborIndex)  // 여기까지 오면 없는거고
+                {
+                     Slid = XMVectorZero();
+
+                    return  false;
+                }
+            }
+            m_iCurrentCellIndex = iNeighborIndex;  //반복문 탈출에 성공했으면 그 좌표를 현재 셀 인덱스로 잡자      
+            m_breturn = true;
+
+        }
+        else /* 나간 방향에 이웃이 없었다면. */
+        {
+
+            m_breturn = false;
+        }
+    }
+
 
     *Slide = Slid;
 
@@ -274,6 +314,9 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type)
 
 _float CNavigation::Compute_HeightOnCell(_float3* fPos)
 {
+    if (m_iCurrentCellIndex == -1)
+        return 0.f;
+
     _vector v1 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_A);
     _vector v2 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_B);
     _vector v3 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_C);
@@ -353,7 +396,8 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
 
 void CNavigation::Set_Type(_uint Type)
 {
-    m_Cells[m_iCurrentCellIndex]->Set_Type(Type);
+    if(-1 != m_iNonMoveCellIndex )
+    m_Cells[m_iNonMoveCellIndex]->Set_Type(Type);
 }
 
 void CNavigation::Set_Type_From_Ray(_vector LocalRayPos, _vector LocalRayDir, _uint Type)
@@ -410,6 +454,25 @@ void CNavigation::Delete_Cell(_vector LocalRayPos, _vector LocalRayDir)
     }
     Safe_Release(*(m_Cells.begin() + Index));
     m_Cells.erase(m_Cells.begin() + Index);
+
+}
+
+void CNavigation::Find_CurrentCell(_vector vWorldPos)
+{
+    _vector vAfterLocalPos = XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
+    _vector vBeforeLocalPos = XMVectorZero();
+    _int iNeighborIndex = { -1 };
+    _vector slide{};
+    for (size_t i = 0; i < m_Cells.size(); i++)
+    {
+
+        if (true == m_Cells[i]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &slide))
+        {
+            m_iCurrentCellIndex = i;
+            return;
+        }
+
+    }
 
 }
 

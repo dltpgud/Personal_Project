@@ -17,6 +17,11 @@ public:
         TRANSFORM_POSITION,
         TRANSFORM_END
     };
+
+    enum FIX
+    {
+        FIX_X, FIX_Y, FIX_Z,FIX_END
+    };
     typedef struct TRANSFORM_DESC
     {
         _float fSpeedPerSec{};
@@ -49,7 +54,7 @@ public:
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
     void Stop_Move();
     void Rotation_to_Player();
-
+    void Other_set_Pos(CTransform* Other, FIX FixPosWhere,_float FixPos, _float3* Ouput = nullptr);
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
     void Turn(_fvector vAxis, _float fTimeDelta);
     void Turn(_bool bX, _bool bY, _bool bZ, _float fTimeDelta);
@@ -66,7 +71,7 @@ public:
     {
         return XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix));
     }
-
+  
      _float4x4* Get_WorldMatrixPtr()  
      {
         return &m_WorldMatrix;
@@ -76,6 +81,10 @@ public:
     {
         return XMLoadFloat4x4(&m_WorldMatrix);
     }
+
+ 
+
+
     _float3 Get_Scaled()
     {
         return _float3(XMVectorGetX(XMVector3Length(Get_TRANSFORM(

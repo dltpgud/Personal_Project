@@ -47,7 +47,7 @@ private:
 	_uint						m_pWeaPonType{};
 	_tchar*					    m_pWeaPonNumName = {};
 
-	 _tchar m_WeaPonName[50]{};
+
 	CInteractiveUI* m_InteractiveUI ;
 	CPlayer* m_pPlayer;
 

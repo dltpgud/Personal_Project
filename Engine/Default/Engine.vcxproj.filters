@@ -112,12 +112,6 @@
     <Filter Include="01.Utility\04.Component\Model\Channel">
       <UniqueIdentifier>{af517dd5-d5f0-431c-8b7f-a0adcfcba9cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\02.GameObjects\ContainerObject">
-      <UniqueIdentifier>{7fff1e9f-2215-4fc0-8a2b-91e7b9d452fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\02.GameObjects\ContainerObject\PartObject">
-      <UniqueIdentifier>{851fb8ea-f8b4-457d-b10d-a9a2e92539bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Utility\04.Component\Navigation">
       <UniqueIdentifier>{12bbd5b6-f40a-450c-81c1-348cf97e5121}</UniqueIdentifier>
     </Filter>
@@ -168,6 +162,12 @@
     </Filter>
     <Filter Include="00.System\Fonts\Manager">
       <UniqueIdentifier>{ad902bbe-0920-426f-a2b6-27af1e4e9ab4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\02.GameObjects\Actor\ContainerObject">
+      <UniqueIdentifier>{7fff1e9f-2215-4fc0-8a2b-91e7b9d452fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\02.GameObjects\Actor\ContainerObject\PartObject">
+      <UniqueIdentifier>{851fb8ea-f8b4-457d-b10d-a9a2e92539bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -289,10 +289,10 @@
       <Filter>01.Utility\04.Component\Model\Channel</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ContainerObject.h">
-      <Filter>01.Utility\02.GameObjects\ContainerObject</Filter>
+      <Filter>01.Utility\02.GameObjects\Actor\ContainerObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PartObject.h">
-      <Filter>01.Utility\02.GameObjects\ContainerObject\PartObject</Filter>
+      <Filter>01.Utility\02.GameObjects\Actor\ContainerObject\PartObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Cell.h">
       <Filter>01.Utility\04.Component\Navigation\Cell</Filter>
@@ -444,10 +444,10 @@
       <Filter>01.Utility\04.Component\Model\Channel</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ContainerObject.cpp">
-      <Filter>01.Utility\02.GameObjects\ContainerObject</Filter>
+      <Filter>01.Utility\02.GameObjects\Actor\ContainerObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PartObject.cpp">
-      <Filter>01.Utility\02.GameObjects\ContainerObject\PartObject</Filter>
+      <Filter>01.Utility\02.GameObjects\Actor\ContainerObject\PartObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Navigation.cpp">
       <Filter>01.Utility\04.Component\Navigation</Filter>

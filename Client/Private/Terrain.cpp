@@ -18,20 +18,28 @@ HRESULT CTerrain::Initialize_Prototype()
 HRESULT CTerrain::Initialize(void* pArg)
 {
     if (nullptr != pArg) {
-        CGameObject::GAMEOBJ_DESC* pDesc = static_cast <CGameObject::GAMEOBJ_DESC*>(pArg);
+        CGameObject::GAMEOBJ_DESC* pDesc = static_cast <GAMEOBJ_DESC*>(pArg);
    
         m_DATA_TYPE = pDesc->DATA_TYPE;
         NavigationFath = pDesc->FilePath;
+        if (FAILED(__super::Initialize(pDesc)))
+            return E_FAIL;
     }
-  
+    else
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
+
+
+    if (m_DATA_TYPE == Terrain_TYPE::TYPE_MAIN)
+        m_bMain = true;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
+    if (m_pNavigationCom != nullptr)
+    {
         m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
-   
+    }
     return S_OK;
 }
 
@@ -112,7 +120,7 @@ void CTerrain::Set_Model(const _wstring& protoModel)
         return;
 }
 
-void CTerrain::Set_Buffer(_uint x, _uint y)
+void CTerrain::Set_Buffer(_uint x, _uint y )
 {
     m_pSize[0] = x;
     m_pSize[1] = y;
@@ -140,10 +148,13 @@ HRESULT CTerrain::Add_Components()
         return E_FAIL;
 
     /* For.Com_Navigation */
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
-        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
-        return E_FAIL;
 
+    if (true == m_bMain)
+    {
+        if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+            TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
+            return E_FAIL;
+    }
     return S_OK;
 }
 
@@ -178,7 +189,10 @@ void CTerrain::Free()
 {
     __super::Free();
 
+    if(m_pNavigationCom != nullptr)
     Safe_Release(m_pNavigationCom);
+
+
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);

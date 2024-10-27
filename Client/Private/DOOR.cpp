@@ -39,6 +39,12 @@ _int CDOOR::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
+    if (true == Go_Move)
+    {
+        m_pPlayer->Set_NavigationType(0);
+    }
+  
+
     return OBJ_NOEVENT;
 }
 
@@ -53,9 +59,9 @@ void CDOOR::Update(_float fTimeDelta)
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
 
     if (fLength <= 6.f && m_bState == false ) {
-        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false);
-        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, true);
-        m_InteractiveUI->Set_Text(L"문 열기");
+     
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
+        m_InteractiveUI->Set_Text(L"문 열기",CInteractiveUI::INTERACTIVE_STATE::IS_DOOR);
         if (true == m_InteractiveUI->Get_Interactive())
         {
 
@@ -65,6 +71,8 @@ void CDOOR::Update(_float fTimeDelta)
                 m_iState = State2::OPEN2;
 
             m_pModelCom->Set_Animation(m_iState, false);
+            Go_Move = true;
+            m_bOpen = true;
             m_InteractiveUI->Set_Interactive(false);
             m_bState = true;
         }
@@ -77,22 +85,27 @@ void CDOOR::Update(_float fTimeDelta)
         else
             m_iState = State2::ClOSE2;
 
+        Go_Move = false;
         m_pModelCom->Set_Animation(m_iState, false);
         m_bState = false;
 
     }
+
     if (true == m_bOpen)
     {
         m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
         m_bOpen = false;
     }
- 
+   
 
+    if (fLength <= 6.f && false == Go_Move)
+    {
+      m_pPlayer->Set_NavigationType(1);
+    }
  
     if (true == m_pModelCom->Play_Animation(fTimeDelta))
     {
-        if (m_pModelName != L"Proto Component ItemDoor Model_aniObj" && m_iState != State::ClOSE)
-        m_bOpen = true;
+      
     }
   
 }
