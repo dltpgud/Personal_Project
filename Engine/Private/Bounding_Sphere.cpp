@@ -46,9 +46,9 @@ _bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDi
 {
 	_bool		isColl = { false };
 
-	_float Dist{};
-	isColl = m_pBoundDesc->Intersects(RayPos, RayDir, Dist);
-	fDis = Dist;
+
+	isColl = m_pBoundDesc->Intersects(RayPos, RayDir,fDis);
+
 	return isColl;
 }
 

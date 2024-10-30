@@ -23,13 +23,14 @@ HRESULT CBody_GunPawn::Initialize(void* pArg)
 
     m_pParentState = pDesc->pParentState;
 
+    m_RimDesc.eState  = pDesc->pRimState;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+    
     return S_OK;
 }
 
@@ -126,9 +127,13 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     if (*m_pParentState == CGunPawn::ST_STUN_START && m_iCurMotion != CGunPawn::ST_STUN_START)
     {
         m_iCurMotion = CGunPawn::ST_STUN_START;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = false;
     }
+    else
+        m_fPlayAniTime = 0.6f;
+
     if (*m_pParentState == CGunPawn::ST_HIT_BACK && m_iCurMotion != CGunPawn::ST_HIT_BACK)
     {
         m_iCurMotion = CGunPawn::ST_HIT_BACK;
@@ -180,13 +185,33 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     if (*m_pParentState == CGunPawn::ST_PRESHOOT && m_iCurMotion != CGunPawn::ST_PRESHOOT)
     {
         m_iCurMotion = CGunPawn::ST_PRESHOOT;
+        m_fPlayAniTime = 0.5;
         bMotionChange = true;
         bLoop = false;
     }
+    else
+        m_fPlayAniTime = 1.f;
+
+
+
+
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
+    {
+        m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
+        m_RimDesc.iPower = 1;
+    }
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
+        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
+        m_RimDesc.iPower = 1;
+    }
+
+
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
-    if (true == m_pModelCom->Play_Animation(fTimeDelta))
+    if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
 
         m_bFinishAni = true;
@@ -230,10 +255,6 @@ HRESULT CBody_GunPawn::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_iCurMotion == CGunPawn::ST_STUN_START)))
-            return E_FAIL;
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CGunPawn::ST_PRESHOOT)))
-            return E_FAIL;
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -286,6 +307,18 @@ HRESULT CBody_GunPawn::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
+        return E_FAIL;
+
+
+
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_RimDesc.eState)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CGunPawn::ST_PRESHOOT)))
         return E_FAIL;
 
     return S_OK;

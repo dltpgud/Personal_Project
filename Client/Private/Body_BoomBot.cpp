@@ -22,14 +22,14 @@ HRESULT CBody_BoomBot::Initialize(void* pArg)
     CBody_BoomBot_Desc* pDesc = static_cast<CBody_BoomBot_Desc*>(pArg);
 
     m_pParentState = pDesc->pParentState;
-
+    m_RimDesc.eState = pDesc->pRimState;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+   m_fPlayAniTime = 0.5f;
     return S_OK;
 }
 
@@ -47,152 +47,192 @@ void CBody_BoomBot::Update(_float fTimeDelta)
     if (*m_pParentState == CBoomBot::ST_Aim_Down && m_iCurMotion != CBoomBot::ST_Aim_Down)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Down;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = false;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Down_Left&& m_iCurMotion != CBoomBot::ST_Aim_Down_Left)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Down_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Down_Right && m_iCurMotion != CBoomBot::ST_Aim_Down_Right)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Down_Right; 
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Left&& m_iCurMotion != CBoomBot::ST_Aim_Left)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Middle && m_iCurMotion != CBoomBot::ST_Aim_Middle)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Middle;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Right && m_iCurMotion != CBoomBot::ST_Aim_Right)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Top && m_iCurMotion != CBoomBot::ST_Aim_Top)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Top;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Top_Left && m_iCurMotion != CBoomBot::ST_Aim_Top_Left)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Top_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Aim_Top_Right&& m_iCurMotion != CBoomBot::ST_Aim_Top_Right)
     {
         m_iCurMotion = CBoomBot::ST_Aim_Top_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Hit_Back && m_iCurMotion != CBoomBot::ST_Hit_Back)
     {
         m_iCurMotion = CBoomBot::ST_Hit_Back;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Hit_Front && m_iCurMotion != CBoomBot::ST_Hit_Front)
     {
         m_iCurMotion = CBoomBot::ST_Hit_Front;
+        m_fPlayAniTime = 1.f;
         bMotionChange = true;
         bLoop = false;
     }
+    
+
     if (*m_pParentState == CBoomBot::ST_Hit_Left && m_iCurMotion != CBoomBot::ST_Hit_Left)
     {
         m_iCurMotion = CBoomBot::ST_Hit_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Hit_Right && m_iCurMotion != CBoomBot::ST_Hit_Right)
     {
         m_iCurMotion = CBoomBot::ST_Hit_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Idle && m_iCurMotion != CBoomBot::ST_Idle)
     {
         m_iCurMotion = CBoomBot::ST_Idle;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_PreShoot && m_iCurMotion != CBoomBot::ST_PreShoot)
     {
         m_iCurMotion = CBoomBot::ST_PreShoot;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Run_Back && m_iCurMotion != CBoomBot::ST_Run_Back)
     {
         m_iCurMotion = CBoomBot::ST_Run_Back;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Run_Front && m_iCurMotion != CBoomBot::ST_Run_Front)
     {
         m_iCurMotion = CBoomBot::ST_Run_Front;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Run_Left && m_iCurMotion != CBoomBot::ST_Run_Left)
     {
         m_iCurMotion = CBoomBot::ST_Run_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Run_Left_Back && m_iCurMotion != CBoomBot::ST_Run_Left_Back)
     {
         m_iCurMotion = CBoomBot::ST_Run_Left_Back;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Run_Right && m_iCurMotion != CBoomBot::ST_Run_Right)
     {
         m_iCurMotion = CBoomBot::ST_Run_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Run_Right_Back && m_iCurMotion != CBoomBot::ST_Run_Right_Back)
     {
         m_iCurMotion = CBoomBot::ST_Run_Right_Back;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CBoomBot::ST_Shoot && m_iCurMotion != CBoomBot::ST_Shoot)
     {
         m_iCurMotion = CBoomBot::ST_Shoot;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = false;
     }
     if (*m_pParentState == CBoomBot::ST_Stun_Loop && m_iCurMotion != CBoomBot::ST_Stun_Loop)
     {
         m_iCurMotion = CBoomBot::ST_Stun_Loop;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = false;
     }
     if (*m_pParentState == CBoomBot::ST_Stun_Start && m_iCurMotion != CBoomBot::ST_Stun_Start)
     {
         m_iCurMotion = CBoomBot::ST_Stun_Start;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
 
+
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
+    {
+        m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
+        m_RimDesc.iPower = 1;
+    }
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
+        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
+        m_RimDesc.iPower = 1;
+    }
+
+
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
-    if (true == m_pModelCom->Play_Animation(fTimeDelta))
+    if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
         m_bFinishAni = true;
         m_pModelCom->Set_Animation(m_iCurMotion, true);
@@ -236,10 +276,7 @@ HRESULT CBody_BoomBot::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_iCurMotion == CBoomBot::ST_Hit_Front)))
-            return E_FAIL;
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CBoomBot::ST_Aim_Down)))
-            return E_FAIL;
+     
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -292,6 +329,16 @@ HRESULT CBody_BoomBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
+        return E_FAIL;
+
+
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_RimDesc.eState)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CBoomBot::ST_Aim_Down)))
         return E_FAIL;
 
     return S_OK;

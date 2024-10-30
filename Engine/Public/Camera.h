@@ -33,7 +33,7 @@ class ENGINE_DLL CCamera abstract : public CGameObject
 	_float					m_fAspect	= { 0.f };
 	_float					m_fNearZ	= { 0.f };
 	_float					m_fFarZ		= { 0.f };
-
+	_float4					m_vEye = {};
  public:
 	virtual CGameObject* Clone(void* pArg) = 0;
 	virtual void Free();

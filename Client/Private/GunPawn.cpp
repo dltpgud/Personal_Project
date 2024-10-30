@@ -35,7 +35,7 @@ HRESULT CGunPawn::Initialize(void* pArg)
     m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     m_bOnCell = true;
-
+    m_DATA_TYPE = CGameObject::DATA_MONSTER;
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
@@ -51,8 +51,10 @@ HRESULT CGunPawn::Initialize(void* pArg)
 _int CGunPawn::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
-        return OBJ_DEAD;
+        return OBJ_DEAD; 
 
+    if (m_iState != ST_STUN_START)
+        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
 
     if (m_pPartHP != nullptr) {
         m_pPartHP->Set_Monster_HP(m_fHP);
@@ -99,6 +101,7 @@ void CGunPawn::HIt_Routine(_float fTimeDelta)
  
     m_iState = ST_STUN_START;
 
+    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
     m_pPartHP->Set_HitStart(true);
     m_pPartHP->Set_Hit(true);
     m_pPartHP->Set_bLateUpdaet(true);
@@ -108,8 +111,11 @@ void CGunPawn::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_PRESHOOT;
 
-    Erase_PartObj(PART_HP);
-    m_pPartHP = nullptr;
+   
+    if (m_pPartHP != nullptr) {
+        Erase_PartObj(PART_HP);
+        m_pPartHP = nullptr;
+    }
 }
 
 void CGunPawn::NON_intersect(_float fTimedelta)
@@ -200,7 +206,7 @@ HRESULT CGunPawn::Add_PartObjects()
     BodyDesc.fSpeedPerSec = 0.f;
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
-
+    BodyDesc.pRimState = &m_iRim;
   if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_GunPawn"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 

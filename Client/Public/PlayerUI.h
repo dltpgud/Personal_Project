@@ -32,8 +32,12 @@ public:
 	virtual HRESULT Render() override;
 
 public:
-	void Set_PlayerMaxHP(_float fMaxHP) { m_fMaxHP = fMaxHP; }
-	void Set_PlayerHP(_float fHP) { m_fHP = fHP; }
+	void Set_PlayerMaxHP(_float fMaxHP) { m_fMaxHP = fMaxHP;
+	swprintf_s(m_tfMaxHp, 50, L"%.f\n", m_fMaxHP);
+	}
+	void Set_PlayerHP(_float fHP) { m_fHP = fHP;
+	swprintf_s(m_tfHP, 50, L"%.f\n", m_fHP);
+	}
 
 	void Set_HPGage(_int GageCount) {
 		if (GageCount < -1)
@@ -59,6 +63,11 @@ private:
 	_float m_fPrXPos{}, m_fPrYPos{};
 	_int   m_iGageCount = {-1};
 	_float m_fHealthHP{};
+
+
+	_tchar	m_tfHP[50];
+
+	_tchar	m_tfMaxHp[50];
 public:	
 	static CPlayerUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

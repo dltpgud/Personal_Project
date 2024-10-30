@@ -33,6 +33,7 @@ HRESULT CCHEST::Initialize(void* pArg)
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
     m_InteractiveUI->Set_Text(L"»óÀÚ ¿­±â", CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
+
     return S_OK;
 }
 
@@ -110,21 +111,7 @@ void CCHEST::Set_Model(const _wstring& protoModel)
 void CCHEST::Set_Buffer(_uint x, _uint y)
 {  m_pWeaPonType = y; 
        
-switch (m_pWeaPonType)
-{
-case CWeapon::WeaPoneType::HendGun:
-    m_pWeaPonNumName = L"HendGun ÀåÂø";
-    break;
-case CWeapon::WeaPoneType::AssaultRifle:
-    m_pWeaPonNumName = L"Assault Rifle ÀåÂø";
-    break;
-case CWeapon::WeaPoneType::MissileGatling:
-    m_pWeaPonNumName = L"Missile Gatling ÀåÂø";
-    break;
-case CWeapon::WeaPoneType::HeavyCrossbow:
-    m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø";
-    break;
-}
+
 }
 
 void CCHEST::Interactive(_float fTimeDelta)
@@ -148,8 +135,10 @@ void CCHEST::Interactive(_float fTimeDelta)
 
         }
     }
+    
     if (fLength > 6.f && m_bState == false) {
-
+    
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
         m_pModelCom[ANI]->Set_Animation(State::IDLE, true);
         m_bHover = false;
         m_bState = true;
@@ -165,13 +154,7 @@ void CCHEST::Interactive(_float fTimeDelta)
         }
 
     }
-
-    if (false == m_bHover || fLength > 6.f) {
- 
-            m_pGameInstance->Set_OpenUI_Inverse( CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
-    }
-
-
+   
     if (true == m_bOpen)
     {
         if (false == m_bIcon)
@@ -190,12 +173,11 @@ void CCHEST::Interactive(_float fTimeDelta)
 
     }
 
-    if (true == m_pModelCom[ANI]->Play_Animation(fTimeDelta))
+    if (true == m_pModelCom[ANI]->Play_Animation(fTimeDelta *0.9f))
     {
         if (false == m_bOpen)
         {
             m_bOpen = true;
-            m_InteractiveUI->Set_Text(m_pWeaPonNumName, CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
         }
     }
 }

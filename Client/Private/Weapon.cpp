@@ -3,6 +3,7 @@
 #include "GameInstance.h"
 #include "Player.h"
 #include "UI.h"
+
 CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -54,6 +55,9 @@ _int CWeapon::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
+
+
+
     return OBJ_NOEVENT;
 }
 
@@ -65,6 +69,8 @@ void CWeapon::Update(_float fTimeDelta)
         m_pGameInstance->UI_shaking(CUI::UIID_PlayerHP, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon_Aim, fTimeDelta);
+
+
 }
 
 void CWeapon::Late_Update(_float fTimeDelta)
@@ -75,14 +81,14 @@ void CWeapon::Late_Update(_float fTimeDelta)
         SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]); // 항등으로 만들어서 넣겠다..
 
     XMStoreFloat4x4(&m_WorldMatrix,
-                    m_pTransformCom->Get_WorldMatrix() * SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
+        m_pTransformCom->Get_WorldMatrix() * SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 }
 
 HRESULT CWeapon::Render()
-{
+{  
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -256,6 +262,8 @@ void CWeapon::Type2_Update(_float fTimeDelta)
     }
  
 }
+
+
 
 void CWeapon::Choose_Weapon(const _uint& WeaponNum)
 {

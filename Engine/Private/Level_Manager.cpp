@@ -303,8 +303,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
         pPoroto[Length] = L'\0';
 
-        if (Type == CGameObject::DATA_CHEST)
-            bFile = ReadFile(hFile, &(WType), sizeof(_uint), &dwByte, nullptr);
+ 
 
         if (0 == dwByte)
         {
@@ -323,7 +322,10 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
 
             if (CGameObject::DATA_CHEST == Type)
+            {
+                bFile = ReadFile(hFile, &(WType), sizeof(_uint), &dwByte, nullptr);
                 pGameObject->Set_Buffer(0, WType);
+            }
             m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
         }
         Safe_Delete_Array(pModel);
@@ -498,7 +500,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _ui
         }
 
         m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-        m_pGameInstance->Add_Monster(iLevelIndex, m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag));
+       
 
 
         Safe_Delete_Array(pModel);

@@ -77,7 +77,7 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
      m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ), m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
     
      CActor* pPickedObj{};
-    _bool intersects{};
+    _vector vPos{};
     for (_uint i = 0; i < m_iLevel; i++) {
         if (0 == m_MonsterList[i].size())
             continue;
@@ -89,24 +89,31 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
         {
             if (nullptr == Monster)
                 continue;
-             Monster->Get_Collider()->RayIntersects(RayPos, RayDir, fDist);
+             
+            Monster->Get_Collider()->RayIntersects(RayPos, RayDir, fDist);
 
             if (fDist < fNewDist)
             {
                 if (fDist != 0) {
                     fNewDist = fDist;
                     pPickedObj = Monster;
+                    vPos = RayPos + RayDir*fNewDist;    
                 }
             }
         }
     }
 
-        if (pPickedObj)
+    if (pPickedObj)
     {
-        pPickedObj->Set_CurrentHP(m_pGameInstance->Get_Player()->Weapon_Damage());
+        static_cast <CActor*>(m_pGameInstance->Get_Player())->Make_Bullet(vPos);
+                    pPickedObj->Set_CurrentHP(m_pGameInstance->Get_Player()->Weapon_Damage());
         pPickedObj->Set_bColl(true);
     }
+    else
+    { 
 
+        static_cast <CActor*>(m_pGameInstance->Get_Player())->Make_Bullet(RayDir);
+    }
     return S_OK;
 }
 

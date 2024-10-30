@@ -13,7 +13,7 @@ class CBody_HealthBot : public CPartObject
 public: 
 	typedef struct BODY_HEALTHBOT_DESC : CPartObject::PARTOBJECT_DESC
 	{
-		const _uint* pParentState = { nullptr };
+
 	}BODY_HEALTHBOT_DESC;
 
 private:

@@ -19,9 +19,9 @@ HRESULT CPlayerUI::Initialize(void* pArg)
 {
     CUI_DESC Desc{};
 
-    Desc.fX = 175.f;
+    Desc.fX = 145.f;
     Desc.fY = 640.f;
-    Desc.fSizeX = 550.f;
+    Desc.fSizeX = 450.f;
     Desc.fSizeY = 150.f;
     Desc.UID = CUI::UIID_PlayerHP;
     Desc.PrUpdate = true;
@@ -76,6 +76,10 @@ void CPlayerUI::Update(_float fTimeDelta)
         m_fHP_Pluse = m_fHP / m_fMaxHP + 0.1f;
     }
 
+
+
+
+
     if (m_iGageCount != -1)
     {
         m_iGageCount--;
@@ -91,6 +95,8 @@ void CPlayerUI::Update(_float fTimeDelta)
 void CPlayerUI::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
+
+       
         return;
 }
 
@@ -123,6 +129,10 @@ HRESULT CPlayerUI::Render()
     m_pVIBufferCom->Bind_Buffers();
 
     m_pVIBufferCom->Render();
+
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_tfHP, _float2(m_fX + 200.f, m_fY + 10.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.5f);
+    m_pGameInstance->Render_Text(TEXT("Robo"), L"/", _float2(m_fX + 250.f, m_fY + 10.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.5f);
+ m_pGameInstance->Render_Text(TEXT("Robo"), m_tfMaxHp, _float2(m_fX + 265.f, m_fY+10.f ), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.5f);
 
     return S_OK;
 }

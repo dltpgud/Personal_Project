@@ -13,7 +13,6 @@ class CBody_JetFly : public CPartObject
 public: 
 	typedef struct CBody_JetFly_Desc : CPartObject::PARTOBJECT_DESC
 	{
-		const _uint* pParentState = { nullptr };
 	}CBody_JetFly_Desc;
 
 private:

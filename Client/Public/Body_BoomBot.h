@@ -12,7 +12,7 @@ class CBody_BoomBot : public CPartObject
 public: 
 	typedef struct CBody_BoomBot_Desc : CPartObject::PARTOBJECT_DESC
 	{
-		const _uint* pParentState = { nullptr };
+
      } CBody_BoomBot_Desc;
 
 private:

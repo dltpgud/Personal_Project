@@ -37,6 +37,7 @@ _int CPartObject::Priority_Update(_float fTimeDelta)
 
 void CPartObject::Update(_float fTimeDelta)
 {
+	__super::Update(fTimeDelta);
 }
 
 void CPartObject::Late_Update(_float fTimeDelta)
@@ -44,10 +45,12 @@ void CPartObject::Late_Update(_float fTimeDelta)
 	XMStoreFloat4x4(&m_WorldMatrix, XMLoadFloat4x4(m_pParentMatrix) *
 		m_pTransformCom->Get_WorldMatrix()); // 부모행렬과 내 월드랑 곱해서 그린다
 
+	__super::Late_Update(fTimeDelta);
 }
 
 HRESULT CPartObject::Render()
 {
+	__super::Render();
 	return S_OK;
 }
 

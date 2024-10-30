@@ -55,7 +55,7 @@ public:
 	virtual void Stun_Routine()override;
 	
 	virtual _float Weapon_Damage() override;
-\
+	virtual HRESULT Make_Bullet(_vector vPos) override;
 	const _float4x4* Get_CameraBone();
 	void Key_Input(_float fTimeDelta);
 
@@ -74,12 +74,12 @@ private:
 	_bool					m_bJump = { false };
 	_bool					m_bHitLock = { false };
 	CPlayerUI*				m_pPlayerUI = { nullptr };
-
+	const _float4x4*		m_pCameraBone = { nullptr };
 
 private:
 	HRESULT Add_Components();
 	HRESULT Add_PartObjects();
-	;
+	
 
 public:
 	static CPlayer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

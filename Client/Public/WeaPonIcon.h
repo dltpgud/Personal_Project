@@ -37,6 +37,9 @@ private:
     _float m_fX{ 0.f };
     _float m_fY{ 0.f };
     _float m_fZ{ 0.f };
+    _tchar* m_pWeaPonNumName = {};
+    class CInteractiveUI* m_InteractiveUI = {nullptr};
+    class CPlayer* m_pPlayer = { nullptr };
 private:
     HRESULT Add_Components();
     HRESULT Bind_ShaderResources();

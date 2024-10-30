@@ -21,6 +21,9 @@ public:
         m_bIsColl = SetColl;
         return S_OK;
     }
+
+
+
 private:
     class CGameInstance* m_pGameInstance = { nullptr };
     list <class CActor*>* m_MonsterList;

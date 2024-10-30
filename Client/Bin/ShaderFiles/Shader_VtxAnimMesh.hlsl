@@ -6,12 +6,15 @@ float4			g_vLightDir;
 float4			g_vLightDiffuse;
 float4			g_vLightAmbient;
 float4			g_vLightSpecular;
+float4			g_RimColor;
+float			g_RimPow;
 
 texture2D		g_DiffuseTexture;
-float4			g_vMtrlAmbient = float4(0.4f, 0.4f, 0.4f, 1.f);
+float4			g_vMtrlAmbient	= float4(0.4f, 0.4f, 0.4f, 1.f);
 float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
 float4			g_vCamPosition;
+
 
 float4x4		g_BoneMatrices[512];   /*뼈 메트릭스 개수*/
 bool g_TagetBool;
@@ -127,12 +130,6 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
 
-	if(true == g_TagetBool)
-    {
-        vector WHite = { 0.5f, 0.5f, 0.5f, 0.1f };
-        vMtrlDiffuse += WHite;
-    }
-	
     if (true == g_TagetDeadBool)
     {
         vector Black = { 0.3f, 0.3f, 0.3f, 0.1f };
@@ -150,11 +147,94 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
 
     float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
 
-    Out.vColor = (g_vLightDiffuse * vMtrlDiffuse) * saturate(vShade) +
-		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
+	
+    float rim = { 0.f };
+	
+	if (true == g_TagetBool)
+    {
 
+        rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
+        rim = pow(1 - rim, g_RimPow);
+    }
+	
+  //   Out.vColor = (g_vLightDiffuse  * vMtrlDiffuse) * saturate(vShade) +
+	//	          (g_vLightSpecular * g_vMtrlSpecular) * fSpecular + (rim * rimColor);
+    
+	
+	
+    float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
+
+    // 카툰 효과를 위한 색상 임계값
+    float3 finalColor;
+    if (NdotL > 0.2)
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
+    }
+    else
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(0.9, 0.9, 0.9); // 음영 색상
+    }    
+	
+    Out.vColor = float4(finalColor * g_vLightDiffuse, vMtrlDiffuse.a) * saturate(vShade) +
+    (g_vLightSpecular * g_vMtrlSpecular) * fSpecular + (rim * g_RimColor); // 최종 색상 반환
+	
+	
+	
     return Out;
 }
+
+
+
+PS_OUT PS_MA(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+
+    float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
+    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
+    float4 vLook = In.vWorldPos - g_vCamPosition;
+    float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
+	
+    float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+
+    // 조명 계산
+    float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
+
+    // 카툰 효과를 위한 색상 임계값
+    float3 finalColor;
+    if (NdotL > 0.2)
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
+    }
+    else
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(0.9, 0.9, 0.9); // 음영 색상
+    }
+	
+		// 카툰 스타일 스펙큘러 단계 조정
+
+    float threshold1 = 0.7; // 첫 번째 임계값 (어두운 영역)
+    float threshold2 = 0.8; // 두 번째 임계값 (밝은 영역)
+
+// 임계값에 따라 스펙큘러 강도를 조정
+    float cartoonSpecular = 0.0;
+    if (fSpecular > threshold2)
+    {
+        cartoonSpecular = 1.0; // 밝은 하이라이트
+    }
+    else if (fSpecular > threshold1)
+    {
+        cartoonSpecular = 0.8; // 중간 하이라이트
+    }
+
+
+    Out.vColor = float4(finalColor * g_vLightDiffuse, vMtrlDiffuse.a) * saturate(vShade) +
+    (g_vLightSpecular * g_vMtrlSpecular) * cartoonSpecular; // 최종 색상 반환
+    
+    
+    return Out;
+}
+
 
 
 technique11 DefaultTechnique
@@ -166,7 +246,7 @@ technique11 DefaultTechnique
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
 		VertexShader = compile vs_5_0 VS_MAIN();
-		PixelShader = compile ps_5_0 PS_MAIN();
+		PixelShader = compile ps_5_0 PS_MA();
 	}
 
     pass DefaultPass1

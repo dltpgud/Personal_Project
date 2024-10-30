@@ -94,6 +94,75 @@ PS_OUT PS_MAIN(PS_IN In)
 }
 
 
+PS_OUT PS_MAKATOON(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+
+    float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
+    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
+    float4 vLook = In.vWorldPos - g_vCamPosition;
+    float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
+	
+    float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+
+    // 조명 계산
+    float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir)*-1));
+
+    // 카툰 효과를 위한 색상 임계값
+    float3 finalColor;
+    if (NdotL > 0.2)
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
+    }
+    else
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(0.95, 0.95, 0.95); // 음영 색상
+    }
+
+    Out.vColor = float4(finalColor * g_vLightDiffuse, vMtrlDiffuse.a) * saturate(vShade);
+   // +(g_vLightSpecular * g_vMtrlSpecular) * fSpecular; // 최종 색상 반환
+    
+    return Out;
+}
+
+
+PS_OUT PS_MAKATOON_ICON(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+
+    float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
+    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
+    float4 vLook = In.vWorldPos - g_vCamPosition;
+    float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
+	
+    float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+
+    
+    float4 rimColor = { 0.5f, 0.5f, 0.5f, 0.5f };
+    float rim = { 0.f };
+	
+        rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
+        rim = pow(1 - rim, 1000);
+    // 조명 계산
+    float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
+
+    // 카툰 효과를 위한 색상 임계값
+    float3 finalColor;
+    if (NdotL > 0.2)
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
+    }
+    else
+    {
+        finalColor = vMtrlDiffuse.rgb * float3(0.95, 0.95, 0.95); // 음영 색상
+    }
+
+    Out.vColor = float4(finalColor * g_vLightDiffuse, vMtrlDiffuse.a) * saturate(vShade); //+(rim * rimColor); // 최종 색상 반환
+    
+    return Out;
+}
 
 
 technique11 DefaultTechnique
@@ -103,9 +172,29 @@ technique11 DefaultTechnique
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
-
+   
         VertexShader = compile vs_5_0 VS_MAIN();
-        PixelShader = compile ps_5_0 PS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAKATOON();
     }
+   
+    pass DefaultPass1
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+   
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAKATOON_ICON();
+    }
+//
+   // pass DefaultPass1
+   // {
+   //     SetRasterizerState(RS_Default);
+   //     SetDepthStencilState(DSS_Default, 0);
+   //     SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+//
+   //     VertexShader = compile vs_5_0 VS_MAIN();
+   //     PixelShader = compile ps_5_0 PS_MAIN();
+   // }
 
 }

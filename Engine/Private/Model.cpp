@@ -99,7 +99,7 @@ _bool CModel::Play_Animation(_float fTimeDelta)
     for (auto& pBone : m_Bones)
     {
         /*컴바인된 메트릭스 자체를 m_PreTransformMatrix로 회전시켜 올바른 위치를 바라 보게 하자 */
-        pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
+            pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
     }
 
     return isFinished;
@@ -107,11 +107,11 @@ _bool CModel::Play_Animation(_float fTimeDelta)
 
 void CModel::Set_Animation(_uint index, _bool IsLoop)
 {
-    m_Animations[m_iCurrentAnimIndex]->init_Loop();
 
     m_iCurrentAnimIndex = index;
     m_IsLoop = IsLoop;
 
+    m_Animations[m_iCurrentAnimIndex]->init_Loop(m_Bones);
 }
 
 
@@ -151,8 +151,7 @@ _float CModel::Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform
 
 void CModel::init_Loop()
 {
-
-    m_Animations[m_iCurrentAnimIndex]->init_Loop();
+    m_Animations[m_iCurrentAnimIndex]->init_Loop(m_Bones);
 }
 
 void CModel::Center_Ext(_float3* Center, _float3* extend)
