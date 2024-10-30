@@ -28,7 +28,7 @@ HRESULT CChannel::Initialize(HANDLE& hFile)
 }
 
 void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _uint* pCurrentKeyFrameIndex,
-                                           _float fCurrentPosition, _bool bMotionChanging, _float fTransTime)
+    _float fCurrentPosition, _bool bMotionChanging, _float fTransTime, KEYFRAME tLasKey)
 {
 
     KEYFRAME LastKeyFrame = m_KeyFrames.back();
@@ -37,26 +37,19 @@ void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _u
     _vector vRotation;
     _vector vPosition;
 
-    if (m_fChangeTime == 0.f)
-    {
-        XMMatrixDecompose(&m_vLastScale, &m_vLastRotation, &m_vLastPosition,
-                          Bones[m_iBoneIndex]->Get_TransformationMatrix());
-
-        m_fChangeTime = 0.1f;
-    }
     // 전환 중일 때
     if (bMotionChanging)
     {
         // 전환 비율을 계산 (전환 경과 시간에 따른 비율)
-        _float fTransitionRatio = fCurrentPosition / fTransTime;
+        _float fTransitionRatio = fCurrentPosition / tLasKey.fTrackPosition;
 
         _vector vCurrentDestScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vScale);
         _vector vCurrentDestRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex].vRotation);
         _vector vCurrentDestPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vPosition), 1.f);
 
-        vScale = XMVectorLerp(m_vLastScale, vCurrentDestScale, fTransitionRatio);
-        vRotation = XMQuaternionSlerp(m_vLastRotation, vCurrentDestRotation, fTransitionRatio);
-        vPosition = XMVectorLerp(m_vLastPosition, vCurrentDestPosition, fTransitionRatio);
+        vScale = XMVectorLerp(XMLoadFloat3(&tLasKey.vScale), vCurrentDestScale, fTransitionRatio);
+        vRotation = XMQuaternionSlerp(XMLoadFloat4(&tLasKey.vRotation), vCurrentDestRotation, fTransitionRatio);
+        vPosition = XMVectorLerp(XMLoadFloat3(&tLasKey.vPosition), vCurrentDestPosition, fTransitionRatio);
 
         _matrix TransformMatrix =
             XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
@@ -80,8 +73,8 @@ void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _u
         while (fCurrentPosition >= m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition) ++*pCurrentKeyFrameIndex;
 
         _float fLinearRatio = (fCurrentPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition) /
-                              (m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition -
-                               m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition);
+            (m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition -
+                m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition);
 
         _vector vSourScale{}, vDestScale{};
         _vector vSourRotation{}, vDestRotation{};
@@ -104,6 +97,22 @@ void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _u
         XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
 
     Bones[m_iBoneIndex]->Set_TransformationMatrix(TransformMatrix);
+}
+
+KEYFRAME CChannel::Init_LastKeyFrame(const vector<class CBone*>& Bones)
+{
+    KEYFRAME tKeyFrame{};
+
+    _vector vReturn[3];
+
+    XMMatrixDecompose(&vReturn[0], &vReturn[1], &vReturn[2],
+        Bones[m_iBoneIndex]->Get_TransformationMatrix());
+
+    XMStoreFloat3(&tKeyFrame.vScale, vReturn[0]);
+    XMStoreFloat4(&tKeyFrame.vRotation, vReturn[1]);
+    XMStoreFloat3(&tKeyFrame.vPosition, vReturn[2]);
+
+    return tKeyFrame;
 }
 
 CChannel* CChannel::Create(HANDLE& hFile)

@@ -178,6 +178,7 @@
     <ClInclude Include="..\Public\Body_JetFly.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
+    <ClInclude Include="..\Public\Bullet.h" />
     <ClInclude Include="..\Public\CHEST.h" />
     <ClInclude Include="..\Public\DOOR.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -232,6 +233,7 @@
     <ClCompile Include="..\Private\Body_JetFly.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
+    <ClCompile Include="..\Private\Bullet.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />
     <ClCompile Include="..\Private\DOOR.cpp" />
     <ClCompile Include="..\Private\Camera_Free.cpp" />

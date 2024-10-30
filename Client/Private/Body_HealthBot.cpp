@@ -22,7 +22,7 @@ HRESULT CBody_HealthBot::Initialize(void* pArg)
     BODY_HEALTHBOT_DESC* pDesc = static_cast<BODY_HEALTHBOT_DESC*>(pArg);
 
     m_pParentState = pDesc->pParentState;
-
+    m_RimDesc.eState = pDesc->pRimState;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
@@ -49,21 +49,36 @@ void CBody_HealthBot::Update(_float fTimeDelta)
     if (*m_pParentState == CHealthBot::ST_Dead && m_iCurMotion != CHealthBot::ST_Dead)
     {
         m_iCurMotion = CHealthBot::ST_Dead;
+        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
         return;
     }
 
     if (*m_pParentState == CHealthBot::ST_Interactive && m_iCurMotion != CHealthBot::ST_Interactive)
     {
         m_iCurMotion = CHealthBot::ST_Interactive;
+        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
         bMotionChange = true;
         bLoop = false;
     }
     if (*m_pParentState == CHealthBot::ST_Idle && m_iCurMotion != CHealthBot::ST_Idle)
     {
         m_iCurMotion = CHealthBot::ST_Idle;
+
         bMotionChange = true;
         bLoop = false;
     }
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
+    {
+        m_RimDesc.fcolor = { 0.f,1.f,0.f,1.f };
+        m_RimDesc.iPower = 5;
+    }
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
+        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
+        m_RimDesc.iPower = 1;
+    }
+
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
@@ -106,9 +121,6 @@ HRESULT CBody_HealthBot::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-       
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CHealthBot::ST_Dead)))
-            return E_FAIL;
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -163,6 +175,15 @@ HRESULT CBody_HealthBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
         return E_FAIL;
 
+
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_RimDesc.eState)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CHealthBot::ST_Dead)))
+        return E_FAIL;
     return S_OK;
 }
 

@@ -28,6 +28,17 @@ namespace Engine
 	}LIGHT_DESC;
 
 
+	typedef struct RIM_LIGHT_DESC
+	{
+		enum STATE { STATE_NORIM, STATE_RIM };
+
+		const _uint*		eState;
+		XMFLOAT4			fcolor;
+		_int				iPower;
+
+	}RIM_LIGHT_DESC;
+
+
 
 	typedef struct  ENGINE_DLL VTXPOS
 	{
@@ -116,7 +127,6 @@ namespace Engine
 		static const unsigned int		iNumElements = 6;
 		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
 	}VTXANIMMESH;
-
 
 	typedef struct KEYFRAME
 	{

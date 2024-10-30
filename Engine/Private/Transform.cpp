@@ -169,6 +169,28 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNav
     }
 }
 
+void CTransform::GO_Dir(_float fTimeDelta, _vector TagetPos)
+{
+
+     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
+     _vector vDir = TagetPos;
+     _float4 fDir{};
+     XMStoreFloat4(&fDir, vDir);
+     vDir = { fDir.x, 0.f, fDir.z, 0.f };
+
+     vDir = XMVector3Normalize(vDir);
+     
+;
+
+
+ vPosition +=  vDir * m_fSpeedPerSec * fTimeDelta ;
+
+ 
+
+
+    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
+}
+
 void CTransform::Stop_Move()
 {
     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
@@ -192,7 +214,7 @@ void CTransform::Rotation_to_Player()
 
 void CTransform::Other_set_Pos(CTransform* Other, FIX FixPosWhere, _float FixPos, _float3* Ouput)
 {
-    _vector OtherPos{};  
+    _vector OtherPos{};  // 내위치를 기준으로 다른 오브젝트의 위치를 정한다.
     switch (FixPosWhere)
     {
     case FIX_X:

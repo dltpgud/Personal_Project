@@ -380,6 +380,7 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
         {
             Type = CCell::TYPE::NOMAL;
         }
+
         CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, m_Cells.size(),Type);
         if (nullptr == pCell)
             return E_FAIL;

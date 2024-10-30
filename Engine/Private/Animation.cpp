@@ -11,6 +11,8 @@ CAnimation::CAnimation(const CAnimation& Proto)
     strcpy_s(m_szName, Proto.m_szName);
 
     for (auto& pChannel : m_Channels) Safe_AddRef(pChannel);
+
+    m_vLastKeyFrame.resize(m_iNumChannels);
 }
 
 HRESULT CAnimation::Initialize(HANDLE& hFile)
@@ -24,6 +26,7 @@ HRESULT CAnimation::Initialize(HANDLE& hFile)
     bReadFile = ReadFile(hFile, &m_iNumChannels, sizeof(m_iNumChannels), &dwByte, nullptr);
 
     m_iChannelKeyFrameIndices.resize(m_iNumChannels);
+    m_vLastKeyFrame.resize(m_iNumChannels);
 
     for (_uint i = 0; i < m_iNumChannels; i++)
     {
@@ -54,11 +57,14 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
     if (m_fCurrentPosition >= m_fDuration)
     {
         if (isLoop)
+        {
             m_fCurrentPosition = 0.f;
+
+        }
         else if (false == isLoop)
         {
 
-            return true;
+             return true;
         }
     }
 
@@ -69,20 +75,22 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
 
     for (_uint i = 0; i < m_iNumChannels; i++)
         m_Channels[i]->Update_TransformationMatrix(Bones, &m_iChannelKeyFrameIndices[i], fChannelAnimTime,
-            m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme);
+            m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme, m_vLastKeyFrame[i]);
 
     return false;
 }
 
-void CAnimation::init_Loop()
+void CAnimation::init_Loop(const vector<class CBone*>& Bones)
 {
     m_fCurrentPosition = 0;
     m_fChangingTime = 0.f;
 
     for (_uint i = 0; i < m_iNumChannels; i++)
-    {
+    {      
         m_iChannelKeyFrameIndices[i] = 0;
-        m_Channels[i]->init_changeTime();
+        m_vLastKeyFrame[i] = m_Channels[i]->Init_LastKeyFrame(Bones);
+        m_vLastKeyFrame[i].fTrackPosition = m_fMotionChangingTIme;  
+
     }
 }
 

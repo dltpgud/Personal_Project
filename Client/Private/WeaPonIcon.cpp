@@ -2,6 +2,8 @@
 #include "WeaPonIcon.h"
 #include "GameInstance.h"
 #include "WeaponUI.h"
+#include "InteractiveUI.h"
+#include "Player.h"
 CWeaPonIcon::CWeaPonIcon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -26,7 +28,8 @@ HRESULT CWeaPonIcon::Initialize(void* pArg)
     
     m_pTransformCom->Set_MoveSpeed(0.05f);
     m_moveTime = 1.f;
-  
+    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
+    m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
     return S_OK;
 }
 
@@ -36,6 +39,10 @@ _int CWeaPonIcon::Priority_Update(_float fTimeDelta)
     {
         return OBJ_DEAD;
     }
+
+
+
+
 
     return OBJ_NOEVENT;
 }
@@ -64,13 +71,53 @@ void CWeaPonIcon::Update(_float fTimeDelta)
             m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(m_fX, m_fY, m_fZ, 1.f));
         }
     }
+
+
+    _vector vPlayerPos = m_pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vDir = vPos - vPlayerPos;
+
+
+    _float fLength = XMVectorGetX(XMVector3Length(vDir));
+
+
+    if(fLength >6.f)
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
+    else
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
+
+
+
+    switch (m_weaPon)
+    {
+    case CWeapon::WeaPoneType::HendGun:
+        m_pWeaPonNumName = L"HendGun ÀåÂø";
+        break;
+    case CWeapon::WeaPoneType::AssaultRifle:
+        m_pWeaPonNumName = L"Assault Rifle ÀåÂø";
+        break;
+    case CWeapon::WeaPoneType::MissileGatling:
+        m_pWeaPonNumName = L"Missile Gatling ÀåÂø";
+        break;
+    case CWeapon::WeaPoneType::HeavyCrossbow:
+        m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø";
+        break;
+    }
+    m_InteractiveUI->Set_Text(m_pWeaPonNumName, CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
+
+
+
+
    
-    if (m_pGameInstance->Get_DIKeyDown(DIK_F))
+    if (true == m_InteractiveUI->Get_Interactive())
     {
         static_cast<CWeaponUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerWeaPon))
             ->Set_ScecondWeapon(m_weaPon);
         m_bDead = true;
-        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
+        m_InteractiveUI->Set_Interactive(false);
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim,CUI::UIID_InteractiveUI);
     }
 }
 
@@ -93,7 +140,7 @@ HRESULT CWeaPonIcon::Render()
                                                                        "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(0)))
+        if (FAILED(m_pShaderCom->Begin(1)))
             return E_FAIL;
 
         m_pModelCom[m_weaPon]->Render(j);

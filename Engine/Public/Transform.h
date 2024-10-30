@@ -52,6 +52,7 @@ public:
     void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
+    void GO_Dir(_float fTimeDelta, _vector Dir);
     void Stop_Move();
     void Rotation_to_Player();
     void Other_set_Pos(CTransform* Other, FIX FixPosWhere,_float FixPos, _float3* Ouput = nullptr);

@@ -1273,7 +1273,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
         WeaPonType = ObjList->Get_Scalra();
 
         if (WeaPonType < 1 || WeaPonType > 3)
-            WeaPonType = rand() % 4 + 1;
+            WeaPonType = rand() % 4 ;
 
         if (Type == CGameObject::DATA_DOOR)
         {
@@ -1733,7 +1733,10 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-
+        if (Type == CGameObject::DATA_CHEST)
+        {
+            pGameObject->Set_Buffer(0, WaPonType);
+        }
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
 
         Safe_Delete_Array(pModel);
@@ -1986,7 +1989,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             _vector Pos = XMVector3TransformCoord(RayPos, m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
             _vector Dir = XMVector3TransformNormal(RayDir, m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
 
-            static_cast<CNavigation*>(m_pNavigation)->Delete_Cell(Pos, Dir);
+                static_cast<CNavigation*>(m_pNavigation)->Delete_Cell(Pos, Dir);
         }
     }
 #pragma endregion

@@ -89,9 +89,12 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 	if (*m_pParentState == CPlayer::STATE_SPRINT && m_iCurMotion != CPlayer::STATE_SPRINT)
 	{
 		m_iCurMotion = CPlayer::STATE_SPRINT;
+		m_fPlayAniTime = 0.5f;
 		bMotionChange = true;
 		bLoop = true;
 	}
+	else
+		m_fPlayAniTime = 1.f;
 	if (*m_pParentState == CPlayer::STATE_JUMP_RUN_LOOP && m_iCurMotion != CPlayer::STATE_JUMP_RUN_LOOP)
 	{
 		m_iCurMotion = CPlayer::STATE_JUMP_RUN_LOOP;
@@ -148,7 +151,7 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 	if (bMotionChange)
 		m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
-	if (true == m_pModelCom->Play_Animation(fTimeDelta))
+	if (true == m_pModelCom->Play_Animation(fTimeDelta ))
 	{
 		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_HitLock(false);
 		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE);

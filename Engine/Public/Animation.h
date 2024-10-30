@@ -12,7 +12,7 @@ private:
 public:
 	HRESULT Initialize(HANDLE& hFile);
 	_bool Update_TransformationMatrix(const vector<class CBone*>& Bones, _bool isLoop, _float fTimeDelta);
-	void init_Loop();
+	void init_Loop(const vector<class CBone*>& Bones);
 private:
 	_char					m_szName[MAX_PATH] = {};
 	_float					m_fDuration = { 0.f };
@@ -24,9 +24,11 @@ private:
 	vector<class CChannel*>	m_Channels;
 	vector<_uint>			m_iChannelKeyFrameIndices;
 
-	//테스트용
-	_float m_fChangingTime{};
-	_float m_fMotionChangingTIme{ 4.f };
+	vector<KEYFRAME>  m_vLastKeyFrame;
+
+
+	_float m_fChangingTime{4.f};
+	_float m_fMotionChangingTIme{ 3.f };
 
 public:
 	static CAnimation* Create(HANDLE& hFile);

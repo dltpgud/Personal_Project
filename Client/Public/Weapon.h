@@ -1,7 +1,7 @@
 #pragma once
 #include "Client_Defines.h"
 #include "PartObject.h"
-
+#include "Bullet.h"
 BEGIN(Engine)
 class CShader;
 class CModel;
@@ -46,6 +46,7 @@ public:
 	void Type0_Update(_float fTimeDelta);
 	void Type2_Update(_float fTimeDelta);
 	_float Damage() { return m_fDamage; }
+
 	void Choose_Weapon(const _uint& WeaponNum);
 	_uint  Get_Bullte() {
 		return m_iMaxBullet[m_iBullet];

@@ -45,7 +45,7 @@ public:
         virtual void Dead_Routine(_float fTimeDelta) {};
         virtual void Stun_Routine() {};
       
-
+        virtual HRESULT Make_Bullet(_vector vPos) { return S_OK; };
 
         //Cell °ü·Ã
         void Set_NavigationType(_uint i);
@@ -62,13 +62,15 @@ public:
     protected:
 
          CNavigation* m_pNavigationCom = { nullptr };
-        _float m_fHP;
-        _float m_fMAXHP;
-        _bool m_bColl = { false };
-        _uint m_iState = {};
-        _float					m_fY{ 0.f };
-        _float                  m_FixY{ 0.f };
-        _bool    m_bOnCell = { false };
+        _float  m_fHP;
+        _float  m_fMAXHP;
+        _bool   m_bColl = { false };
+        _uint   m_iState = {};
+        _float	m_fY{ 0.f };
+        _float  m_FixY{ 0.f };
+        _bool   m_bOnCell = { false };
+        _uint   m_iRim{}; // ¸² ¿¬»ê ÇÒ²¨ ¸»²¨
+
     public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;

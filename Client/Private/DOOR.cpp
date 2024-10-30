@@ -28,9 +28,9 @@ HRESULT CDOOR::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
+
     return S_OK;
 }
 
@@ -44,7 +44,6 @@ _int CDOOR::Priority_Update(_float fTimeDelta)
         m_pPlayer->Set_NavigationType(0);
     }
   
-
     return OBJ_NOEVENT;
 }
 
@@ -62,6 +61,7 @@ void CDOOR::Update(_float fTimeDelta)
      
         m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
         m_InteractiveUI->Set_Text(L"문 열기",CInteractiveUI::INTERACTIVE_STATE::IS_DOOR);
+
         if (true == m_InteractiveUI->Get_Interactive())
         {
 
@@ -70,21 +70,23 @@ void CDOOR::Update(_float fTimeDelta)
             else
                 m_iState = State2::OPEN2;
 
+            m_iState == State::OPEN ? m_OpenTime = 0.2f : m_OpenTime = 0.6f;
             m_pModelCom->Set_Animation(m_iState, false);
             Go_Move = true;
             m_bOpen = true;
-            m_InteractiveUI->Set_Interactive(false);
+           m_InteractiveUI->Set_Interactive(false);
             m_bState = true;
         }
     }
  
     if (fLength > 6.f && m_bState == true) {
 
+ 
         if(m_pModelName != L"Proto Component ItemDoor Model_aniObj")
-        m_iState = State::ClOSE;
+            m_iState = State::ClOSE;
         else
             m_iState = State2::ClOSE2;
-
+        m_iState == State::ClOSE ? m_OpenTime = 0.2f : m_OpenTime = 0.6f;
         Go_Move = false;
         m_pModelCom->Set_Animation(m_iState, false);
         m_bState = false;
@@ -93,7 +95,7 @@ void CDOOR::Update(_float fTimeDelta)
 
     if (true == m_bOpen)
     {
-        m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false);
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
         m_bOpen = false;
     }
    
@@ -103,10 +105,7 @@ void CDOOR::Update(_float fTimeDelta)
       m_pPlayer->Set_NavigationType(1);
     }
  
-    if (true == m_pModelCom->Play_Animation(fTimeDelta))
-    {
-      
-    }
+    m_pModelCom->Play_Animation(fTimeDelta * m_OpenTime);
   
 }
 
@@ -129,6 +128,7 @@ HRESULT CDOOR::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
+      
         /*애니용 추가*/
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
@@ -157,13 +157,12 @@ void CDOOR::Set_Model(const _wstring& protoModel)
     else {
 
         m_iState = State::ClOSE;
-        m_pModelCom->Set_Animation(m_iState, true);
+        m_pModelCom->Set_Animation(m_iState, false);
     }
 }
 
 HRESULT CDOOR::Add_Components()
 {
-
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
@@ -198,6 +197,7 @@ HRESULT CDOOR::Bind_ShaderResources()
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
         return E_FAIL;
+
     return S_OK;
 }
 

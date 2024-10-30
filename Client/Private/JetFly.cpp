@@ -35,7 +35,7 @@ HRESULT CJetFly::Initialize(void* pArg)
     m_fHP = m_fMAXHP;
     m_bOnCell = { false };
 
-
+    m_DATA_TYPE = CGameObject::DATA_MONSTER;
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
@@ -53,6 +53,9 @@ _int CJetFly::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
+    if (m_iState != ST_Sragger)
+        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
 
     if (m_pPartHP != nullptr ) {
         m_pPartHP->Set_Monster_HP(m_fHP);
@@ -108,6 +111,8 @@ void CJetFly::HIt_Routine(_float fTimeDelta)
    
     m_iState = ST_Sragger;
 
+    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+    
     m_pPartHP->Set_HitStart(true);
     m_pPartHP->Set_Hit(true);
     m_pPartHP->Set_bLateUpdaet(true);
@@ -117,8 +122,10 @@ void CJetFly::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_Hit_Front;
 
-    Erase_PartObj(PART_HP);
-    m_pPartHP = nullptr;
+    if (m_pPartHP != nullptr) {
+        Erase_PartObj(PART_HP);
+        m_pPartHP = nullptr;
+    }
 }
 
 void CJetFly::NON_intersect(_float fTimedelta)
@@ -187,7 +194,7 @@ HRESULT CJetFly::Add_PartObjects()
     BodyDesc.fSpeedPerSec = 0.f;
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
-
+    BodyDesc.pRimState = &m_iRim;
   if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_JetFly"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 

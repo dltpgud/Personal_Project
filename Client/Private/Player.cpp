@@ -46,6 +46,9 @@ HRESULT CPlayer::Initialize(void* pArg)
     m_pPlayerUI = static_cast<CPlayerUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerHP));
     m_pPlayerUI->Set_PlayerMaxHP(m_fMAXHP);
     m_pPlayerUI->Set_PlayerHP(m_fHP);
+
+
+    m_pCameraBone = static_cast<CBody_Player*>(m_PartObjects[PART_BODY])->Get_SocketMatrix("Camera");
     return S_OK;
 }
 
@@ -109,9 +112,36 @@ _float CPlayer::Weapon_Damage()
     return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Damage();
 }
 
+HRESULT CPlayer::Make_Bullet(_vector vPos)
+{
+    _vector vWPos = m_PartObjects[PART_WEAPON]->Get_PartObj_Position();
+    _float3 fWPos{};
+    XMStoreFloat3(&fWPos, vWPos);
+    vWPos = XMVectorSet(fWPos.x, fWPos.y+0.1f, fWPos.z+0.1f, 1.f);
+
+    _vector  vEye = {
+    m_pCameraBone->_41, m_pCameraBone->_42, m_pCameraBone->_43, m_pCameraBone->_44
+    };
+
+    _vector Eye = XMVector3TransformCoord(vEye, m_pTransformCom->Get_WorldMatrix());
+
+    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Eye);
+
+    
+      CBullet::CBULLET_DESC Desc{};
+      Desc.fSpeedPerSec = 60.f;
+      Desc.pTagetPos = vPos;
+      Desc.vPos = vWPos;
+      Desc.vPlayerAt = Eye + m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
+      CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
+      m_pGameInstance->Add_Clon_to_Layers(LEVEL_STAGE1, CGameObject::SKILL, pGameObject);
+
+      return S_OK;
+}
+
 const _float4x4* CPlayer::Get_CameraBone()
 {
-    return static_cast<CBody_Player*>(m_PartObjects[PART_BODY])->Get_SocketMatrix("Camera");
+    return m_pCameraBone;
 }
 
 void CPlayer::Key_Input(_float fTimeDelta)
@@ -119,10 +149,15 @@ void CPlayer::Key_Input(_float fTimeDelta)
 
     if (m_pGameInstance->Get_DIKeyState(DIK_LSHIFT))
     {
-  
-            m_Type == T00 ? m_iState = STATE_SPRINT : m_iState = STATE_SPRINT2;
-            m_pTransformCom->Set_MoveSpeed(30.f);
-        
+
+        if (m_iState < STATE_HENDGUN_RELOAD)
+        {
+            if (m_iState != STATE_SWITCHIN && m_iState != STATE_SWITCHIN2)
+            {
+                m_Type == T00 ? m_iState = STATE_SPRINT : m_iState = STATE_SPRINT2;
+                m_pTransformCom->Set_MoveSpeed(30.f);
+            }
+        }
     }
     else
     {

@@ -22,9 +22,6 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Layer_Monster(CGameObject::ACTOR)))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
-		return E_FAIL;
-
 	if (FAILED(Ready_Layer_Camera(CGameObject::CAMERA)))
 		return E_FAIL;
 
@@ -35,6 +32,8 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Layer_NPC(CGameObject::NPC)))
 		return E_FAIL;
 
+	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
+		return E_FAIL;
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
@@ -49,6 +48,7 @@ void CLevel_Stage1::Update(_float fTimeDelta)
 	{
 		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));
 	}
+
 	__super::Update(fTimeDelta);
 }
 
@@ -102,7 +102,7 @@ _vector vEye = {static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Camera
   XMStoreFloat4(&At, Eye + +m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
 	 
 	Desc.vAt = At;
-	Desc.fFovy = XMConvertToRadians(50.0f);
+	Desc.fFovy = XMConvertToRadians(45.0f);
 	Desc.fNearZ = 0.1f;
 	Desc.fFarZ = 500.f;
 	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
@@ -187,10 +187,10 @@ HRESULT CLevel_Stage1::Ready_Light()
 	LIGHT_DESC			LightDesc{};
 
 	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(0.f, -1.f, 1.f, 0.f);
+	LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 	LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vSpecular = _float4(0.2f, 0.2f, 0.2f, 0.2f);
+	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
 
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;

@@ -27,7 +27,7 @@ HRESULT CCamera::Initialize(void* pArg)
 
 	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMLoadFloat4(&pDesc->vEye));
 	m_pTransformCom->LookAt(XMLoadFloat4(&pDesc->vAt));
-
+	m_vEye = pDesc->vEye;
 	m_fFovy = pDesc->fFovy;
 	m_fAspect = pDesc->fAspect;
 	m_fNearZ = pDesc->fNearZ;

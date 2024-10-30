@@ -32,8 +32,8 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     else if (true == forPlayer)
     { 
          POINT ptPlayerAim{};
-         ptPlayerAim.x = 655;
-         ptPlayerAim.y = 420;
+                 ptPlayerAim.x = 655;
+                 ptPlayerAim.y = 420;
 
          m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
 

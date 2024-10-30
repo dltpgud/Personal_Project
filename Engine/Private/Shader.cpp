@@ -155,6 +155,24 @@ HRESULT CShader::Bind_Float(const _char* pConstantName, const _float pfloat)
     return pMatrixVariable->SetFloat(pfloat);
 }
 
+HRESULT CShader::Bind_Int(const _char* pConstantName, const _int pint)
+{
+    if (nullptr == m_pEffect)
+        return E_FAIL;
+    /* 쉐이더파일안에 정의되어있는 지정한 이름의 전역변수에 대한 핸들을 얻어온다. */
+    ID3DX11EffectVariable* pVariable = m_pEffect->GetVariableByName(pConstantName);
+    if (nullptr == pVariable)
+        return E_FAIL;
+
+    /*행렬로 변환, 행렬 변수를 가져온다*/
+    ID3DX11EffectScalarVariable* pMatrixVariable = pVariable->AsScalar();
+    if (nullptr == pMatrixVariable)
+        return E_FAIL;
+
+    /*세팅 후 반환..부동 소수점 행렬을 설정합니다*/
+    return pMatrixVariable->SetInt(pint);
+}
+
 HRESULT CShader::Bind_Bool(const _char* pConstantName, const _bool pbool)
 {
 

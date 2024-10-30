@@ -13,7 +13,6 @@ class CBody_GunPawn : public CPartObject
 public: 
 	typedef struct BODY_GUNPAWN_DESC : CPartObject::PARTOBJECT_DESC
 	{
-		const _uint* pParentState = { nullptr };
 	}BODY_GUNPAWN_DESC;
 
 private:

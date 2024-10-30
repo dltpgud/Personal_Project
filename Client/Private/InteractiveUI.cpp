@@ -99,6 +99,11 @@ _bool CInteractiveUI::Get_Interactive()
     return m_bInteractive[m_iInteractiveType]; 
 }
 
+_int CInteractiveUI::Get_Type()
+{
+    return m_iInteractiveType; 
+}
+
 void CInteractiveUI::Set_Interactive(_bool Interactive)
 {
     m_bInteractive[m_iInteractiveType] = Interactive;

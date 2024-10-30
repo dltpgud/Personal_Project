@@ -31,6 +31,7 @@
 #include "Body_HealthBot.h"
 #include "HealthBot.h"
 #include "MonsterHP.h"
+#include "Bullet.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -360,6 +361,10 @@ HRESULT CLoader::Loading_For_Stage1Level()
         return E_FAIL;
 
 
+	
+		if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_Bullet"),
+		CBullet::Create(m_pDevice, m_pContext))))
+			return E_FAIL;
 
 
 

@@ -22,14 +22,14 @@ HRESULT CBody_JetFly::Initialize(void* pArg)
     CBody_JetFly_Desc* pDesc = static_cast<CBody_JetFly_Desc*>(pArg);
 
     m_pParentState = pDesc->pParentState;
-
+    m_RimDesc.eState = pDesc->pRimState;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+    m_fPlayAniTime = 0.5f;
     return S_OK;
 }
 
@@ -48,86 +48,115 @@ void CBody_JetFly::Update(_float fTimeDelta)
     if (*m_pParentState == CJetFly::ST_Idle && m_iCurMotion != CJetFly::ST_Idle)
     {
         m_iCurMotion = CJetFly::ST_Idle;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_BarrelRoll_Left && m_iCurMotion != CJetFly::ST_BarrelRoll_Left)
     {
         m_iCurMotion = CJetFly::ST_BarrelRoll_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_BarrelRoll_Right && m_iCurMotion != CJetFly::ST_BarrelRoll_Right)
     {
         m_iCurMotion = CJetFly::ST_BarrelRoll_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Hit_Back && m_iCurMotion != CJetFly::ST_Hit_Back)
     {
         m_iCurMotion = CJetFly::ST_Hit_Back;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Hit_Front && m_iCurMotion != CJetFly::ST_Hit_Front)
     {
         m_iCurMotion = CJetFly::ST_Hit_Front;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = false;
     }
     if (*m_pParentState == CJetFly::ST_Hit_Left && m_iCurMotion != CJetFly::ST_Hit_Left)
     {
         m_iCurMotion = CJetFly::ST_Hit_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Hit_Right && m_iCurMotion != CJetFly::ST_Hit_Right)
     {
         m_iCurMotion = CJetFly::ST_Hit_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Shoot && m_iCurMotion != CJetFly::ST_Shoot)
     {
         m_iCurMotion = CJetFly::ST_Shoot;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Sragger && m_iCurMotion != CJetFly::ST_Sragger)
     {
         m_iCurMotion = CJetFly::ST_Sragger;
+        m_fPlayAniTime = 1.f;
         bMotionChange = true;
         bLoop = false;
     }
+  
+
     if (*m_pParentState == CJetFly::ST_Walk_Back && m_iCurMotion != CJetFly::ST_Walk_Back)
     {
         m_iCurMotion = CJetFly::ST_Walk_Back;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Walk_Front && m_iCurMotion != CJetFly::ST_Walk_Front)
     {
         m_iCurMotion = CJetFly::ST_Walk_Front;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Walk_Left && m_iCurMotion != CJetFly::ST_Walk_Left)
     {
         m_iCurMotion = CJetFly::ST_Walk_Left;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
     if (*m_pParentState == CJetFly::ST_Walk_Right && m_iCurMotion != CJetFly::ST_Walk_Right)
     {
         m_iCurMotion = CJetFly::ST_Walk_Right;
+        m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
 
+
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
+    {
+        m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
+        m_RimDesc.iPower = 1;
+    }
+
+    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
+        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
+        m_RimDesc.iPower = 1;
+    }
+
+
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
-    if (true == m_pModelCom->Play_Animation(fTimeDelta))
+    if (true == m_pModelCom->Play_Animation(fTimeDelta* m_fPlayAniTime))
     {
 
         m_bFinishAni = true;
@@ -166,10 +195,6 @@ HRESULT CBody_JetFly::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_iCurMotion == CJetFly::ST_Sragger)))
-            return E_FAIL;
-        if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CJetFly::ST_Hit_Front)))
-            return E_FAIL;
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -224,6 +249,15 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
         return E_FAIL;
 
+
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool",m_RimDesc.eState)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CJetFly::ST_Hit_Front)))
+        return E_FAIL;
     return S_OK;
 }
 

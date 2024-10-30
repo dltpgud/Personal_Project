@@ -35,6 +35,7 @@ public:
 		m_iInteractiveType = static_cast<INTERACTIVE_STATE>(Type);
 	}
 	_bool Get_Interactive();
+	_int Get_Type(); 
 	void  Set_Interactive(_bool Interactive);
 private:
 	HRESULT				Add_Components();

@@ -40,7 +40,7 @@ HRESULT CHealthBot::Initialize(void* pArg)
     m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     m_bOnCell = true;
-
+    m_DATA_TYPE = CGameObject::DATA_NPC;
     m_pInteractiveUI = static_cast <CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
     m_CPlayerUI = static_cast <CPlayerUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerHP));
     return S_OK;
@@ -94,21 +94,25 @@ void CHealthBot::intersect(_float fTimedelta)
         {
 
             m_pInteractiveUI->Set_Text(L"체력 회복", CInteractiveUI::INTERACTIVE_STATE::IS_HEALTH);
-      
+
+            m_iRim = RIM_LIGHT_DESC::STATE_RIM;
             m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
 
             if (m_pInteractiveUI->Get_Interactive())
             {
                 m_iState = ST_Interactive;
                 m_bInteract = true;
-
+                m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
                 m_pInteractiveUI->Set_Interactive(false);
             }
 
         }
-      else
-        m_iState = ST_Idle;  
-       
+        else {
+
+            m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+            m_iState = ST_Idle;
+  
+        }
     if ( m_bInteract == true)
     {
 
@@ -152,7 +156,7 @@ HRESULT CHealthBot::Add_PartObjects()
     BodyDesc.fSpeedPerSec = 0.f;
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
-
+    BodyDesc.pRimState = &m_iRim;
   if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_HealthBot"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 

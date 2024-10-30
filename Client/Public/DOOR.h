@@ -13,7 +13,7 @@ class CInteractiveUI;
 class CPlayer;
 class CDOOR final : public CGameObject
 {
-	enum State {ClOSE, OPEN };
+	enum State {ClOSE, IDL, OPEN };
 	enum State2 { OPEN2, IDLE,ClOSE2};
 private:
 	CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -36,7 +36,7 @@ public:
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CModel*						m_pModelCom = { nullptr };
-
+	_float m_OpenTime = { 1.f };
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

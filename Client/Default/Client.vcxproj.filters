@@ -130,6 +130,9 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\MonsterHP">
       <UniqueIdentifier>{4933a1e9-3351-425e-acf7-f5b4ba58b32b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player\Bullet">
+      <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -207,9 +210,6 @@
     <ClInclude Include="..\Public\WeaPonIcon.h">
       <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\GunPawn.h">
-      <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Body_GunPawn.h">
       <Filter>02.GameObjects\03.Actor\Monster\GunPawn\Body</Filter>
     </ClInclude>
@@ -246,11 +246,17 @@
     <ClInclude Include="..\Public\HealthBot.h">
       <Filter>02.GameObjects\03.Actor\NPC\HealthBot</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Body_HealthBot.h">
-      <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\MonsterHP.h">
       <Filter>02.GameObjects\03.Actor\Monster\MonsterHP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GunPawn.h">
+      <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Bullet.h">
+      <Filter>02.GameObjects\03.Actor\Player\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_HealthBot.h">
+      <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -361,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MonsterHP.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\MonsterHP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Bullet.cpp">
+      <Filter>02.GameObjects\03.Actor\Player\Bullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

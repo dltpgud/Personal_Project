@@ -25,7 +25,7 @@ public:
       ST_Interactive,
       ST_Dead,
     };                   
-
+  
 private:
     CHealthBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CHealthBot(const CHealthBot& Prototype);
@@ -48,6 +48,7 @@ private:
     _bool m_bInteract = false;
     CInteractiveUI* m_pInteractiveUI = { nullptr };
     CPlayerUI* m_CPlayerUI = { nullptr };
+
 public:
     static CHealthBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

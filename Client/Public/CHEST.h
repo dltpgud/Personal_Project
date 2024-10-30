@@ -45,7 +45,7 @@ private:
 	_bool						m_bHover = { false };
 	_bool						m_bState = { false };
 	_uint						m_pWeaPonType{};
-	_tchar*					    m_pWeaPonNumName = {};
+
 
 
 	CInteractiveUI* m_InteractiveUI ;
