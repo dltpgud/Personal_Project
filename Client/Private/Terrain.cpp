@@ -21,7 +21,7 @@ HRESULT CTerrain::Initialize(void* pArg)
         CGameObject::GAMEOBJ_DESC* pDesc = static_cast <GAMEOBJ_DESC*>(pArg);
    
         m_DATA_TYPE = pDesc->DATA_TYPE;
-        NavigationFath = pDesc->FilePath;
+
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
     }
@@ -31,14 +31,14 @@ HRESULT CTerrain::Initialize(void* pArg)
 
 
     if (m_DATA_TYPE == Terrain_TYPE::TYPE_MAIN)
-        m_bMain = true;
+            m_bMain = true;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
     if (m_pNavigationCom != nullptr)
     {
-        m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
+            m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
     }
     return S_OK;
 }
@@ -50,7 +50,7 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
         return OBJ_DEAD;
     }
 
-
+    m_fTimeSum += fTimeDelta / m_iUVoffset;
 
     return OBJ_NOEVENT;
 }
@@ -95,7 +95,10 @@ HRESULT CTerrain::Render()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
         return E_FAIL;
 
-    m_pShaderCom->Begin(0);
+    if (FAILED(m_pShaderCom->Bind_Float("g_TimeSum", m_fTimeSum)))
+        return E_FAIL;
+
+    m_pShaderCom->Begin(m_bFire);
 
     m_pVIBufferCom->Bind_Buffers();
 
@@ -113,9 +116,10 @@ HRESULT CTerrain::Render()
     return S_OK;
 }
 
-void CTerrain::Set_Model(const _wstring& protoModel)
+void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, protoModel, TEXT("Com_Model"),
+
+        if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
         reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return;
 }
@@ -135,11 +139,21 @@ _float3* CTerrain::Get_VtxPos()
 }
 
 
+void CTerrain::Set_Scalra_uint(_uint scalra)
+{
+    m_bFire = scalra;
+}
+
+void CTerrain::Set_Scalra_float(_float scalra)
+{
+    m_iUVoffset = scalra;
+}
+
 
 HRESULT CTerrain::Add_Components()
 {
 
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxNorTex"), TEXT("Com_Shader"),
+        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxNorTex"), TEXT("Com_Shader"),
         reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
@@ -151,7 +165,7 @@ HRESULT CTerrain::Add_Components()
 
     if (true == m_bMain)
     {
-        if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
             TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
             return E_FAIL;
     }

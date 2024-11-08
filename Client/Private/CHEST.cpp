@@ -24,14 +24,14 @@ HRESULT CCHEST::Initialize(void* pArg)
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     m_DATA_TYPE = GAMEOBJ_DATA::DATA_CHEST;
 
-    if (FAILED(__super::Initialize(pArg)))
+         if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
-    m_InteractiveUI->Set_Text(L"상자 열기", CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
+    m_InteractiveUI->Set_Text(L"상자 열기");
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
 
     return S_OK;
@@ -96,22 +96,24 @@ HRESULT CCHEST::Render()
     return S_OK;
 }
 
-void CCHEST::Set_Model(const _wstring& protoModel)
+void CCHEST::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
 
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, protoModel, TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom[ANI]))))
     {
         MSG_BOX("Set_Model failed");
         return;
     }
 
+    if (FAILED(__super::Add_Component(ILevel, TEXT("Proto Component ChestWeapon Model_Nonani"),
+        TEXT("Com_NonAniModel"), reinterpret_cast<CComponent**>(&m_pModelCom[NONANI]))))
+        return ;
 }
 
 void CCHEST::Set_Buffer(_uint x, _uint y)
-{  m_pWeaPonType = y; 
-       
-
+{ 
+    m_pWeaPonType = y; 
 }
 
 void CCHEST::Interactive(_float fTimeDelta)
@@ -127,7 +129,7 @@ void CCHEST::Interactive(_float fTimeDelta)
 
     if (false == m_bOpen) {
         if (fLength <= 6.f && m_bState == true) {
-            m_InteractiveUI->Set_Text(L"상자 열기", CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
+            m_InteractiveUI->Set_Text(L"상자 열기");
             m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
             m_pModelCom[ANI]->Set_Animation(State::HOVDER, true);
             m_bHover = true;
@@ -194,9 +196,6 @@ HRESULT CCHEST::Add_Components()
                                       TEXT("Com_NONANIShader"), reinterpret_cast<CComponent**>(&m_pShaderCom[NONANI]))))
         return E_FAIL;
 
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto Component ChestWeapon Model_Nonani"),
-                                      TEXT("Com_NonAniModel"), reinterpret_cast<CComponent**>(&m_pModelCom[NONANI]))))
-        return E_FAIL;
 
     return S_OK;
 }

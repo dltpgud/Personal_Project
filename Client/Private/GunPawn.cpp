@@ -26,7 +26,7 @@ HRESULT CGunPawn::Initialize(void* pArg)
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
     Desc.JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
-                if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(&Desc)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
@@ -41,9 +41,7 @@ HRESULT CGunPawn::Initialize(void* pArg)
 
     m_iState = ST_IDLE;
 
-
-
-    m_pPartHP = static_cast <CMonsterHP*>(m_PartObjects[PART_HP]);
+    m_pPartHP = static_cast<CMonsterHP*>(m_PartObjects[PART_HP]);
 
     return S_OK;
 }
@@ -51,36 +49,36 @@ HRESULT CGunPawn::Initialize(void* pArg)
 _int CGunPawn::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
-        return OBJ_DEAD; 
+        return OBJ_DEAD;
 
     if (m_iState != ST_STUN_START)
         m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
 
-    if (m_pPartHP != nullptr) {
+    if (m_pPartHP != nullptr)
+    {
         m_pPartHP->Set_Monster_HP(m_fHP);
         m_pTransformCom->Other_set_Pos(m_pPartHP->Get_Transform(), CTransform::FIX_Y, 3.f);
     }
 
     if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
-       m_pTransformCom->Rotation_to_Player();
+        m_pTransformCom->Rotation_to_Player();
+
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
 }
 
 void CGunPawn::Update(_float fTimeDelta)
 {
-    if (m_PartObjects[PART_BODY]->Get_Finish()) {
+    if (m_PartObjects[PART_BODY]->Get_Finish())
+    {
         if (m_pPartHP != nullptr)
             m_pPartHP->Set_Hit(false);
 
         m_iState = ST_IDLE;
     }
 
-
- 
-    if(m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
-    NON_intersect(fTimeDelta);
-    
+    if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
+        NON_intersect(fTimeDelta);
 
     __super::Update(fTimeDelta);
 }
@@ -93,12 +91,12 @@ void CGunPawn::Late_Update(_float fTimeDelta)
 HRESULT CGunPawn::Render()
 {
     __super::Render();
-    return S_OK; 
+    return S_OK;
 }
 
-void CGunPawn::HIt_Routine(_float fTimeDelta)
+void CGunPawn::HIt_Routine()
 {
- 
+
     m_iState = ST_STUN_START;
 
     m_iRim = RIM_LIGHT_DESC::STATE_RIM;
@@ -107,12 +105,12 @@ void CGunPawn::HIt_Routine(_float fTimeDelta)
     m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CGunPawn::Dead_Routine(_float fTimeDelta)
+void CGunPawn::Dead_Routine()
 {
     m_iState = ST_PRESHOOT;
 
-   
-    if (m_pPartHP != nullptr) {
+    if (m_pPartHP != nullptr)
+    {
         Erase_PartObj(PART_HP);
         m_pPartHP = nullptr;
     }
@@ -127,19 +125,20 @@ void CGunPawn::NON_intersect(_float fTimedelta)
     _vector vDir = vPlayerPos - vPos;
 
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
-    if (50.f > fLength)
+
+
+    if (30.f > fLength)
     {
-        if (20.f < fLength) {
-
-            _float3 fDir{};
-            XMStoreFloat3(&fDir, vDir);
-
+        if (20.f < fLength)
+        {
             m_iState = ST_RUN_LEFT;
         }
+
         if (m_iState == ST_RUN_BACK_FRONT)
         {
             m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
         }
+
         if (m_iState == ST_RUN_BACK)
         {
             m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
@@ -148,27 +147,26 @@ void CGunPawn::NON_intersect(_float fTimedelta)
         {
             m_pTransformCom->Go_Left(fTimedelta, m_pNavigationCom);
         }
+
         if (m_iState == ST_RUN_RIGHT)
         {
-
-
             m_pTransformCom->Go_Right(fTimedelta, m_pNavigationCom);
         }
 
         if (15.f > fLength)
         {
 
-            if (m_iState != ST_RUN_RIGHT)
-            m_iState = ST_GRENADE_PRESHOOT;
+           if (m_iState != ST_RUN_RIGHT)
+                m_iState = ST_GRENADE_PRESHOOT;
             if (true == static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_bRun())
             {
                 m_iState = ST_RUN_RIGHT;
             }
 
-
-
             if (7.f > fLength)
+            {
                 m_iState = ST_RUN_BACK;
+            }
         }
     }
     else
@@ -176,23 +174,21 @@ void CGunPawn::NON_intersect(_float fTimedelta)
 }
 
 HRESULT CGunPawn::Add_Components()
-{    /* For.Com_Collider_AABB */
-    CBounding_OBB::BOUND_OBB_DESC		OBBDesc{};
-
+{ /* For.Com_Collider_AABB */
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
 
     _float3 Center{}, Extents{};
     OBBDesc.vExtents = _float3(1.f, 1.3f, 0.5f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
-    OBBDesc.vRotation = { 0.f,0.f,0.f };
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
-        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+    OBBDesc.vRotation = {0.f, 0.f, 0.f};
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
 
+    CNavigation::NAVIGATION_DESC Desc{};
 
-    CNavigation::NAVIGATION_DESC		Desc{};
-
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
-        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+                                      reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
         return E_FAIL;
 
     return S_OK;
@@ -207,17 +203,15 @@ HRESULT CGunPawn::Add_PartObjects()
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
     BodyDesc.pRimState = &m_iRim;
-  if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_GunPawn"), PART_BODY, &BodyDesc)))
+    if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_GunPawn"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 
+    CMonsterHP::CMonsterHP_DESC HpDesc{};
+    HpDesc.fMaxHP = m_fMAXHP;
+    HpDesc.fHP = m_fHP;
 
-  CMonsterHP::CMonsterHP_DESC HpDesc{};
-  HpDesc.fMaxHP = m_fMAXHP;
-  HpDesc.fHP = m_fHP;
-
-  if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
-      return E_FAIL;
-
+    if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
+        return E_FAIL;
 
     return S_OK;
 }
@@ -256,5 +250,4 @@ CGameObject* CGunPawn::Clone(void* pArg)
 void CGunPawn::Free()
 {
     __super::Free();
-
 }

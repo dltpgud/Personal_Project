@@ -89,7 +89,7 @@ private:
     void Set_scale();
     void Set_Tile();
     void Set_Cell_Type();
-
+    void Set_Door_Type();
     void re_setting();
 
     void Picking_Pos();
@@ -123,6 +123,7 @@ private:
     _int m_CopyiIcomtem_selected_idx{};
     _int m_WeaPon{};
     _int m_iCellType{};
+
     _uint m_iScene{};
     _uint m_iCellCount{};
     POROTO_TYPE m_pType{};
@@ -132,14 +133,14 @@ private:
     _float m_fRotfspped{};
     _float m_fposition[3];
     _float m_fscale[3];
-
+    _float m_FireOffset{};
     _float3 m_fCellPoint[3];
 
     _bool m_bCell = {false};
     _bool m_Key = {false};
     _bool m_bSetCellW = false;
     _bool m_bLoadCell = false;
-
+    _bool m_bFireTile = false;
     CTransform* m_pObjTransform = {nullptr};
 
     _wstring m_wPrototype_Key{};
@@ -150,9 +151,10 @@ private:
     vector<CGameObject*> m_vTerrain;
 
     CGameObject* m_PicObj = {nullptr};
+    CGameObject* m_PicObjTerrain = { nullptr };
     CGameObject* m_Terrain = {nullptr};
     CComponent* m_pNavigation = {nullptr};
-    
+    _int m_DoorType{ 0 };
    
 
 public:

@@ -140,7 +140,7 @@ HRESULT CBody_HealthBot::Add_Components()
         return E_FAIL;
 
     /* For.Com_Model */
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto Component HealthBot_Model"), TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto Component HealthBot_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 

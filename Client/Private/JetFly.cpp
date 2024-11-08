@@ -41,10 +41,6 @@ HRESULT CJetFly::Initialize(void* pArg)
 
     m_iState = ST_Idle;
 
-
-
-
-
     m_pPartHP = static_cast <CMonsterHP*>(m_PartObjects[PART_HP]);
     return S_OK;
 }
@@ -62,8 +58,6 @@ _int CJetFly::Priority_Update(_float fTimeDelta)
         m_pTransformCom->Other_set_Pos(m_pPartHP->Get_Transform(), CTransform::FIX_Y, 2.f);
     }
 
-    if (m_iState != ST_Hit_Front && m_iState != ST_Sragger)
-        m_pTransformCom->Rotation_to_Player();
 
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
@@ -76,11 +70,13 @@ void CJetFly::Update(_float fTimeDelta)
             m_pPartHP->Set_Hit(false);
         m_iState = ST_Idle;
     }
-
-    if(m_iState != ST_Hit_Front && m_iState != ST_Sragger)
-        NON_intersect(fTimeDelta);
-
-  
+    if (2 != m_pNavigationCom->Get_CurrentCell_Type())
+    {
+        if (m_iState != ST_Hit_Front && m_iState != ST_Sragger) {
+            m_pTransformCom->Rotation_to_Player();
+            NON_intersect(fTimeDelta);
+        }
+    }
     if (m_iState == ST_Hit_Front) {
 
         _float3 fPos{};
@@ -106,7 +102,7 @@ HRESULT CJetFly::Render()
     return S_OK; 
 }
 
-void CJetFly::HIt_Routine(_float fTimeDelta)
+void CJetFly::HIt_Routine()
 {
    
     m_iState = ST_Sragger;
@@ -118,7 +114,7 @@ void CJetFly::HIt_Routine(_float fTimeDelta)
     m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CJetFly::Dead_Routine(_float fTimeDelta)
+void CJetFly::Dead_Routine()
 {
     m_iState = ST_Hit_Front;
 
@@ -127,6 +123,8 @@ void CJetFly::Dead_Routine(_float fTimeDelta)
         m_pPartHP = nullptr;
     }
 }
+
+
 
 void CJetFly::NON_intersect(_float fTimedelta)
 {
@@ -139,7 +137,7 @@ void CJetFly::NON_intersect(_float fTimedelta)
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
     if (40.f > fLength)
     {
-        if (25.f < fLength) {
+        if (20.f < fLength) {
             
             _float3 fDir{};
              XMStoreFloat3(&fDir, vDir);
@@ -148,7 +146,7 @@ void CJetFly::NON_intersect(_float fTimedelta)
             m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
         }
 
-        if (25.f > fLength)
+        if (20.f >= fLength)
         {
             m_iState = ST_Shoot;
            
@@ -179,7 +177,7 @@ HRESULT CJetFly::Add_Components()
 
     CNavigation::NAVIGATION_DESC		Desc{};
 
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
         TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
         return E_FAIL;
 

@@ -105,7 +105,7 @@ void CWeaPonIcon::Update(_float fTimeDelta)
         m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø";
         break;
     }
-    m_InteractiveUI->Set_Text(m_pWeaPonNumName, CInteractiveUI::INTERACTIVE_STATE::IS_CHEST);
+    m_InteractiveUI->Set_Text(m_pWeaPonNumName);
 
 
 

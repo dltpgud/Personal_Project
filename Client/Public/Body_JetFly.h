@@ -32,13 +32,13 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-
+	void Make_Bullet();
 private:
 
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-
+	_float m_pDamage = {6.f};
 public:
 	static CBody_JetFly* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

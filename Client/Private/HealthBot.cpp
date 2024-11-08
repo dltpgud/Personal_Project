@@ -93,7 +93,7 @@ void CHealthBot::intersect(_float fTimedelta)
         if (fLength <= 5.f)
         {
 
-            m_pInteractiveUI->Set_Text(L"체력 회복", CInteractiveUI::INTERACTIVE_STATE::IS_HEALTH);
+            m_pInteractiveUI->Set_Text(L"체력 회복");
 
             m_iRim = RIM_LIGHT_DESC::STATE_RIM;
             m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
@@ -105,15 +105,22 @@ void CHealthBot::intersect(_float fTimedelta)
                 m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
                 m_pInteractiveUI->Set_Interactive(false);
             }
-
+            m_bOpenUI = true;
         }
         else {
 
             m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
             m_iState = ST_Idle;
-  
+
+            if (m_bOpenUI == true) {
+                m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
+                m_bOpenUI = false;
+            }
         }
-    if ( m_bInteract == true)
+
+
+
+    if ( m_bInteract == true && fLength <= 5.f)
     {
 
        
@@ -139,11 +146,7 @@ HRESULT CHealthBot::Add_Components()
         return E_FAIL;
 
 
-    CNavigation::NAVIGATION_DESC		Desc{};
 
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
-        TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
-        return E_FAIL;
 
     return S_OK;
 }

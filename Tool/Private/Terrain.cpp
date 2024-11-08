@@ -29,7 +29,7 @@ HRESULT CTerrain::Initialize(void* pArg)
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+     pFloat = reinterpret_cast<float*>(&m_iUVoffset);
     return S_OK;
 }
 
@@ -39,7 +39,8 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
     {
         return OBJ_DEAD;
     }
-   
+    m_fTimeSum += fTimeDelta /m_iUVoffset;
+
     return OBJ_NOEVENT;
 }
 
@@ -84,18 +85,19 @@ HRESULT CTerrain::Render()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
         return E_FAIL;
 
-    m_pShaderCom->Begin(0);
+    if (FAILED(m_pShaderCom->Bind_Float("g_TimeSum", m_fTimeSum)))
+        return E_FAIL;
+
+     m_pShaderCom->Begin(m_bFire);
 
     m_pVIBufferCom->Bind_Buffers();
 
     m_pVIBufferCom->Render();
 
-
-   // m_pNavigationCom->Render();
     return S_OK;
 }
 
-void CTerrain::Set_Model(const _wstring& protoModel)
+void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_wModel = protoModel;
     if (FAILED(__super::Add_Component(LEVEL_STATIC, m_wModel, TEXT("Com_Texture"),
@@ -109,6 +111,14 @@ void CTerrain::Set_Buffer(_uint x, _uint y)
     m_pSize[0] = x;
     m_pSize[1] = y;
     m_pVIBufferCom->Set_Buffer(x, y);
+}
+
+void CTerrain::Set_Scalra_uint(_uint scalra)
+{  m_bFire = scalra; 
+}
+
+void CTerrain::Set_Scalra_float(_float scalra)
+{  m_iUVoffset = scalra; 
 }
 
 _float3* CTerrain::Get_VtxPos()

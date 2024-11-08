@@ -16,7 +16,9 @@ CLevel_Edit::CLevel_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) :
     ZeroMemory(&m_iIcomtem_selected_idx, sizeof(_int) * 6);
     ZeroMemory(&m_fCellPoint, sizeof(_float3) * 3);
     ZeroMemory(&m_iCellCount, sizeof(_uint));
-    ZeroMemory(&m_iCellType, sizeof(int));
+    ZeroMemory(&m_iCellType, sizeof(_int));
+    ZeroMemory(&m_DoorType, sizeof(_int));
+    ZeroMemory(&m_FireOffset, sizeof(_float));
     
 }
 
@@ -29,7 +31,7 @@ HRESULT CLevel_Edit::Initialize()
     m_fRotfspped = 1.f;
     m_tFPath[0] = L"../Bin/Data/Map/SetMap_Stage1_terrain.dat";
     m_tFPath[1] = L"../Bin/Data/Map/SetMap_Stage1_Wall.dat";
-    m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat";
+    m_tFPath[2] = L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat";  
     m_tFPath[3] = L"../Bin/Data/Map/SetMap_Stage1_ani.dat";
     m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
     m_tFPath[5] = L"../Bin/Data/Monster/Stage1_Monster.dat";
@@ -356,7 +358,7 @@ void CLevel_Edit::MapANIObj_ListBox()
     }
 
     ChsetWeapon();
-
+    Set_Door_Type();
     Create_Leyer_Botton(ANIMAPOBJ, m_iItem_selected_idx[3], m_iIcomtem_selected_idx[3]);
 }
 void CLevel_Edit::Terrain_ListBox()
@@ -388,8 +390,29 @@ void CLevel_Edit::Terrain_ListBox()
     }
 
     Set_Tile();
+    ImGui::Checkbox("Fire", &m_bFireTile);
 
 
+   
+    ImGui::Text("Fire_speed");
+    ImGui::SameLine(100, 0);
+    ImGui::InputFloat("##2354", &m_FireOffset);
+
+    _bool ret;
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::ImColor(0.f, 0.5f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::ImColor(1.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::ImColor(1.f, 0.f, 1.f));
+    ret = ImGui::Button("Pcik_Fire_speed");
+    ImGui::PopStyleColor(3);
+    if (ret)
+    {
+        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+            return;
+
+        if(nullptr != m_PicObjTerrain)
+        static_cast<CTerrain*>(m_PicObjTerrain)->Set_Scalra_float(m_FireOffset);
+      
+    }
 
     Create_Leyer_Botton(TERRAIN, m_iItem_selected_idx[0], m_iIcomtem_selected_idx[0]);
 }
@@ -534,8 +557,17 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
         if (1 > m_iBufferCount[0] || 1 > m_iBufferCount[1])
             return E_FAIL;
 
+
+        
+
         pDec.DATA_TYPE = CGameObject::DATA_TERRAIN;
         CGameObject* pTerrain = m_pGameInstance->Clone_Prototype(protKey, &pDec);
+        if (true == m_bFireTile) {
+            static_cast<CTerrain*>(pTerrain)->Set_Scalra_uint(1);
+            static_cast<CTerrain*>(pTerrain)->Set_Scalra_float(m_FireOffset);
+        }
+        if (false == m_bFireTile)
+            static_cast<CTerrain*>(pTerrain)->Set_Scalra_uint(0);
 
         pTerrain->Set_Model(protcomKey);
 
@@ -578,6 +610,9 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
             pDec.DATA_TYPE = CGameObject::DATA_DOOR;
             CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
+            if (m_WeaPon < 0 || m_WeaPon > 3)
+                m_WeaPon = 0;
+            aObj->Set_Buffer(0, m_DoorType);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
         }
         if (false == lstrcmpW(protKey, L"Proto GameObject Chest_aniObj"))
@@ -859,6 +894,14 @@ void CLevel_Edit::Set_Cell_Type()
     ImGui::InputInt("##553", &m_iCellType);
 }
 
+void CLevel_Edit::Set_Door_Type()
+{
+    _bool ret{};  //쎌의 종류를 정한다
+    ImGui::Text("DoorType");
+    ImGui::SameLine(100, 0);
+    ImGui::InputInt("##55883", &m_DoorType);
+}
+
 void CLevel_Edit::re_setting()
 {
     // 모든 값들을 기본값으로 정한다.
@@ -1093,7 +1136,8 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
     _tchar* pPoroto;
     _uint TileX{0};
     _uint TileY{0};
-
+    _uint bFire{0};
+    _float FireOffset{0.f};
     for (auto& ObjList : AllSave)
     {
 
@@ -1104,7 +1148,8 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
         Type = ObjList->Get_Data();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
-
+        bFire = ObjList-> Get_Scalra();
+        FireOffset = ObjList-> Get_Scalra_float();
         if (Type == CGameObject::DATA_TERRAIN)
         {
             TileX = static_cast<CTerrain*>(ObjList)->Get_SizeX();
@@ -1129,6 +1174,9 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
             DWORD wcharDataSize = (lstrlenW(pPoroto) + 1) * sizeof(wchar_t);
             WriteFile(hFile, &wcharDataSize, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, wcharDataSize, &dwByte, NULL);
+
+            WriteFile(hFile, &bFire, sizeof(_uint), &dwByte, nullptr);
+            WriteFile(hFile, &FireOffset, sizeof(_float), &dwByte, nullptr);
         }
     }
 
@@ -1272,11 +1320,13 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
         pPoroto = ObjList->Get_ProtoName();
         WeaPonType = ObjList->Get_Scalra();
 
-        if (WeaPonType < 1 || WeaPonType > 3)
-            WeaPonType = rand() % 4 ;
+       
 
         if (Type == CGameObject::DATA_DOOR)
         {
+            if (WeaPonType < 0 || WeaPonType > 3)  // 사실 문 설정값이야
+                WeaPonType = 0;
+
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
@@ -1293,9 +1343,14 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
             DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+
+            WriteFile(hFile, &WeaPonType, sizeof(_uint), &dwByte, nullptr);
         }
         else if (Type == CGameObject::DATA_CHEST)
         {
+            if (WeaPonType < 1 || WeaPonType > 3)
+                WeaPonType = rand() % 4;
+
             WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
             WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
@@ -1455,6 +1510,8 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
     _uint TileX{0};
     _uint TileY{0};
     _bool bSetCellW = false;
+    _uint bFire{ 0 };
+    _float FireOffset{ 0.f };
     while (true)
     {
         _bool bFile(false);
@@ -1482,6 +1539,10 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
         pPoroto[Length] = L'\0';
 
+
+        bFile = ReadFile(hFile, &(bFire), sizeof(_uint), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(FireOffset), sizeof(_float), &dwByte, nullptr);
+
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
@@ -1502,7 +1563,8 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-
+        pGameObject->Set_Scalra_float(FireOffset);
+        pGameObject->Set_Scalra_uint(bFire);
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
 
         m_vTerrain.push_back(pGameObject);
@@ -1711,8 +1773,8 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
         pPoroto[Length] = L'\0';
 
-        if (Type == CGameObject::DATA_CHEST)
-            bFile = ReadFile(hFile, &(WaPonType), sizeof(_uint), &dwByte, nullptr);
+
+        bFile = ReadFile(hFile, &(WaPonType), sizeof(_uint), &dwByte, nullptr);
 
         if (0 == dwByte)
         {
@@ -1733,10 +1795,9 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-        if (Type == CGameObject::DATA_CHEST)
-        {
+     
             pGameObject->Set_Buffer(0, WaPonType);
-        }
+        
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
 
         Safe_Delete_Array(pModel);
@@ -1811,7 +1872,7 @@ void CLevel_Edit::Load_Monster(const _tchar* tFPath)
         pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
-        pGameObject->Set_Model(pModel);
+        pGameObject->Set_Model(pModel, LEVEL_EDIT);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
@@ -2049,6 +2110,15 @@ void CLevel_Edit::Key_input(_float ftimedelta)
                                       ftimedelta * MouseMove * m_fRotfspped);
             }
         }
+        if (m_pGameInstance->Get_DIKeyState(DIK_Z))
+        {
+            if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Z))
+            {
+                // 현재 오브젝트를 X축 회전한다.
+                m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_UP),
+                    ftimedelta * MouseMove * m_fRotfspped);
+            }
+        }
     }
 
 #pragma region 피킹 키
@@ -2140,7 +2210,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
 
         // 현재 오브젝트의 트랜스 폼을 터레인의 트렌스 폼으로..
         m_pObjTransform = m_vTerrain[index]->Get_Transform(); // 현재 오브젝트의 트랜스 폼을 메쉬의 트렌스 폼으로..
-
+        m_PicObjTerrain = m_vTerrain[index];
         Update_Pos();
         Update_Speed();
     }
@@ -2333,25 +2403,28 @@ void CLevel_Edit::Picking_Cell(_uint i)
         // Cell 정보 입력을 시작한다.
         m_PicObj = m_Terrain;
         _vector P1{}, P2{}, P3{};
-
+        _vector fp1{}, fp2{}, fp3{};
         m_fCellPoint[i] = Pick;
 
         if (i == 0)
         {
             P1 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[0].x, m_fCellPoint[0].y, m_fCellPoint[0].z, 1.f),
                                          m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+     
             XMStoreFloat3(&m_fCellPoint[0], P1);
         }
         if (i == 1)
         {
             P2 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[1].x, m_fCellPoint[1].y, m_fCellPoint[1].z, 1.f),
                                          m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+
             XMStoreFloat3(&m_fCellPoint[1], P2);
         }
         if (i == 2)
         {
             P3 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[2].x, m_fCellPoint[2].y, m_fCellPoint[2].z, 1.f),
                                          m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+
             XMStoreFloat3(&m_fCellPoint[2], P3);
         }
     }
@@ -2360,7 +2433,7 @@ void CLevel_Edit::Picking_Cell(_uint i)
         // 터레인이 없고 메쉬만 있었다면, 메쉬에 Cell 정점을 그린다.
         _vector p1{}, p2{}, p3{};
         m_PicObj = Desc.pPickedObj;
-
+        _vector fp1{},fp2{},fp3{};
         _float3 fMashPos{};
         XMStoreFloat3(&fMashPos, vPos);
         m_fCellPoint[i] = fMashPos;
@@ -2369,18 +2442,24 @@ void CLevel_Edit::Picking_Cell(_uint i)
         {
             p1 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[0].x, m_fCellPoint[0].y, m_fCellPoint[0].z, 1.f),
                                          m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+
+
             XMStoreFloat3(&m_fCellPoint[0], p1);
         }
         else if (i == 1)
         {
             p2 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[1].x, m_fCellPoint[1].y, m_fCellPoint[1].z, 1.f),
                                          m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+
+  
+
             XMStoreFloat3(&m_fCellPoint[1], p2);
         }
         else if (i == 2)
         {
             p3 = XMVector3TransformCoord(XMVectorSet(m_fCellPoint[2].x, m_fCellPoint[2].y, m_fCellPoint[2].z, 1.f),
                                          m_Terrain->Get_Transform()->Get_WorldMatrix_Inverse());
+
             XMStoreFloat3(&m_fCellPoint[2], p3);
         }
     }
@@ -2390,6 +2469,7 @@ void CLevel_Edit::Picking_Cell(_uint i)
         //scout << m_fCellPoint[0].x << " " << m_fCellPoint[0].y << " " << m_fCellPoint[0].z << endl;
         //scout << m_fCellPoint[1].x << " " << m_fCellPoint[1].y << " " << m_fCellPoint[1].z << endl;
         //scout << m_fCellPoint[2].x << " " << m_fCellPoint[2].y << " " << m_fCellPoint[2].z << endl;
+        
         static_cast<CNavigation*>(m_pNavigation)->Create_Poly(m_fCellPoint[0], m_fCellPoint[1], m_fCellPoint[2], m_iCellType);
     }
 }

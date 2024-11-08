@@ -37,7 +37,9 @@ public:
 
 	const _float4x4* Get_SocketMatrix(const _char* pBoneName);
 
-
+	void Set_CurMotion(_uint Motion) {
+		m_iCurMotion = Motion;
+	}
 	_vector Get_PartObj_Position()
 	{
 		/*XMLoad- 저장용행렬을 연산용으로*/
@@ -47,8 +49,7 @@ public:
 protected:
 	const _float4x4*				m_pParentMatrix = { nullptr };
 	_float4x4						m_WorldMatrix = {};   
-
-
+	const _float4x4*				m_pFindBonMatrix = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
 

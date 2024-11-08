@@ -2,7 +2,7 @@
 #include "Body_GunPawn.h"
 #include "GameInstance.h"
 #include "GunPawn.h"
-
+#include "Bullet.h"
 CBody_GunPawn::CBody_GunPawn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -30,7 +30,9 @@ HRESULT CBody_GunPawn::Initialize(void* pArg)
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-    
+
+    m_pFindBonMatrix = Get_SocketMatrix("R_Canon_Scale_02");
+
     return S_OK;
 }
 
@@ -52,42 +54,14 @@ void CBody_GunPawn::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-    if (*m_pParentState == CGunPawn::ST_JETPACK && m_iCurMotion != CGunPawn::ST_JETPACK)
-    {
-        m_iCurMotion = CGunPawn::ST_JETPACK;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_SHOOT03 && m_iCurMotion != CGunPawn::ST_SHOOT03)
-    {
-        m_iCurMotion = CGunPawn::ST_SHOOT03;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_STURN_LOOP && m_iCurMotion != CGunPawn::ST_STURN_LOOP)
-    {
-        m_iCurMotion = CGunPawn::ST_STURN_LOOP;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CGunPawn::ST_RUN_BACK && m_iCurMotion != CGunPawn::ST_RUN_BACK)
     {
         m_iCurMotion = CGunPawn::ST_RUN_BACK;
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CGunPawn::ST_RUN_BACK_LEFT && m_iCurMotion != CGunPawn::ST_RUN_BACK_LEFT)
-    {
-        m_iCurMotion = CGunPawn::ST_RUN_BACK_LEFT;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_RUN_BACK_RIGHT && m_iCurMotion != CGunPawn::ST_RUN_BACK_RIGHT)
-    {
-        m_iCurMotion = CGunPawn::ST_RUN_BACK_RIGHT;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CGunPawn::ST_RUN_LEFT && m_iCurMotion != CGunPawn::ST_RUN_LEFT)
     {
         m_iCurMotion = CGunPawn::ST_RUN_LEFT;
@@ -100,30 +74,7 @@ void CBody_GunPawn::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CGunPawn::ST_STAGGER_BACK && m_iCurMotion != CGunPawn::ST_STAGGER_BACK)
-    {
-        m_iCurMotion = CGunPawn::ST_STAGGER_BACK;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_STAGGER_FRONT && m_iCurMotion != CGunPawn::ST_STAGGER_FRONT)
-    {
-        m_iCurMotion = CGunPawn::ST_STAGGER_FRONT;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_STAGGER_LEFT && m_iCurMotion != CGunPawn::ST_STAGGER_LEFT)
-    {
-        m_iCurMotion = CGunPawn::ST_STAGGER_LEFT;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_STAGGER_RIGHT && m_iCurMotion != CGunPawn::ST_STAGGER_RIGHT)
-    {
-        m_iCurMotion = CGunPawn::ST_STAGGER_RIGHT;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CGunPawn::ST_STUN_START && m_iCurMotion != CGunPawn::ST_STUN_START)
     {
         m_iCurMotion = CGunPawn::ST_STUN_START;
@@ -134,30 +85,13 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     else
         m_fPlayAniTime = 0.6f;
 
-    if (*m_pParentState == CGunPawn::ST_HIT_BACK && m_iCurMotion != CGunPawn::ST_HIT_BACK)
-    {
-        m_iCurMotion = CGunPawn::ST_HIT_BACK;
-        bMotionChange = true;
-        bLoop = true;
-    }
     if (*m_pParentState == CGunPawn::ST_HIT_FRONT && m_iCurMotion != CGunPawn::ST_HIT_FRONT)
     {
         m_iCurMotion = CGunPawn::ST_HIT_FRONT;
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CGunPawn::ST_HIT_LEFT && m_iCurMotion != CGunPawn::ST_HIT_LEFT)
-    {
-        m_iCurMotion = CGunPawn::ST_HIT_LEFT;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CGunPawn::ST_HIT_RIGHT && m_iCurMotion != CGunPawn::ST_HIT_RIGHT)
-    {
-        m_iCurMotion = CGunPawn::ST_HIT_RIGHT;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CGunPawn::ST_IDLE && m_iCurMotion != CGunPawn::ST_IDLE)
     {
         m_iCurMotion = CGunPawn::ST_IDLE;
@@ -176,12 +110,7 @@ void CBody_GunPawn::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CGunPawn::ST_SHOOT01 && m_iCurMotion != CGunPawn::ST_SHOOT01)
-    {
-        m_iCurMotion = CGunPawn::ST_SHOOT01;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CGunPawn::ST_PRESHOOT && m_iCurMotion != CGunPawn::ST_PRESHOOT)
     {
         m_iCurMotion = CGunPawn::ST_PRESHOOT;
@@ -191,9 +120,6 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     }
     else
         m_fPlayAniTime = 1.f;
-
-
-
 
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
@@ -207,6 +133,17 @@ void CBody_GunPawn::Update(_float fTimeDelta)
         m_RimDesc.iPower = 1;
     }
 
+
+
+    if (m_iCurMotion == CGunPawn::ST_RUN_LEFT || m_iCurMotion == CGunPawn::ST_RUN_RIGHT)
+    {
+        m_FireTime += fTimeDelta;
+
+        if (m_FireTime > 0.5f) {
+            Make_Bullet();
+            m_FireTime = 0.f;
+        }
+    }
 
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
@@ -267,6 +204,30 @@ HRESULT CBody_GunPawn::Render()
     return S_OK;
 }
 
+HRESULT CBody_GunPawn::Make_Bullet()
+{
+  
+    _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
+
+    _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+    
+     _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION) 
+                      - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    CBullet::CBULLET_DESC Desc{};
+    Desc.fSpeedPerSec = 20.f;
+    Desc.pTagetPos = Dir;
+    Desc.vPos = vHPos;
+    Desc.Damage = &m_pDamage;
+    Desc.iWeaponType = CBullet::MONSTER_BULLET::TYPE_GUNPAWN;
+    Desc.LifTime = 1.f;
+    CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
+    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+    m_pGameInstance->Add_MonsterBullet(m_pGameInstance->Get_iCurrentLevel(), pGameObject);
+
+    return S_OK;
+}
+
 HRESULT CBody_GunPawn::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
@@ -274,7 +235,7 @@ HRESULT CBody_GunPawn::Add_Components()
         return E_FAIL;
 
     /* For.Com_Model */
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto_Component_GunPawn_Model"), TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_GunPawn_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 

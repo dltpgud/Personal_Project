@@ -35,7 +35,7 @@ namespace Engine
 		const _uint*		eState;
 		XMFLOAT4			fcolor;
 		_int				iPower;
-
+		XMFLOAT4			vPosition;
 	}RIM_LIGHT_DESC;
 
 
@@ -74,6 +74,18 @@ namespace Engine
 	}VTXPOSTEX;
 
 
+	typedef struct ENGINE_DLL VTXPOINT
+	{
+		/* 정점의 위치 (Position)*/
+		XMFLOAT3		vPosition;
+		/* 텍스쳐의 색을 가져오기위한 좌표.(Texcoord) */
+		XMFLOAT2		vPSize;
+
+		static const unsigned int		iNumElements = 2;
+		static const D3D11_INPUT_ELEMENT_DESC	Elements[2];
+	}VTXPOINT;
+
+
 	typedef struct ENGINE_DLL VTXCUBE
 	{
 		/* 정점의 위치 (Position)*/
@@ -103,13 +115,23 @@ namespace Engine
 		XMFLOAT3		vPosition;
 		XMFLOAT3		vNormal;
 		XMFLOAT2		vTexcoord;
-		// XMFLOAT2		vTexcoord1;
+
 
 		XMFLOAT3		vTangent;
 
 		static const unsigned int		iNumElements = 4;
 		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
 	}VTXMESH;
+
+
+	typedef struct VTXMATRIX
+	{
+		XMFLOAT4		vRight;
+		XMFLOAT4		vUp;
+		XMFLOAT4		vLook;
+		XMFLOAT4		vTranslation;
+		XMFLOAT2		vLifeTime;
+	}VTXMATRIX;
 
 	typedef struct ENGINE_DLL VTXANIMMESH
 	{
@@ -135,4 +157,17 @@ namespace Engine
 		XMFLOAT3		vPosition;
 		float			fTrackPosition;
 	}KEYFRAME;
+
+
+	typedef struct ENGINE_DLL VTXPARTICLE_RECT
+	{
+		static const unsigned int		iNumElements = 7;
+		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
+	}VTXPARTICLE_RECT;
+
+	typedef struct ENGINE_DLL VTXPARTICLE_POINT
+	{
+		static const unsigned int		iNumElements = 7;
+		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
+	}VTXPARTICLE_POINT;
 }

@@ -55,8 +55,8 @@ public:
 	_uint  Get_MaxBullte() {
 		return m_iFirstBullet[m_pWeapon];
 	}
-
-
+	HRESULT Make_Bullet(_float3 Offset);
+	
 private:
 
 	CModel* m_pModelCom[WeaPoneType_END] = {nullptr};
@@ -69,8 +69,11 @@ private:
 	_uint m_iFirstBullet[WeaPoneType_END]{ 0 };
 	WeaPoneType	m_iBullet{};
 	_float m_fDamage{};
+	_bool m_istate{};
+	const _float4x4* m_pWeapon_SocketMatrix[WeaPoneType_END] = { nullptr };
+	_float3 m_fWeaPonOffset{};
 
-
+	
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

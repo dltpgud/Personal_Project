@@ -3,12 +3,11 @@
 #include "GameInstance.h"
 #include "Player.h"
 #include "UI.h"
-
-CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
+CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{ pDevice, pContext }
 {
 }
 
-CWeapon::CWeapon(const CWeapon& Prototype) : CPartObject{Prototype}
+CWeapon::CWeapon(const CWeapon& Prototype) : CPartObject{ Prototype }
 {
 }
 
@@ -45,8 +44,12 @@ HRESULT CWeapon::Initialize(void* pArg)
 
     m_pTransformCom->Set_Scaling(0.01f, 0.01f, 0.01f);
 
+    m_pWeapon_SocketMatrix[HendGun]  =m_pModelCom[HendGun]->Get_BoneMatrix("W_Trigger");
+    m_pWeapon_SocketMatrix[AssaultRifle] = m_pModelCom[AssaultRifle]->Get_BoneMatrix("W_Bayonet");
+    m_pWeapon_SocketMatrix[MissileGatling] = m_pModelCom[MissileGatling]->Get_BoneMatrix("W_Rotator");
+    m_pWeapon_SocketMatrix[HeavyCrossbow] = m_pModelCom[HeavyCrossbow]->Get_BoneMatrix("W_Front_Middle");
 
-       
+    m_fPlayAniTime = 1.f;
     return S_OK;
 }
 
@@ -54,9 +57,6 @@ _int CWeapon::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
-
-
-
 
     return OBJ_NOEVENT;
 }
@@ -66,11 +66,9 @@ void CWeapon::Update(_float fTimeDelta)
 
     *m_pType == CPlayer::T00 ? Type0_Update(fTimeDelta) : Type2_Update(fTimeDelta);
 
-        m_pGameInstance->UI_shaking(CUI::UIID_PlayerHP, fTimeDelta);
+    m_pGameInstance->UI_shaking(CUI::UIID_PlayerHP, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon_Aim, fTimeDelta);
-
-
 }
 
 void CWeapon::Late_Update(_float fTimeDelta)
@@ -88,7 +86,7 @@ void CWeapon::Late_Update(_float fTimeDelta)
 }
 
 HRESULT CWeapon::Render()
-{  
+{
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -97,7 +95,7 @@ HRESULT CWeapon::Render()
     for (_uint i = 0; i < iNumMeshes; i++)
     {
         if (FAILED(m_pModelCom[m_pWeapon]->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
-                                                                        "g_DiffuseTexture")))
+            "g_DiffuseTexture")))
             return E_FAIL;
 
         if (FAILED(m_pModelCom[m_pWeapon]->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
@@ -114,7 +112,7 @@ HRESULT CWeapon::Render()
 
 void CWeapon::Type0_Update(_float fTimeDelta)
 {
-    _bool bMotionChange = {false}, bLoop = {false};
+    _bool bMotionChange = { false }, bLoop = { false };
     if (*m_pParentState == CPlayer::STATE_HENDGUN_RELOAD && m_iCurMotion != Reload)
     {
         m_iBullet = CWeapon::HendGun;
@@ -126,18 +124,10 @@ void CWeapon::Type0_Update(_float fTimeDelta)
 
     if (*m_pParentState == CPlayer::STATE_HENDGUN_SHOOT && m_iCurMotion != Shoot)
     {
-        m_iMaxBullet[m_iBullet] -= 1;
-
-        if (0 >= m_iMaxBullet[m_iBullet])
-        {
-            m_pGameInstance->Get_Player()->Set_State(CPlayer::STATE_HENDGUN_RELOAD);
-        }
-        else
-        {
-            m_iCurMotion = Shoot;
-            m_fDamage = 16;
-            m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
-        }
+        m_fWeaPonOffset = { 1.f,1.5f,4.5f };
+        Make_Bullet(m_fWeaPonOffset);
+        m_iCurMotion = Shoot;
+        m_fDamage = 10;
 
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.2f, 0.2f);
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.2f, 0.2f);
@@ -156,17 +146,18 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         m_iCurMotion = Idle;
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, true);
     }
-  
+
 }
 
 void CWeapon::Type2_Update(_float fTimeDelta)
 {
-    _bool bMotionChange = {false}, bLoop = {false};
+    _bool bMotionChange = { false }, bLoop = { false };
 
     if (AssaultRifle == m_pWeapon)
     {
         if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion != Reload)
         {
+            m_fPlayAniTime = 1.f;
             m_iBullet = CWeapon::AssaultRifle;
             m_iMaxBullet[m_iBullet] = 30;
             m_iCurMotion = Reload;
@@ -176,25 +167,24 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
         if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_SHOOT && m_iCurMotion != Shoot)
         {
-            m_iMaxBullet[m_iBullet] -= 3;
-            if (0 >= m_iMaxBullet[m_iBullet])
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_ASSAULTRIFlLE_RELOAD);
-            else {
-                m_iCurMotion = Shoot;
-                m_fDamage = 18.f;
-                m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
-            }
-            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.5f, 0.5f);
-            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.5f, 0.5f);
-            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.5f, -0.5f);
+            m_fWeaPonOffset = { 1.f,1.f,1.5f };
+            Make_Bullet(m_fWeaPonOffset);
+            
+            m_iCurMotion = Shoot;
+            m_fDamage = 15.f;
+            m_fPlayAniTime = 2.f;
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.3f, 0.3f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.3f, 0.3f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.3f, -0.3f);
             bMotionChange = true;
             bLoop = false;
         }
     }
     else if (MissileGatling == m_pWeapon)
     {
+
         if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD && m_iCurMotion != Reload)
-        {
+        {     m_fPlayAniTime = 1.f;
             m_iBullet = CWeapon::MissileGatling;
             m_iMaxBullet[m_iBullet] = 20;
             m_iCurMotion = Reload;
@@ -204,23 +194,23 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
         if (*m_pParentState == CPlayer::STATE_MissileGatling_SHOOT && m_iCurMotion != Shoot)
         {
-            m_iMaxBullet[m_iBullet] -= 4;
-            if (0 >= m_iMaxBullet[m_iBullet])
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_MissileGatling_RELOAD);
-            else {
-                m_iCurMotion = Shoot;
-                m_fDamage = 20.f;
-                m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
-            }
-            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.7f, 0.7f);
-            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.7f, 0.7f);
-            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.7f, -0.7f);
+            m_fWeaPonOffset = { 1.f,1.f,1.5f };
+            Make_Bullet(m_fWeaPonOffset);
+            Make_Bullet(m_fWeaPonOffset);
+            Make_Bullet(m_fWeaPonOffset);
+            m_iCurMotion = Shoot;
+            m_fDamage = 20.f;
+            m_fPlayAniTime = 2.f;
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.6f, 0.6f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.6f, 0.6f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.6f, -0.6f);
             bMotionChange = true;
             bLoop = false;
         }
     }
     else if (HeavyCrossbow == m_pWeapon)
     {
+        m_fPlayAniTime = 1.f;
         if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD && m_iCurMotion != Reload)
         {
             m_iBullet = CWeapon::HeavyCrossbow;
@@ -232,19 +222,15 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
         if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_SHOOT && m_iCurMotion != Shoot)
         {
-            m_iMaxBullet[m_iBullet] -= 1;
-
-            if (0 >= m_iMaxBullet[m_iBullet])
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_HEAVYCROSSBOW_RELOAD);
-            else {
-                m_iCurMotion = Shoot;
-                m_fDamage = 50.f;
-                m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
-            }
+            m_fWeaPonOffset = { 1.f,1.f,1.5f };
+            Make_Bullet(m_fWeaPonOffset);
+            m_iCurMotion = Shoot;
+            m_fDamage = 50.f;
+       
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 1.f, -1.f);
-           
+
             bMotionChange = true;
             bLoop = false;
         }
@@ -254,16 +240,15 @@ void CWeapon::Type2_Update(_float fTimeDelta)
     if (bMotionChange)
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, bLoop);
 
-    if (true == m_pModelCom[m_pWeapon]->Play_Animation(fTimeDelta))
+    if (true == m_pModelCom[m_pWeapon]->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
         m_iCurMotion = Idle;
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, true);
     }
- 
+  
+
 }
-
-
 
 void CWeapon::Choose_Weapon(const _uint& WeaponNum)
 {
@@ -273,28 +258,77 @@ void CWeapon::Choose_Weapon(const _uint& WeaponNum)
     m_pModelCom[m_pWeapon]->Set_Animation(Idle, false);
 }
 
+HRESULT CWeapon::Make_Bullet(_float3 Offset)
+{
+    m_iMaxBullet[m_iBullet] -= 1;
+
+    if (0 >= m_iMaxBullet[m_iBullet])
+    {
+        switch (m_pWeapon)
+        {
+        case CWeapon::HendGun : 
+           m_pGameInstance->Get_Player()->Set_State(CPlayer::STATE_HENDGUN_RELOAD);
+            break;
+        case CWeapon::AssaultRifle:
+          m_pGameInstance->Get_Player()->Set_State(CPlayer::STATE_ASSAULTRIFlLE_RELOAD);
+            break;
+        case CWeapon::MissileGatling:
+           m_pGameInstance->Get_Player()->Set_State(CPlayer::STATE_MissileGatling_RELOAD);
+            break;
+        case CWeapon::HeavyCrossbow:
+            m_pGameInstance->Get_Player()->Set_State(CPlayer::STATE_HEAVYCROSSBOW_RELOAD);
+            break;
+        }
+
+    }
+    else
+    m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
+
+    _vector At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) *10.f;  
+
+
+    if (m_pWeapon >= WeaPoneType_END || m_pWeapon < HendGun)
+        return E_FAIL;
+
+    _vector Hend_Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y,
+             m_pWeapon_SocketMatrix[m_pWeapon]->_43* Offset.z, m_pWeapon_SocketMatrix[m_pWeapon]->_44 };
+
+    _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+
+
+    CBullet::CBULLET_DESC Desc{};
+     Desc.fSpeedPerSec = 150.f;
+     Desc.pTagetPos = At;                   
+     Desc.vPos = vHPos;
+     Desc.iWeaponType = m_pWeapon;
+     CGameObject* pGameObject =  m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
+    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+
+    return S_OK;
+}
+
 HRESULT CWeapon::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
-                                      reinterpret_cast<CComponent**>(&m_pShaderCom))))
+        reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
     /* For.Com_Model */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_HendGun"), TEXT("Com_Model"),
-                                      reinterpret_cast<CComponent**>(&m_pModelCom[HendGun]))))
+        reinterpret_cast<CComponent**>(&m_pModelCom[HendGun]))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_AssaultRifle"), TEXT("Com_Model2"),
-                                      reinterpret_cast<CComponent**>(&m_pModelCom[AssaultRifle]))))
+        reinterpret_cast<CComponent**>(&m_pModelCom[AssaultRifle]))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_MissileGatling"),
-                                      TEXT("Com_Model3"),
-                                      reinterpret_cast<CComponent**>(&m_pModelCom[MissileGatling]))))
+        TEXT("Com_Model3"),
+        reinterpret_cast<CComponent**>(&m_pModelCom[MissileGatling]))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_HeavyCrossbow"), TEXT("Com_Model4"),
-                                      reinterpret_cast<CComponent**>(&m_pModelCom[HeavyCrossbow]))))
+        reinterpret_cast<CComponent**>(&m_pModelCom[HeavyCrossbow]))))
         return E_FAIL;
 
     return S_OK;
@@ -306,10 +340,10 @@ HRESULT CWeapon::Bind_ShaderResources()
         return E_FAIL;
 
     if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
     if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))

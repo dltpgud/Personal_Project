@@ -95,7 +95,7 @@ HRESULT CChest::Render()
     return S_OK;
 }
 
-void CChest::Set_Model(const _wstring& protoModel)
+void CChest::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_wModel = protoModel;
     /* For.Com_Model */

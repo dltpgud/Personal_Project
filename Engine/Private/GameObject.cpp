@@ -11,8 +11,9 @@ CGameObject::CGameObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CGameObject::CGameObject(const CGameObject& Prototype) 
     : m_pDevice{Prototype.m_pDevice}, m_pContext{Prototype.m_pContext}, m_pGameInstance{Prototype.m_pGameInstance},
-      m_pTransformCom{Prototype.m_pTransformCom}, m_bClone(true)
+      m_pTransformCom{Prototype.m_pTransformCom}, m_pColliderCom{ Prototype.m_pColliderCom }, m_bClone(true)
 {
+    Safe_AddRef(m_pColliderCom);
     Safe_AddRef(m_pTransformCom);
     Safe_AddRef(m_pGameInstance);
     Safe_AddRef(m_pContext);
@@ -117,6 +118,7 @@ void CGameObject::Free()
 
     for (auto& Pair : m_Components) Safe_Release(Pair.second);
     m_Components.clear();
+
     Safe_Release(m_pColliderCom);
     Safe_Release(m_pTransformCom);
     Safe_Release(m_pGameInstance);

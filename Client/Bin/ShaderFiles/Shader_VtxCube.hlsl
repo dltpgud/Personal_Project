@@ -5,15 +5,7 @@ matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 textureCUBE		g_Texture;
 
 
-sampler LinearSampler = sampler_state
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-};
 
-sampler PointSampler = sampler_state
-{
-	filter = MIN_MAG_MIP_POINT;
-};
 
 struct VS_IN
 {

@@ -12,9 +12,11 @@ public:
 
 
     HRESULT Add_Monster(_uint Ilevel, class CGameObject* Monster);
+    HRESULT Add_MonsterBullet(_uint Ilevel, class CGameObject* MonsterBullet);
     void All_Collison_check();
     HRESULT Player_To_Monster_Collison_Check();
     HRESULT Player_To_Monster_Ray_Collison_Check();
+    HRESULT Player_To_Monster_Bullet_Collison_Check();
     void Clear(_uint Ilevel);
     HRESULT Find_Cell(_uint Ilevel);
     HRESULT Set_Collison(_bool SetColl) {
@@ -27,6 +29,8 @@ public:
 private:
     class CGameInstance* m_pGameInstance = { nullptr };
     list <class CActor*>* m_MonsterList;
+    list <class CGameObject*> m_MonsterBullet;
+
     _uint   m_iLevel;
     _bool m_bIsColl = { false };
 

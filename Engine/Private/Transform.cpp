@@ -29,7 +29,7 @@ void CTransform::LookAt(_fvector vAt)
     Set_TRANSFORM(TRANSFORM_LOOK, XMVector3Normalize(vLook) * vScaled.z);
 }
 
-void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
+void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation, _bool* IsSame )
 {
     _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
@@ -37,9 +37,9 @@ void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
     _vector vAfterPos = vPosition + XMVector3Normalize(vLook) * m_fSpeedPerSec * fTimeDelta;
 
     _vector Slide{};
+
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
-        if (XMVector3Equal(Slide, XMVectorZero()))
-            return;
+
         vPosition += Slide;
     
     }
@@ -49,7 +49,7 @@ void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation)
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation)
+void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation, _bool* IsSame)
 {
     _vector vRight = Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
@@ -58,7 +58,6 @@ void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation)
 
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
- 
         vPosition += Slide;
     }
     else
@@ -67,7 +66,7 @@ void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation)
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation)
+void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation, _bool* IsSame )
 {
     _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
@@ -76,16 +75,16 @@ void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation)
 
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
-        {
+    {
             vPosition += Slide;
-        }
+    }
     else
         vPosition = vAfterPos;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Backward(_float fTimeDelta, CNavigation* pNavigation)
+void CTransform::Go_Backward(_float fTimeDelta, CNavigation* pNavigation, _bool* IsSame )
 {
     _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
@@ -103,7 +102,7 @@ void CTransform::Go_Backward(_float fTimeDelta, CNavigation* pNavigation)
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Up(_float fTimeDelta, CNavigation* pNavigation)
+void CTransform::Go_Up(_float fTimeDelta, CNavigation* pNavigation, _bool* IsSame )
 {
     _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
@@ -121,7 +120,7 @@ void CTransform::Go_Up(_float fTimeDelta, CNavigation* pNavigation)
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
 
-void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation)
+void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation, _bool* IsSame )
 {
     _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
@@ -142,7 +141,7 @@ void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation)
 void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNavigation* pNavigation)
 {
 
-    m_fTimeSum += fTimeDelta * 9.8f;
+    m_fTimeSum += fTimeDelta * 6.8f;
  
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
@@ -165,30 +164,65 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNav
         Position.y = YPos;
        Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
         m_fTimeSum = 0.f;
+        m_fTimeSumDouble = 0.f;
         *Jumpcheck = false;
     }
 }
 
+void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
+{
+    
+    m_fTimeSumDouble += fTimeDelta * 4.8f;
+
+    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
+
+    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower+ m_JumpPower/3  - m_fTimeSumDouble) * fTimeDelta * m_fSpeedPerSec*2;
+
+    _vector slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &slide))
+    {
+        vAfterPos += slide;
+    }
+
+    Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vAfterPos);
+
+}
+
 void CTransform::GO_Dir(_float fTimeDelta, _vector TagetPos)
 {
+    _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
 
-     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
-     _vector vDir = TagetPos;
-     _float4 fDir{};
-     XMStoreFloat4(&fDir, vDir);
-     vDir = { fDir.x, 0.f, fDir.z, 0.f };
-
-     vDir = XMVector3Normalize(vDir);
-     
-;
-
-
- vPosition +=  vDir * m_fSpeedPerSec * fTimeDelta ;
-
- 
-
+    vPosition += TagetPos * m_fSpeedPerSec * fTimeDelta; ;
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
+}
+
+void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, _bool* Jumpcheck)
+{
+    m_fTimeSum += fTimeDelta * 9.8f;
+
+    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
+
+     vPosition += XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
+
+     GO_Dir(fTimeDelta, Dir);
+  
+
+     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vPosition);
+
+    _float3 Position;
+     XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    if (Position.y <= YPos)
+    {
+        Position.y = YPos;
+        Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
+        m_fTimeSum = 0.f;
+        *Jumpcheck = false;
+    }
 }
 
 void CTransform::Stop_Move()
@@ -309,6 +343,8 @@ void CTransform::Rotation(_float fX, _float fY, _float fZ)
     Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(vUp, RotationMatrix));
     Set_TRANSFORM(TRANSFORM_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
 }
+
+
 
 HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstantName)
 {

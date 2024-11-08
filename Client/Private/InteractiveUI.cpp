@@ -18,8 +18,8 @@ HRESULT CInteractiveUI::Initialize_Prototype()
 HRESULT CInteractiveUI::Initialize(void* pArg)
 {
     CUI_DESC Desc{};
-    Desc.fX = g_iWinSizeX * 0.5f-60.f;
-    Desc.fY = g_iWinSizeY * 0.5f+60.f;
+    Desc.fX = g_iWinSizeX * 0.5f-40.f;
+    Desc.fY = g_iWinSizeY * 0.5f;
     Desc.fZ =  0.f;
     Desc.fSizeX = 50.f;
     Desc.fSizeY = 50.f;
@@ -37,7 +37,7 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-     m_iInteractiveType = INTERACTIVE_STATE::IS_END;
+
     return S_OK;
 }
 
@@ -48,17 +48,31 @@ _int CInteractiveUI::Priority_Update(_float fTimeDelta)
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F))
     {
-        m_bInteractive[m_iInteractiveType] = true;
-        m_vColor = { 0.f,1.f,0.f,1.f };
+        
+        m_bColor = true;
+     
     }
-    else
-        m_vColor = { 1.f,1.f,1.f,1.f };
+
+
     return OBJ_NOEVENT;
 }
 
 void CInteractiveUI::Update(_float fTimeDelta)
 {
-   
+    if (m_bColor) 
+    {
+        m_ColorTime += fTimeDelta;
+         m_vColor = { 0.f,1.f,0.f,1.f };
+        if (m_ColorTime > 0.2f)
+        {
+            m_bInteractive = true;
+            m_ColorTime = 0.f;
+            m_bColor = false;
+        };
+    }
+    else
+        m_vColor = { 1.f,1.f,1.f,1.f };
+    
 }
 
 void CInteractiveUI::Late_Update(_float fTimeDelta)
@@ -89,24 +103,21 @@ HRESULT CInteractiveUI::Render()
     m_pVIBufferCom->Render();
 
 
-    m_pGameInstance->Render_Text(TEXT("Robo"), m_pText, _float2(g_iWinSizeX * 0.5f-40.f , g_iWinSizeY * 0.5f + 40.f), m_vColor, 0.4f);
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_pText, _float2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f-20.f ), m_vColor, 0.4f);
 
     return S_OK;
 }
 
 _bool CInteractiveUI::Get_Interactive()
 {
-    return m_bInteractive[m_iInteractiveType]; 
+    return m_bInteractive; 
 }
 
-_int CInteractiveUI::Get_Type()
-{
-    return m_iInteractiveType; 
-}
+
 
 void CInteractiveUI::Set_Interactive(_bool Interactive)
 {
-    m_bInteractive[m_iInteractiveType] = Interactive;
+    m_bInteractive = Interactive;
 }
 
 HRESULT CInteractiveUI::Add_Components()

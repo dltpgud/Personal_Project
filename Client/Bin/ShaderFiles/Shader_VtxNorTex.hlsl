@@ -14,18 +14,9 @@ float4 g_vMtrlAmbient = float4(0.4f, 0.4f, 0.4f, 1.f);
 float4 g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
 float4 g_vCamPosition;
+float g_TimeSum; 
+float2 g_ScrollSpeed;
 
-sampler LinearSampler = sampler_state
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = WRAP;
-    AddressV = WRAP;
-};
-
-sampler PointSampler = sampler_state
-{
-	filter = MIN_MAG_MIP_POINT;
-};
 
 struct VS_IN
 {
@@ -101,6 +92,36 @@ PS_OUT PS_MAIN(PS_IN In)
 	return Out;
 }
 
+
+PS_OUT PS_Fire(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+    float2 uvOffset = g_TimeSum;
+    
+    float2 movedTexCoord = In.vTexcoord + uvOffset;
+    
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord).r;
+	
+    float4 vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
+
+    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal)); 
+    float4 vLook = In.vWorldPos - g_vCamPosition; 
+
+    float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f); 
+	
+    float3 colorStart = float3(1.f, 0.f, 0.f); // 빨강
+    float3 colorEnd = float3(1.f,1.0, 0.0); // 노랑
+	
+    float3 color = lerp(colorStart, colorEnd, vMtrlDiffuse);
+    
+    
+    Out.vColor = (g_vLightDiffuse * float4(color, 1.0)) * saturate(vShade) +
+		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
+/*최종 픽셀 색은 디퓨즈에 법선을 이용한 환경광을 곱하고 스펙큘러들을 곱해서 최종 픽셀 색을 정한다-*/
+	
+    return Out;
+}
 technique11 DefaultTechnique
 {
 	pass DefaultPass
@@ -112,4 +133,14 @@ technique11 DefaultTechnique
 		VertexShader = compile vs_5_0 VS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN();
 	}
+
+    pass DefaultPass2
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_Fire();
+    }
 }

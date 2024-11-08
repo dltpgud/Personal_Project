@@ -2,7 +2,7 @@
 #include "JetFly.h"
 #include "GameInstance.h"
 #include "Body_JetFly.h"
-
+#include "Bullet.h"
 CBody_JetFly::CBody_JetFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -30,6 +30,8 @@ HRESULT CBody_JetFly::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
     m_fPlayAniTime = 0.5f;
+
+    m_pFindBonMatrix = Get_SocketMatrix("Canon_Scale");
     return S_OK;
 }
 
@@ -52,27 +54,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CJetFly::ST_BarrelRoll_Left && m_iCurMotion != CJetFly::ST_BarrelRoll_Left)
-    {
-        m_iCurMotion = CJetFly::ST_BarrelRoll_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CJetFly::ST_BarrelRoll_Right && m_iCurMotion != CJetFly::ST_BarrelRoll_Right)
-    {
-        m_iCurMotion = CJetFly::ST_BarrelRoll_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CJetFly::ST_Hit_Back && m_iCurMotion != CJetFly::ST_Hit_Back)
-    {
-        m_iCurMotion = CJetFly::ST_Hit_Back;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CJetFly::ST_Hit_Front && m_iCurMotion != CJetFly::ST_Hit_Front)
     {
         m_iCurMotion = CJetFly::ST_Hit_Front;
@@ -80,26 +62,14 @@ void CBody_JetFly::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-    if (*m_pParentState == CJetFly::ST_Hit_Left && m_iCurMotion != CJetFly::ST_Hit_Left)
-    {
-        m_iCurMotion = CJetFly::ST_Hit_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CJetFly::ST_Hit_Right && m_iCurMotion != CJetFly::ST_Hit_Right)
-    {
-        m_iCurMotion = CJetFly::ST_Hit_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CJetFly::ST_Shoot && m_iCurMotion != CJetFly::ST_Shoot)
     {
+        Make_Bullet();
         m_iCurMotion = CJetFly::ST_Shoot;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
-        bLoop = true;
+        bLoop = false;
     }
     if (*m_pParentState == CJetFly::ST_Sragger && m_iCurMotion != CJetFly::ST_Sragger)
     {
@@ -124,22 +94,6 @@ void CBody_JetFly::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CJetFly::ST_Walk_Left && m_iCurMotion != CJetFly::ST_Walk_Left)
-    {
-        m_iCurMotion = CJetFly::ST_Walk_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CJetFly::ST_Walk_Right && m_iCurMotion != CJetFly::ST_Walk_Right)
-    {
-        m_iCurMotion = CJetFly::ST_Walk_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-
-
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
@@ -151,7 +105,6 @@ void CBody_JetFly::Update(_float fTimeDelta)
         m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
         m_RimDesc.iPower = 1;
     }
-
 
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
@@ -207,6 +160,27 @@ HRESULT CBody_JetFly::Render()
     return S_OK;
 }
 
+void CBody_JetFly::Make_Bullet()
+{
+    _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
+
+    _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+
+    _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
+        - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    CBullet::CBULLET_DESC Desc{};
+    Desc.fSpeedPerSec = 20.f;
+    Desc.pTagetPos = Dir;
+    Desc.vPos = vHPos;
+    Desc.Damage = &m_pDamage;
+    Desc.iWeaponType = CBullet::MONSTER_BULLET:: TYPE_JETFLY;
+    Desc.LifTime = 1.f;
+    CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
+    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+    m_pGameInstance->Add_MonsterBullet(m_pGameInstance->Get_iCurrentLevel(), pGameObject);
+}
+
 HRESULT CBody_JetFly::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
@@ -214,7 +188,7 @@ HRESULT CBody_JetFly::Add_Components()
         return E_FAIL;
 
     /* For.Com_Model */
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto_Component_JetFly_Model"), TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_JetFly_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 

@@ -2,7 +2,7 @@
 #include "BoomBot.h"
 #include "GameInstance.h"
 #include "Body_BoomBot.h"
-
+#include "Bullet.h"
 CBody_BoomBot::CBody_BoomBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -23,6 +23,7 @@ HRESULT CBody_BoomBot::Initialize(void* pArg)
 
     m_pParentState = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
+    m_Fall_Y = pDesc->Fall_Y;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
@@ -30,6 +31,8 @@ HRESULT CBody_BoomBot::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
    m_fPlayAniTime = 0.5f;
+
+   m_pFindBonMatrix = Get_SocketMatrix("Canon_Scale");
     return S_OK;
 }
 
@@ -51,69 +54,7 @@ void CBody_BoomBot::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-    if (*m_pParentState == CBoomBot::ST_Aim_Down_Left&& m_iCurMotion != CBoomBot::ST_Aim_Down_Left)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Down_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Down_Right && m_iCurMotion != CBoomBot::ST_Aim_Down_Right)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Down_Right; 
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Left&& m_iCurMotion != CBoomBot::ST_Aim_Left)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Middle && m_iCurMotion != CBoomBot::ST_Aim_Middle)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Middle;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Right && m_iCurMotion != CBoomBot::ST_Aim_Right)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Top && m_iCurMotion != CBoomBot::ST_Aim_Top)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Top;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Top_Left && m_iCurMotion != CBoomBot::ST_Aim_Top_Left)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Top_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Aim_Top_Right&& m_iCurMotion != CBoomBot::ST_Aim_Top_Right)
-    {
-        m_iCurMotion = CBoomBot::ST_Aim_Top_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Hit_Back && m_iCurMotion != CBoomBot::ST_Hit_Back)
-    {
-        m_iCurMotion = CBoomBot::ST_Hit_Back;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CBoomBot::ST_Hit_Front && m_iCurMotion != CBoomBot::ST_Hit_Front)
     {
         m_iCurMotion = CBoomBot::ST_Hit_Front;
@@ -121,22 +62,7 @@ void CBody_BoomBot::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-    
 
-    if (*m_pParentState == CBoomBot::ST_Hit_Left && m_iCurMotion != CBoomBot::ST_Hit_Left)
-    {
-        m_iCurMotion = CBoomBot::ST_Hit_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Hit_Right && m_iCurMotion != CBoomBot::ST_Hit_Right)
-    {
-        m_iCurMotion = CBoomBot::ST_Hit_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
     if (*m_pParentState == CBoomBot::ST_Idle && m_iCurMotion != CBoomBot::ST_Idle)
     {
         m_iCurMotion = CBoomBot::ST_Idle;
@@ -144,78 +70,15 @@ void CBody_BoomBot::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = true;
     }
-    if (*m_pParentState == CBoomBot::ST_PreShoot && m_iCurMotion != CBoomBot::ST_PreShoot)
-    {
-        m_iCurMotion = CBoomBot::ST_PreShoot;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Run_Back && m_iCurMotion != CBoomBot::ST_Run_Back)
-    {
-        m_iCurMotion = CBoomBot::ST_Run_Back;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Run_Front && m_iCurMotion != CBoomBot::ST_Run_Front)
-    {
-        m_iCurMotion = CBoomBot::ST_Run_Front;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Run_Left && m_iCurMotion != CBoomBot::ST_Run_Left)
-    {
-        m_iCurMotion = CBoomBot::ST_Run_Left;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Run_Left_Back && m_iCurMotion != CBoomBot::ST_Run_Left_Back)
-    {
-        m_iCurMotion = CBoomBot::ST_Run_Left_Back;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Run_Right && m_iCurMotion != CBoomBot::ST_Run_Right)
-    {
-        m_iCurMotion = CBoomBot::ST_Run_Right;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CBoomBot::ST_Run_Right_Back && m_iCurMotion != CBoomBot::ST_Run_Right_Back)
-    {
-        m_iCurMotion = CBoomBot::ST_Run_Right_Back;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
+
     if (*m_pParentState == CBoomBot::ST_Shoot && m_iCurMotion != CBoomBot::ST_Shoot)
     {
+        Make_Bullet();
         m_iCurMotion = CBoomBot::ST_Shoot;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = false;
     }
-    if (*m_pParentState == CBoomBot::ST_Stun_Loop && m_iCurMotion != CBoomBot::ST_Stun_Loop)
-    {
-        m_iCurMotion = CBoomBot::ST_Stun_Loop;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    if (*m_pParentState == CBoomBot::ST_Stun_Start && m_iCurMotion != CBoomBot::ST_Stun_Start)
-    {
-        m_iCurMotion = CBoomBot::ST_Stun_Start;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-
-
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
@@ -235,17 +98,10 @@ void CBody_BoomBot::Update(_float fTimeDelta)
     if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
         m_bFinishAni = true;
-        m_pModelCom->Set_Animation(m_iCurMotion, true);
-
-        if (m_iCurMotion == CBoomBot::ST_Shoot)
-            m_bHitAttackMotion = false;
+        m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
     else
-    {
-        if (m_iCurMotion == CBoomBot::ST_Hit_Front)
-        {
-            m_bHitAttackMotion = true;
-        }
+    { 
         m_bFinishAni = false;
         if (m_iCurMotion == CBoomBot::ST_Aim_Down)
         m_pModelCom->Set_Animation(m_iCurMotion, false);
@@ -289,6 +145,29 @@ HRESULT CBody_BoomBot::Render()
     return S_OK;
 }
 
+void CBody_BoomBot::Make_Bullet()
+{
+    _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
+
+    _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+
+    _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
+        - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+
+    CBullet::CBULLET_DESC Desc{};
+    Desc.fSpeedPerSec = 20.f;
+    Desc.pTagetPos = Dir;
+    Desc.vPos = vHPos;
+    Desc.Damage = &m_pDamage;
+    Desc.Fall_Y = m_Fall_Y;
+    Desc.iWeaponType = CBullet::MONSTER_BULLET::TYPE_BOOMBOT;
+    Desc.LifTime = 1.f;
+    Desc.bSturn = true;
+    CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
+    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+    m_pGameInstance->Add_MonsterBullet(m_pGameInstance->Get_iCurrentLevel(), pGameObject);
+}
+
 HRESULT CBody_BoomBot::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
@@ -296,7 +175,7 @@ HRESULT CBody_BoomBot::Add_Components()
         return E_FAIL;
 
     /* For.Com_Model */
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Proto_Component_BoomBot_Model"), TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_BoomBot_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 

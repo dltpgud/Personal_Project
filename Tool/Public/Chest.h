@@ -30,13 +30,13 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
 
-	virtual void Set_Model(const _wstring& protoModel) override;
+	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
 	virtual CModel* Get_Model() override { return m_pModelCom; }
 	virtual _wstring Get_ComPonentName() override { return m_wModel; }
 	virtual _tchar* Get_ProtoName() override;
 	virtual void Set_Buffer(_uint x, _uint y) override { m_WeaPon = y; };
 
-	virtual _uint  Get_Scalra()override {return m_WeaPon;}
+	virtual _uint  Get_Scalra()override {return  m_WeaPon;}
 	virtual _float check_BoxDist(_vector RayPos, _vector RayDir)override ;
 private:
 

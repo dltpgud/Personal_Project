@@ -51,6 +51,8 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
+
     if (m_iState != ST_Hit_Front)
         m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
 
@@ -77,12 +79,14 @@ void CBoomBot::Update(_float fTimeDelta)
             m_iState = ST_Idle;
     }
 
-   if(m_iState != ST_Hit_Front && m_iState != ST_Aim_Down) 
-        NON_intersect(fTimeDelta);
 
-
-
-
+    if (2 != m_pNavigationCom->Get_CurrentCell_Type())
+    {
+        if (m_iState != ST_Hit_Front && m_iState != ST_Aim_Down)
+            NON_intersect(fTimeDelta);
+    }
+    else
+        m_pTransformCom->Go_Backward(fTimeDelta, m_pNavigationCom);
     __super::Update(fTimeDelta);
 }
 
@@ -97,7 +101,7 @@ HRESULT CBoomBot::Render()
     return S_OK; 
 }
 
-void CBoomBot::HIt_Routine(_float fTimeDelta)
+void CBoomBot::HIt_Routine()
 {
     m_iState = ST_Hit_Front;
 
@@ -107,10 +111,9 @@ void CBoomBot::HIt_Routine(_float fTimeDelta)
     m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CBoomBot::Dead_Routine(_float fTimeDelta)
+void CBoomBot::Dead_Routine()
 {
     m_iState = ST_Aim_Down;
-
 
     if (m_pPartHP != nullptr) {
         Erase_PartObj(PART_HP);
@@ -130,35 +133,25 @@ void CBoomBot::NON_intersect(_float fTimedelta)
 
    
 
-    if (20.f > fLength)
+    if (20.f > fLength && 10.f < fLength)
     {
+        _float3 fDir{};
+        XMStoreFloat3(&fDir, vDir);
 
-        if (15.f < fLength)
-        {
-            _float3 fDir{};
-            XMStoreFloat3(&fDir, vDir);
-
-            m_iState = ST_Run_Front;
-           m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
-       
-        }
-        if (15.f > fLength)
-        {
-            m_iState = ST_Shoot;
-            m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
-        }
+        m_iState = ST_Run_Front;
+        m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);  
+    }
+    if (10.f >= fLength)
+        m_iState = ST_Idle;
+    if (8.f > fLength)
+    {
+        m_iState = ST_Shoot;
+        m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
     }
     else {
             m_iState = ST_Idle;
     }
 
-
-
-    if (true == static_cast <CBody_BoomBot*>(m_PartObjects[PART_BODY])->Get_HitAttackMotion())
-    {
-        m_iState = ST_Shoot;
-
-    }
 }
 
 HRESULT CBoomBot::Add_Components()
@@ -177,7 +170,7 @@ HRESULT CBoomBot::Add_Components()
 
     CNavigation::NAVIGATION_DESC		Desc{};
 
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, TEXT("Prototype_Component_Navigation"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
         TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
         return E_FAIL;
 
@@ -193,6 +186,7 @@ HRESULT CBoomBot::Add_PartObjects()
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
     BodyDesc.pRimState = &m_iRim;
+    BodyDesc.Fall_Y = &m_fY;
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_BoomBot"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 

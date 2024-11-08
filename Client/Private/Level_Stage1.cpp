@@ -16,6 +16,7 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
+
 	if (FAILED(Ready_Layer_Player(CGameObject::ACTOR)))
 		return E_FAIL;
 
@@ -25,15 +26,15 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Layer_Camera(CGameObject::CAMERA)))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
+ 	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
 		return E_FAIL;
-
 
 	if (FAILED(Ready_Layer_NPC(CGameObject::NPC)))
 		return E_FAIL;
 
 	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
 		return E_FAIL;
+
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
@@ -49,7 +50,17 @@ void CLevel_Stage1::Update(_float fTimeDelta)
 		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));
 	}
 
+	if (m_pGameInstance->IsOpenStage())
+	{
+		m_pGameInstance->Set_Open_Bool(false);
+		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));	
+
+
+	}
+
 	__super::Update(fTimeDelta);
+
+
 }
 
 HRESULT CLevel_Stage1::Render()
@@ -79,6 +90,9 @@ HRESULT CLevel_Stage1::Ready_Layer_Monster(const _uint& pLayerTag)
 	  L"../Bin/Data/Monster/Stage1_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOOM_BOT)))
 	return   E_FAIL;
 
+  if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_MecanoBot",
+	  L"../Bin/Data/Monster/Stage1_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_MECANOBOT)))
+	  return   E_FAIL;
 	return S_OK;
 }
 
@@ -86,10 +100,9 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _uint& pLayerTag)
 {
 	CCamera_Free::CAMERA_FREE_DESC			Desc{};
 
-_vector vEye = {static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_41,
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_42,
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_43,
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone()->_44};
+  const _float4x4* fcamBone = 	static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone();
+
+ _vector vEye = {fcamBone->_41, fcamBone->_42, fcamBone->_43, fcamBone->_44};
 
  _vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
 
@@ -126,6 +139,7 @@ HRESULT CLevel_Stage1::Ready_Layer_UI(const _uint& pLayerTag)
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false)))
 		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -206,7 +220,7 @@ HRESULT CLevel_Stage1::Ready_Layer_Player(const _uint& pLayerTag)
 	m_pGameInstance->Set_Player(m_pGameInstance->Recent_GameObject(LEVEL_STATIC, pLayerTag));
 
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(25.f, 2.f, -12.f, 1.f));
-
+	m_pGameInstance->Get_Player()->Get_Transform()->Rotation(0.f, 0.4f, 0.f);
 	return S_OK;
 }
 
