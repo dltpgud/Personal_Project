@@ -10,18 +10,6 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float g_hp, g_hp_pluse;
 texture2D g_Texture, g_Texture0, g_Texture1, g_Texture2;
 
-sampler LinearSampler = sampler_state  /*선언과 초기화를 동시에 한 것*/
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = WRAP;
-    AddressV = WRAP;
-};
-
-sampler PointSampler = sampler_state
-{
-    Filter = MIN_MAG_MIP_POINT;
-};
-
 struct VS_IN    /*입력 매개변수*/
 {
     float3 vPosition : POSITION;

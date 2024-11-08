@@ -71,9 +71,9 @@ HRESULT CWall::Render()
     return S_OK;
 }
 
-void CWall::Set_Model(const _wstring& protoModel)
+void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, protoModel, TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
     {
         MSG_BOX("Set_Model failed");

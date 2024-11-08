@@ -176,6 +176,7 @@
     <ClInclude Include="..\Public\Body_GunPawn.h" />
     <ClInclude Include="..\Public\Body_HealthBot.h" />
     <ClInclude Include="..\Public\Body_JetFly.h" />
+    <ClInclude Include="..\Public\Body_MecanoBot.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
     <ClInclude Include="..\Public\Bullet.h" />
@@ -190,6 +191,8 @@
     <ClInclude Include="..\Public\InteractiveUI.h" />
     <ClInclude Include="..\Public\JetFly.h" />
     <ClInclude Include="..\Public\Level_Stage2.h" />
+    <ClInclude Include="..\Public\Level_StageBoss.h" />
+    <ClInclude Include="..\Public\MecanoBot.h" />
     <ClInclude Include="..\Public\Menu.h" />
     <ClInclude Include="..\Public\Client_Defines.h" />
     <ClInclude Include="..\Public\Level_Stage1.h">
@@ -231,6 +234,7 @@
     <ClCompile Include="..\Private\Body_GunPawn.cpp" />
     <ClCompile Include="..\Private\Body_HealthBot.cpp" />
     <ClCompile Include="..\Private\Body_JetFly.cpp" />
+    <ClCompile Include="..\Private\Body_MecanoBot.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
     <ClCompile Include="..\Private\Bullet.cpp" />
@@ -243,6 +247,8 @@
     <ClCompile Include="..\Private\InteractiveUI.cpp" />
     <ClCompile Include="..\Private\JetFly.cpp" />
     <ClCompile Include="..\Private\Level_Stage2.cpp" />
+    <ClCompile Include="..\Private\Level_StageBoss.cpp" />
+    <ClCompile Include="..\Private\MecanoBot.cpp" />
     <ClCompile Include="..\Private\Menu.cpp" />
     <ClCompile Include="..\Private\Level_Stage1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -291,6 +297,8 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxCube.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxNorTex.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticlePoint.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticleRect.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </FxCompile>

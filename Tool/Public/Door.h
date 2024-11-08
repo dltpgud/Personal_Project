@@ -30,11 +30,15 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
 
-	virtual void Set_Model(const _wstring& protoModel) override;
+	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
 	virtual CModel* Get_Model() override { return m_pModelCom; }
 	virtual _wstring Get_ComPonentName() override { return m_wModel; }
 	virtual _tchar* Get_ProtoName() override;
 	virtual _float check_BoxDist(_vector RayPos, _vector RayDir)override;
+
+	virtual void Set_Buffer(_uint x, _uint y) override { m_DoorType = y; };
+
+	virtual _uint  Get_Scalra()override { return  m_DoorType; }
 private:
 
 	CShader*					m_pShaderCom = { nullptr };
@@ -45,6 +49,7 @@ private:
 	_wstring m_wModel;
 	_tchar* m_Proto;
 	_int m_istate;
+	_uint m_DoorType;
 public:
 	static CDoor* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

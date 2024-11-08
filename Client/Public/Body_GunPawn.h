@@ -32,10 +32,14 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 	_bool Get_bRun() { return m_bRUN; }
+
+	HRESULT Make_Bullet();
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
 	_bool m_bRUN = false;
+	_float m_pDamage = { 7.f };
+	_float m_FireTime{ 0.f };
 public:
 	static CBody_GunPawn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

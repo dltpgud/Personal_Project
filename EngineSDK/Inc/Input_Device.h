@@ -44,8 +44,9 @@ public:
 		return *(((_long*)&m_tMouseState) + eMouseState);	
 	}
 	
+	void Mouse_Fix();
 public:
-	HRESULT Initialize(HINSTANCE hInst, HWND hWnd);
+	HRESULT Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
 	void	Update_InputDev(void);
 private:
 	LPDIRECTINPUT8			m_pInputSDK = { nullptr };
@@ -59,9 +60,12 @@ private:
 	_byte					m_PreMouseState[3]{};
 	_byte					m_PreKeyState[256]{};
 	DIMOUSESTATE			m_tMouseState = {};
-
+	HWND                    g_Hwnd = {};
+	_uint					g_iWinSizeX{};
+	_uint					g_iWinSizeY{};
+	_bool					m_bturn = { false };
 public:
-	static CInput_Device* Create(HINSTANCE hInst, HWND hWnd);
+	static CInput_Device* Create(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
 	virtual void	Free(void);
 
 };

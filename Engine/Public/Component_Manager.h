@@ -38,14 +38,15 @@ public:
 
     map<const _wstring, class CComponent*> Get_Com_proto_vec(_uint iLevelindex);
 
+    /*키 값이 중복 되었는지 확인하는 함수, 맴버함 수 Add_Prototype 안에서 호출해 확인하는 용도이다 */
+    class CComponent* Find_Prototype(_uint iLevelIndex, const _wstring& strPrototypeTag);
 private:
     _uint m_iNumLevels = {0};
     map<const _wstring, class CComponent*>* m_pPrototypes = {nullptr};
     typedef map<const _wstring, class CComponent*> PROTOTYPES;
 
 private:
-    /*키 값이 중복 되었는지 확인하는 함수, 맴버함 수 Add_Prototype 안에서 호출해 확인하는 용도이다 */
-    class CComponent* Find_Prototype(_uint iLevelIndex, const _wstring& strPrototypeTag);
+
 
 public:
     static CComponent_Manager* Create(_uint iNumLevels);

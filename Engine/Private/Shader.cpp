@@ -155,6 +155,8 @@ HRESULT CShader::Bind_Float(const _char* pConstantName, const _float pfloat)
     return pMatrixVariable->SetFloat(pfloat);
 }
 
+
+
 HRESULT CShader::Bind_Int(const _char* pConstantName, const _int pint)
 {
     if (nullptr == m_pEffect)

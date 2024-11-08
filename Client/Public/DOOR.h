@@ -13,7 +13,9 @@ class CInteractiveUI;
 class CPlayer;
 class CDOOR final : public CGameObject
 {
-	enum State {ClOSE, IDL, OPEN };
+	enum State {
+	OPEN, ClOSE
+	};
 	enum State2 { OPEN2, IDLE,ClOSE2};
 private:
 	CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -31,8 +33,9 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
-	virtual void Set_Model(const _wstring& protoModel) override;
+	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
 	virtual CModel* Get_Model() override { return m_pModelCom; }
+	virtual void Set_Buffer(_uint x, _uint y)override;
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CModel*						m_pModelCom = { nullptr };
@@ -48,6 +51,9 @@ private:
 	_bool m_bOpen = { false };
 	_bool Go_Move = { false };
 	_uint m_iState = { 0 }; // 현재 문 상태 체크
+	_bool m_bInterect = false;
+	_uint m_DoorType{};
+	
 public:
 	static CDOOR* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

@@ -19,7 +19,7 @@ HRESULT CBody_Player::Initialize_Prototype()
 
 HRESULT CBody_Player::Initialize(void* pArg)
 {
-	
+
 	BODY_PLAYER_DESC* pDesc = static_cast<BODY_PLAYER_DESC*>(pArg);
 
 	m_pParentState = pDesc->pParentState;
@@ -30,8 +30,8 @@ HRESULT CBody_Player::Initialize(void* pArg)
 
 	if (FAILED(Add_Components()))
 		return E_FAIL;
-
-	 return S_OK;
+	m_fPlayAniTime = 1.f;
+	return S_OK;
 }
 
 _int CBody_Player::Priority_Update(_float fTimeDelta)
@@ -83,18 +83,15 @@ HRESULT CBody_Player::Render()
 void CBody_Player::Type0_Update(_float fTimeDelta)
 {
 	_bool bMotionChange = { false }, bLoop = { false };
-	
+
 
 
 	if (*m_pParentState == CPlayer::STATE_SPRINT && m_iCurMotion != CPlayer::STATE_SPRINT)
 	{
 		m_iCurMotion = CPlayer::STATE_SPRINT;
-		m_fPlayAniTime = 0.5f;
 		bMotionChange = true;
 		bLoop = true;
 	}
-	else
-		m_fPlayAniTime = 1.f;
 	if (*m_pParentState == CPlayer::STATE_JUMP_RUN_LOOP && m_iCurMotion != CPlayer::STATE_JUMP_RUN_LOOP)
 	{
 		m_iCurMotion = CPlayer::STATE_JUMP_RUN_LOOP;
@@ -143,21 +140,25 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 	}
 	if (*m_pParentState == CPlayer::STATE_HENDGUN_SHOOT && m_iCurMotion != CPlayer::STATE_HENDGUN_SHOOT)
 	{
-	 	m_iCurMotion = CPlayer::STATE_HENDGUN_SHOOT;
-		bMotionChange = true;
-		bLoop = false;
+			m_iCurMotion = CPlayer::STATE_HENDGUN_SHOOT;
+			bMotionChange = true;
+			bLoop = false;
+	
 	}
 
 	if (bMotionChange)
 		m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
-	if (true == m_pModelCom->Play_Animation(fTimeDelta ))
+	if (true == m_pModelCom->Play_Animation(fTimeDelta))
 	{
+		m_bFinishAni = true;
 		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_HitLock(false);
 		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE);
 		m_iCurMotion = CPlayer::STATE_IDLE;
 		m_pModelCom->Set_Animation(m_iCurMotion, true);
-	}
+	}else
+		m_bFinishAni = false;
+
 }
 
 void CBody_Player::Type2_Update(_float fTimeDelta)
@@ -166,6 +167,7 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_JUMP_RUN_HIGH2 && m_iCurMotion != CPlayer::STATE_JUMP_RUN_HIGH2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_JUMP_RUN_HIGH2;
 		bMotionChange = true;
 		bLoop = true;
@@ -173,18 +175,21 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_SPRINT2 && m_iCurMotion != CPlayer::STATE_SPRINT2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_SPRINT2;
 		bMotionChange = true;
 		bLoop = true;
 	}
 	if (*m_pParentState == CPlayer::STATE_JUMP_RUN_LOOP2 && m_iCurMotion != CPlayer::STATE_JUMP_RUN_LOOP2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_JUMP_RUN_LOOP2;
 		bMotionChange = true;
 		bLoop = true;
 	}
 	if (*m_pParentState == CPlayer::STATE_RUN2 && m_iCurMotion != CPlayer::STATE_RUN2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_RUN2;
 		bMotionChange = true;
 		bLoop = true;
@@ -192,13 +197,15 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_IDLE2 && m_iCurMotion != CPlayer::STATE_IDLE2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_IDLE2;
 		bMotionChange = true;
 		bLoop = true;
 	}
 
-	if (*m_pParentState == CPlayer::STATE_SWITCHIN2&& m_iCurMotion != CPlayer::STATE_SWITCHIN2)
+	if (*m_pParentState == CPlayer::STATE_SWITCHIN2 && m_iCurMotion != CPlayer::STATE_SWITCHIN2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_SWITCHIN2;
 		bMotionChange = true;
 		bLoop = false;
@@ -207,6 +214,7 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_STUN2 && m_iCurMotion != CPlayer::STATE_STUN2)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_STUN2;
 		bMotionChange = true;
 		bLoop = false;
@@ -214,12 +222,14 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion != CPlayer::STATE_ASSAULTRIFlLE_RELOAD)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_ASSAULTRIFlLE_RELOAD;
 		bMotionChange = true;
 		bLoop = false;
 	}
 	if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_SHOOT && m_iCurMotion != CPlayer::STATE_ASSAULTRIFlLE_SHOOT)
 	{
+		m_fPlayAniTime = 1.9f;
 		m_iCurMotion = CPlayer::STATE_ASSAULTRIFlLE_SHOOT;
 		bMotionChange = true;
 		bLoop = false;
@@ -227,47 +237,54 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD && m_iCurMotion != CPlayer::STATE_MissileGatling_RELOAD)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_MissileGatling_RELOAD;
 		bMotionChange = true;
 		bLoop = false;
 	}
 	if (*m_pParentState == CPlayer::STATE_MissileGatling_SHOOT && m_iCurMotion != CPlayer::STATE_MissileGatling_SHOOT)
 	{
+		m_fPlayAniTime = 1.9f;
 		m_iCurMotion = CPlayer::STATE_MissileGatling_SHOOT;
 		bMotionChange = true;
 		bLoop = false;
 	}
 	if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_HENDPOSE && m_iCurMotion != CPlayer::STATE_HEAVYCROSSBOW_HENDPOSE)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_HEAVYCROSSBOW_HENDPOSE;
 		bMotionChange = true;
 		bLoop = false;
 	}
 	if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD && m_iCurMotion != CPlayer::STATE_HEAVYCROSSBOW_RELOAD)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_HEAVYCROSSBOW_RELOAD;
-	 	bMotionChange = true;
-	 	bLoop = false;
+		bMotionChange = true;
+		bLoop = false;
 	}
 	if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_SHOOT && m_iCurMotion != CPlayer::STATE_HEAVYCROSSBOW_SHOOT)
 	{
+		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_HEAVYCROSSBOW_SHOOT;
 		bMotionChange = true;
 		bLoop = false;
 	}
-	
+
 
 	if (bMotionChange)
- 		m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
+		m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
-	if (true == m_pModelCom->Play_Animation(fTimeDelta))
+	if (true == m_pModelCom->Play_Animation(fTimeDelta* m_fPlayAniTime ))
 	{
-	    	static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_HitLock(false);
-			static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
-			m_iCurMotion = CPlayer::STATE_IDLE2;
-		
+		m_bFinishAni = true;
+		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_HitLock(false);
+		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
+		m_iCurMotion = CPlayer::STATE_IDLE2;
+
 		m_pModelCom->Set_Animation(m_iCurMotion, true);
-	}
+	}else
+		m_bFinishAni = false;
 
 
 }
@@ -330,7 +347,7 @@ CBody_Player* CBody_Player::Create(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	return pInstance;
 }
- 
+
 CGameObject* CBody_Player::Clone(void* pArg)
 {
 	CBody_Player* pInstance = new CBody_Player(*this);

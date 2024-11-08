@@ -112,17 +112,8 @@
     <Filter Include="01.Utility\04.Component\Model\Channel">
       <UniqueIdentifier>{af517dd5-d5f0-431c-8b7f-a0adcfcba9cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\04.Component\Navigation">
-      <UniqueIdentifier>{12bbd5b6-f40a-450c-81c1-348cf97e5121}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Navigation\Cell">
-      <UniqueIdentifier>{602935b4-d1f2-47f8-af72-53bdb3ce79be}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Utility\04.Component\VIBuffer\Cell">
       <UniqueIdentifier>{3ad739b4-759a-40df-acbd-116449fa956f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="08.ShaderFiles">
-      <UniqueIdentifier>{c8765a11-7d92-4e54-914a-be038a5d86e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="01.Utility\04.Component\Collider">
       <UniqueIdentifier>{967fcf9d-7ccd-4687-9fec-bcb014dcddf4}</UniqueIdentifier>
@@ -168,6 +159,30 @@
     </Filter>
     <Filter Include="01.Utility\02.GameObjects\Actor\ContainerObject\PartObject">
       <UniqueIdentifier>{851fb8ea-f8b4-457d-b10d-a9a2e92539bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\VIBuffer\Instancing">
+      <UniqueIdentifier>{faa420c1-ef98-4505-a923-5b849aa4711c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\VIBuffer\Instancing\Point">
+      <UniqueIdentifier>{eeafeb07-28c6-422a-9feb-a15c7c31f6e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\VIBuffer\Instancing\Rect">
+      <UniqueIdentifier>{64885f50-435d-488c-b3cb-ce1da897bbda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Navigation">
+      <UniqueIdentifier>{12bbd5b6-f40a-450c-81c1-348cf97e5121}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Navigation\Cell">
+      <UniqueIdentifier>{602935b4-d1f2-47f8-af72-53bdb3ce79be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\08.RenderTaget">
+      <UniqueIdentifier>{9807bca7-dc5d-482f-850c-c42bb549512b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\08.RenderTaget\Manager">
+      <UniqueIdentifier>{d5d6c114-0591-4de9-a405-3a7696e38c79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.ShaderFiles">
+      <UniqueIdentifier>{c8765a11-7d92-4e54-914a-be038a5d86e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -336,6 +351,21 @@
     <ClInclude Include="..\Public\CustomFont.h">
       <Filter>00.System\Fonts</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Instancing.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Instancing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Particle_Point.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Instancing\Point</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Particle_Rect.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Instancing\Rect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RenderTarget.h">
+      <Filter>01.Utility\08.RenderTaget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Target_Manager.h">
+      <Filter>01.Utility\08.RenderTaget\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -491,15 +521,33 @@
     <ClCompile Include="..\Private\Font_Manager.cpp">
       <Filter>00.System\Fonts\Manager</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Instancing.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Instancing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Particle_Rect.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Instancing\Rect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Particle_Point.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Instancing\Point</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RenderTarget.cpp">
+      <Filter>01.Utility\08.RenderTaget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Target_Manager.cpp">
+      <Filter>01.Utility\08.RenderTaget\Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl">
-      <Filter>08.ShaderFiles</Filter>
+      <Filter>02.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_Deferred.hlsl">
+      <Filter>02.ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
-      <Filter>08.ShaderFiles</Filter>
+      <Filter>02.ShaderFiles</Filter>
     </None>
   </ItemGroup>
 </Project>

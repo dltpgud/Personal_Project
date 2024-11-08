@@ -11,6 +11,7 @@ HRESULT CPipeLine::Update()
         XMStoreFloat4x4(&m_TransMatrixInverse[i], XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_TransMatrix[i])));
 
     XMStoreFloat4(&m_vCamPosition, XMLoadFloat4x4(&m_TransMatrixInverse[D3DTS_VIEW]).r[3]);
+    XMStoreFloat4(&m_vCamLook, XMLoadFloat4x4(&m_TransMatrixInverse[D3DTS_VIEW]).r[2]);
     return S_OK;
 }
 

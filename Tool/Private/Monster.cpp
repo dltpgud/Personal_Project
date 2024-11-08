@@ -100,7 +100,7 @@ HRESULT CMonster::Render()
     return S_OK;
 }
 
-void CMonster::Set_Model(const _wstring& protoModel)
+void CMonster::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_wModel = protoModel;
     /* For.Com_Model */

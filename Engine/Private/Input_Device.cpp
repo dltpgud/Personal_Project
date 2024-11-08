@@ -5,7 +5,26 @@ Engine::CInput_Device::CInput_Device(void)
 
 }
 
-HRESULT Engine::CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd)
+void CInput_Device::Mouse_Fix()
+{
+
+	if (!m_bturn)
+	{
+		m_bturn = true;
+	}
+	else
+		m_bturn = false;
+
+	if (m_bturn == true) 
+	{
+		POINT ptMouse{ static_cast<LONG>(g_iWinSizeX) >> 1, static_cast<LONG>(g_iWinSizeY) >> 1 };
+
+		ClientToScreen(g_Hwnd, &ptMouse);
+		SetCursorPos(ptMouse.x, ptMouse.y);
+	}
+}
+
+HRESULT Engine::CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY)
 {
 
 	// DInput 컴객체를 생성하는 함수
@@ -44,7 +63,9 @@ HRESULT Engine::CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd)
 	// 장치에 대한 access 버전을 받아오는 함수
 	m_pMouse->Acquire();
 
-
+	g_Hwnd = hWnd;
+	g_iWinSizeX = iWinSizeX;
+	g_iWinSizeY = iWinSizeY;
 	return S_OK;
 }
 
@@ -58,11 +79,11 @@ void CInput_Device::Update_InputDev(void)
 }
 
 
-CInput_Device * CInput_Device::Create(HINSTANCE hInst, HWND hWnd)
+CInput_Device * CInput_Device::Create(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY)
 {
 	CInput_Device*		pInstance = new CInput_Device();
 
-	if (FAILED(pInstance->Initialize(hInst, hWnd)))
+	if (FAILED(pInstance->Initialize(hInst, hWnd, iWinSizeX, iWinSizeY)))
 	{
 		MSG_BOX("Failed to Created : CInput_Device");
 		Safe_Release(pInstance);

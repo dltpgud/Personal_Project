@@ -14,17 +14,7 @@ float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 float4			g_vCamPosition;
 
 
-sampler LinearSampler = sampler_state
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = WRAP;
-	AddressV = WRAP;
-};
 
-sampler PointSampler = sampler_state
-{
-	filter = MIN_MAG_MIP_POINT;
-};
 
 struct VS_IN
 {

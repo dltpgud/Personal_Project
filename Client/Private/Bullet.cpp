@@ -17,19 +17,33 @@ HRESULT CBullet::Initialize_Prototype()
 
 HRESULT CBullet::Initialize(void* pArg)
 {
-    if (pArg != nullptr) {
+    if (nullptr != pArg) {
         CBULLET_DESC* pDesc = static_cast<CBULLET_DESC*>(pArg);
         m_pTagetPos = pDesc->pTagetPos;
         m_vPos = pDesc->vPos;
         m_vPlayerAt = pDesc->vPlayerAt;
-    }
-    if (FAILED(__super::Initialize(pArg)))
-        return E_FAIL;
+        m_iWeaponType = pDesc->iWeaponType;
+        m_fFall_Y = pDesc->Fall_Y;
+        m_pDamage = pDesc->Damage;
+        m_fLifeTime = pDesc->LifTime;
+        m_DATA_TYPE = pDesc->bSturn;
+        if (FAILED(__super::Initialize(pDesc)))
+            return E_FAIL;
+    }else
+        if (FAILED(__super::Initialize(pArg)))
+            return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_vPos);
+
+    _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    m_vDir = XMVector3Normalize(Dir);
+
+
+    if (0.f == m_fLifeTime)
+        m_fLifeTime = 1.f;
     return S_OK;
 }
 
@@ -38,23 +52,50 @@ _int CBullet::Priority_Update(_float fTimeDelta)
     if (m_bDead)
     {
         return OBJ_DEAD;
-    }
+    }  
+    
+    m_fDeadTime += fTimeDelta;
 
-    if (true == XMVector3Equal(m_pTagetPos, XMVectorZero()))
+    if (m_fDeadTime > m_fLifeTime)
+             m_bDead = true;
+
+    _bool bJump{};
+    switch (m_iWeaponType)
     {
-       // m_pTransformCom->LookAt();
-        m_pTransformCom->GO_Dir(fTimeDelta, m_vPlayerAt);
+    case PLATER_BULLET ::TYPE_HENDGUN : 
+          m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
+    case PLATER_BULLET::TYPE_ASSAULTRIFLE:
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
+    case PLATER_BULLET::TYPE_MISSILEGATLING:
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
+    case PLATER_BULLET::TYPE_HEAVYCROSSBOW:
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
+    case MONSTER_BULLET::TYPE_GUNPAWN :
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
+    case MONSTER_BULLET::TYPE_BOOMBOT:
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+    ///    m_pTransformCom->Go_jump_Dir(fTimeDelta, m_vDir, *m_fFall_Y, &bJump);
+        break;
+
+    case MONSTER_BULLET::TYPE_JETFLY:
+         m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
+    case MONSTER_BULLET::TYPE_MECANOBOT:
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+        break;
+
     }
-    else 
-    {
-
-        m_pTransformCom->LookAt(m_pTagetPos);
-        m_pTransformCom->Go_Straight(fTimeDelta);
-    }
-
-
-
-
 
     return OBJ_NOEVENT;
 
@@ -79,9 +120,10 @@ HRESULT CBullet::Render()
     return S_OK;
 }
 
-
-
-
+_float CBullet::Get_Scalra_float()
+{
+    return *m_pDamage;
+}
 
 HRESULT CBullet::Add_Components()
 {
@@ -100,12 +142,7 @@ HRESULT CBullet::Add_Components()
     return S_OK;
 }
 
-HRESULT CBullet::Bind_ShaderResources()
-{
-    
 
-    return S_OK;
-}
 
 CBullet* CBullet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

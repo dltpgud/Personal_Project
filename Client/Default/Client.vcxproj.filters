@@ -127,11 +127,20 @@
     <Filter Include="02.GameObjects\03.Actor\NPC\HealthBot\Body">
       <UniqueIdentifier>{776463e0-3f2d-404e-b3a9-648d7cac8a22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet">
+      <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
+    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\MonsterHP">
       <UniqueIdentifier>{4933a1e9-3351-425e-acf7-f5b4ba58b32b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Player\Bullet">
-      <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\MecanoBot">
+      <UniqueIdentifier>{da0b2d90-f0fe-4c2e-8947-dc98d01f1481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\MecanoBot\Body">
+      <UniqueIdentifier>{3734b442-2bbf-4f17-8bf5-793f60674080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Level\01.GamePlay\StageBoss">
+      <UniqueIdentifier>{69b3a31f-376a-407e-a01a-91c101f2e151}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -253,10 +262,19 @@
       <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Bullet.h">
-      <Filter>02.GameObjects\03.Actor\Player\Bullet</Filter>
+      <Filter>02.GameObjects\03.Actor\Bullet</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_HealthBot.h">
       <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MecanoBot.h">
+      <Filter>02.GameObjects\03.Actor\Monster\MecanoBot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_MecanoBot.h">
+      <Filter>02.GameObjects\03.Actor\Monster\MecanoBot\Body</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_StageBoss.h">
+      <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -369,7 +387,16 @@
       <Filter>02.GameObjects\03.Actor\Monster\MonsterHP</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Bullet.cpp">
-      <Filter>02.GameObjects\03.Actor\Player\Bullet</Filter>
+      <Filter>02.GameObjects\03.Actor\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MecanoBot.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\MecanoBot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_MecanoBot.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\MecanoBot\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_StageBoss.cpp">
+      <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -402,6 +429,12 @@
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex_Inverse.hlsl">
+      <Filter>97.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticlePoint.hlsl">
+      <Filter>97.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticleRect.hlsl">
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

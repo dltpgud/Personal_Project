@@ -37,7 +37,6 @@ public: /* For.Graphic_Device */
 	HRESULT Render_Begin(_float4 Color);
 	HRESULT Render_End();
 
-
 public: /* For.Input_Device */
 	_byte	Get_DIKeyState(_ubyte byKeyID);
 	_byte	Get_DIMouseState(MOUSEKEYSTATE eMouse);
@@ -45,6 +44,8 @@ public: /* For.Input_Device */
 	_byte	Get_DIMouseDown(MOUSEKEYSTATE eMouse);
 	_byte   Get_DIKeyDown(_ubyte byKeyID);
 	_byte   Get_DIAnyKey();
+	void	MouseFix();
+
 public: /* for.Timer_Manager */
 	_float  Get_TimeDelta(const _wstring& strTimerTag);
 	HRESULT	Add_Timer(const _wstring& strTimerTag);
@@ -54,7 +55,9 @@ public: /* for.Timer_Manager */
 #endif
 public: /* for.Level_Manager */
 	HRESULT Open_Level(_uint iCurrentLevelID, class CLevel* pNewLevel);
-
+	_uint Get_iCurrentLevel();
+	_bool IsOpenStage();
+	void Set_Open_Bool(_bool NextStage);
 
 public: /* For.Object_Manager*/
 	HRESULT Add_Prototype(const _wstring& strPrototypeTag, class CGameObject* pPrototype);
@@ -73,6 +76,7 @@ public: /* For.Object_Manager*/
 
 public: /* For.Collider_Manager */
 	HRESULT Add_Monster(_uint iClearLevelID, class CGameObject* Monster);
+	HRESULT Add_MonsterBullet(_uint iClearLevelID, class CGameObject* MonsterBUllet);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
 	HRESULT Find_Cell(_uint Ilevel);
 
@@ -93,6 +97,7 @@ public: /* For.UI_Manager*/
 	HRESULT Add_Prototype_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, class CComponent* pPrototype);
 	class CComponent* Clone_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, void* pArg = nullptr);
 	map<const _wstring, class CComponent*> Get_Com_proto_vec(_uint iLevelindex);
+	CComponent* Find_Prototype(_uint iLevelIndex, const _wstring& strPrototypeTag);
 
 public: /* For.Sound*/
 	void	Play_Sound(_tchar* pSoundKey,CSound::CHANNELID eID, _float fVolume);
@@ -109,6 +114,7 @@ public: /* For.PipeLine */
 	const _float4x4* Get_TransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_TransformMatrix(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
+	const _float4* Get_CamLook();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 
 public: /* For.Light_Manager */
@@ -121,14 +127,28 @@ public: /* For.Calculator */
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
 	HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
-
+	_vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
 public: /* For.Font_Manager */
 	HRESULT Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath);
 	HRESULT Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale = 1.f, _float fRotation = 0.f, const _float2& vPivot = _float2(0.f, 0.f));
 
+
+public: /* For.Target_Manager */
+		HRESULT Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor);
+		HRESULT Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
+		HRESULT Begin_MRT(const _wstring& strMRTTag);
+		HRESULT End_MRT(const _wstring& strMRTTag);
+
+#ifdef _DEBUG
+		HRESULT Ready_RT_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
+		HRESULT Render_RT_Debug(const _wstring& strMRTTag, class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+#endif
+
+
+
 private:
- CActor* m_pPlayer = {nullptr};   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
-	class Collider_Manager*			m_pCollider_Manager = { nullptr };
+	 CActor*						m_pPlayer			 = { nullptr };   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
+	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
 	class CInput_Device*			m_pInput_Device		 = { nullptr };
 	class CTimer_Manager*			m_pTimer_Manager	 = { nullptr };
@@ -142,6 +162,7 @@ private:
 	class CLight_Manager*			m_pLight_Manager	 = { nullptr };
 	class CCalculator*              m_pCalculator		 = { nullptr };
 	class CFont_Manager*			m_pFont_Manager		 = { nullptr };
+	class CTarget_Manager*			m_pTarget_Manager	 = { nullptr };
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;

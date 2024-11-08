@@ -45,14 +45,16 @@ public:
     }
     void Set_Scaling(_float fScaleX, _float fScaleY, _float fScaleZ);
     void LookAt(_fvector vAt);
-    void Go_Straight(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void Go_Left(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void Go_Backward(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
+    void Go_Straight(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
+    void Go_Left(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
+    void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
+    void Go_Backward(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
+    void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
+    void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
+    void Go_Doublejump(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void GO_Dir(_float fTimeDelta, _vector Dir);
+    void Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, _bool* Jumpcheck );
     void Stop_Move();
     void Rotation_to_Player();
     void Other_set_Pos(CTransform* Other, FIX FixPosWhere,_float FixPos, _float3* Ouput = nullptr);
@@ -62,6 +64,8 @@ public:
 
     /* 항등회전 상태를 기준으로 지정한 각도만큼 회전한다. */
     void Rotation(_float fX, _float fY, _float fZ);
+
+
 public:
     _vector Get_TRANSFORM(TRANSFORM eTRANSFORM)
     {
@@ -73,18 +77,15 @@ public:
         return XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix));
     }
   
-     _float4x4* Get_WorldMatrixPtr()  
-     {
+    _float4x4* Get_WorldMatrixPtr()  
+    {
         return &m_WorldMatrix;
-     }
+    }
 
     _matrix Get_WorldMatrix()
     {
         return XMLoadFloat4x4(&m_WorldMatrix);
     }
-
- 
-
 
     _float3 Get_Scaled()
     {
@@ -130,6 +131,8 @@ private:
 
     _float m_JumpPower{};
     _float m_fTimeSum{};
+    _float m_fTimeSumDouble{};
+
 public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;

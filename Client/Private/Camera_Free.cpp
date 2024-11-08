@@ -31,11 +31,10 @@ _int CCamera_Free::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
-    
-    _vector  vEye = {
-        m_PlayerEye->_41, m_PlayerEye->_42, m_PlayerEye->_43, m_PlayerEye->_44
-    };
-     _vector Eye = XMVector3TransformCoord(vEye, m_pPlayer->Get_Transform()->Get_WorldMatrix());
+ 
+    _vector  vEye = {  m_PlayerEye->_41, m_PlayerEye->_42, m_PlayerEye->_43, m_PlayerEye->_44 };
+ 
+    _vector Eye = XMVector3TransformCoord(vEye, m_pPlayer->Get_Transform()->Get_WorldMatrix());
  
      m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Eye);
 

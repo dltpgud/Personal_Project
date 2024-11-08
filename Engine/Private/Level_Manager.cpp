@@ -16,7 +16,7 @@ HRESULT CLevel_Manager::Open_Level(_uint iCurrentLevelID, CLevel* pNewLevel)
     /* 최초레벨할당할때 지우면 큰일난다. m_iCurrentLevelID : 의도치 않은 값으로 초기화되어있기때문에 의도치않은
      * 레벨자원을 지우잖어. */
     if (nullptr != m_pCurrentLevel)
-        m_pGameInstance->Clear(m_iCurrentLevelID);
+         m_pGameInstance->Clear(m_iCurrentLevelID);
 
     Safe_Release(m_pCurrentLevel);
 
@@ -56,9 +56,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
     _uint Type{0};
     _uint TileX{0};
     _uint TileY{0};
-   
     _bool bMainTile = true;
-
+    _uint bFire{ 0 };
+    _float FireOffset{ 0.f };
     while (true)
     {
         _bool bFile(false);
@@ -85,6 +85,11 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
         wchar_t* pPoroto = new wchar_t[Length + 1];
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
 
+
+
+        bFile = ReadFile(hFile, &(bFire), sizeof(_uint), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(FireOffset), sizeof(_float), &dwByte, nullptr);
+
         if (0 == dwByte)
         {
             Safe_Delete_Array(pModel);
@@ -101,26 +106,27 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
             if (true == bMainTile)
             {
                 DESC.DATA_TYPE = 0;
-            }
-
+            }else
+                DESC.DATA_TYPE = 1;
             pGameObject = ProtoObj->Clone(&DESC);
         }
         else
         pGameObject = ProtoObj->Clone(Arg);
 
-        pGameObject->Set_Model(pModel);
+        pGameObject->Set_Model(pModel, iLevelIndex);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+        pGameObject->Set_Scalra_float(FireOffset);
+        pGameObject->Set_Scalra_uint(bFire);
 
-
-            pGameObject->Set_Buffer(TileX, TileY);
-            bMainTile = false;
+        pGameObject->Set_Buffer(TileX, TileY);
+        bMainTile = false;
         
         m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
 
-        Safe_Delete_Array(pModel);
+         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
     CloseHandle(hFile);
@@ -179,7 +185,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, con
 
         CGameObject* pGameObject = ProtoObj->Clone(Arg);
 
-        pGameObject->Set_Model(pModel);
+        pGameObject->Set_Model(pModel, iLevelIndex);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
@@ -231,7 +237,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _u
         bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
         pModel[strLength] = L'\0';
 
-        DWORD Length;
+            DWORD Length;
         bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, nullptr);
         wchar_t* pPoroto = new wchar_t[Length + 1];
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
@@ -245,7 +251,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _u
 
         CGameObject* pGameObject = ProtoObj->Clone(Arg);
 
-        pGameObject->Set_Model(pModel);
+     pGameObject->Set_Model(pModel, iLevelIndex);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
@@ -303,7 +309,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
         bFile = ReadFile(hFile, pPoroto, Length, &dwByte, nullptr);
         pPoroto[Length] = L'\0';
 
- 
+        bFile = ReadFile(hFile, &(WType), sizeof(_uint), &dwByte, nullptr);
 
         if (0 == dwByte)
         {
@@ -315,17 +321,13 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
         if (type == Type) {
             CGameObject* pGameObject = ProtoObj->Clone(Arg);
 
-            pGameObject->Set_Model(pModel);
+            pGameObject->Set_Model(pModel, iLevelIndex);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-
-            if (CGameObject::DATA_CHEST == Type)
-            {
-                bFile = ReadFile(hFile, &(WType), sizeof(_uint), &dwByte, nullptr);
-                pGameObject->Set_Buffer(0, WType);
-            }
+            pGameObject->Set_Buffer(0, WType);
+           
             m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
         }
         Safe_Delete_Array(pModel);
@@ -413,6 +415,16 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
 
         case CActor::TYPE_JET_FLY:
             if (false == lstrcmpW(pModel, L"Proto Component JetFly_Monster")) {
+                pGameObject = ProtoObj->Clone(Arg);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            }
+            break;
+
+        case CActor::TYPE_MECANOBOT:
+            if (false == lstrcmpW(pModel, L"Proto Component MecanoBot_Monster")) {
                 pGameObject = ProtoObj->Clone(Arg);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
@@ -510,6 +522,16 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _ui
 
 
     return S_OK;
+}
+
+_uint CLevel_Manager::Get_iCurrentLevel()
+{
+    return m_iCurrentLevelID;
+}
+
+void CLevel_Manager::Set_Open_Bool(_bool NextStage)
+{
+    OpenLevel = NextStage;
 }
 
 CLevel_Manager* CLevel_Manager::Create()

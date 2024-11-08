@@ -80,7 +80,7 @@ HRESULT CWALL::Render()
     return S_OK;
 }
 
-void CWALL::Set_Model(const _wstring& protoModel)
+void CWALL::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_wModel = protoModel;
     if (FAILED(__super::Add_Component(LEVEL_STATIC, m_wModel, TEXT("Com_Model"),

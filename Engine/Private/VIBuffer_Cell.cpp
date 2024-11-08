@@ -14,11 +14,11 @@ HRESULT CVIBuffer_Cell::Initialize_Prototype(const _float3* pPoints)
 {
 	m_iVertexStride = sizeof(VTXPOS);
 	m_iNumVertices = 3;
-	m_iIndexStride = sizeof(_ushort);
+	m_iIndexStride = sizeof(_ushort); 
 	m_iNumIndexices = 4;
 	m_iNumVertexBuffers = 1;
 	m_eIndexFormat = DXGI_FORMAT_R16_UINT;
-	m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;   //D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;  //D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	
 #pragma region VERTEX_BUFFER
 	/* dx9 : 정점버퍼를 할당하고 -> 락언락해서 정점버퍼에 초기값을 채운다. */

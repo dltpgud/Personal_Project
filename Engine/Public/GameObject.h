@@ -87,7 +87,7 @@ public:
     }
 
     /*for EDIT to Client*/
-    virtual void Set_Model(const _wstring& protoModel)
+    virtual void Set_Model(const _wstring& protoModel, _uint iLevel = 0)
     {
     }
      _int  Get_Data()
@@ -98,6 +98,9 @@ public:
     virtual _tchar* Get_ProtoName() { return nullptr; }
     virtual void Set_Buffer(_uint x, _uint y) {};
     virtual _uint Get_Scalra() { return 0; };
+    virtual _float Get_Scalra_float() { return 0.f; };
+    virtual void Set_Scalra_uint(_uint scalra) {};
+    virtual void Set_Scalra_float(_float scalra) {};
   virtual _float check_BoxDist(_vector RayPos, _vector RayDir) { return _float(0xffff); }
 
   virtual CCollider* Get_Collider() { return m_pColliderCom; };

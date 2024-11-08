@@ -8,7 +8,7 @@ class ENGINE_DLL CActor abstract : public CContainerObject
 {
 public:
     enum ACTOR_MONSTER_TYPE {
-        TYPE_BOOM_BOT, TYPE_GUN_PAWN, TYPE_JET_FLY, TYPE_END
+        TYPE_BOOM_BOT, TYPE_GUN_PAWN, TYPE_JET_FLY, TYPE_MECANOBOT, TYPE_END
         
     };
 
@@ -36,29 +36,32 @@ public:
 public:
         //상태 관련
         void Set_bColl(_bool Coll) { m_bColl = Coll; }
+        void Set_bStun(_bool Coll) { m_bStun = Coll; }
         void Set_State(_uint st)
         {
             m_iState = st;
         }
         _uint Get_State() { return m_iState; }
-        virtual void HIt_Routine(_float fTimeDelta) {};
-        virtual void Dead_Routine(_float fTimeDelta) {};
+        virtual void HIt_Routine() {};
+        virtual void Dead_Routine() {};
         virtual void Stun_Routine() {};
       
-        virtual HRESULT Make_Bullet(_vector vPos) { return S_OK; };
 
-        //Cell 관련
+        //네비 관련
         void Set_NavigationType(_uint i);
         void Find_CurrentCell();
         _float Get_fY() { return m_fY; }
         void Height_On_Cell(_float3* fPos);
-
+        void Set_onCell(_bool bonCell) { m_bOnCell = bonCell; }
+        void Clear_CNavigation(_tchar* tFPath); // 플레이어 씬전환 후 새로운쎌 부여
+ 
+        void Is_onDemageCell();
         //체력관련
         void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
         void Set_HealthCurrentHP(_float Health) { m_fHP += Health; }
         _bool IsFullHP() const { return m_fHP == m_fMAXHP; }
         virtual _float Weapon_Damage() { return 0.f; }
-     
+       
     protected:
 
          CNavigation* m_pNavigationCom = { nullptr };
@@ -70,7 +73,7 @@ public:
         _float  m_FixY{ 0.f };
         _bool   m_bOnCell = { false };
         _uint   m_iRim{}; // 림 연산 할꺼 말꺼
-
+        _bool   m_bStun = {false};
     public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;

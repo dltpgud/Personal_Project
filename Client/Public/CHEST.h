@@ -32,7 +32,7 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
-	virtual void Set_Model(const _wstring& protoModel) override;
+	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
 	virtual void Set_Buffer(_uint x, _uint y)override;
 
 	void Interactive(_float fTimeDelta);

@@ -51,8 +51,9 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-    virtual void HIt_Routine(_float fTimeDelta)override;
-    virtual void Dead_Routine(_float fTimeDelta) override;
+    virtual void HIt_Routine()override;
+    virtual void Dead_Routine() override;
+
     void NON_intersect(_float fTimedelta);
 
 

@@ -3,6 +3,8 @@
 #include "InteractiveUI.h"
 #include "GameInstance.h"
 #include "Player.h"
+#include "Level_Loading.h"
+
 CDOOR::CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -60,7 +62,7 @@ void CDOOR::Update(_float fTimeDelta)
     if (fLength <= 6.f && m_bState == false ) {
      
         m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
-        m_InteractiveUI->Set_Text(L"문 열기",CInteractiveUI::INTERACTIVE_STATE::IS_DOOR);
+        m_InteractiveUI->Set_Text(L"문 열기");
 
         if (true == m_InteractiveUI->Get_Interactive())
         {
@@ -70,23 +72,29 @@ void CDOOR::Update(_float fTimeDelta)
             else
                 m_iState = State2::OPEN2;
 
-            m_iState == State::OPEN ? m_OpenTime = 0.2f : m_OpenTime = 0.6f;
+            m_iState == State::OPEN ? m_OpenTime = 0.3f : m_OpenTime = 0.6f;
             m_pModelCom->Set_Animation(m_iState, false);
             Go_Move = true;
             m_bOpen = true;
-           m_InteractiveUI->Set_Interactive(false);
+            m_InteractiveUI->Set_Interactive(false);
             m_bState = true;
-        }
-    }
- 
-    if (fLength > 6.f && m_bState == true) {
 
+        }   
+        m_bInterect = true;
+    } 
  
+    if (fLength > 6.f && m_bInterect == true) {
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
+        m_bInterect = false;
+    }
+    if (fLength > 6.f && m_bState == true) {
+   
+
         if(m_pModelName != L"Proto Component ItemDoor Model_aniObj")
             m_iState = State::ClOSE;
         else
             m_iState = State2::ClOSE2;
-        m_iState == State::ClOSE ? m_OpenTime = 0.2f : m_OpenTime = 0.6f;
+        m_iState == State::ClOSE ? m_OpenTime = 0.3f : m_OpenTime = 0.6f;
         Go_Move = false;
         m_pModelCom->Set_Animation(m_iState, false);
         m_bState = false;
@@ -105,7 +113,15 @@ void CDOOR::Update(_float fTimeDelta)
       m_pPlayer->Set_NavigationType(1);
     }
  
-    m_pModelCom->Play_Animation(fTimeDelta * m_OpenTime);
+    if (true == m_pModelCom->Play_Animation(fTimeDelta * m_OpenTime)) 
+    {
+
+        if (m_DoorType == 2 && m_iState == State::OPEN)
+        {
+
+            m_pGameInstance->Set_Open_Bool(true);
+        }
+    }
   
 }
 
@@ -128,7 +144,6 @@ HRESULT CDOOR::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-      
         /*애니용 추가*/
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
@@ -142,23 +157,28 @@ HRESULT CDOOR::Render()
     return S_OK;
 }
 
-void CDOOR::Set_Model(const _wstring& protoModel)
+void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_pModelName = protoModel;
-    if (FAILED(__super::Add_Component(LEVEL_STAGE1, protoModel, TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
     {
         MSG_BOX("Set_Model failed");
         return;
     }
 
-    if(m_pModelName == L"Proto Component ItemDoor Model_aniObj")
+    if(m_pModelName == L"Proto Component ItemDoor Model_aniObj" )
         m_pModelCom->Set_Animation(2, false);
     else {
 
         m_iState = State::ClOSE;
         m_pModelCom->Set_Animation(m_iState, false);
     }
+}
+
+void CDOOR::Set_Buffer(_uint x, _uint y)
+{
+    m_DoorType = y;
 }
 
 HRESULT CDOOR::Add_Components()

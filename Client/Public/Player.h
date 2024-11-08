@@ -51,30 +51,32 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
-	virtual void HIt_Routine(_float fTimeDelta)override;
+	virtual void HIt_Routine()override;
 	virtual void Stun_Routine()override;
 	
 	virtual _float Weapon_Damage() override;
-	virtual HRESULT Make_Bullet(_vector vPos) override;
 	const _float4x4* Get_CameraBone();
 	void Key_Input(_float fTimeDelta);
-
+	
 	void Choose_Weapon(const _uint& WeaponNum);
 	_uint Get_Bullet();
 	_uint Get_MaxBullte();
 	_bool Get_jump() { return m_bJump; }
 	void Set_HitLock(_bool Lock);
 
-	void Mouse_Fix();
 private:
 	_uint					m_Type = {};
-	_uint					m_bWeaponType = {};
+	_uint					m_iWeaponType = {};
 	_bool					m_bturn = { false };
 	_bool					m_bchange = { false };
 	_bool					m_bJump = { false };
+	_bool					m_bDoubleJump = { false };
 	_bool					m_bHitLock = { false };
+	_bool					m_bFallLock = { false };
+	_float					m_DemageCellTime = { 0.f};
 	CPlayerUI*				m_pPlayerUI = { nullptr };
 	const _float4x4*		m_pCameraBone = { nullptr };
+	_uint m_iJumpCount = 0;
 
 private:
 	HRESULT Add_Components();

@@ -32,8 +32,8 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     else if (true == forPlayer)
     { 
          POINT ptPlayerAim{};
-                 ptPlayerAim.x = 655;
-                 ptPlayerAim.y = 420;
+                 ptPlayerAim.x = 640;
+                 ptPlayerAim.y = 360;
 
          m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
 
@@ -80,10 +80,12 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
     _vector RPos = XMVector3TransformCoord(RayPos, matWorld);
     _vector RDIR = XMVector3TransformNormal(RayDir, matWorld);
 
+    RDIR = XMVector3Normalize(RDIR);
+
     const _float3* pTerrainVtx = pTerrainBufferCom->Get_VtxPos();
     const _ulong& dwCntZ = pTerrainBufferCom->Get_NumVerticesZ();
     const _ulong& dwCntX = pTerrainBufferCom->Get_NumVerticesX();
-
+    
     _ulong dwVtxIdx[3]{};
 
     for (_ulong i = 0; i < dwCntZ - 1; ++i)
@@ -126,7 +128,7 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
             v2 = pTerrainVtx[dwVtxIdx[2]];
             // V1 + U(V2 - V1) + V(V3 - V1)
 
-            if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2),
+             if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2),
                                                    fDist))
             {
                 _float3 Las_pos{};
@@ -153,6 +155,21 @@ HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, 
 
 
     return S_OK;
+}
+
+_vector CCalculator::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
+{
+    _vector v1 = XMLoadFloat3(&fP1);
+    _vector v2 = XMLoadFloat3(&fP2);
+    _vector v3 = XMLoadFloat3(&fP3);
+
+    // 벡터 v1 -> v2와 v1 -> v3 차이 계산
+    _vector edge1 = v2 - v1;
+    _vector edge2 = v3 - v1;
+
+    // 두 벡터의 외적이 평면의 법선 벡터
+    return XMVector3Cross(edge1, edge2);
+
 }
 
 _float CCalculator::Compute_Random_Normal()

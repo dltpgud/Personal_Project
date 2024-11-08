@@ -5,6 +5,7 @@
 #include "LEVEL_MENU.h"
 #include "Level_Stage1.h"
 #include "Level_Stage2.h"
+#include "Level_StageBoss.h"
 #include "GameInstance.h"
 #include "SpriteTexture.h"
 
@@ -64,6 +65,12 @@ void CLevel_Loading::Update(_float fTimeDelta)
             if (m_pGameInstance->Get_DIAnyKey())
             {
                 hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage2::Create(m_pDevice, m_pContext));
+            }
+            break;
+        case LEVEL_BOSS:
+            if (m_pGameInstance->Get_DIAnyKey())
+            {
+                hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_StageBoss::Create(m_pDevice, m_pContext));
             }
             break;
         }

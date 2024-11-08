@@ -38,7 +38,6 @@ void CUI_Manager::Priority_Update(_float fTimeDelta)
 
                 if (OBJ_DEAD == iResult)
                 {
-                    // 해당 몬스터의 태그를 받아와서 false로 바꿈
 
                     Safe_Release((*veciter));
                     veciter= m_UIVec[i].erase(veciter);

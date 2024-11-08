@@ -15,21 +15,11 @@ float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
 float4			g_vCamPosition;
 
-
 float4x4		g_BoneMatrices[512];   /*뼈 메트릭스 개수*/
 bool g_TagetBool;
 bool g_TagetDeadBool;
-sampler LinearSampler = sampler_state
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = WRAP;
-	AddressV = WRAP;
-};
 
-sampler PointSampler = sampler_state
-{
-	filter = MIN_MAG_MIP_POINT;
-};
+
 
 struct VS_IN
 {
@@ -149,18 +139,14 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
 
 	
     float rim = { 0.f };
-	
+    
+    
 	if (true == g_TagetBool)
     {
 
         rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
         rim = pow(1 - rim, g_RimPow);
     }
-	
-  //   Out.vColor = (g_vLightDiffuse  * vMtrlDiffuse) * saturate(vShade) +
-	//	          (g_vLightSpecular * g_vMtrlSpecular) * fSpecular + (rim * rimColor);
-    
-	
 	
     float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
 

@@ -1,5 +1,16 @@
+sampler LinearSampler = sampler_state
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
 
-
+sampler PointSampler = sampler_state
+{
+    filter = MIN_MAG_MIP_POINT;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
 
 RasterizerState RS_Default
 {

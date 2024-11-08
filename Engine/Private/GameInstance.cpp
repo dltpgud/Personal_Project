@@ -9,6 +9,7 @@
 #include "Light_Manager.h"
 #include "Collider_Manager.h"
 #include "Font_Manager.h"
+#include "Target_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -24,7 +25,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pGraphic_Device)
 		return E_FAIL;
 	/* 입력 장치를 초기화한다. */
-	m_pInput_Device = CInput_Device::Create(EngineDesc.hInstance, EngineDesc.hWnd);
+	m_pInput_Device = CInput_Device::Create(EngineDesc.hInstance, EngineDesc.hWnd, EngineDesc.iWinSizeX, EngineDesc.iWinSizeY);
 	if (nullptr == m_pGraphic_Device)
 		return E_FAIL;
 
@@ -57,6 +58,10 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pSound)
 		return E_FAIL;
 	
+	m_pTarget_Manager = CTarget_Manager::Create(*ppDevice, *ppContext);
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
 	m_pRenderer		     = CRenderer::Create(*ppDevice, *ppContext);
 	if (nullptr == m_pRenderer)
 		return E_FAIL;
@@ -88,7 +93,9 @@ void CGameInstance::Update(_float fTimeDelta)
 
 	/* 엔진에있는 객체들 중 반복적인 갱신이 필요한 녀석이라면 여기서 다 호출. */
 
+    
 	m_pInput_Device->Update_InputDev();
+
 
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
@@ -96,16 +103,14 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pPipeLine->Update();
 
 
-
+	
 	m_pObject_Manager->Update(fTimeDelta);
 	m_pUI_Manager->Update(fTimeDelta);
 
 
-
-	m_pCollider_Manager->All_Collison_check();
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	m_pUI_Manager->Late_Update(fTimeDelta);
-
+    m_pCollider_Manager->All_Collison_check();
 	m_pLevel_Manager->Update(fTimeDelta);
 
 }
@@ -200,6 +205,11 @@ _byte CGameInstance::Get_DIAnyKey()
 	return m_pInput_Device->Get_DIAnyKey();
 }
 
+void CGameInstance::MouseFix()
+{
+	m_pInput_Device->Mouse_Fix();
+}
+
 #pragma endregion
 
 #pragma region Timer_Manager
@@ -248,6 +258,28 @@ HRESULT CGameInstance::Open_Level(_uint iCurrentLevelID, CLevel* pNewLevel)
 	return S_OK;
 }
 
+_uint CGameInstance::Get_iCurrentLevel()
+{
+	if (nullptr == m_pLevel_Manager)
+		return 0;
+	return m_pLevel_Manager->Get_iCurrentLevel();
+}
+
+_bool CGameInstance::IsOpenStage()
+{
+	if (nullptr == m_pLevel_Manager)
+		return false;
+	return m_pLevel_Manager->IsOpenStage();
+}
+
+void CGameInstance::Set_Open_Bool(_bool NextStage)
+{
+	if (nullptr == m_pLevel_Manager)
+		return;
+
+	m_pLevel_Manager->Set_Open_Bool(NextStage);
+}
+
 #pragma endregion
 
 #pragma region Object_Manager
@@ -289,7 +321,6 @@ CGameObject::PICKEDOBJ_DESC CGameInstance::Pking_onMash(_vector RayPos, _vector 
 	if (nullptr == m_pObject_Manager)
 	{
 		MSG_BOX("Nullptr ObjMgr");
-		//return nullptr;
 	}
 
 	return m_pObject_Manager->Pking_onMash(RayPos, RayDir);
@@ -297,6 +328,13 @@ CGameObject::PICKEDOBJ_DESC CGameInstance::Pking_onMash(_vector RayPos, _vector 
 
 CGameObject* CGameInstance::Recent_GameObject(_uint iLevelIndex, const _uint& strLayerTag)
 {
+
+	if (nullptr == m_pObject_Manager)
+	{
+		MSG_BOX("Nullptr ObjMgr");
+		return nullptr;
+	}
+
 	return m_pObject_Manager->Recent_GameObject(iLevelIndex ,strLayerTag);
 }
 
@@ -326,7 +364,7 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& s
 		switch (DataType)
 		{
 		case CGameObject::DATA_TERRAIN : 
-				return m_pLevel_Manager->Load_to_Next_Map_terrain(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
+ 					return m_pLevel_Manager->Load_to_Next_Map_terrain(iLevelIndex, strLayerTag, pPrototype, strProtoMapPath, pArg);
 			break;
 
 		case CGameObject::DATA_NONANIMAPOBJ:
@@ -394,16 +432,33 @@ CGameObject* CGameInstance::Clone_Prototype(const _wstring& strPrototypeTag, voi
 #pragma region Collider_Manager
 HRESULT CGameInstance::Add_Monster(_uint iClearLevelID, CGameObject* Monster)
 {
+	if (nullptr == m_pCollider_Manager)
+		return E_FAIL;
+
 	return m_pCollider_Manager->Add_Monster(iClearLevelID,Monster);
+}
+
+HRESULT CGameInstance::Add_MonsterBullet(_uint iClearLevelID, CGameObject* MonsterBUllet)
+{
+	if (nullptr == m_pCollider_Manager)
+		return E_FAIL;
+
+	return m_pCollider_Manager ->Add_MonsterBullet(iClearLevelID, MonsterBUllet);
 }
 
 HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
 {
+	if (nullptr == m_pCollider_Manager)
+		return E_FAIL;
+
  	return m_pCollider_Manager->Set_Collison(true);
 }
 
 HRESULT CGameInstance::Find_Cell(_uint Ilevel)
 {
+	if (nullptr == m_pCollider_Manager)
+		return E_FAIL;
+
 	return m_pCollider_Manager->Find_Cell(Ilevel);
 }
 
@@ -495,6 +550,12 @@ map<const _wstring, class CComponent*> CGameInstance::Get_Com_proto_vec(_uint iL
 {
 	return m_pComponent_Manager->Get_Com_proto_vec(iLevelindex);
 }
+CComponent* CGameInstance::Find_Prototype(_uint iLevelIndex, const _wstring& strPrototypeTag)
+{
+	if (nullptr == m_pComponent_Manager)
+		return nullptr;
+	return  m_pComponent_Manager->Find_Prototype(iLevelIndex, strPrototypeTag);
+}
 #pragma endregion
 
 #pragma region Sound
@@ -555,6 +616,9 @@ HRESULT CGameInstance::Add_RenderGameObject(CRenderer::RENDERGROUP eRenderGroup,
 #pragma region PipeLine
 const _float4x4* CGameInstance::Get_TransformFloat4x4(CPipeLine::TRANSFORM_STATE eState)
 {
+	if (nullptr == m_pPipeLine)
+		return nullptr;
+
 	return m_pPipeLine ->Get_TransformFloat4x4(eState);
 }
 
@@ -565,11 +629,25 @@ _matrix CGameInstance::Get_TransformMatrix(CPipeLine::TRANSFORM_STATE eState)
 
 const _float4* CGameInstance::Get_CamPosition()
 {
+	if (nullptr == m_pPipeLine)
+		return nullptr;
+
 	return m_pPipeLine->Get_CamPosition();
+}
+
+const _float4* CGameInstance::Get_CamLook()
+{
+	if (nullptr == m_pPipeLine)
+		return nullptr;
+
+	return m_pPipeLine->Get_CamLook();
 }
 
 void CGameInstance::Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix)
 {
+	if (nullptr == m_pPipeLine)
+		return;
+
 	return m_pPipeLine->Set_TransformMatrix(eState, TransformMatrix);
 }
 
@@ -579,11 +657,18 @@ void CGameInstance::Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmat
 #pragma region Light_Manager
 const LIGHT_DESC* CGameInstance::Get_LightDesc(_uint iIndex)
 {
+
+	if (nullptr == m_pLight_Manager)
+		return nullptr;
+
 	return m_pLight_Manager->Get_LightDesc(iIndex);
 }
 
 HRESULT CGameInstance::Add_Light(const LIGHT_DESC& LightDesc)
 {
+	if (nullptr == m_pLight_Manager)
+		return E_FAIL;
+
 	return m_pLight_Manager->Add_Light(LightDesc);
 }
 #pragma endregion
@@ -592,27 +677,46 @@ HRESULT CGameInstance::Add_Light(const LIGHT_DESC& LightDesc)
 #pragma region Calculator
 _float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis)
 {
+	if (nullptr == m_pCalculator)
+		return _float3(0.f,0.f,0.f);
+
 	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom,  RayPos,  RayDir, Transform, fDis);
 }
 
 void CGameInstance::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir , _bool forPlayer)
 {
+	if (nullptr == m_pCalculator)
+		return;
+
     m_pCalculator->Make_Ray(Proj, view, RayPos, RayDir, forPlayer);
 	return;
 }
 
 _float CGameInstance::Compute_Random_Normal()
 {
+	if (nullptr == m_pCalculator)
+		return _float(0.f);
+
 	return m_pCalculator->Compute_Random_Normal();
 }
 
 _float CGameInstance::Compute_Random(_float fMin, _float fMax)
 {
+	if (nullptr == m_pCalculator)
+		return _float(0.f);
+
 	return m_pCalculator->Compute_Random(fMin, fMax);
 }
 HRESULT CGameInstance::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
 {
+	if (nullptr == m_pCalculator)
+		return E_FAIL;
+
 	return m_pCalculator->Compute_Y(pNavigation, Transform, Pos);
+}
+_vector CGameInstance::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
+{
+	return m_pCalculator->PointNomal(fP1, fP2, fP3);
 }
 #pragma endregion
 
@@ -620,12 +724,68 @@ HRESULT CGameInstance::Compute_Y(CNavigation* pNavigation, CTransform* Transform
 #pragma region Font_Manager
 HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath)
 {
+	if (nullptr == m_pFont_Manager)
+		return E_FAIL;
+
 	return m_pFont_Manager->Add_Font(strFontTag, pFontFilePath);
 }
 
 HRESULT CGameInstance::Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale, _float fRotation, const _float2& vPivot)
 {
+	if (nullptr == m_pFont_Manager)
+		return E_FAIL;
+
 	return m_pFont_Manager->Render_Text(strFontTag, pText, vPosition, vColor, fScale, fRotation, vPivot);
+}
+#pragma endregion
+
+#pragma region Target_Manager
+HRESULT CGameInstance::Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor)
+{
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
+	return  m_pTarget_Manager->Add_RenderTarget(strTargetTag, iWidth, iHeight, ePixelFormat, vClearColor);
+}
+
+HRESULT CGameInstance::Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag)
+{
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
+	return m_pTarget_Manager->Add_MRT(strMRTTag, strTargetTag);
+}
+
+HRESULT CGameInstance::Begin_MRT(const _wstring& strMRTTag)
+{
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
+	return  m_pTarget_Manager->Begin_MRT(strMRTTag);
+}
+
+HRESULT CGameInstance::End_MRT(const _wstring& strMRTTag)
+{
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
+	return m_pTarget_Manager->End_MRT(strMRTTag);
+}
+
+HRESULT CGameInstance::Ready_RT_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
+{
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
+	return m_pTarget_Manager->Ready_Debug(strTargetTag, fX, fY, fSizeX, fSizeY);
+}
+
+HRESULT CGameInstance::Render_RT_Debug(const _wstring& strMRTTag, CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	if (nullptr == m_pTarget_Manager)
+		return E_FAIL;
+
+	return m_pTarget_Manager->Render_Debug(strMRTTag, pShader, pVIBuffer);
 }
 
 #pragma endregion
@@ -633,6 +793,7 @@ HRESULT CGameInstance::Render_Text(const _wstring& strFontTag, const _tchar* pTe
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
+	Safe_Release(m_pTarget_Manager);
 	Safe_Release(m_pFont_Manager);
 	Safe_Release(m_pCollider_Manager);
 	Safe_Release(m_pCalculator);

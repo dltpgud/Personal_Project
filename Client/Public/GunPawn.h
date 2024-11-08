@@ -62,17 +62,20 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-    virtual void HIt_Routine(_float fTimeDelta)override;
-    virtual void Dead_Routine(_float fTimeDelta) override;
+    virtual void HIt_Routine()override;
+    virtual void Dead_Routine() override;
+
+
     void NON_intersect(_float fTimedelta);
-
-
 
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
     HRESULT Bind_ShaderResources();
     CMonsterHP* m_pPartHP = { nullptr };
+    _float m_FireTime{ 0.f };
+
+
 public:
     static CGunPawn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

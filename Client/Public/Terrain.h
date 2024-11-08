@@ -28,7 +28,7 @@ public:
 
     virtual HRESULT Render() override;
 
-    virtual void Set_Model(const _wstring& protoModel) override;
+    virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
     virtual void Set_Buffer(_uint x, _uint y)override;
     CVIBuffer_Terrain* Get_buffer()
     {
@@ -44,7 +44,8 @@ public:
     {
         return m_pSize[1];
     }
-
+    virtual void Set_Scalra_uint(_uint scalra);
+    virtual void Set_Scalra_float(_float scalra);
 private:
     CTexture* m_pTextureCom = {nullptr};
     CShader* m_pShaderCom = {nullptr};
@@ -52,7 +53,10 @@ private:
     CNavigation* m_pNavigationCom = {nullptr};
     _uint m_pSize[2]{};
     _bool m_bMain = {false};  // 이건 타일 수정할 떄 꼭 하자
-    const _tchar* NavigationFath = { nullptr };
+    _uint m_bFire{0};
+    _float m_iUVoffset{ 0.f };
+    _float m_fTimeSum{ 0.f };
+
 private:
     HRESULT Add_Components();
 

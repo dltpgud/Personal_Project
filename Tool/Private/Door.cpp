@@ -100,7 +100,7 @@ HRESULT CDoor::Render()
     return S_OK;
 }
 
-void CDoor::Set_Model(const _wstring& protoModel)
+void CDoor::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_wModel = protoModel;
     /* For.Com_Model */

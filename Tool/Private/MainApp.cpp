@@ -126,6 +126,9 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Texture1_Terrain"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resources/Textures/Terrain/Tile0.dds")))))
 		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Fire1_Terrain"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resources/Textures/Terrain/T_Fire_Pattern_02.dds")))))
+		return E_FAIL;
 
 	///*Prototype_Component_Struck*/
 	_matrix			PreTransformMatrix = XMMatrixIdentity();
@@ -173,7 +176,12 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock small wall1 Model_nonaniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock_small_wall1.dat"), PreTransformMatrix))))
 		return E_FAIL;
-
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component BossFloor Model_nonaniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/BossFloor.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Test Model_nonaniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Test.dat"), PreTransformMatrix))))
+		return E_FAIL;
 
 if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Pylon Model_nonaniObj"),
 	    CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Pylon.dat"), PreTransformMatrix))))
@@ -209,11 +217,6 @@ if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Co
 if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component vine2 Model_nonaniObj"),
 	CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Vine2.dat"), PreTransformMatrix))))
 	return E_FAIL;
-
-
-
-
-
 
 
 		///*Prototype_Component_Wall*/
@@ -282,7 +285,9 @@ if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Co
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component BoomBot_Monster"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_BoomBot.dat"), PreTransformMatrix))))
 		return E_FAIL;
-
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component MecanoBot_Monster"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_MecanoBot.dat"), PreTransformMatrix))))
+		return E_FAIL;
 
 	///*Prototype_Component_NPC*/
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component HealthBot_NPC"),

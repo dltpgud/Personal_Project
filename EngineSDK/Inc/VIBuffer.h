@@ -16,7 +16,7 @@ public:
 
 public:
     /* 그리기 위해 필요한 값들을 장치에 올린다. */
-    HRESULT Bind_Buffers();
+    virtual  HRESULT Bind_Buffers();
 
 protected:
     ID3D11Buffer* m_pVB = {nullptr}; // 버텍스 버퍼 변수
