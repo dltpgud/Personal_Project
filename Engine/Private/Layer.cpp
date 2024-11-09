@@ -66,6 +66,15 @@ void CLayer::Late_Update(_float fTimeDelta)
     }
 }
 
+CGameObject* CLayer::Get_GameObject(const _uint& strLayerTag , const _uint& ProtoTag)
+{
+    for (auto& pGameObject : m_GameObjects[strLayerTag])
+    {
+        if (pGameObject->Get_Data() == ProtoTag)
+            return pGameObject;
+    }
+}
+
 _bool CLayer::IsGameObject(const _uint& strLayerTag)
 {
     return m_GameObjects[strLayerTag].size() == 0 ? false : true;

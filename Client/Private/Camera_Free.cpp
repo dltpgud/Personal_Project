@@ -18,7 +18,7 @@ HRESULT CCamera_Free::Initialize_Prototype()
 HRESULT CCamera_Free::Initialize(void* pArg)
 {
     CAMERA_FREE_DESC* pDesc = static_cast<CAMERA_FREE_DESC*>(pArg);
-
+    m_DATA_TYPE = CGameObject::DATA_CAMERA;
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());

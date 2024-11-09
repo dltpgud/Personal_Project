@@ -14,7 +14,7 @@ public:
 	void	Priority_Update(_float fTimeDelta);
 	void	Update(_float fTimeDelta);
 	void	Late_Update(_float fTimeDelta);
-
+	CGameObject* Get_GameObject(const _uint& strLayerTag, const _uint& ProtoTag);
 
 
 	/*for_EDIT*/

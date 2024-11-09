@@ -4,8 +4,10 @@
 #include "Level_Loading.h"
 #include "PlayerUI.h"
 #include "Camera_Free.h"
+#include "SceneCamera.h"
 #include "Player.h"
-
+#include "BillyBoom.h"
+#include "BossIntroBG.h"
 CLevel_StageBoss::CLevel_StageBoss(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -23,7 +25,7 @@ HRESULT CLevel_StageBoss::Initialize()
 		return E_FAIL;
 
 	if (FAILED(Ready_Layer_Camera(CGameObject::CAMERA)))
-		return E_FAIL;
+	 	return E_FAIL;
 
 	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
 		return E_FAIL;
@@ -34,18 +36,28 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
+	
+
+	m_pSceneCam = static_cast<CSceneCamera*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::CAMERA, CGameObject::DATA_CAMERA));
+
 	return S_OK;
 }
 
 void CLevel_StageBoss::Update(_float fTimeDelta)
 {
-
+	if (nullptr != m_pSceneCam) {
+		if (m_pSceneCam->Get_IsCamEnd())
+		{
+			dynamic_cast<CBillyBoom*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER))->Intro_Routine(fTimeDelta);
+			
+		}
+	}
+	
 	__super::Update(fTimeDelta);
 }
 
 HRESULT CLevel_StageBoss::Render()
 {
-	
 	__super::Render();
 
 #ifdef _DEBUG
@@ -57,38 +69,37 @@ HRESULT CLevel_StageBoss::Render()
 
 HRESULT CLevel_StageBoss::Ready_Layer_Monster(const _uint& pLayerTag)
 {
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_BoomBot",
-	//	L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOOM_BOT)))
-	//	return   E_FAIL;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag, L"Prototype_GameObject_BillyBoom",
+		L"../Bin/Data/Monster/BossStage_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOSS)))
+		return   E_FAIL;
 
 	return S_OK;
 }
 
 HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _uint& pLayerTag)
 {
-	CCamera_Free::CAMERA_FREE_DESC			Desc{};
+	static_cast<CCamera_Free*>(m_pGameInstance->Find_CloneGameObject(LEVEL_STATIC, CGameObject::CAMERA, CGameObject::DATA_CAMERA))->Set_Update(false);
 
-	const _float4x4* fcamBone = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone();
+	CGameObject* pMonster = m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER);
 
-	_vector vEye = { fcamBone->_41, fcamBone->_42, fcamBone->_43, fcamBone->_44 };
+	CSceneCamera::CSceneCamera_DESC			Desc{};
+	_float4 fEye = { 50.f, 5.f, 16.f, 1.f };
+	
+ 	_float4 fCamPos{};
+ 	XMStoreFloat4(&fCamPos, pMonster->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+	
+	_float4 At = { fCamPos.x, 5.f, fCamPos.z, fCamPos.w };
 
-	_vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
-
-	_float4 fEye{};
-	XMStoreFloat4(&fEye, Eye);
-
-	Desc.vEye = fEye;
-
-	_float4 At{};
-	XMStoreFloat4(&At, Eye + +m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
-
+    Desc.vEye = fEye;
 	Desc.vAt = At;
 	Desc.fFovy = XMConvertToRadians(45.0f);
 	Desc.fNearZ = 0.1f;
 	Desc.fFarZ = 500.f;
 	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
+	Desc.fSpeedPerSec = 10.f;
+	Desc.vStopPos = XMVectorSet(50.f, 5, fCamPos.z -20.f, fCamPos.w);
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag,
-		TEXT("Prototype_GameObject_Camera_Free"), nullptr, 0, &Desc)))
+		TEXT("Prototype_GameObject_SceneCamera"), nullptr, 0, &Desc)))
 		return E_FAIL;
 
 	return S_OK;
@@ -97,11 +108,11 @@ HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _uint& pLayerTag)
 HRESULT CLevel_StageBoss::Ready_Layer_UI(const _uint& pLayerTag)
 {
 
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, true)))
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, true)))
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true)))
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
 		return S_OK;
@@ -135,25 +146,12 @@ HRESULT CLevel_StageBoss::Ready_Find_cell()
 
 HRESULT CLevel_StageBoss::Ready_Light()
 {
-	LIGHT_DESC			LightDesc{};
-
-	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(0.f, -1.f, 1.f, 0.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
-
-	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
-		return E_FAIL;
-
 	return S_OK;
 }
 
 HRESULT CLevel_StageBoss::Ready_Layer_Player(const _uint& pLayerTag)
 {
-
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(50.f, 0.f, 15.f, 1.f));
-
 	return S_OK;
 }
 

@@ -22,6 +22,10 @@ public:
         return &m_TransMatrix[eState]; // 저장용
     }
 
+
+
+
+
     _matrix Get_TransformMatrix(TRANSFORM_STATE eState)
     {
         return XMLoadFloat4x4(&m_TransMatrix[eState]); // 연산용

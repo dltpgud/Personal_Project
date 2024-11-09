@@ -47,6 +47,7 @@ void CLevel_Stage1::Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyDown(DIK_U))
 	{
+
 		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));
 	}
 
@@ -119,7 +120,7 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _uint& pLayerTag)
 	Desc.fNearZ = 0.1f;
 	Desc.fFarZ = 500.f;
 	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag,
 		TEXT("Prototype_GameObject_Camera_Free"),nullptr,0, &Desc)))
 		return E_FAIL;
 
@@ -167,13 +168,9 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _uint& pLayerTag)
 		L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_DOOR)))
 		return   E_FAIL;
 
-
-
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag,
 		TEXT("Prototype_GameObject_Sky"))))
 		return E_FAIL;
-
-
 
 	return S_OK;
 }

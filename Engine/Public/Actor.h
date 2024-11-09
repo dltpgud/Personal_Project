@@ -8,7 +8,7 @@ class ENGINE_DLL CActor abstract : public CContainerObject
 {
 public:
     enum ACTOR_MONSTER_TYPE {
-        TYPE_BOOM_BOT, TYPE_GUN_PAWN, TYPE_JET_FLY, TYPE_MECANOBOT, TYPE_END
+        TYPE_BOOM_BOT, TYPE_GUN_PAWN, TYPE_JET_FLY, TYPE_MECANOBOT,TYPE_BOSS, TYPE_END
         
     };
 
