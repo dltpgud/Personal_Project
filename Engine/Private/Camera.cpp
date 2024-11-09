@@ -38,6 +38,9 @@ HRESULT CCamera::Initialize(void* pArg)
 
 _int CCamera::Priority_Update(_float fTimeDelta)
 {
+	if(false == m_bUpdate)
+		return OBJ_NOEVENT;
+
 	m_pGameInstance->Set_TransformMatrix(CPipeLine::D3DTS_VIEW, m_pTransformCom->Get_WorldMatrix_Inverse());
 
 	m_pGameInstance->Set_TransformMatrix(CPipeLine::D3DTS_PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNearZ, m_fFarZ));

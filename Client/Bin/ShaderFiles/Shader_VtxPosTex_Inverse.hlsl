@@ -6,7 +6,8 @@
 /* 외부프로젝트에서 쉐이더 전역으로 특정 데이터를 던지고 받기위한 메모리공간의 의미. */
 /* 전역변수는 다른 쉐이더파일에 같은 타입과 이름으로 선언된 변수가 있다라면 메모리공간을 공유한다. */
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-
+Texture2D maskTexture;
+float threshold;
 float g_hp, g_hp_pluse;
 texture2D g_Texture, g_Texture0, g_Texture1, g_Texture2;
 bool g_Hit;
@@ -137,8 +138,31 @@ PS_OUT PS_MAIN_HP(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_MAIN_Dissolve(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    // 이미지 색상 가져오기
+    Out.vColor = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    
+    // 마스크 값 가져오기 (흑백 마스크 사용 가정)
+    float maskValue = maskTexture.Sample(LinearSampler, In.vTexcoord).r;
 
+    // 마스크 값이 threshold 이상일 때만 색상을 보여줌
+    if (maskValue < threshold)
+    {
+   
+        return Out;
 
+    }
+    else
+    {
+        // 디졸브되지 않은 부분은 투명 처리
+        Out.vColor = (0, 0, 0, 0);
+        return Out;
+
+    }
+
+}
 
 /* 지정해준 색을 지정한 렌더타겟에 그려준다. */
 
@@ -164,4 +188,15 @@ technique11 DefaultTechnique
 		VertexShader = compile vs_5_0 VS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN_HP();
 	}
+
+    pass DefaultPass2
+    {
+        SetRasterizerState(RS_Clockwise);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_Dissolve();
+    }
+
 }

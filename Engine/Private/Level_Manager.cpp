@@ -432,6 +432,16 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
             }
             break;
+
+        case CActor::TYPE_BOSS:
+            if (false == lstrcmpW(pModel, L"Proto Component Boss_Monster")) {
+                pGameObject = ProtoObj->Clone(Arg);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+                pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            }
+            break;
         }
 
         m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);

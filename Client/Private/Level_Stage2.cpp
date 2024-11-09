@@ -73,30 +73,6 @@ HRESULT CLevel_Stage2::Ready_Layer_Monster(const _uint& pLayerTag)
 
 HRESULT CLevel_Stage2::Ready_Layer_Camera(const _uint& pLayerTag)
 {
-	CCamera_Free::CAMERA_FREE_DESC			Desc{};
-
-	const _float4x4* fcamBone = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_CameraBone();
-
-	_vector vEye = { fcamBone->_41, fcamBone->_42, fcamBone->_43, fcamBone->_44 };
-
-	_vector Eye = XMVector3TransformCoord(vEye, m_pGameInstance->Get_Player()->Get_Transform()->Get_WorldMatrix());
-
-	_float4 fEye{};
-	XMStoreFloat4(&fEye, Eye);
-
-	Desc.vEye = fEye;
-
-	_float4 At{};
-	XMStoreFloat4(&At, Eye + +m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
-
-	Desc.vAt = At;
-	Desc.fFovy = XMConvertToRadians(45.0f);
-	Desc.fNearZ = 0.1f;
-	Desc.fFarZ = 500.f;
-	Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag,
-		TEXT("Prototype_GameObject_Camera_Free"), nullptr, 0, &Desc)))
-		return E_FAIL;
 
 	return S_OK;
 }
@@ -154,17 +130,6 @@ HRESULT CLevel_Stage2::Ready_Find_cell()
 
 HRESULT CLevel_Stage2::Ready_Light()
 {
-	LIGHT_DESC			LightDesc{};
-
-	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(0.f, -1.f, 1.f, 0.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
-
-	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
-		return E_FAIL;
-
 	return S_OK;
 }
 

@@ -26,7 +26,8 @@ public:
         DATA_DOOR,
         DATA_CHEST,
         DATA_MONSTER,
-        DATA_NPC
+        DATA_NPC,
+        DATA_CAMERA
     };
 public:
     typedef struct GAMEOBJ_DESC : public CTransform::TRANSFORM_DESC

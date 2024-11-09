@@ -178,7 +178,7 @@ void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
 
     _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
 
-    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower+ m_JumpPower/3  - m_fTimeSumDouble) * fTimeDelta * m_fSpeedPerSec*2;
+    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower*1.5f - m_fTimeSumDouble) * fTimeDelta * m_fSpeedPerSec;
 
     _vector slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &slide))

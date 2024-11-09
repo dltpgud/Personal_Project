@@ -172,6 +172,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Aim.h" />
+    <ClInclude Include="..\Public\BillyBoom.h" />
+    <ClInclude Include="..\Public\Body_BillyBoom.h" />
     <ClInclude Include="..\Public\Body_BoomBot.h" />
     <ClInclude Include="..\Public\Body_GunPawn.h" />
     <ClInclude Include="..\Public\Body_HealthBot.h" />
@@ -179,6 +181,7 @@
     <ClInclude Include="..\Public\Body_MecanoBot.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
+    <ClInclude Include="..\Public\BossIntroBG.h" />
     <ClInclude Include="..\Public\Bullet.h" />
     <ClInclude Include="..\Public\CHEST.h" />
     <ClInclude Include="..\Public\DOOR.h">
@@ -211,6 +214,7 @@
     <ClInclude Include="..\Public\PlayerUI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\Sky.h" />
     <ClInclude Include="..\Public\SpriteTexture.h" />
     <ClInclude Include="..\Public\Terrain.h">
@@ -230,6 +234,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Aim.cpp" />
+    <ClCompile Include="..\Private\BillyBoom.cpp" />
+    <ClCompile Include="..\Private\Body_BillyBoom.cpp" />
     <ClCompile Include="..\Private\Body_BoomBot.cpp" />
     <ClCompile Include="..\Private\Body_GunPawn.cpp" />
     <ClCompile Include="..\Private\Body_HealthBot.cpp" />
@@ -237,6 +243,7 @@
     <ClCompile Include="..\Private\Body_MecanoBot.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
+    <ClCompile Include="..\Private\BossIntroBG.cpp" />
     <ClCompile Include="..\Private\Bullet.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />
     <ClCompile Include="..\Private\DOOR.cpp" />
@@ -266,6 +273,7 @@
     <ClCompile Include="..\Private\PlayerUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\Private\Sky.cpp" />
     <ClCompile Include="..\Private\SpriteTexture.cpp" />
     <ClCompile Include="..\Private\Terrain.cpp">

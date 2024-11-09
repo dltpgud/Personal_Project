@@ -64,8 +64,8 @@ public: /* For.Object_Manager*/
 	HRESULT Add_GameObject_To_Layer(_uint iLevelIndex, const _uint& strLayerTag, const _wstring& strPrototypeTag, const _tchar* strProtoMapPath = nullptr, const _uint& DataType =0, void* pArg = nullptr, const _uint& ProtoTag = 0);
 	HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, class CGameObject* pGameObject);
     CGameObject* Find_Prototype(const _wstring& strPrototypeTag);
-	class CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg = nullptr);
-
+    CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg = nullptr);
+	CGameObject* Find_CloneGameObject(_uint iLevelIndex, const _uint& strLayerTag, const _uint& ProtoTag);
 	/*---EDIT----*/
 	map<const _wstring, class CGameObject*>		 Get_ProtoObject_map();
 	_bool IsGameObject(_uint iLevelIndex, const _uint& strLayerTag);

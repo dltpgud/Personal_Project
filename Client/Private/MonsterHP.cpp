@@ -32,11 +32,6 @@ HRESULT CMonsterHP::Initialize(void* pArg)
 		return E_FAIL;
 
 
- 	_matrix mat = XMMatrixRotationY((XMConvertToRadians(180.f)));
-
-
-
-
 	m_pTransformCom->Set_Scaling(2.f, 0.2f, 0.f);
 
 	m_fHP_Pluse = m_fHP * 1.3f / m_fMaxHP;

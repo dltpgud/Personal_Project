@@ -426,6 +426,13 @@ CGameObject* CGameInstance::Clone_Prototype(const _wstring& strPrototypeTag, voi
 
 	return m_pObject_Manager->Clone_Prototype(strPrototypeTag, pArg);
 }
+CGameObject* CGameInstance::Find_CloneGameObject(_uint iLevelIndex, const _uint& strLayerTag, const _uint& ProtoTag)
+{
+	if (nullptr == m_pObject_Manager)
+		return nullptr;
+
+	return m_pObject_Manager->Find_CloneGameObject(iLevelIndex, strLayerTag, ProtoTag);
+}
 #pragma endregion
 
 

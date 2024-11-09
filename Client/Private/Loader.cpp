@@ -34,6 +34,10 @@
 #include "Bullet.h"
 #include "Body_MecanoBot.h"
 #include "MecanoBot.h"
+#include "Body_BillyBoom.h"
+#include "BillyBoom.h"
+#include "SceneCamera.h"
+#include "BossIntroBG.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -297,6 +301,9 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_MecanoBot"),
 		 	CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_MecanoBot.dat"), PreTransformMatrix))))
 			return E_FAIL;
+		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_BillyBoom"),
+			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_BillyBoom.dat"), PreTransformMatrix))))
+			return E_FAIL;
 
 		//*Prototype_Component_NPC*//
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component HealthBot_Model"),
@@ -403,6 +410,22 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	 	CBody_MecanoBot::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+
+	/* Prototype_GameObject_Monster_Boss */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_BillyBoom"),
+		CBillyBoom::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	/* Prototype_GameObject_Monster_Body_Boss */
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_BillyBoom"),
+		CBody_BillyBoom::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Boss_InstroUI"),
+		CBossIntroBG::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+
+
+
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_Bullet"),
 		CBullet::Create(m_pDevice, m_pContext))))
 			return E_FAIL;
@@ -461,7 +484,10 @@ HRESULT CLoader::Loading_For_BossLevel()
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
 
 	m_strLoadingText = TEXT("객체원형 로딩중입니다.");
-
+	/*Prototype_GameObject_SceneCamera*/
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");

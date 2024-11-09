@@ -142,6 +142,21 @@
     <Filter Include="01.Level\01.GamePlay\StageBoss">
       <UniqueIdentifier>{69b3a31f-376a-407e-a01a-91c101f2e151}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\Boss">
+      <UniqueIdentifier>{99d8ddec-d756-4a55-9528-fc55e0a5e88b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\Boss\Body">
+      <UniqueIdentifier>{f2fd4784-5a7b-49c6-bb25-587d96ebf4ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\99 Camera\FPV">
+      <UniqueIdentifier>{a02db8ca-48d9-4dad-8eaf-a57d37620ecd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\99 Camera\SceneCam">
+      <UniqueIdentifier>{2c0aa120-5eba-4e01-b921-b7fd723506c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\Boss\IntroUI">
+      <UniqueIdentifier>{85fab227-8d6c-458a-ae53-d03f02920569}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -182,9 +197,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\PlayerUI.h">
       <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Camera_Free.h">
-      <Filter>02.GameObjects\99 Camera</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Cursor.h">
       <Filter>02.GameObjects\04.UI\Cursor</Filter>
@@ -276,6 +288,21 @@
     <ClInclude Include="..\Public\Level_StageBoss.h">
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom.h">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Body_BillyBoom.h">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss\Body</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Camera_Free.h">
+      <Filter>02.GameObjects\99 Camera\FPV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SceneCamera.h">
+      <Filter>02.GameObjects\99 Camera\SceneCam</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BossIntroBG.h">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss\IntroUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -304,9 +331,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\PlayerUI.cpp">
       <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Camera_Free.cpp">
-      <Filter>02.GameObjects\99 Camera</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Cursor.cpp">
       <Filter>02.GameObjects\04.UI\Cursor</Filter>
@@ -397,6 +421,21 @@
     </ClCompile>
     <ClCompile Include="..\Private\Level_StageBoss.cpp">
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Body_BillyBoom.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss\Body</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Camera_Free.cpp">
+      <Filter>02.GameObjects\99 Camera\FPV</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SceneCamera.cpp">
+      <Filter>02.GameObjects\99 Camera\SceneCam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossIntroBG.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss\IntroUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

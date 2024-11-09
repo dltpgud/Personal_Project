@@ -1,4 +1,4 @@
-﻿ #pragma once
+﻿#pragma once
 
 #include "Client_Defines.h"
 #include "Level.h"
@@ -25,6 +25,9 @@ private:
 	HRESULT Ready_Find_cell();
 	HRESULT Ready_Light();
 	
+private :
+	class CSceneCamera* m_pSceneCam = { nullptr};
+
 public:
 	static CLevel_StageBoss* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void Free() override;
