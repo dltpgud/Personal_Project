@@ -79,7 +79,7 @@ void CMecanoBot::Update(_float fTimeDelta)
     if (2 != m_pNavigationCom->Get_CurrentCell_Type())
     {
         if (m_iState != ST_Stagger_Front && m_iState != ST_Stun_Start) {
-            m_pTransformCom->Rotation_to_Player();
+            m_pTransformCom->Rotation_to_Player(fTimeDelta);
             NON_intersect(fTimeDelta);
         }
     }

@@ -3,15 +3,15 @@
 #include "Shader.h"
 #include "VIBuffer_Rect.h"
 
-CRenderTarget::CRenderTarget(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
-	: m_pDevice { pDevice }
-	, m_pContext { pContext }
+CRenderTarget::CRenderTarget(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	: m_pDevice{ pDevice }
+	, m_pContext{ pContext }
 {
 	Safe_AddRef(m_pContext);
 	Safe_AddRef(m_pDevice);
 }
 
-HRESULT CRenderTarget::Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4 & vClearColor)
+HRESULT CRenderTarget::Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor)
 {
 	m_vClearColor = vClearColor;
 
@@ -31,7 +31,7 @@ HRESULT CRenderTarget::Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT ePixe
 	TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	TextureDesc.CPUAccessFlags = 0;
 	TextureDesc.MiscFlags = 0;
-	
+
 	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
 		return E_FAIL;
 
@@ -41,18 +41,25 @@ HRESULT CRenderTarget::Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT ePixe
 	if (FAILED(m_pDevice->CreateRenderTargetView(m_pTexture2D, nullptr, &m_pRTV)))
 		return E_FAIL;
 
+
+
+
 	return S_OK;
 }
 
 void CRenderTarget::Clear()
 {
-	m_pContext->ClearRenderTargetView(m_pRTV, (_float*)&m_vClearColor); // 랜더 타겟뷰를 클리어 색으로 지워준다.
+	m_pContext->ClearRenderTargetView(m_pRTV, (_float*)&m_vClearColor);
+}
+
+HRESULT CRenderTarget::Bind_ShaderResource(CShader* pShader, const _char* pConstantName)
+{
+	return pShader->Bind_SRV(pConstantName, m_pSRV);
 }
 
 #ifdef _DEBUG
 HRESULT CRenderTarget::Ready_Debug(_float fX, _float fY, _float fSizeX, _float fSizeY)
 {
-	// 직교 투영으로 랜더 타겟을 그릴 준비를 한다.
 	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
 
 	m_WorldMatrix._11 = fSizeX;
@@ -68,10 +75,8 @@ HRESULT CRenderTarget::Ready_Debug(_float fX, _float fY, _float fSizeX, _float f
 
 	return S_OK;
 }
-HRESULT CRenderTarget::Render(CShader * pShader, CVIBuffer_Rect * pVIBuffer)
+HRESULT CRenderTarget::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
-
- // 쉐이더에 바인딩한다.
 	if (FAILED(pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
 		return E_FAIL;
 
@@ -86,9 +91,9 @@ HRESULT CRenderTarget::Render(CShader * pShader, CVIBuffer_Rect * pVIBuffer)
 }
 #endif
 
-CRenderTarget * CRenderTarget::Create(ID3D11Device * pDevice, ID3D11DeviceContext * pContext, _uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4 & vClearColor)
+CRenderTarget* CRenderTarget::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor)
 {
-	CRenderTarget*		pInstance = new CRenderTarget(pDevice, pContext);
+	CRenderTarget* pInstance = new CRenderTarget(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize(iWidth, iHeight, ePixelFormat, vClearColor)))
 	{
@@ -104,7 +109,6 @@ void CRenderTarget::Free()
 {
 	__super::Free();
 
-	//SaveDDSTextureToFile(m_pContext, m_pTexture2D, TEXT("../Bin/fdkljsa.dds"));
 
 	Safe_Release(m_pRTV);
 	Safe_Release(m_pSRV);

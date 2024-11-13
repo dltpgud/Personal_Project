@@ -6,6 +6,7 @@
 #include "Camera_Free.h"
 #include "Player.h"
 #include "Actor.h"
+
 CLevel_Stage1::CLevel_Stage1(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -38,7 +39,7 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
-	
+
 	return S_OK;
 }
 
@@ -200,7 +201,7 @@ HRESULT CLevel_Stage1::Ready_Light()
 	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
 	LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vAmbient = _float4(0.3f, 0.3f, 0.3f, 1.f);
 	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
 
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))

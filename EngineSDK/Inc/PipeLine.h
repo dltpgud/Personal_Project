@@ -22,8 +22,12 @@ public:
         return &m_TransMatrix[eState]; // 저장용
     }
 
-
-
+    const _float4x4* Get_TransformFloat4x4_Inverse(TRANSFORM_STATE eState) {
+        return &m_TransMatrixInverse[eState];
+    }
+    _matrix Get_TransformMatrix_Inverse(TRANSFORM_STATE eState) {
+        return XMLoadFloat4x4(&m_TransMatrixInverse[eState]);
+    }
 
 
     _matrix Get_TransformMatrix(TRANSFORM_STATE eState)

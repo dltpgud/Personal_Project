@@ -51,8 +51,17 @@ void Cfabric::Update(_float fTimeDelta)
 
 void Cfabric::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
+    if (m_wModel == TEXT("Proto Component Bus Model_nonaniObj"))
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
+            return;
+    }
+    else
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
+    }
+       
     __super::Late_Update(fTimeDelta);
 }
 
@@ -75,7 +84,7 @@ HRESULT Cfabric::Render()
 
         m_pModelCom->Render(i);
     }
-    __super::Render();
+    
     
     return S_OK;
 }
@@ -150,18 +159,6 @@ HRESULT Cfabric::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    const LIGHT_DESC* pLightDesc = m_pGameInstance->Get_LightDesc(0);
-    if (nullptr == pLightDesc)
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDir", &pLightDesc->vDirection, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDiffuse", &pLightDesc->vDiffuse, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
-        return E_FAIL;
 
     return S_OK;
 }

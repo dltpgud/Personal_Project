@@ -109,10 +109,12 @@ public: /* For.Sound*/
 
 public: /* For.Renderer	*/
 	HRESULT Add_RenderGameObject(CRenderer::RENDERGROUP eRenderGroup, class CGameObject* pRenderGameObject);
-
+	HRESULT Add_DebugComponents(class CComponent* pComponent);
 public: /* For.PipeLine */
 	const _float4x4* Get_TransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_TransformMatrix(CPipeLine::TRANSFORM_STATE eState);
+	const _float4x4* Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
+	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
@@ -120,6 +122,8 @@ public: /* For.PipeLine */
 public: /* For.Light_Manager */
 	const LIGHT_DESC* Get_LightDesc(_uint iIndex);
 	HRESULT Add_Light(const LIGHT_DESC& LightDesc);
+	HRESULT Render_Lights(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT Light_Clear();
 
 public: /* For.Calculator */
 	_float3	Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis);
@@ -138,6 +142,7 @@ public: /* For.Target_Manager */
 		HRESULT Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 		HRESULT Begin_MRT(const _wstring& strMRTTag);
 		HRESULT End_MRT(const _wstring& strMRTTag);
+		HRESULT Bind_RT_SRV(class CShader* pShader, const _char* pConstantName, const _wstring& strTargetTag);
 
 #ifdef _DEBUG
 		HRESULT Ready_RT_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);

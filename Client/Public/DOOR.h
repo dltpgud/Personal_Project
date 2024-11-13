@@ -36,10 +36,14 @@ public:
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
 	virtual CModel* Get_Model() override { return m_pModelCom; }
 	virtual void Set_Buffer(_uint x, _uint y)override;
+
+	HRESULT Add_StageDoorLight();
+	HRESULT Add_BossDoorLight();
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CModel*						m_pModelCom = { nullptr };
-	_float m_OpenTime = { 1.f };
+	_float						m_OpenTime = { 1.f };
+	_bool                       m_bSet_Light = true;
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

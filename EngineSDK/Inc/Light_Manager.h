@@ -15,10 +15,11 @@ public:
 
 public:
 	HRESULT Initialize();
-	HRESULT Add_Light(const LIGHT_DESC& LightDesc);
-
+	HRESULT Add_Light( const LIGHT_DESC& LightDesc);
+   	HRESULT Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT Clear();
 private:
-	list<class CLight*>		m_Lights;
+	list<class CLight*> m_Lights{};
 
 public:
 	static CLight_Manager* Create();

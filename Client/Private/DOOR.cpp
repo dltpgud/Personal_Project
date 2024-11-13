@@ -32,7 +32,7 @@ HRESULT CDOOR::Initialize(void* pArg)
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
-
+    
     return S_OK;
 }
 
@@ -51,6 +51,12 @@ _int CDOOR::Priority_Update(_float fTimeDelta)
 
 void CDOOR::Update(_float fTimeDelta)
 {
+
+    if (m_bSet_Light) {
+        Add_StageDoorLight();
+        Add_BossDoorLight();
+        m_bSet_Light = false;
+    }
     _vector vPlayerPos = m_pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
     _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
@@ -174,11 +180,142 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_iState = State::ClOSE;
         m_pModelCom->Set_Animation(m_iState, false);
     }
+  //  Add_Light();
 }
 
 void CDOOR::Set_Buffer(_uint x, _uint y)
 {
     m_DoorType = y;
+}
+
+HRESULT CDOOR::Add_StageDoorLight()
+{
+
+    if (m_pModelName == L"Proto Component ItemDoor Model_aniObj")
+        return S_OK;
+    if (m_pModelName == L"Proto Component BossDoor Model_aniObj")
+        return S_OK;
+
+     const _float4x4* LightPos = m_pModelCom->Get_BoneMatrix("Door_Down");
+    
+     _vector vLocalPos{};
+     _vector vWoldPos{};
+     _float4 fWoldPos{};
+     LIGHT_DESC	LightDesc{};
+
+     vLocalPos  = { LightPos->_41 - 4.5f, LightPos->_42 + 7.f, LightPos->_43 + 3.f, LightPos->_44 };
+     vWoldPos =  XMVector3TransformCoord(vLocalPos, m_pTransformCom->Get_WorldMatrix());
+    XMStoreFloat4(&fWoldPos, vWoldPos);
+
+    ZeroMemory(&LightDesc, sizeof LightDesc);
+    LightDesc.eType = LIGHT_DESC::TYPE_POINT;
+    LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
+    LightDesc.fRange = 3.f;
+    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
+    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
+    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+
+    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+        return E_FAIL;
+
+
+    vLocalPos = { LightPos->_41 + 3.5f, LightPos->_42 + 7.f, LightPos->_43 + 3.f, LightPos->_44 };
+    vWoldPos = XMVector3TransformCoord(vLocalPos, m_pTransformCom->Get_WorldMatrix());
+    XMStoreFloat4(&fWoldPos, vWoldPos);
+
+    ZeroMemory(&LightDesc, sizeof LightDesc);
+    LightDesc.eType = LIGHT_DESC::TYPE_POINT;
+    LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
+    LightDesc.fRange = 3.f;
+    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
+    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
+    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+
+    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+        return E_FAIL;
+
+    vLocalPos = { LightPos->_41 + 4.f, LightPos->_42 + 7.f, LightPos->_43 - 3.f, LightPos->_44 };
+    vWoldPos = XMVector3TransformCoord(vLocalPos, m_pTransformCom->Get_WorldMatrix());
+    XMStoreFloat4(&fWoldPos, vWoldPos);
+
+    ZeroMemory(&LightDesc, sizeof LightDesc);
+    LightDesc.eType = LIGHT_DESC::TYPE_POINT;
+    LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
+    LightDesc.fRange = 3.f;
+    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
+    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
+    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+
+    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+        return E_FAIL;
+
+    vLocalPos = { LightPos->_41 - 4.f, LightPos->_42 + 7.f, LightPos->_43 - 3.f, LightPos->_44 };
+    vWoldPos = XMVector3TransformCoord(vLocalPos, m_pTransformCom->Get_WorldMatrix());
+    XMStoreFloat4(&fWoldPos, vWoldPos);
+
+    ZeroMemory(&LightDesc, sizeof LightDesc);
+    LightDesc.eType = LIGHT_DESC::TYPE_POINT;
+    LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
+    LightDesc.fRange = 3.f;
+    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
+    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
+    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+    
+    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+        return E_FAIL;
+
+
+    return S_OK;
+}
+
+HRESULT CDOOR::Add_BossDoorLight()
+{
+
+    if (m_pModelName == L"Proto Component ItemDoor Model_aniObj")
+        return S_OK;
+    if (m_pModelName == L"Proto Component StageDoor Model_aniObj")
+        return S_OK;
+
+    const _float4x4* LightPos = m_pModelCom->Get_BoneMatrix("Clap_L");
+
+    _vector vLocalPos{};
+    _vector vWoldPos{};
+    _float4 fWoldPos{};
+    LIGHT_DESC	LightDesc{};
+
+    vLocalPos = { LightPos->_41-2.f, LightPos->_42 +7.f, LightPos->_43-4.f, LightPos->_44 };
+    vWoldPos = XMVector3TransformCoord(vLocalPos, m_pTransformCom->Get_WorldMatrix());
+    XMStoreFloat4(&fWoldPos, vWoldPos);
+
+    ZeroMemory(&LightDesc, sizeof LightDesc);
+    LightDesc.eType = LIGHT_DESC::TYPE_POINT;
+    LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
+    LightDesc.fRange = 3.f;
+    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
+    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
+    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+
+    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+        return E_FAIL;
+
+
+    vLocalPos = { LightPos->_41 + 2.f, LightPos->_42 + 7.f, LightPos->_43-4.f, LightPos->_44 };
+    vWoldPos = XMVector3TransformCoord(vLocalPos, m_pTransformCom->Get_WorldMatrix());
+    XMStoreFloat4(&fWoldPos, vWoldPos);
+
+    ZeroMemory(&LightDesc, sizeof LightDesc);
+    LightDesc.eType = LIGHT_DESC::TYPE_POINT;
+    LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
+    LightDesc.fRange = 3.f;
+    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
+    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
+    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+
+    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+        return E_FAIL;
+
+
+    return S_OK;
 }
 
 HRESULT CDOOR::Add_Components()
@@ -205,19 +342,7 @@ HRESULT CDOOR::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    const LIGHT_DESC* pLightDesc = m_pGameInstance->Get_LightDesc(0);
-    if (nullptr == pLightDesc)
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDir", &pLightDesc->vDirection, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDiffuse", &pLightDesc->vDiffuse, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
-        return E_FAIL;
-
+ 
     return S_OK;
 }
 

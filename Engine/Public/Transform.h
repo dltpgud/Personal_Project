@@ -45,18 +45,18 @@ public:
     }
     void Set_Scaling(_float fScaleX, _float fScaleY, _float fScaleZ);
     void LookAt(_fvector vAt);
-    void Go_Straight(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
-    void Go_Left(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
-    void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
-    void Go_Backward(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
-    void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
-    void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool* IsSame = nullptr);
+    void Go_Straight(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
+    void Go_Left(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
+    void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
+    void Go_Backward(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
+    void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
+    void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
     void Go_Doublejump(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void GO_Dir(_float fTimeDelta, _vector Dir);
     void Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, _bool* Jumpcheck );
     void Stop_Move();
-    void Rotation_to_Player();
+    void Rotation_to_Player(_float fTimeDelta);
     void Other_set_Pos(CTransform* Other, FIX FixPosWhere,_float FixPos, _float3* Ouput = nullptr);
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
     void Turn(_fvector vAxis, _float fTimeDelta);

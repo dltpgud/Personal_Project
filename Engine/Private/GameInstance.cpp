@@ -131,7 +131,6 @@ void CGameInstance::Clear(_uint iClearLevelID)
 	m_pObject_Manager->Clear(iClearLevelID);
 	m_pComponent_Manager->Clear(iClearLevelID);
 	m_pCollider_Manager->Clear(iClearLevelID);
-
 }
 
 void CGameInstance::Set_Player(CGameObject* pPlayer)
@@ -244,7 +243,7 @@ void CGameInstance::Get_FPS(const _wstring& pTimerTag, HWND g_hWnd)
 
 	return m_pTimer_Manager->Get_FPS(pTimerTag, g_hWnd);
 }
-#endif // !_DEBUG
+#endif 
 #pragma endregion
 
 #pragma region Level_Manager 
@@ -618,6 +617,13 @@ HRESULT CGameInstance::Add_RenderGameObject(CRenderer::RENDERGROUP eRenderGroup,
 
 	return m_pRenderer->Add_RenderGameObject(eRenderGroup, pRenderGameObject);
 }
+HRESULT CGameInstance::Add_DebugComponents(CComponent* pComponent)
+{
+	if (nullptr == m_pRenderer)
+		return E_FAIL;
+
+	return m_pRenderer->Add_DebugComponents(pComponent);
+}
 #pragma endregion
 
 #pragma region PipeLine
@@ -632,6 +638,16 @@ const _float4x4* CGameInstance::Get_TransformFloat4x4(CPipeLine::TRANSFORM_STATE
 _matrix CGameInstance::Get_TransformMatrix(CPipeLine::TRANSFORM_STATE eState)
 {
 	return m_pPipeLine->Get_TransformMatrix(eState);
+}
+
+const _float4x4* CGameInstance::Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState)
+{
+	return m_pPipeLine->Get_TransformFloat4x4_Inverse(eState);
+}
+
+_matrix CGameInstance::Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState)
+{
+	return m_pPipeLine->Get_TransformMatrix_Inverse(eState);
 }
 
 const _float4* CGameInstance::Get_CamPosition()
@@ -678,6 +694,16 @@ HRESULT CGameInstance::Add_Light(const LIGHT_DESC& LightDesc)
 
 	return m_pLight_Manager->Add_Light(LightDesc);
 }
+HRESULT CGameInstance::Render_Lights(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	return m_pLight_Manager->Render(pShader, pVIBuffer);
+}
+
+HRESULT CGameInstance::Light_Clear()
+{
+	 return m_pLight_Manager->Clear();
+}
+
 #pragma endregion
 
 
@@ -779,6 +805,13 @@ HRESULT CGameInstance::End_MRT(const _wstring& strMRTTag)
 	return m_pTarget_Manager->End_MRT(strMRTTag);
 }
 
+HRESULT CGameInstance::Bind_RT_SRV(CShader* pShader, const _char* pConstantName, const _wstring& strTargetTag)
+{
+
+	return m_pTarget_Manager->Bind_SRV(pShader, pConstantName, strTargetTag);
+}
+
+ #ifdef _DEBUG
 HRESULT CGameInstance::Ready_RT_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
 {
 	if (nullptr == m_pTarget_Manager)
@@ -796,6 +829,7 @@ HRESULT CGameInstance::Render_RT_Debug(const _wstring& strMRTTag, CShader* pShad
 }
 
 #pragma endregion
+#endif // _DEBUG
 
 void CGameInstance::Free()
 {

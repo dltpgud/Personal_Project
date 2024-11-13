@@ -154,8 +154,14 @@
     <Filter Include="02.GameObjects\99 Camera\SceneCam">
       <UniqueIdentifier>{2c0aa120-5eba-4e01-b921-b7fd723506c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\Boss\IntroUI">
+    <Filter Include="02.GameObjects\04.UI\Boss UI">
+      <UniqueIdentifier>{beacd3f3-5428-4154-bca9-83d56edfea3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\Boss UI\Boss IntroUI">
       <UniqueIdentifier>{85fab227-8d6c-458a-ae53-d03f02920569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\Boss UI\Boss HP">
+      <UniqueIdentifier>{3f5e2226-e1ba-4a35-9f72-8935c85aee40}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -188,9 +194,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Menu.h">
       <Filter>02.GameObjects\04.UI\Menu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Loader.h">
-      <Filter>01.Level\99.Loading\Loader</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Loading.h">
       <Filter>02.GameObjects\04.UI\Loading</Filter>
@@ -288,9 +291,6 @@
     <ClInclude Include="..\Public\Level_StageBoss.h">
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\BillyBoom.h">
-      <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Body_BillyBoom.h">
       <Filter>02.GameObjects\03.Actor\Monster\Boss\Body</Filter>
     </ClInclude>
@@ -301,7 +301,16 @@
       <Filter>02.GameObjects\99 Camera\SceneCam</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BossIntroBG.h">
-      <Filter>02.GameObjects\03.Actor\Monster\Boss\IntroUI</Filter>
+      <Filter>02.GameObjects\04.UI\Boss UI\Boss IntroUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BossHP.h">
+      <Filter>02.GameObjects\04.UI\Boss UI\Boss HP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom.h">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader.h">
+      <Filter>01.Level\99.Loading</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -435,7 +444,10 @@
       <Filter>02.GameObjects\99 Camera\SceneCam</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BossIntroBG.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\Boss\IntroUI</Filter>
+      <Filter>02.GameObjects\04.UI\Boss UI\Boss IntroUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossHP.cpp">
+      <Filter>02.GameObjects\04.UI\Boss UI\Boss HP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

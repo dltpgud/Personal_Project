@@ -116,7 +116,7 @@ void CDoor::Set_Model(const _wstring& protoModel, _uint ILevel)
     CBounding_OBB::BOUND_OBB_DESC		OBBDesc{};
   //  m_pModelCom->Center_Ext(&OBBDesc.vCenter, &OBBDesc.vExtents);
 
-    OBBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
+    OBBDesc.vExtents = _float3(4.f, 8.f, 3.f);
     OBBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
     OBBDesc.vRotation = { 0.f,0.f,0.f };
     //AABBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);

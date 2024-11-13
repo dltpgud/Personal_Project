@@ -38,9 +38,10 @@ HRESULT CBossIntroBG::Initialize(void* pArg)
 
 _int CBossIntroBG::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
+	if (m_bDead) {
 
+		return OBJ_DEAD;
+	}
 	m_pTransformCom->LookAt(XMLoadFloat4(m_pGameInstance->Get_CamPosition()));
 
 	return OBJ_NOEVENT;
@@ -70,7 +71,7 @@ void CBossIntroBG::Update(_float fTimeDelta)
 		dynamic_cast<CCamera_Free*>(m_pGameInstance->Find_CloneGameObject(LEVEL_STATIC, CGameObject::CAMERA, CGameObject::DATA_CAMERA))->Set_Update(true);
 	
 		dynamic_cast<CSceneCamera*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::CAMERA, CGameObject::DATA_CAMERA))->Set_Dead(true);
- 
+ 		m_pGameInstance->Set_OpenUI(CUI::UIID_BossHP, true);
 	}
 }
 
@@ -120,7 +121,7 @@ HRESULT CBossIntroBG::Set_Pos()
 	IntroDesc[0].fSizeY = 18.f;
 	IntroDesc[0].fX = m_fX;
 	IntroDesc[0].fY = m_fY ;
-	IntroDesc[0].fZ = m_fZ+2.f;
+	IntroDesc[0].fZ = m_fZ+4.f;
 
 
 	IntroDesc[2].fSizeX = 7.f;
@@ -132,7 +133,7 @@ HRESULT CBossIntroBG::Set_Pos()
 	IntroDesc[1].fSizeX = 2.f;
 	IntroDesc[1].fSizeY = 2.f;
 	IntroDesc[1].fX =  m_fX	+ 1.7f;
-	IntroDesc[1].fY =  m_fY + 2.2f;
+	IntroDesc[1].fY =  m_fY + 1.5f;
 	IntroDesc[1].fZ =  m_fZ - 8.8f;
 
 	return S_OK;
@@ -153,10 +154,6 @@ void CBossIntroBG::Set_IntroPos(void* pArg)
 		CTransform::TRANSFORM_POSITION,
 		XMVectorSet(m_fX, m_fY + m_fSizeY * 0.4f, m_fZ, 1.f));
 }
-
-
-
-
 
 
 

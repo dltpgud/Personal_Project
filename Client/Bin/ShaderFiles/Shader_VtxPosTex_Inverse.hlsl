@@ -12,6 +12,14 @@ float g_hp, g_hp_pluse;
 texture2D g_Texture, g_Texture0, g_Texture1, g_Texture2;
 bool g_Hit;
 
+
+struct VS_IN_SAMPLE
+{
+    float3 vPosition : POSITION;
+    float2 vTexcoord : TEXCOORD0;
+};
+
+
 struct VS_IN    /*입력 매개변수*/
 {
     float3 vPosition : POSITION;
@@ -95,10 +103,9 @@ PS_OUT PS_MAIN_HP_Bar_BackGround(PS_IN In)
     }
     Out.vColor = Diffuse0;
 
-    if (Out.vColor.a == 0.f)  /*DX11에서는 알파테스트(알파값으로 반투명은 고려하지 않고 그릴지 말지 판단해 놓는 것)가 없음으로 쉐이더로 조건*/
+    if (Out.vColor.a == 0.f)  
         discard;
-    
-    //  float2 vProjPos = In.vProjPos.xy / In.vProjPos.w;     /*뷰 포트 좌표를 투영 좌표로 전환이 가능*/
+
     
     return Out;
 }

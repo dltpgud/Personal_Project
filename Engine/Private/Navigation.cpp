@@ -75,7 +75,7 @@ void CNavigation::SetUp_Neighbor()
         }
     }
 }
-_bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide)
+_bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide, _bool Demage)
 {
     if (m_iCurrentCellIndex <= -1 || m_iCurrentCellIndex > m_Cells.size())
         return false;
@@ -109,9 +109,19 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                         return false;
                     }
 
+                    if (true == Demage) {
+                        if (CCell::DEMAGE == m_Cells[iNeighborIndex]->Get_Type())
+                        {
+                            m_iNonMoveCellIndex = iNeighborIndex;
+                            Slid = XMVectorZero();
+                            return false;
+                        }
+                    }
                     if (CCell::SAFE == m_Cells[iNeighborIndex]->Get_Type())
                     {
-                        m_iSafeCellIndex = iNeighborIndex;
+                        m_vSafePos = (m_Cells[iNeighborIndex]->Get_Point(CCell::POINT_A) +
+                            m_Cells[iNeighborIndex]->Get_Point(CCell::POINT_B) +
+                            m_Cells[iNeighborIndex]->Get_Point(CCell::POINT_C)) / 3;
                     }
                     break;
                 }
@@ -149,6 +159,16 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                         m_iNonMoveCellIndex = iNeighborIndex;
                         Slid = XMVectorZero();
                         return false;
+                    }
+
+
+                    if (true == Demage) {
+                        if (CCell::DEMAGE == m_Cells[iNeighborIndex]->Get_Type())
+                        {
+                            m_iNonMoveCellIndex = iNeighborIndex;
+                            Slid = XMVectorZero();
+                            return false;
+                        }
                     }
 
                     if (CCell::SAFE == m_Cells[iNeighborIndex]->Get_Type())
@@ -495,7 +515,7 @@ void CNavigation::Find_CurrentCell(_vector vWorldPos)
 
         if (true == m_Cells[i]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &slide))
         {
-            m_iCurrentCellIndex = i;
+             m_iCurrentCellIndex = i;
             return;
         }
     }

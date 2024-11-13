@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "BillyBoom.h"
 #include "BossIntroBG.h"
+
 CLevel_StageBoss::CLevel_StageBoss(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -49,7 +50,7 @@ void CLevel_StageBoss::Update(_float fTimeDelta)
 		if (m_pSceneCam->Get_IsCamEnd())
 		{
 			dynamic_cast<CBillyBoom*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER))->Intro_Routine(fTimeDelta);
-			
+
 		}
 	}
 	
@@ -146,6 +147,18 @@ HRESULT CLevel_StageBoss::Ready_Find_cell()
 
 HRESULT CLevel_StageBoss::Ready_Light()
 {
+	m_pGameInstance->Light_Clear();
+	LIGHT_DESC			LightDesc{};
+
+	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
+	LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vAmbient = _float4(0.3f, 0.3f, 0.3f, 1.f);
+	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
+
+	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -171,5 +184,5 @@ CLevel_StageBoss* CLevel_StageBoss::Create(ID3D11Device* pDevice, ID3D11DeviceCo
 void CLevel_StageBoss::Free()
 {
 	__super::Free();
-
+	Safe_Release(m_pSceneCam);
 }

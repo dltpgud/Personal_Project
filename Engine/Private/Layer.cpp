@@ -73,6 +73,7 @@ CGameObject* CLayer::Get_GameObject(const _uint& strLayerTag , const _uint& Prot
         if (pGameObject->Get_Data() == ProtoTag)
             return pGameObject;
     }
+    return nullptr;
 }
 
 _bool CLayer::IsGameObject(const _uint& strLayerTag)
@@ -98,17 +99,13 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
             if (nullptr == pGameObject->Get_Model())
                 continue;
 
-         //if (CGameObject::DATA_CHEST == pGameObject->Get_Data() ) 
-         //      fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
-        // else if (CGameObject::DATA_DOOR == pGameObject->Get_Data())
             fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
-       //   else
-        //    fCurDIs = pGameObject->Get_Model()->Check_Pick(RayPos, RayDir, pGameObject->Get_Transform(), &vPos);
+
             if (fCurDIs < Desc.fDis)
             {
-                Desc.vPos = vPos;
                 Desc.fDis = fCurDIs;
                 Desc.pPickedObj = pGameObject;
+                Desc.vPos = RayPos + RayDir * fCurDIs;
             }
         }
     }
