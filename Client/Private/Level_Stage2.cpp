@@ -64,9 +64,9 @@ HRESULT CLevel_Stage2::Render()
 
 HRESULT CLevel_Stage2::Ready_Layer_Monster(const _uint& pLayerTag)
 {
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_MecanoBot",
-		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_MECANOBOT)))
-		return   E_FAIL;
+	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_MecanoBot",
+	//	L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_MECANOBOT)))
+	//	return   E_FAIL;
 
 	return S_OK;
 }
@@ -130,6 +130,18 @@ HRESULT CLevel_Stage2::Ready_Find_cell()
 
 HRESULT CLevel_Stage2::Ready_Light()
 {
+	m_pGameInstance->Light_Clear();
+	LIGHT_DESC			LightDesc{};
+
+	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
+	LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vAmbient = _float4(0.3f, 0.3f, 0.3f, 1.f);
+	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
+
+	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+		return E_FAIL;
+
 	return S_OK;
 }
 

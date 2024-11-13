@@ -12,8 +12,8 @@ class CBody_BillyBoom : public CPartObject
 public: 
 	typedef struct CBody_BillyBoom_Desc : CPartObject::PARTOBJECT_DESC
 	{
-
-     } CBody_BillyBoom_Desc;
+		CGameObject* pPickeObj{};
+    } CBody_BillyBoom_Desc;
 
 private:
 	CBody_BillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -34,7 +34,7 @@ public:
 
 
 	void Make_Bullet();
-
+	const _float4x4* GetHeand() { return m_pFindAttBonMatrix[3]; }
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
@@ -43,10 +43,9 @@ private:
 
 	_float m_fAttackTime{ 0.f };
 	_float m_pDamage = { 4.f };
+	CGameObject* m_pParent = nullptr;
+	const _float4x4* m_pFindAttBonMatrix[4]{};
 
-
-
-	const _float4x4* m_pFindBonMatrix[4]{};
 public:
     static CBody_BillyBoom* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

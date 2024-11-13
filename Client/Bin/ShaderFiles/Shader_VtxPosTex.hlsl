@@ -10,6 +10,14 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float g_hp, g_hp_pluse;
 texture2D g_Texture, g_Texture0, g_Texture1, g_Texture2;
 
+
+struct VS_IN_SAMPLE
+{
+    float3 vPosition : POSITION;
+    float2 vTexcoord : TEXCOORD0;
+};
+
+
 struct VS_IN    /*입력 매개변수*/
 {
     float3 vPosition : POSITION;
@@ -112,7 +120,69 @@ PS_OUT PS_MAIN_HP(PS_IN In)
     return Out;
 }
 
+
+PS_OUT PS_MAIN_BOSSHP(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+
+
+    float4 Black = { 0.f, 0.f, 1.f, 0.f };
+    float3 Blue = { 0.f, 0.f, 1.f };
+    float3 Majenta = { 1.f, 0.f, 1.f };
+    float3 Yellow = { 1.f, 1.f, 0.f };
+    float4 Diffuse0 = g_Texture.Sample(LinearSampler, In.vTexcoord);
+  
+    if (all(Diffuse0.xyz == Blue))
+       Diffuse0 -= Black;
+
+   else if (Diffuse0.x > 0.f && Diffuse0.z != 0.f)
+        Diffuse0 -= float4(1.f, 1.f, 1.f, 0.f);
+   else if (Diffuse0.x >= 0.f && Diffuse0.z == 0.f)
+        Diffuse0 += float4(1.f, 1.f, 1.f, 0.f);
+
+    if (In.vTexcoord.x < g_hp && all(Diffuse0.xyz == float3(0.f, 0.f, 0.f)))
+        Diffuse0 += float4(1.f, 0.f, 0.f, 1.f);
+    else if (In.vTexcoord.x < g_hp_pluse && all(Diffuse0.xyz == float3(0.f, 0.f, 0.f)))
+        Diffuse0 += float4(1.f, 1.f, 1.f, 1.f);
+    
+    
+    Out.vColor = Diffuse0;      
+
+        if (Out.vColor.a == 0.f)   
+            discard;
+    
+        return Out;
+    }
 /* 지정해준 색을 지정한 렌더타겟에 그려준다. */
+
+PS_OUT PS_MAIN_BOSSHP_BAR(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    vector Red = { 0.f, 1.f, 1.f, 0.f };
+    vector yellow = { 0.f, 0.f, 1.f, 0.f };
+    vector WHite = { 0.1f, 0.1f, 0.1f, 0.1f };
+    vector Diffuse0 = g_Texture0.Sample(LinearSampler, In.vTexcoord);
+    vector Diffuse1 = g_Texture1.Sample(LinearSampler, In.vTexcoord);
+  
+    Diffuse0 -= Red;
+    Diffuse1 -= yellow;
+
+    
+    if (In.vTexcoord.x < g_hp)
+        Out.vColor = Diffuse0;
+    else if (In.vTexcoord.x < g_hp_pluse)
+        Out.vColor = Diffuse1;
+
+ 
+    
+    
+    if (Out.vColor.a == 0.f)   
+        discard;
+    
+    return Out;
+}
 
 technique11 DefaultTechnique
 { /*Technique은 특정 렌더링 작업을 정의하는 셰이더 코드 블록*/
@@ -136,4 +206,23 @@ technique11 DefaultTechnique
 		PixelShader = compile ps_5_0 PS_MAIN_HP();
 	}
 
+    pass DefaultPass2
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_BOSSHP();
+    }
+
+    pass DefaultPass3
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_BOSSHP_BAR();
+    }
 }

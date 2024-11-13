@@ -49,7 +49,7 @@ _int CWeaPonIcon::Priority_Update(_float fTimeDelta)
 
 void CWeaPonIcon::Update(_float fTimeDelta)
 {
-    m_pTransformCom->Rotation_to_Player();
+    m_pTransformCom->Rotation_to_Player(fTimeDelta);
 
 
     if (m_moveTime > 0.f)
@@ -198,18 +198,6 @@ HRESULT CWeaPonIcon::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    const LIGHT_DESC* pLightDesc = m_pGameInstance->Get_LightDesc(0);
-    if (nullptr == pLightDesc)
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDir", &pLightDesc->vDirection, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDiffuse", &pLightDesc->vDiffuse, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
-        return E_FAIL;
 
     return S_OK;
 }

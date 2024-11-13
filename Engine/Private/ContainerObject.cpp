@@ -44,7 +44,6 @@ _int CContainerObject::Priority_Update(_float fTimeDelta)
 			pPartObject->Priority_Update(fTimeDelta);
 	}
 
-	__super::Priority_Update(fTimeDelta);
 	return OBJ_NOEVENT;
 }
 
@@ -70,7 +69,6 @@ void CContainerObject::Late_Update(_float fTimeDelta)
 
 HRESULT CContainerObject::Render()
 {
-	__super::Render();
 	return S_OK;
 }
 

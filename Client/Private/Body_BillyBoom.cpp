@@ -21,8 +21,11 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
 
     CBody_BillyBoom_Desc* pDesc = static_cast<CBody_BillyBoom_Desc*>(pArg);
 
-    m_pParentState = pDesc->pParentState;
+    m_pParentState   = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
+   
+    m_pParent        = pDesc->pPickeObj;
+    Safe_Release(m_pParent);
     /* Ãß°¡ÀûÀ¸·Î ÃÊ±âÈ­°¡ ÇÊ¿äÇÏ´Ù¸é ¼öÇàÇØÁØ´Ù. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
@@ -32,10 +35,13 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
    m_fPlayAniTime = 0.5f;
 
  // m_pFindBonMatrix = Get_SocketMatrix("R_Canon_02");
-   m_pFindBonMatrix[0] = Get_SocketMatrix("L_TopArm_05"); // ¿ÞÂÊ À§ ÆÈ
-   m_pFindBonMatrix[1] = Get_SocketMatrix("R_TopArm_05"); // ¿À¸¥ ÂÊ À§ ÆÈ
-   m_pFindBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
-   m_pFindBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // À§ÆÈ ¸ð¾Æ ½÷
+   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_05"); // ¿ÞÂÊ À§ ÆÈ
+   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_05"); // ¿À¸¥ ÂÊ À§ ÆÈ
+   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
+   m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ½Î´Ù±¸..
+
+
+   
     return S_OK;
 }
 
@@ -49,6 +55,7 @@ _int CBody_BillyBoom::Priority_Update(_float fTimeDelta)
 
 void CBody_BillyBoom::Update(_float fTimeDelta)
 {
+
     _bool bMotionChange = {false}, bLoop = {false};
     if (*m_pParentState == CBillyBoom::ST_Idle && m_iCurMotion != CBillyBoom::ST_Idle)
     {
@@ -64,9 +71,134 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-   
-   
+    if (*m_pParentState == CBillyBoom::ST_Comp_Poke_Front && m_iCurMotion != CBillyBoom::ST_Comp_Poke_Front)
+    {
+        m_iCurMotion = CBillyBoom::ST_Comp_Poke_Front;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+    if (*m_pParentState == CBillyBoom::ST_Comp_Idle && m_iCurMotion != CBillyBoom::ST_Comp_Idle)
+    {
+        m_iCurMotion = CBillyBoom::ST_Comp_Idle;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = true;
+    }
 
+    if (*m_pParentState == CBillyBoom::ST_Run_Front && m_iCurMotion != CBillyBoom::ST_Run_Front)
+    {
+        m_iCurMotion = CBillyBoom::ST_Run_Front;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = true;
+    }
+    
+
+    if (m_iCurMotion == CBillyBoom::ST_Barre_Shoot) {
+        m_fPlayAniTime = 0.5f;
+    }
+
+    if (*m_pParentState == CBillyBoom::ST_Barre_In && m_iCurMotion != CBillyBoom::ST_Barre_In)
+    {
+        m_iCurMotion = CBillyBoom::ST_Barre_In;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+    if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
+    {
+        m_fPlayAniTime = 1.f;
+    }
+
+    if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
+    {
+        m_fPlayAniTime = 0.25f;
+
+    }
+
+    if ( m_iCurMotion == CBillyBoom::ST_Laser_PreShoot)
+    {
+ 
+        m_fPlayAniTime = 1.f;
+
+    }
+
+    if (*m_pParentState == CBillyBoom::ST_Laser_In && m_iCurMotion != CBillyBoom::ST_Laser_In)
+    {
+        m_iCurMotion = CBillyBoom::ST_Laser_In;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+
+    if (*m_pParentState == CBillyBoom::ST_ShockWave_In && m_iCurMotion != CBillyBoom::ST_ShockWave_In)
+    {
+        m_iCurMotion = CBillyBoom::ST_ShockWave_In;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+
+    if ( m_iCurMotion == CBillyBoom::ST_ShockWave_PreShoot)
+    {
+        m_fPlayAniTime = 1.f;
+
+    }
+
+    if ( m_iCurMotion == CBillyBoom::ST_ShockWave_Shoot)
+    {
+     
+        m_fPlayAniTime = 1.f;
+
+    }
+
+    if ( m_iCurMotion == CBillyBoom::ST_ShockWave_Out)
+    {
+
+        m_fPlayAniTime = 1.f;
+
+    }
+
+    if (*m_pParentState == CBillyBoom::ST_Bash_PreShoot && m_iCurMotion != CBillyBoom::ST_Bash_PreShoot)
+    {   
+        m_iCurMotion = CBillyBoom::ST_Bash_PreShoot;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+    if ( m_iCurMotion == CBillyBoom::ST_Bash_Shoot)
+    {
+  
+        m_fPlayAniTime = 1.f;
+
+    }
+
+
+    if (*m_pParentState == CBillyBoom::ST_Stun_Start && m_iCurMotion != CBillyBoom::ST_Stun_Start)
+    {
+        m_iCurMotion = CBillyBoom::ST_Stun_Start;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+
+
+    if (*m_pParentState == CBillyBoom::ST_Stun_Pose && m_iCurMotion != CBillyBoom::ST_Stun_Pose)
+    {
+        m_iCurMotion = CBillyBoom::ST_Stun_Pose;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
+    
+    if (*m_pParentState == CBillyBoom::ST_Stun_Recover && m_iCurMotion != CBillyBoom::ST_Stun_Recover)
+    {
+        m_iCurMotion = CBillyBoom::ST_Stun_Recover;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = false;
+    }
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
@@ -74,17 +206,78 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         m_RimDesc.iPower = 1;
     }
 
+
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
         m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
         m_RimDesc.iPower = 1;
     }
-
-
+    
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
     if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
+        if (m_iCurMotion == CBillyBoom::ST_Bash_Shoot)
+            m_bFinishAni = true;
+        else
+        if (m_iCurMotion == CBillyBoom::ST_ShockWave_Shoot)
+                m_bFinishAni = true;
+        else
+        if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
+                        m_bFinishAni = true;
+        else
+            if (m_iCurMotion == CBillyBoom::ST_Barre_Shoot)
+                m_bFinishAni = true;
+        else
+        if (m_iCurMotion == CBillyBoom::ST_Bash_PreShoot)
+        {
+            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Bash_Shoot);
+            m_iCurMotion = CBillyBoom::ST_Bash_Shoot;
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
+        if (m_iCurMotion == CBillyBoom::ST_ShockWave_In)
+        {
+            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_ShockWave_PreShoot);
+            m_iCurMotion = CBillyBoom::ST_ShockWave_PreShoot;
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
+        if (m_iCurMotion == CBillyBoom::ST_ShockWave_PreShoot)
+        {
+            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_ShockWave_Shoot);
+            m_iCurMotion = CBillyBoom::ST_ShockWave_Shoot;
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
+        if (m_iCurMotion == CBillyBoom::ST_Laser_In)
+        {
+            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Laser_PreShoot);
+            m_iCurMotion = CBillyBoom::ST_Laser_PreShoot;
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
+        if (m_iCurMotion == CBillyBoom::ST_Laser_PreShoot)
+        {
+            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Laser_ShootLoop);
+            m_iCurMotion = CBillyBoom::ST_Laser_ShootLoop;
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
+        if(m_iCurMotion == CBillyBoom::ST_Barre_In)
+        {
+           static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Barre_PreShoot);
+           m_iCurMotion = CBillyBoom::ST_Barre_PreShoot;
+           m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
+        if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
+        {
+            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Barre_Shoot);
+            m_iCurMotion = CBillyBoom::ST_Barre_Shoot;
+            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        }
+        else
         if (m_iCurMotion != CBillyBoom::ST_Intro) {
             m_bFinishAni = true;
             m_iCurMotion = CBillyBoom::ST_Idle;
@@ -93,9 +286,8 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     else
     {  
-      
         m_bFinishAni = false;
-       if(m_iCurMotion == CBillyBoom::ST_Stun_Start )
+       if(m_iCurMotion == CBillyBoom::ST_Comp_Idle)
         m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
 }
@@ -103,10 +295,9 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 void CBody_BillyBoom::Late_Update(_float fTimeDelta)
 {
 
-    __super::Late_Update(fTimeDelta);
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+    __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CBody_BillyBoom::Render()
@@ -188,26 +379,14 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    const LIGHT_DESC* pLightDesc = m_pGameInstance->Get_LightDesc(0);
-    if (nullptr == pLightDesc)
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDir", &pLightDesc->vDirection, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDiffuse", &pLightDesc->vDiffuse, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
-        return E_FAIL;
-
-
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", m_RimDesc.eState)))
-        return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CBillyBoom::ST_Stun_Start)))
         return E_FAIL;
 
@@ -243,4 +422,5 @@ CGameObject* CBody_BillyBoom::Clone(void* pArg)
 void CBody_BillyBoom::Free()
 {
     __super::Free();
+
 }

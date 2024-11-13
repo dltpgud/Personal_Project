@@ -69,6 +69,7 @@ void CWeapon::Update(_float fTimeDelta)
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerHP, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon_Aim, fTimeDelta);
+    m_pGameInstance->UI_shaking(CUI::UIID_BossHP, fTimeDelta);
 }
 
 void CWeapon::Late_Update(_float fTimeDelta)
@@ -132,6 +133,7 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.2f, 0.2f);
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.2f, 0.2f);
         m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.2f, -0.2f);
+        m_pGameInstance->Set_UI_shaking(CUI::UIID_BossHP, 0.2f, 0.2f, -0.2f);
         bMotionChange = true;
         bLoop = false;
     }
@@ -176,6 +178,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.3f, 0.3f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.3f, 0.3f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.3f, -0.3f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_BossHP, 0.2f, 0.3f, -0.3f);
             bMotionChange = true;
             bLoop = false;
         }
@@ -204,6 +207,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.6f, 0.6f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.6f, 0.6f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 0.6f, -0.6f);
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_BossHP, 0.2f, 0.6f, -0.6f);
             bMotionChange = true;
             bLoop = false;
         }
@@ -230,7 +234,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon_Aim, 0.2f, 1.f, -1.f);
-
+            m_pGameInstance->Set_UI_shaking(CUI::UIID_BossHP, 0.2f, 1.f, -1.f);
             bMotionChange = true;
             bLoop = false;
         }

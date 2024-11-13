@@ -73,16 +73,28 @@ public:
 
     virtual void HIt_Routine()override;
     virtual void Dead_Routine() override;
+    virtual void Stun_Routine()override;
+
     void NON_intersect(_float fTimedelta);
-
     void Intro_Routine(_float fTimedelta);
+    void Change_State(_float fTimedelta);
 
+    void Set_Barre_Shoot(_float fTimedelta);
+    void Set_Laser(_float fTimedelta);
+    void Set_ShockWave(_float fTimedelta);
+    void Set_Bash(_float fTimedelta);
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
-    HRESULT Bind_ShaderResources();
 private:
-    _bool m_bIntro = { true };
+    _bool            m_bIntro = { true };
+    class CBossHPUI* m_pHP = { nullptr };
+    _int	         m_iPrAttack[4] = { -1, -1, -1, -1 };
+    _int             m_iSkillTime = 0;
+    _bool               m_bSkill = false;
+    _bool            m_bHit = false;
+    _float          m_fHitTimeSum = { 0.f };
+    _bool m_bStart = true;
 
 public:
     static CBillyBoom* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

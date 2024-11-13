@@ -63,7 +63,7 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
 
 
     if (m_iState != ST_Hit_Front && m_iState != ST_Aim_Down)
-        m_pTransformCom->Rotation_to_Player();
+        m_pTransformCom->Rotation_to_Player(fTimeDelta);
 
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;

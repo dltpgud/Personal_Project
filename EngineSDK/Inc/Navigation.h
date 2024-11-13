@@ -25,7 +25,7 @@ public:
 	}
 public:
         void SetUp_Neighbor();
-    _bool isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr);
+    _bool isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr, _bool Demage = false);
 
 #ifdef _DEBUG
 public:
@@ -53,7 +53,7 @@ private:
 	vector<class CCell*>	m_Cells;
 	static	const _float4x4*				m_WorldMatrix ;  // 전역 변수로 설정한 것은 이 월드 좌표를 지형위에 띄운 여러 객체들 (몬스터, 플레이어, 등등)이 사용해야하기 때문
 	_int					m_iNonMoveCellIndex = { -1 };
-	_int					m_iSafeCellIndex = { -1 };
+
 	_vector					m_vSafePos{};
 #ifdef _DEBUG
 private:

@@ -61,7 +61,7 @@ _int CGunPawn::Priority_Update(_float fTimeDelta)
     }
 
     if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
-        m_pTransformCom->Rotation_to_Player();
+        m_pTransformCom->Rotation_to_Player(fTimeDelta);
 
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
@@ -69,7 +69,7 @@ _int CGunPawn::Priority_Update(_float fTimeDelta)
 
 void CGunPawn::Update(_float fTimeDelta)
 {
-    if (m_PartObjects[PART_BODY]->Get_Finish())
+        if (m_PartObjects[PART_BODY]->Get_Finish())
     {
         if (m_pPartHP != nullptr)
             m_pPartHP->Set_Hit(false);

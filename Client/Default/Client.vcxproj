@@ -181,6 +181,7 @@
     <ClInclude Include="..\Public\Body_MecanoBot.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
+    <ClInclude Include="..\Public\BossHP.h" />
     <ClInclude Include="..\Public\BossIntroBG.h" />
     <ClInclude Include="..\Public\Bullet.h" />
     <ClInclude Include="..\Public\CHEST.h" />
@@ -243,6 +244,7 @@
     <ClCompile Include="..\Private\Body_MecanoBot.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
+    <ClCompile Include="..\Private\BossHP.cpp" />
     <ClCompile Include="..\Private\BossIntroBG.cpp" />
     <ClCompile Include="..\Private\Bullet.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />

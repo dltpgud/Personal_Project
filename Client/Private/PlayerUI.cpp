@@ -69,17 +69,6 @@ _int CPlayerUI::Priority_Update(_float fTimeDelta)
 
 void CPlayerUI::Update(_float fTimeDelta)
 {
-
-    if (GetAsyncKeyState(VK_F8) & 0x8000)
-    {
-        m_fHP -= 10.f;
-        m_fHP_Pluse = m_fHP / m_fMaxHP + 0.1f;
-    }
-
-
-
-
-
     if (m_iGageCount != -1)
     {
         m_iGageCount--;
@@ -95,8 +84,6 @@ void CPlayerUI::Update(_float fTimeDelta)
 void CPlayerUI::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
-
-       
         return;
 }
 
@@ -111,7 +98,7 @@ HRESULT CPlayerUI::Render()
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_Float("g_hp_pluse", m_fHP_Pluse)))
         return E_FAIL;
-    ;
+    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))

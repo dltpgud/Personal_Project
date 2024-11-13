@@ -36,7 +36,8 @@ HRESULT CLevel_Edit::Initialize()
     m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
     m_tFPath[5] = L"../Bin/Data/Monster/Stage1_Monster.dat";
     m_tFPath[6] = L"../Bin/Data/NPC/Stage1_NPC.dat";
-    
+ 
+
     for (_uint i = 0; i < 3; i++) { m_fscale[i] = 1; }
 
     if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
@@ -914,14 +915,13 @@ void CLevel_Edit::re_setting()
 
 HRESULT CLevel_Edit::Ready_Light()
 {
-    // 조명을 세팅하고..
-    LIGHT_DESC LightDesc{};
+    LIGHT_DESC			LightDesc{};
 
     LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-    LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);
+    LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
     LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vSpecular = _float4(0.2f, 0.2f, 0.2f, 1.f);
+    LightDesc.vAmbient = _float4(0.3f, 0.3f, 0.3f, 1.f);
+    LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
@@ -2176,6 +2176,8 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         }
     }
 
+
+
     if (m_pGameInstance->Get_DIKeyState(DIK_O))
     { // 레이 캐스팅을 통해 터레인 자체를 피킹한다.
         _vector RayPos{}, RayDir{};
@@ -2473,6 +2475,9 @@ void CLevel_Edit::Picking_Cell(_uint i)
         static_cast<CNavigation*>(m_pNavigation)->Create_Poly(m_fCellPoint[0], m_fCellPoint[1], m_fCellPoint[2], m_iCellType);
     }
 }
+
+
+
 
 CLevel_Edit* CLevel_Edit::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

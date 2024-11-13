@@ -16,7 +16,7 @@ private:
     virtual ~CCalculator() = default;
 
 public:
-    void Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir, _bool forPlayer = false);
+    void    Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir, _bool forPlayer = false);
 
     _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RaDir,
                               CTransform* Transform, _float* fDis);
@@ -25,8 +25,8 @@ public:
     HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 
     _vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
-    _float Compute_Random_Normal();
-    _float Compute_Random(_float fMin, _float fMax);
+    _float  Compute_Random_Normal();
+    _float  Compute_Random(_float fMin, _float fMax);
 private:
     ID3D11Device* m_pDevice = {nullptr};
     ID3D11DeviceContext* m_pContext = {nullptr};

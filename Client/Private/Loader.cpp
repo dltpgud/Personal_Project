@@ -38,6 +38,7 @@
 #include "BillyBoom.h"
 #include "SceneCamera.h"
 #include "BossIntroBG.h"
+#include "BossHP.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -183,8 +184,7 @@ HRESULT CLoader::Loading_For_MenuLevel()
 
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 	//m_pGameInstance->LoadSoundFile("ST.ogg");
-
-
+	
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");
 
 	m_bFinished = true;
@@ -488,6 +488,13 @@ HRESULT CLoader::Loading_For_BossLevel()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_SceneCamera"),
 		CSceneCamera::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Boss_HP"),
+		CBossHPUI::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+
+
+	
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");

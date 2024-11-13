@@ -99,12 +99,12 @@ void CBody_JetFly::Update(_float fTimeDelta)
     {
         m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
         m_RimDesc.iPower = 1;
-    }
-
+    }   
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
         m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
         m_RimDesc.iPower = 1;
     }
+
 
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
@@ -210,28 +210,17 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    const LIGHT_DESC* pLightDesc = m_pGameInstance->Get_LightDesc(0);
-    if (nullptr == pLightDesc)
+    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDir", &pLightDesc->vDirection, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDiffuse", &pLightDesc->vDiffuse, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
-        return E_FAIL;
-
-
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool",m_RimDesc.eState)))
-        return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CJetFly::ST_Hit_Front)))
         return E_FAIL;
+  
     return S_OK;
 }
 

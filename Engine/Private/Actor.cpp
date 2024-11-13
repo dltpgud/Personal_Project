@@ -67,19 +67,16 @@ void CActor::Late_Update(_float fTimeDelta)
 		}
                 m_bColl = false;
 	}
+
+
+m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
+	
    __super::Late_Update(fTimeDelta);	
 }
 
 HRESULT CActor::Render()
- 	{
-#ifdef _DEBUG
+{
 
-	if (m_pNavigationCom && true ==m_bOnCell) {
-		 		m_pNavigationCom->Render();
-	}
-
-#endif
-	__super::Render();
 
 	return S_OK;
 }

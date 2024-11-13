@@ -59,7 +59,7 @@ void CHealthBot::Update(_float fTimeDelta)
 {
     if (false == m_bInteract)
     {
-        m_pTransformCom->Rotation_to_Player();
+        m_pTransformCom->Rotation_to_Player(fTimeDelta);
         intersect(fTimeDelta);
     }
 

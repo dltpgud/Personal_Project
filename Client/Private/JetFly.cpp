@@ -73,7 +73,7 @@ void CJetFly::Update(_float fTimeDelta)
     if (2 != m_pNavigationCom->Get_CurrentCell_Type())
     {
         if (m_iState != ST_Hit_Front && m_iState != ST_Sragger) {
-            m_pTransformCom->Rotation_to_Player();
+            m_pTransformCom->Rotation_to_Player(fTimeDelta);
             NON_intersect(fTimeDelta);
         }
     }
@@ -164,7 +164,6 @@ void CJetFly::NON_intersect(_float fTimedelta)
 HRESULT CJetFly::Add_Components()
 {    /* For.Com_Collider_AABB */
     CBounding_Sphere::BOUND_SPHERE_DESC		CBounding_Sphere{};
-
 
     _float3 Center{}, Extents{};
     CBounding_Sphere.fRadius = 1.f;

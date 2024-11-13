@@ -58,22 +58,12 @@ void CGameObject::Update(_float fTimeDelta)
 
 void CGameObject::Late_Update(_float fTimeDelta)
 {
-#ifdef _DEBUG
-    if (m_pColliderCom) {
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-            return;
-    }
-#endif
+    m_pGameInstance->Add_DebugComponents(m_pColliderCom);
 }
 
 HRESULT CGameObject::Render()
 {
-#ifdef _DEBUG
-    if (m_pColliderCom) {
 
-        m_pColliderCom->Render();
-    }
-#endif
     return S_OK;
 }
 
