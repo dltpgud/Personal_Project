@@ -84,6 +84,8 @@ HRESULT CTerrain::Render()
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
+
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
@@ -96,10 +98,6 @@ HRESULT CTerrain::Render()
 
     m_pVIBufferCom->Render();
 
-
-
-
-
     return S_OK;
 }
 
@@ -109,6 +107,9 @@ void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
         if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
         reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return;
+
+
+
 }
 
 void CTerrain::Set_Buffer(_uint x, _uint y )
@@ -129,6 +130,7 @@ _float3* CTerrain::Get_VtxPos()
 void CTerrain::Set_Scalra_uint(_uint scalra)
 {
     m_bFire = scalra;
+
 }
 
 void CTerrain::Set_Scalra_float(_float scalra)

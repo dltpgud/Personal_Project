@@ -184,6 +184,9 @@
     <Filter Include="02.ShaderFiles">
       <UniqueIdentifier>{c8765a11-7d92-4e54-914a-be038a5d86e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Utility\02.GameObjects\BlendObject">
+      <UniqueIdentifier>{c1e7f0e2-13cb-474c-89c5-680138e9761b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -366,6 +369,9 @@
     <ClInclude Include="..\Public\Target_Manager.h">
       <Filter>01.Utility\08.RenderTaget\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BlendObject.h">
+      <Filter>01.Utility\02.GameObjects\BlendObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -535,6 +541,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Target_Manager.cpp">
       <Filter>01.Utility\08.RenderTaget\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BlendObject.cpp">
+      <Filter>01.Utility\02.GameObjects\BlendObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

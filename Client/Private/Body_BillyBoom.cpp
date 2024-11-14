@@ -35,11 +35,10 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
    m_fPlayAniTime = 0.5f;
 
  // m_pFindBonMatrix = Get_SocketMatrix("R_Canon_02");
-   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_05"); // ¿ÞÂÊ À§ ÆÈ
-   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_05"); // ¿À¸¥ ÂÊ À§ ÆÈ
-   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
-   m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ½Î´Ù±¸..
-
+//   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_05"); // ¿ÞÂÊ À§ ÆÈ
+//   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_05"); // ¿À¸¥ ÂÊ À§ ÆÈ
+//   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
+//   m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ½Î´Ù±¸..
 
    
     return S_OK;
@@ -66,11 +65,19 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     if (*m_pParentState == CBillyBoom::ST_Intro && m_iCurMotion != CBillyBoom::ST_Intro)
     {
+
         m_iCurMotion = CBillyBoom::ST_Intro;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
         bLoop = false;
     }
+       
+    if (m_iCurMotion == CBillyBoom::ST_Intro)
+    {
+        m_fEmissivePower = 5;
+    }
+ 
+
     if (*m_pParentState == CBillyBoom::ST_Comp_Poke_Front && m_iCurMotion != CBillyBoom::ST_Comp_Poke_Front)
     {
         m_iCurMotion = CBillyBoom::ST_Comp_Poke_Front;
@@ -306,6 +313,10 @@ HRESULT CBody_BillyBoom::Render()
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
+
+
+
+
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -316,10 +327,19 @@ HRESULT CBody_BillyBoom::Render()
             return E_FAIL;
 
      
+        if (i == 1 && m_iCurMotion == CBillyBoom::ST_Intro)
+            m_bEmissive = true;
+        else
+            m_bEmissive = false;
+
+
+        if (FAILED(m_pShaderCom->Bind_Bool("g_bEmissive", m_bEmissive)))
+            return E_FAIL;
+
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(1)))
+        if (FAILED(m_pShaderCom->Begin(2)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -377,7 +397,7 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
-        return E_FAIL;
+       return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
         return E_FAIL;
@@ -388,6 +408,13 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CBillyBoom::ST_Stun_Start)))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Float("g_EmissivePower", m_fEmissivePower)))
+        return E_FAIL;
+
+    if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, 1, aiTextureType_EMISSIVE, 0,
+        "g_EmissiveTexture")))
         return E_FAIL;
 
     return S_OK;

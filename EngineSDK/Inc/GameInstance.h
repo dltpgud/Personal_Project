@@ -132,6 +132,9 @@ public: /* For.Calculator */
 	_float Compute_Random(_float fMin, _float fMax);
 	HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 	_vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
+	_bool IsPicked(_float3* pOut, _bool IsPlayer);
+
+
 public: /* For.Font_Manager */
 	HRESULT Add_Font(const _wstring& strFontTag, const _tchar* pFontFilePath);
 	HRESULT Render_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, FXMVECTOR vColor, _float fScale = 1.f, _float fRotation = 0.f, const _float2& vPivot = _float2(0.f, 0.f));
@@ -143,7 +146,7 @@ public: /* For.Target_Manager */
 		HRESULT Begin_MRT(const _wstring& strMRTTag);
 		HRESULT End_MRT(const _wstring& strMRTTag);
 		HRESULT Bind_RT_SRV(class CShader* pShader, const _char* pConstantName, const _wstring& strTargetTag);
-
+		HRESULT Copy_RT_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut);
 #ifdef _DEBUG
 		HRESULT Ready_RT_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 		HRESULT Render_RT_Debug(const _wstring& strMRTTag, class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
