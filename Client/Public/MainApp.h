@@ -28,7 +28,7 @@ private:
 private:
 	HRESULT Open_Level(LEVELID eLevelID);
 	HRESULT Ready_Prototype_Component_For_Static();
-
+	HRESULT Ready_Prototype_Component_For_Nomal();
 public:
 	static CMainApp*	 Create();
 	virtual void		 Free() override;

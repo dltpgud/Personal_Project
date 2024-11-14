@@ -3,10 +3,12 @@
 #include "Transform.h"
 #include "Model.h"
 #include "Navigation.h"
+#include "GameInstance.h"
+CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+    : m_pDevice{pDevice}, m_pContext{pContext}, m_pGameInstance{ CGameInstance::GetInstance() }
 
-CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd)
-    : m_pDevice{pDevice}, m_pContext{pContext}, g_hWnd { hWnd }
 {
+    Safe_AddRef(m_pGameInstance);
     Safe_AddRef(m_pDevice);
     Safe_AddRef(m_pContext);
 }
@@ -144,6 +146,37 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
     return _float3(0xffff,0xffff,0xffff);
 }
 
+HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewportHeight)
+{
+
+    g_hWnd = hWnd;
+
+
+    m_iViewportWidth = iViewportWidth;
+    m_iViewportHeight = iViewportHeight;
+
+    D3D11_TEXTURE2D_DESC			TextureDesc{};
+
+    TextureDesc.Width = iViewportWidth;
+    TextureDesc.Height = iViewportHeight;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+
+    TextureDesc.SampleDesc.Quality = 0;
+    TextureDesc.SampleDesc.Count = 1;
+
+    TextureDesc.Usage = D3D11_USAGE_STAGING;
+    TextureDesc.BindFlags = 0;
+    TextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+    TextureDesc.MiscFlags = 0;
+
+    if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
+        return E_FAIL;
+
+    return S_OK;
+}
+
 HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
 {
    _float3 fPos{};
@@ -182,9 +215,65 @@ _float CCalculator::Compute_Random(_float fMin, _float fMax)
     return (fMax - fMin) * Compute_Random_Normal() + fMin;
 }
 
-CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd)
+_bool CCalculator::isPicked(_float3* pOut, _bool IsPlayer)
 {
-    CCalculator* pInstance = new CCalculator(pDevice, pContext, hWnd);
+
+
+    POINT			ptMouse{};
+
+    if (false == IsPlayer) {
+        GetCursorPos(&ptMouse);
+
+        /* 뷰포트 상의 마우스 위치를 구했다. */
+        ScreenToClient(g_hWnd, &ptMouse);
+    }
+    if (true == IsPlayer)
+    {
+        ptMouse.x = m_iViewportWidth * 0.5f;
+        ptMouse.y = m_iViewportHeight * 0.5f;
+    }
+
+
+    _uint			iIndex = ptMouse.y * m_iViewportWidth + ptMouse.x;
+
+    m_pGameInstance->Copy_RT_Resource(TEXT("Target_PickDepth"), m_pTexture2D);
+
+    D3D11_MAPPED_SUBRESOURCE		SubResource{};
+
+    m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ_WRITE, 0, &SubResource);
+
+    _float4* pPixel = static_cast<_float4*>(SubResource.pData) + iIndex;
+
+    _float3			vWorldPos = {};
+
+    /* 투영공간상의 위치를 구한다. */
+    vWorldPos.x = ptMouse.x / (m_iViewportWidth * 0.5f) - 1.f;
+    vWorldPos.y = ptMouse.y / (m_iViewportHeight * -0.5f) + 1.f;
+    vWorldPos.z = pPixel->x;
+
+    /* 뷰공간상의 위치를 구한다. */
+    _vector			vPosition = XMVector3TransformCoord(XMLoadFloat3(&vWorldPos), m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_PROJ));
+
+
+    /* 월드공간상의 위치를 구한다. */
+    vPosition = XMVector3TransformCoord(vPosition, m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_VIEW));
+
+    m_pContext->Unmap(m_pTexture2D, 0);
+
+    XMStoreFloat3(pOut, vPosition);
+
+    return _bool(pPixel->w);
+}
+
+CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd, _uint iViewportWidth, _uint iViewportHeight )
+{
+    CCalculator* pInstance = new CCalculator(pDevice, pContext);
+
+    if (FAILED(pInstance->Initialize(hWnd, iViewportWidth, iViewportHeight)))
+    {
+        MSG_BOX("Failed to Created : CCalculator");
+        Safe_Release(pInstance);
+    }
 
     return pInstance;
 }
@@ -192,6 +281,12 @@ CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 void CCalculator::Free()
 {
     __super::Free();
+
+
+    Safe_Release(m_pGameInstance);
+
+    Safe_Release(m_pTexture2D);
+
 
     Safe_Release(m_pContext);
     Safe_Release(m_pDevice);

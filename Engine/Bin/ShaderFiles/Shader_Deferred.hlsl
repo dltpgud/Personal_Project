@@ -15,10 +15,10 @@ vector g_vLightSpecular;
 texture2D g_NormalTexture;
 texture2D g_DepthTexture;
 texture2D g_SpecularTexture;
-
+texture2D g_EmissiveTexture;
 texture2D g_ShadeTexture;
 texture2D g_DiffuseTexture;
-
+texture2D g_RimTexture;
 vector g_vMtrlAmbient = { 1.f, 1.f, 1.f, 1.f };
 vector g_vMtrlSpecular = { 1.f, 1.f, 1.f, 1.f };
 
@@ -182,10 +182,11 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    vector vDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-    vector vShade = g_ShadeTexture.Sample(LinearSampler, In.vTexcoord);
-    vector vSpecular = g_SpecularTexture.Sample(LinearSampler, In.vTexcoord);
-    
+    vector vDiffuse  = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vShade    = g_ShadeTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vSpecular = g_SpecularTexture.Sample(LinearSampler, In.vTexcoord); 
+    vector vRim      = g_RimTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
     if (vDiffuse.a == 0.f)
         discard;
     
@@ -198,7 +199,7 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
    // if (iCurID == 1 && fCurState >= 0.08f)
   
 
-    Out.vColor = vDiffuse * vShade + vSpecular ;
+    Out.vColor = vDiffuse * vShade + vSpecular + vRim + vEmissive;
 
     return Out;
 }

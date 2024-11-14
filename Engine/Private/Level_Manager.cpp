@@ -113,13 +113,14 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
         else
         pGameObject = ProtoObj->Clone(Arg);
 
+        pGameObject->Set_Scalra_uint(bFire);
         pGameObject->Set_Model(pModel, iLevelIndex);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
         pGameObject->Set_Scalra_float(FireOffset);
-        pGameObject->Set_Scalra_uint(bFire);
+
 
         pGameObject->Set_Buffer(TileX, TileY);
         bMainTile = false;

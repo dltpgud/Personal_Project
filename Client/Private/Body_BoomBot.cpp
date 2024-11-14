@@ -132,7 +132,7 @@ HRESULT CBody_BoomBot::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-     
+
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -179,6 +179,7 @@ HRESULT CBody_BoomBot::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
+    
     return S_OK;
 }
 

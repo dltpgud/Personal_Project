@@ -63,13 +63,14 @@ private:
 	const _float4x4* m_pSocketMatrix = { nullptr };
 
 	const _uint* m_pType = { nullptr };
-
+	_float	m_fEmissivePower{ 0.f };
 	_uint m_pWeapon{};
 	_uint m_iMaxBullet[WeaPoneType_END]{0};
 	_uint m_iFirstBullet[WeaPoneType_END]{ 0 };
 	WeaPoneType	m_iBullet{};
 	_float m_fDamage{};
 	_bool m_istate{};
+	_bool m_bEmissive = false;
 	const _float4x4* m_pWeapon_SocketMatrix[WeaPoneType_END] = { nullptr };
 	_float3 m_fWeaPonOffset{};
 

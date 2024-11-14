@@ -43,6 +43,7 @@ private:
 	_float* m_Fall_Y = { nullptr };
 	_float m_fAttackTime{ 0.f };
 	_float m_pDamage = { 5.f };
+
 public:
         static CBody_BoomBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

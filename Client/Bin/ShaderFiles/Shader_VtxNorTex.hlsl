@@ -67,7 +67,8 @@ struct PS_OUT
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
-
+    vector vPickDepth : SV_TARGET3;
+    vector vEmissive : SV_TARGET5;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -102,7 +103,7 @@ PS_OUT PS_MAIN(PS_IN In)
 	/* 0 ~ 1 */
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
     
-    
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
 /*최종 픽셀 색은 디퓨즈에 법선을 이용한 환경광을 곱하고 스펙큘러들을 곱해서 최종 픽셀 색을 정한다-*/
 	
 	return Out;
@@ -118,7 +119,7 @@ PS_OUT PS_Fire(PS_IN In)
     float2 movedTexCoord = In.vTexcoord + uvOffset;
     
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord).r;
-	
+
     //float4 vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
 
 //    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal)); 
@@ -130,13 +131,12 @@ PS_OUT PS_Fire(PS_IN In)
     float3 colorEnd = float3(1.f,1.0, 0.0); // 노랑
 	
     float3 color = lerp(colorStart, colorEnd, vMtrlDiffuse);
-    
-    
+
    // Out.vColor = (g_vLightDiffuse * float4(color, 1.0)) * saturate(vShade) +
 //		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
 /*최종 픽셀 색은 디퓨즈에 법선을 이용한 환경광을 곱하고 스펙큘러들을 곱해서 최종 픽셀 색을 정한다-*/
     
-    
+ 
     vMtrlDiffuse = float4(color, 1);
     
     
@@ -147,6 +147,7 @@ PS_OUT PS_Fire(PS_IN In)
 
 	/* 0 ~ 1 */
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
     return Out;
 }
 technique11 DefaultTechnique

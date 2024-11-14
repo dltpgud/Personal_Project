@@ -45,7 +45,8 @@ private:
 	_float m_pDamage = { 4.f };
 	CGameObject* m_pParent = nullptr;
 	const _float4x4* m_pFindAttBonMatrix[4]{};
-
+	_float m_fEmissivePower = false;
+	_bool	m_bEmissive = false;
 public:
     static CBody_BillyBoom* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

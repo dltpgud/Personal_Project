@@ -70,7 +70,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pPipeLine)
 		return E_FAIL;
 
-	m_pCalculator = CCalculator::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
+	m_pCalculator = CCalculator::Create(*ppDevice, *ppContext, EngineDesc.hWnd, EngineDesc.iWinSizeX, EngineDesc.iWinSizeY);
 	if (nullptr == m_pCalculator)
 		return E_FAIL;
 
@@ -751,6 +751,10 @@ _vector CGameInstance::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 {
 	return m_pCalculator->PointNomal(fP1, fP2, fP3);
 }
+_bool CGameInstance::IsPicked(_float3* pOut, _bool IsPlayer)
+{
+	return m_pCalculator->isPicked(pOut, IsPlayer);
+}
 #pragma endregion
 
 
@@ -809,6 +813,11 @@ HRESULT CGameInstance::Bind_RT_SRV(CShader* pShader, const _char* pConstantName,
 {
 
 	return m_pTarget_Manager->Bind_SRV(pShader, pConstantName, strTargetTag);
+}
+
+HRESULT CGameInstance::Copy_RT_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut)
+{
+	return m_pTarget_Manager->Copy_Resource(strTargetTag, pOut);
 }
 
  #ifdef _DEBUG

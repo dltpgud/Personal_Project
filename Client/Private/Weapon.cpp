@@ -48,7 +48,7 @@ HRESULT CWeapon::Initialize(void* pArg)
     m_pWeapon_SocketMatrix[AssaultRifle] = m_pModelCom[AssaultRifle]->Get_BoneMatrix("W_Bayonet");
     m_pWeapon_SocketMatrix[MissileGatling] = m_pModelCom[MissileGatling]->Get_BoneMatrix("W_Rotator");
     m_pWeapon_SocketMatrix[HeavyCrossbow] = m_pModelCom[HeavyCrossbow]->Get_BoneMatrix("W_Front_Middle");
-
+    m_fEmissivePower = 1.f;
     m_fPlayAniTime = 1.f;
     return S_OK;
 }
@@ -99,11 +99,22 @@ HRESULT CWeapon::Render()
             "g_DiffuseTexture")))
             return E_FAIL;
 
+        if (m_pWeapon != MissileGatling) {
+            if (FAILED(m_pModelCom[m_pWeapon]->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_EMISSIVE, 0,
+                "g_EmissiveTexture")))
+                return E_FAIL;
+        }
+        
         if (FAILED(m_pModelCom[m_pWeapon]->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(0)))
-            return E_FAIL;
+        if (m_pWeapon != MissileGatling) {
+            if (FAILED(m_pShaderCom->Begin(3)))
+                return E_FAIL;
+        }
+        else 
+            if (FAILED(m_pShaderCom->Begin(0)))
+                return E_FAIL;
 
         m_pModelCom[m_pWeapon]->Render(i);
     }
@@ -116,6 +127,7 @@ void CWeapon::Type0_Update(_float fTimeDelta)
     _bool bMotionChange = { false }, bLoop = { false };
     if (*m_pParentState == CPlayer::STATE_HENDGUN_RELOAD && m_iCurMotion != Reload)
     {
+        m_fEmissivePower = 2.f;
         m_iBullet = CWeapon::HendGun;
         m_iMaxBullet[m_iBullet] = 15;
         m_iCurMotion = Reload;
@@ -125,6 +137,7 @@ void CWeapon::Type0_Update(_float fTimeDelta)
 
     if (*m_pParentState == CPlayer::STATE_HENDGUN_SHOOT && m_iCurMotion != Shoot)
     {
+        m_fEmissivePower = 1.5f;
         m_fWeaPonOffset = { 1.f,1.5f,4.5f };
         Make_Bullet(m_fWeaPonOffset);
         m_iCurMotion = Shoot;
@@ -159,6 +172,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
     {
         if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion != Reload)
         {
+            m_fEmissivePower = 2.f;
             m_fPlayAniTime = 1.f;
             m_iBullet = CWeapon::AssaultRifle;
             m_iMaxBullet[m_iBullet] = 30;
@@ -171,7 +185,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
         {
             m_fWeaPonOffset = { 1.f,1.f,1.5f };
             Make_Bullet(m_fWeaPonOffset);
-            
+            m_fEmissivePower = 1.5f;
             m_iCurMotion = Shoot;
             m_fDamage = 15.f;
             m_fPlayAniTime = 2.f;
@@ -217,6 +231,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
         m_fPlayAniTime = 1.f;
         if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD && m_iCurMotion != Reload)
         {
+            m_fEmissivePower = 2.f;
             m_iBullet = CWeapon::HeavyCrossbow;
             m_iMaxBullet[m_iBullet] = 7;
             m_iCurMotion = Reload;
@@ -226,6 +241,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
         if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_SHOOT && m_iCurMotion != Shoot)
         {
+            m_fEmissivePower = 1.5f;
             m_fWeaPonOffset = { 1.f,1.f,1.5f };
             Make_Bullet(m_fWeaPonOffset);
             m_iCurMotion = Shoot;
@@ -287,9 +303,17 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     }
     else
     m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
+   
+    _float3	vPickPos{};
+    _vector At{};
 
-    _vector At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) *10.f;  
-
+    if (true == m_pGameInstance->IsPicked(&vPickPos, true)) 
+    {
+        At = XMLoadFloat3(&vPickPos);
+    }
+    if (false == m_pGameInstance->IsPicked(&vPickPos, true)) {
+      At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 10.f;
+    }
 
     if (m_pWeapon >= WeaPoneType_END || m_pWeapon < HendGun)
         return E_FAIL;
@@ -353,19 +377,11 @@ HRESULT CWeapon::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    const LIGHT_DESC* pLightDesc = m_pGameInstance->Get_LightDesc(0);
-    if (nullptr == pLightDesc)
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDir", &pLightDesc->vDirection, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightDiffuse", &pLightDesc->vDiffuse, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightAmbient", &pLightDesc->vAmbient, sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vLightSpecular", &pLightDesc->vSpecular, sizeof(_float4))))
-        return E_FAIL;
-
+    if (m_pWeapon != MissileGatling) {
+        if (FAILED(m_pShaderCom->Bind_Float("g_EmissivePower", m_fEmissivePower)))
+            return E_FAIL;
+    }
+ 
     return S_OK;
 }
 

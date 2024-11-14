@@ -29,7 +29,8 @@ HRESULT CMainApp::Initialize()
 
 	if (FAILED(Ready_Prototype_Component_For_Static()))
 		return E_FAIL;
-
+	if (FAILED(Ready_Prototype_Component_For_Nomal()))
+		return E_FAIL;
 	/*최초 씬 설정*/
 	if(FAILED(Open_Level(LEVEL_MENU)))
 		return E_FAIL;
@@ -468,6 +469,15 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 
 
 	
+	return S_OK;
+}
+
+HRESULT CMainApp::Ready_Prototype_Component_For_Nomal()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_T_Tire_N"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Models/Nomal/T_Tire_N.dds")))))
+		return E_FAIL;
+
 	return S_OK;
 }
 
