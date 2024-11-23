@@ -8,17 +8,19 @@ private:
     virtual ~Collider_Manager() = default;
 
 public:
-    HRESULT Initialize(_uint Ilevel);
+    HRESULT Initialize();
 
 
-    HRESULT Add_Monster(_uint Ilevel, class CGameObject* Monster);
-    HRESULT Add_MonsterBullet(_uint Ilevel, class CGameObject* MonsterBullet);
+    HRESULT Add_Monster( class CGameObject* Monster);
+    HRESULT Add_MonsterBullet( class CGameObject* MonsterBullet);
+ 
     void All_Collison_check();
     HRESULT Player_To_Monster_Collison_Check();
     HRESULT Player_To_Monster_Ray_Collison_Check();
-    HRESULT Player_To_Monster_Bullet_Collison_Check();
-    void Clear(_uint Ilevel);
-    HRESULT Find_Cell(_uint Ilevel);
+ 
+    HRESULT Player_To_Monster_Bullet_Collison();
+    void Clear();
+    HRESULT Find_Cell();
     HRESULT Set_Collison(_bool SetColl) {
         m_bIsColl = SetColl;
         return S_OK;
@@ -28,15 +30,14 @@ public:
 
 private:
     class CGameInstance* m_pGameInstance = { nullptr };
-    list <class CActor*>* m_MonsterList;
-    list <class CGameObject*> m_MonsterBullet;
-
+    list <class CActor*> m_MonsterList;
+    list <class CSkill*>m_MonsterBullet;
     _uint   m_iLevel;
     _bool m_bIsColl = { false };
 
 
 public:
-    static Collider_Manager* Create(_uint Ilevel);
+    static Collider_Manager* Create();
     virtual void Free() override;
 };
 END

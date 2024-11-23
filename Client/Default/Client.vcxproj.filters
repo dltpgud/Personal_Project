@@ -163,6 +163,36 @@
     <Filter Include="02.GameObjects\04.UI\Boss UI\Boss HP">
       <UniqueIdentifier>{3f5e2226-e1ba-4a35-9f72-8935c85aee40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\05. Effect">
+      <UniqueIdentifier>{ac2f6e33-6b24-4d72-bf50-da424bf00c76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI\State">
+      <UniqueIdentifier>{33bbb4a7-14ae-45a4-8401-034eb7cc1a23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI\Shooting">
+      <UniqueIdentifier>{2810b300-687c-4e3c-834a-8e001329e019}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Player">
+      <UniqueIdentifier>{03aa1484-4972-4d10-954f-48035698f265}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\NomalMonster">
+      <UniqueIdentifier>{f0d97725-4843-467f-90b9-5178f39e1d73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss">
+      <UniqueIdentifier>{e59b2bf2-f346-4bd0-a5e9-5c35e7fe2172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Berrle">
+      <UniqueIdentifier>{8c196b0d-3930-43d4-a24c-84cf07d85e14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\ShockWave">
+      <UniqueIdentifier>{39c9ab58-c735-4170-a077-6cbdbe47c592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\05. Effect\Shoot">
+      <UniqueIdentifier>{2f15e3f3-ad55-47bd-b901-26b4a131c32c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\05. Effect\ShockWave">
+      <UniqueIdentifier>{732a8197-3014-44dc-a2f4-70c1998a49d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -276,9 +306,6 @@
     <ClInclude Include="..\Public\GunPawn.h">
       <Filter>02.GameObjects\03.Actor\Monster\GunPawn</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Bullet.h">
-      <Filter>02.GameObjects\03.Actor\Bullet</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Body_HealthBot.h">
       <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
     </ClInclude>
@@ -310,7 +337,31 @@
       <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Loader.h">
-      <Filter>01.Level\99.Loading</Filter>
+      <Filter>01.Level\99.Loading\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerEffectUI.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ShootingUI.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\Shooting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerBullet.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Bullet.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BossBullet_Berrle.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BossBullet_Missile.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ShootEffect.h">
+      <Filter>02.GameObjects\05. Effect\Shoot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ShockWave.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -419,9 +470,6 @@
     <ClCompile Include="..\Private\MonsterHP.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\MonsterHP</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Bullet.cpp">
-      <Filter>02.GameObjects\03.Actor\Bullet</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\MecanoBot.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\MecanoBot</Filter>
     </ClCompile>
@@ -448,6 +496,30 @@
     </ClCompile>
     <ClCompile Include="..\Private\BossHP.cpp">
       <Filter>02.GameObjects\04.UI\Boss UI\Boss HP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerEffectUI.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShootingUI.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\Shooting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerBullet.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Bullet.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossBullet_Missile.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShootEffect.cpp">
+      <Filter>02.GameObjects\05. Effect\Shoot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShockWave.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -486,6 +558,9 @@
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticleRect.hlsl">
+      <Filter>97.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

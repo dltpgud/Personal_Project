@@ -65,9 +65,9 @@ void CVIBuffer_Terrain::Set_HightMap(const _tchar* pHeightMapFilePath)
             _uint iIndex = i * m_iNumVerticesX + j;
 
             pVertices[iIndex].vPosition =
-                _float3(j, (pPixel[iIndex] & 0x000000ff) / 15.0f, i); // y가 파란색인 픽셀로 높이맵
+              _float3(static_cast<_float>(j), (pPixel[iIndex] & 0x000000ff) / 15.0f, static_cast<_float>(i)); // y가 파란색인 픽셀로 높이맵
             pVertices[iIndex].vNormal = _float3(0.0f, 0.f, 0.f);
-            pVertices[iIndex].vTexcoord = _float2(j / (m_iNumVerticesX - 1.f), i / (m_iNumVerticesZ - 1.f));
+            pVertices[iIndex].vTexcoord = _float2(static_cast<_float>(j) / (m_iNumVerticesX - 1.f), static_cast<_float>(i) / (m_iNumVerticesZ - 1.f));
         }
     }
 
@@ -177,12 +177,12 @@ void CVIBuffer_Terrain::Set_Buffer(_int x, _int z)
         {
             _uint iIndex = i * m_iNumVerticesX + j;
 
-            pVertices[iIndex].vPosition = _float3(j, 0.f, i); // y가 파란색인 픽셀로 높이맵
+            pVertices[iIndex].vPosition = _float3(static_cast<_float>(j), 0.f, static_cast<_float>(i)); // y가 파란색인 픽셀로 높이맵
 
             m_pPos[iIndex] = pVertices[iIndex].vPosition;
 
             pVertices[iIndex].vNormal = _float3(0.0f, 0.f, 0.f);
-            pVertices[iIndex].vTexcoord = _float2(j / (m_iNumVerticesX - 1.f), i / (m_iNumVerticesZ - 1.f));
+            pVertices[iIndex].vTexcoord = _float2(static_cast<_float>(j) / (m_iNumVerticesX - 1.f), static_cast<_float>(i) / (m_iNumVerticesZ - 1.f));
         }
     }
 

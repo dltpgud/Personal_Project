@@ -85,6 +85,10 @@ void CGunPawn::Update(_float fTimeDelta)
 
 void CGunPawn::Late_Update(_float fTimeDelta)
 {
+
+
+    if (FAILED(m_pGameInstance->Add_Monster(this)))
+        return;
     __super::Late_Update(fTimeDelta);
 }
 

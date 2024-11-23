@@ -23,7 +23,7 @@ HRESULT CBody_BoomBot::Initialize(void* pArg)
 
     m_pParentState = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
-    m_Fall_Y = pDesc->Fall_Y;
+
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
@@ -158,14 +158,13 @@ void CBody_BoomBot::Make_Bullet()
     Desc.fSpeedPerSec = 20.f;
     Desc.pTagetPos = Dir;
     Desc.vPos = vHPos;
-    Desc.Damage = &m_pDamage;
-    Desc.Fall_Y = m_Fall_Y;
-    Desc.iWeaponType = CBullet::MONSTER_BULLET::TYPE_BOOMBOT;
-    Desc.LifTime = 1.f;
-    Desc.bSturn = true;
+    Desc.fDamage = &m_pDamage;
+
+    Desc.iActorType = CSkill::MONSTER::TYPE_BOOMBOT;
+   
+    Desc.iSkillType = CSkill::STYPE_STURN;
     CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
     m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
-    m_pGameInstance->Add_MonsterBullet(m_pGameInstance->Get_iCurrentLevel(), pGameObject);
 }
 
 HRESULT CBody_BoomBot::Add_Components()

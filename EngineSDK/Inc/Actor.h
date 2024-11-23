@@ -42,6 +42,7 @@ public:
             m_iState = st;
         }
         _uint Get_State() { return m_iState; }
+        virtual _bool Get_bJump() { return false; }
         virtual void HIt_Routine() {};
         virtual void Dead_Routine() {};
         virtual void Stun_Routine() {};
@@ -58,10 +59,11 @@ public:
         void Is_onDemageCell();
         //체력관련
         void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
-        void Set_HealthCurrentHP(_float Health) { m_fHP += Health; }
+        void Set_HealthCurrentHP(_float Health);
         _bool IsFullHP() const { return m_fHP == m_fMAXHP; }
         virtual _float Weapon_Damage() { return 0.f; }
        
+
     protected:
 
          CNavigation* m_pNavigationCom = { nullptr };
@@ -74,6 +76,7 @@ public:
         _bool   m_bOnCell = { false };
         _uint   m_iRim{}; // 림 연산 할꺼 말꺼
         _bool   m_bStun = {false};
+    
     public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;

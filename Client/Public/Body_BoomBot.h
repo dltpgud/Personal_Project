@@ -12,7 +12,7 @@ class CBody_BoomBot : public CPartObject
 public: 
 	typedef struct CBody_BoomBot_Desc : CPartObject::PARTOBJECT_DESC
 	{
-		_float* Fall_Y{};
+
      } CBody_BoomBot_Desc;
 
 private:
@@ -40,7 +40,7 @@ private:
 	HRESULT Bind_ShaderResources();
 private:
 	
-	_float* m_Fall_Y = { nullptr };
+
 	_float m_fAttackTime{ 0.f };
 	_float m_pDamage = { 5.f };
 

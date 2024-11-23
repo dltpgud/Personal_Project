@@ -62,7 +62,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pTarget_Manager)
 		return E_FAIL;
 
-	m_pRenderer		     = CRenderer::Create(*ppDevice, *ppContext);
+	m_pRenderer		     = CRenderer::Create(*ppDevice, *ppContext, EngineDesc.iWinSizeX, EngineDesc.iWinSizeY);
 	if (nullptr == m_pRenderer)
 		return E_FAIL;
 
@@ -74,7 +74,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pCalculator)
 		return E_FAIL;
 
-	m_pCollider_Manager = Collider_Manager::Create(EngineDesc.iNumLevels);
+	m_pCollider_Manager = Collider_Manager::Create();
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
 
@@ -130,13 +130,12 @@ void CGameInstance::Clear(_uint iClearLevelID)
 	m_pUI_Manager->Clear(iClearLevelID);
 	m_pObject_Manager->Clear(iClearLevelID);
 	m_pComponent_Manager->Clear(iClearLevelID);
-	m_pCollider_Manager->Clear(iClearLevelID);
+	m_pCollider_Manager->Clear();
 }
 
 void CGameInstance::Set_Player(CGameObject* pPlayer)
 {
 	m_pPlayer =  static_cast <CActor*>(pPlayer);
-
 }
 
 CActor* CGameInstance::Get_Player()
@@ -436,20 +435,20 @@ CGameObject* CGameInstance::Find_CloneGameObject(_uint iLevelIndex, const _uint&
 
 
 #pragma region Collider_Manager
-HRESULT CGameInstance::Add_Monster(_uint iClearLevelID, CGameObject* Monster)
+HRESULT CGameInstance::Add_Monster( CGameObject* Monster)
 {
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
 
-	return m_pCollider_Manager->Add_Monster(iClearLevelID,Monster);
+	return m_pCollider_Manager->Add_Monster(Monster);
 }
 
-HRESULT CGameInstance::Add_MonsterBullet(_uint iClearLevelID, CGameObject* MonsterBUllet)
+HRESULT CGameInstance::Add_MonsterBullet( CGameObject* MonsterBUllet)
 {
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
 
-	return m_pCollider_Manager ->Add_MonsterBullet(iClearLevelID, MonsterBUllet);
+	return m_pCollider_Manager ->Add_MonsterBullet( MonsterBUllet);
 }
 
 HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
@@ -460,12 +459,12 @@ HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
  	return m_pCollider_Manager->Set_Collison(true);
 }
 
-HRESULT CGameInstance::Find_Cell(_uint Ilevel)
+HRESULT CGameInstance::Find_Cell()
 {
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
 
-	return m_pCollider_Manager->Find_Cell(Ilevel);
+	return m_pCollider_Manager->Find_Cell();
 }
 
 #pragma endregion
@@ -793,12 +792,12 @@ HRESULT CGameInstance::Add_MRT(const _wstring& strMRTTag, const _wstring& strTar
 	return m_pTarget_Manager->Add_MRT(strMRTTag, strTargetTag);
 }
 
-HRESULT CGameInstance::Begin_MRT(const _wstring& strMRTTag)
+HRESULT CGameInstance::Begin_MRT(const _wstring& strMRTTag,  ID3D11DepthStencilView* pDSV, _bool isClear)
 {
 	if (nullptr == m_pTarget_Manager)
 		return E_FAIL;
 
-	return  m_pTarget_Manager->Begin_MRT(strMRTTag);
+	return  m_pTarget_Manager->Begin_MRT(strMRTTag, pDSV, isClear);
 }
 
 HRESULT CGameInstance::End_MRT(const _wstring& strMRTTag)

@@ -45,6 +45,39 @@ void CNonAni::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+ 
+}
+
+HRESULT CNonAni::Render_Shadow()
+{
+    //_float4x4			ViewMatrix, ProjMatrix;
+    //
+    //XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(0.f, 10.f, -8.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+    //XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY, 0.1f, 500.f));
+    //
+    //
+    //if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+    //    return E_FAIL;
+    //
+    //
+    //if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &ViewMatrix)))
+    //    return E_FAIL;
+    //if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &ProjMatrix)))
+    //    return E_FAIL;
+    //
+    //
+    //_uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
+    //
+    //for (size_t i = 0; i < iNumMeshes; i++)
+    //{
+    // 
+    //    if (FAILED(m_pShaderCom->Begin(2)))
+    //        return E_FAIL;
+    //
+    //    m_pModelCom->Render(i);
+    //}
+    //
+    return S_OK;
 }
 
 HRESULT CNonAni::Render()
@@ -59,8 +92,8 @@ HRESULT CNonAni::Render()
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
-
-        if (FAILED(m_pShaderCom->Begin(0)))
+ 
+        if (FAILED(m_pShaderCom->Begin(m_iPass)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -70,12 +103,18 @@ HRESULT CNonAni::Render()
 
 void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
+     m_wModel = protoModel;
     if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
     {
         MSG_BOX("Set_Model failed");
         return;
     }
+
+    if (protoModel == L"Proto Component BossFloor Model_nonaniObj")
+        m_iPass = 1;
+    else
+        m_iPass = 0;
 }
 
 

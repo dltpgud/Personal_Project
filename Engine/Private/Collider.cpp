@@ -89,12 +89,21 @@ _bool CCollider::Intersect(CCollider* pTargetCollider)
 
 _bool CCollider::RayIntersects(_vector RayPos, _vector RayDir, _float& fDis)
 {
-
-
-	m_isColl = m_pBounding->RayIntersect(RayPos, RayDir, fDis);
-
-	return m_isColl;
+	return 	m_isColl = m_pBounding->RayIntersect(RayPos, RayDir, fDis);
 }
+
+_float CCollider::Get_iCurRadius()
+{
+	return m_pBounding->Get_iCurRadius();
+}
+
+_float3 CCollider::Get_iCurCenter()
+{
+	return m_pBounding->Get_iCurCenter();
+}
+
+
+
 
 #ifdef _DEBUG
 

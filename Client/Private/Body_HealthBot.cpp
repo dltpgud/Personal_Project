@@ -68,13 +68,16 @@ void CBody_HealthBot::Update(_float fTimeDelta)
         bLoop = false;
     }
 
+
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
+   
         m_RimDesc.fcolor = { 0.f,1.f,0.f,1.f };
         m_RimDesc.iPower = 5;
     }
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
+    
         m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
         m_RimDesc.iPower = 1;
     }
@@ -84,10 +87,7 @@ void CBody_HealthBot::Update(_float fTimeDelta)
 
     if (true == m_pModelCom->Play_Animation(fTimeDelta))
     {
-
- 
-         m_bFinishAni = true;
-
+         m_bFinishAni = true;        
         if(m_iCurMotion == CHealthBot::ST_Idle)
          m_pModelCom->Set_Animation(m_iCurMotion, true);
     }

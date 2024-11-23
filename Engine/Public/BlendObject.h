@@ -9,7 +9,7 @@ BEGIN(Engine)
 class ENGINE_DLL CBlendObject abstract : public CGameObject
 {
 public:
-	typedef struct : public CGameObject::GAMEOBJ_DESC
+	typedef struct BLEND_DESC  : public CGameObject::GAMEOBJ_DESC
 	{		
 	}BLEND_DESC;
 protected:

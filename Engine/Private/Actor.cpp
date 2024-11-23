@@ -58,7 +58,7 @@ void CActor::Late_Update(_float fTimeDelta)
 		
 		if (m_fHP > 0.f)
 		{
-			HIt_Routine();
+	       HIt_Routine();
 		}
 
 		if (m_fHP <= 0.f)
@@ -76,8 +76,6 @@ m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
 
 HRESULT CActor::Render()
 {
-
-
 	return S_OK;
 }
 
@@ -121,7 +119,22 @@ void CActor::Is_onDemageCell()
 			Dead_Routine();
 		}
 	}
+
+
 }
+void CActor::Set_HealthCurrentHP(_float Health) {
+	if (IsFullHP())
+		return;
+
+	if (m_fHP + Health >= m_fMAXHP)
+		m_fHP = m_fMAXHP;
+
+	else
+	m_fHP += Health;
+
+}
+	
+
 
 
 void CActor::Free()

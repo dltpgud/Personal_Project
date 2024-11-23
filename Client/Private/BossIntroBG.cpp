@@ -58,8 +58,6 @@ void CBossIntroBG::Update(_float fTimeDelta)
 
 	if (m_TimeSum >= 2.5f)
 	{
-		m_bDead = true;
-
 		m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, true);
 
 		m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, true);
@@ -72,6 +70,8 @@ void CBossIntroBG::Update(_float fTimeDelta)
 	
 		dynamic_cast<CSceneCamera*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::CAMERA, CGameObject::DATA_CAMERA))->Set_Dead(true);
  		m_pGameInstance->Set_OpenUI(CUI::UIID_BossHP, true);
+
+		m_bDead = true;
 	}
 }
 

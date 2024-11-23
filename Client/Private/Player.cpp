@@ -4,6 +4,7 @@
 #include "Body_Player.h"
 #include "Weapon.h"
 #include "PlayerUI.h"
+#include "PlayerEffectUI.h"
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{ pDevice, pContext }
 {
 }
@@ -24,7 +25,7 @@ HRESULT CPlayer::Initialize(void* pArg)
     Desc.iNumPartObjects = PART_END;
     Desc.fSpeedPerSec = 15.f;
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
-    Desc.JumpPower = 2.4f;
+    Desc.JumpPower = 1.5f;
 
     m_Type = T00;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
@@ -56,6 +57,7 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
 
      m_pPlayerUI->Set_PlayerHP(m_fHP);
 
+
     if (m_bchange)
     {
         m_iWeaponType == CWeapon::HendGun ? m_Type = T00 : m_Type = T01;
@@ -63,26 +65,33 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
         m_bchange = false;
     }
 
+    if (m_bHit == true) {
+        m_fHitTime += fTimeDelta;
+        if (m_fHitTime > 0.3f)
+        {
+            m_bHit = false;
+            m_fHitTime = 0.f;
+        }
 
+    }
     if (m_bHitLock == true)
     {
         m_Type == T00 ? m_iState = STATE_STUN : m_iState = STATE_STUN2;
-
     }
-   
-    Is_onDemageCell();
-    
 
     if (false == m_bHitLock && false == m_bFallLock)
     {
         Key_Input(fTimeDelta);
+
     }
+
     __super::Priority_Update(fTimeDelta);
     return OBJ_NOEVENT;
 }
 
 void CPlayer::Update(_float fTimeDelta)
 {
+    
     if (false == m_bJump) {
         if (m_pNavigationCom->ISFall())
         {
@@ -98,6 +107,7 @@ void CPlayer::Update(_float fTimeDelta)
                 m_DemageCellTime += fTimeDelta;
                 m_bFallLock = false;
                 HIt_Routine();
+                m_fHP -= 10.f/100.f;
                 if (m_DemageCellTime > 1.f) {
                     Set_onCell(true);
                  
@@ -108,11 +118,18 @@ void CPlayer::Update(_float fTimeDelta)
             }
         }
     }
+
+
     __super::Update(fTimeDelta);
+
+
+
+  
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
 {
+    Is_onDemageCell();
     if (false == m_bJump)
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
@@ -130,11 +147,14 @@ HRESULT CPlayer::Render()
 
 void CPlayer::HIt_Routine()
 {
-
+    m_eUIState = STATE_UI_HIT;
+    m_bHit = true;
+    m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, true);
 }
 
 void CPlayer::Stun_Routine()
 {
+   if(false == m_bJump)
     m_bHitLock = true;
 }
 
@@ -151,7 +171,7 @@ const _float4x4* CPlayer::Get_CameraBone()
 
 void CPlayer::Key_Input(_float fTimeDelta)
 {
-
+    
     if (m_pGameInstance->Get_DIKeyState(DIK_LSHIFT))
     {
 
@@ -160,13 +180,24 @@ void CPlayer::Key_Input(_float fTimeDelta)
             if (m_iState != STATE_SWITCHIN && m_iState != STATE_SWITCHIN2)
             {
                 m_Type == T00 ? m_iState = STATE_SPRINT : m_iState = STATE_SPRINT2;
-                m_pTransformCom->Set_MoveSpeed(30.f);
+                m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, true);
+                if (m_eUIState != STATE_UI_HEALTH)
+                m_eUIState = STATE_UI_SPRINT;
+                m_pTransformCom->Set_MoveSpeed(40.f);
             }
         }
     }
     else
     {
-        m_pTransformCom->Set_MoveSpeed(15.f);
+
+        m_pTransformCom->Set_MoveSpeed(20.f);
+        if (false == m_bHit) {
+            if (m_eUIState != STATE_UI_HEALTH)
+            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false);
+        }
+
+        if(m_eUIState != STATE_UI_HEALTH)
+        m_eUIState = STATE_UI_IDlE;
 
         if (m_iState < STATE_HENDGUN_RELOAD)
         {
@@ -292,7 +323,6 @@ void CPlayer::Key_Input(_float fTimeDelta)
     }
 
 
-
     if (m_iState != STATE_HENDGUN_RELOAD && m_iState != STATE_ASSAULTRIFlLE_RELOAD &&
         m_iState != STATE_MissileGatling_RELOAD && m_iState != STATE_HEAVYCROSSBOW_RELOAD)
     {
@@ -302,6 +332,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
             if (CWeapon::HendGun == m_iWeaponType && T00 == m_Type)
                 m_iState = STATE_HENDGUN_SHOOT;
 
+      
             if (T01 == m_Type)
             {
                 if (CWeapon::AssaultRifle == m_iWeaponType)
@@ -316,6 +347,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
 
         }
     }
+    
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_SPACE))
     {
@@ -329,7 +361,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
         if (false == m_bDoubleJump) {
             m_Type == T00 ? m_iState = STATE_JUMP_RUN_LOOP : m_iState = STATE_JUMP_RUN_LOOP2;
         }
-        m_pTransformCom->Go_jump(fTimeDelta, m_fY, &m_bJump);
+            m_pTransformCom->Go_jump(fTimeDelta, m_fY, &m_bJump);
 
         if (m_iJumpCount >= 2)
         {
@@ -416,6 +448,19 @@ HRESULT CPlayer::Add_PartObjects()
         static_cast<CBody_Player*>(m_PartObjects[PART_BODY])->Get_SocketMatrix("Weapon_Attachement");
     WeaponDesc.pType = &m_Type;
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Weapon"), PART_WEAPON, &WeaponDesc)))
+        return E_FAIL;
+
+
+
+    CPlayerEffectUI::CPlayerEffectUI_DESC Desc{};
+    Desc.State = &m_eUIState;
+
+    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, CGameObject::UI, L"Prototype GameObject_PlayerEffectUI",nullptr,0,&Desc)))
+        return E_FAIL;
+
+
+
+    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false)))
         return E_FAIL;
 
     return S_OK;

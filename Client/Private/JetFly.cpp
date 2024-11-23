@@ -93,6 +93,8 @@ void CJetFly::Update(_float fTimeDelta)
 
 void CJetFly::Late_Update(_float fTimeDelta)
 {
+    if (FAILED(m_pGameInstance->Add_Monster(this)))
+        return;
     __super::Late_Update(fTimeDelta);
 }
 

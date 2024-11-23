@@ -4,6 +4,7 @@
 #include "VIBuffer_Rect.h"
 #include "VIBuffer_Terrain.h"
 #include "VIBuffer_Cube.h"
+#include "VIBuffer_Point.h"
 #include "Navigation.h"
 #include "Model.h"
 #include "Collider.h"

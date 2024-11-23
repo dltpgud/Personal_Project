@@ -72,6 +72,13 @@ void CLevel_Edit::Update(_float fTimeDelta)
     {
         Key_input(fTimeDelta);
     }
+
+    if (nullptr != m_PicObj || true == m_bLoadCell)
+    {
+        //static_cast<CNavigation*>(m_pNavigation)->Render();
+
+        m_pGameInstance->Add_DebugComponents(static_cast<CNavigation*>(m_pNavigation));
+    }
     __super::Update(fTimeDelta);
 }
 
@@ -79,10 +86,7 @@ HRESULT CLevel_Edit::Render()
 {
     SetWindowText(g_hWnd, TEXT("편집 레벨입니다."));
 
-    if (nullptr != m_PicObj || true == m_bLoadCell)
-    {
-        static_cast<CNavigation*>(m_pNavigation)->Render();
-    }
+    
     __super::Render();
 
     return S_OK;

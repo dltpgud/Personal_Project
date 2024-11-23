@@ -32,8 +32,7 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-
-	void Make_Bullet();
+	HRESULT Make_Barre(_float3 Offset);
 	const _float4x4* GetHeand() { return m_pFindAttBonMatrix[3]; }
 private:
 	HRESULT Add_Components();
@@ -47,6 +46,12 @@ private:
 	const _float4x4* m_pFindAttBonMatrix[4]{};
 	_float m_fEmissivePower = false;
 	_bool	m_bEmissive = false;
+	_uint m_iEmissiveMashNum{ 0 };
+	_float3 m_fEmissiveColor{};
+	_bool m_bEmissiveStart = false;
+	_float m_fTimeSum{ 0.f };
+	_float3 m_fOffset{};
+	_bool m_bBerrle = false;
 public:
     static CBody_BillyBoom* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

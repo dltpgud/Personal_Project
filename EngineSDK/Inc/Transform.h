@@ -53,7 +53,7 @@ public:
     void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
     void Go_Doublejump(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
-    void GO_Dir(_float fTimeDelta, _vector Dir);
+    void GO_Dir(_float fTimeDelta,  _vector vDir, CNavigation* pNavigation = nullptr, _bool* bStop = nullptr);
     void Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, _bool* Jumpcheck );
     void Stop_Move();
     void Rotation_to_Player(_float fTimeDelta);

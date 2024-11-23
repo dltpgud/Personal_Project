@@ -21,9 +21,11 @@ float4			g_vCamPosition;
 
 float4x4		g_BoneMatrices[512];   /*뼈 메트릭스 개수*/
 bool g_TagetBool;
+bool g_DoorBool;
 bool g_TagetDeadBool;
 bool g_bEmissive;
 float g_EmissivePower;
+float3 g_EmissiveColor;
 
 struct VS_IN
 {
@@ -102,6 +104,7 @@ struct PS_OUT
     vector vPickDepth : SV_TARGET3;
     vector vRim : SV_TARGET4;
     vector vEmissive : SV_TARGET5;
+    vector vOutLine : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -110,10 +113,8 @@ PS_OUT PS_MAIN(PS_IN In)
 	
 	vector		vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);	
 
-
 	if (vMtrlDiffuse.a <= 0.3f)
 		discard;
-
 
 //	float4		vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
 //
@@ -123,18 +124,13 @@ PS_OUT PS_MAIN(PS_IN In)
 //	float		fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
 //
 //	Out.vColor = (g_vLightDiffuse * vMtrlDiffuse) * saturate(vShade) + 
-//		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
-    
+//		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;    
+
     Out.vDiffuse = vMtrlDiffuse;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
-    
- 
-
-
-    
-    
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
 	return Out;
 }
 
@@ -160,6 +156,7 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
         rim = pow(1 - rim, g_RimPow);
     }
 
+   
     //float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
     //
     //// 카툰 효과를 위한 색상 임계값
@@ -177,12 +174,12 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
     return Out;
 }
-
 
 PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
 {
@@ -199,21 +196,20 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
 
-
     float rim = { 0.f };
     if (true == g_TagetBool)
     {
         rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
-        rim = pow(1 - rim, g_RimPow);
+        rim     = pow(1 - rim, g_RimPow);
     }
 
     if (true == g_bEmissive)
     {
         vMtrlEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
-        float3 colorStart = float3(0.f, 0.f, 0.f); // 빨강
-        float3 colorEnd = float3(1.f, 0.5f, 0.0); // 노랑
+        float3 colorStart = float3(0.f, 0.f, 0.f); 
+        float3 colorEnd = g_EmissiveColor.rgb;
 	
-        float3 color = lerp(colorStart, colorEnd, vMtrlEmissive);
+        float3 color = lerp(colorStart, colorEnd, vMtrlEmissive.rgb);
         
         vMtrlEmissive = float4(color, 0.f) * g_EmissivePower;
 
@@ -221,18 +217,16 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
     else
         vMtrlEmissive = 0.f;
 
-   
     Out.vDiffuse = vMtrlDiffuse;
     Out.vEmissive = vMtrlEmissive;
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
     return Out;
 }
-
-
 
 PS_OUT PS_WEAPON(PS_IN In)
 {
@@ -244,20 +238,45 @@ PS_OUT PS_WEAPON(PS_IN In)
         discard;
     vector vMtrlEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
 
-    
-    
-    
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vEmissive = vMtrlEmissive * g_EmissivePower;
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
-    
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
     return Out;
 }
 
 
+
+PS_OUT PS_Door(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+
+    if (vMtrlDiffuse.a <= 0.3f)
+        discard;
+
+    float rim = { 0.f };
+    if (true == g_DoorBool)
+    {
+        rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
+        rim = pow(1 - rim, g_RimPow);
+    }
+
+    Out.vDiffuse = vMtrlDiffuse;
+
+	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vRim = (rim * g_RimColor);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    
+    return Out;
+}
 
 technique11 DefaultTechnique
 {
@@ -304,6 +323,17 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_WEAPON();
+    }
+
+    pass DefaultPass4
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_Door();
     }
 
 }

@@ -336,6 +336,10 @@ HRESULT CLevel_Loading::Ready_Clone_Layer(const _uint& pLayerTag)
         return E_FAIL;
     if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
         return E_FAIL;
+    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false)))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false)))
+        return E_FAIL;
     /*Interactive UI꺼 놓고*/
     if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false)))
         return E_FAIL;

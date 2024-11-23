@@ -21,6 +21,9 @@ void CBounding_Sphere::Update(_fmatrix WorldMatrix)
 {
 
 	m_pBoundDesc_Original->Transform(*m_pBoundDesc, WorldMatrix);
+
+	m_iCurRadius = m_pBoundDesc->Radius;
+	m_iCurCenter = m_pBoundDesc->Center;
 }
 
 _bool CBounding_Sphere::Intersect(CCollider::TYPE eType, CBounding* pTargetBounding)
@@ -45,12 +48,24 @@ _bool CBounding_Sphere::Intersect(CCollider::TYPE eType, CBounding* pTargetBound
 _bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
 {
 	_bool		isColl = { false };
-
+	
 
 	isColl = m_pBoundDesc->Intersects(RayPos, RayDir,fDis);
 
 	return isColl;
 }
+
+_float CBounding_Sphere::Get_iCurRadius()
+{
+	return m_iCurRadius;
+}
+
+_float3 CBounding_Sphere::Get_iCurCenter()
+{
+	return m_iCurCenter;
+}
+
+
 
 #ifdef _DEBUG
 

@@ -24,7 +24,8 @@ public:
 public:
 	_bool Intersect(CCollider* pTargetCollider);
 	_bool RayIntersects(_vector RayPos, _vector RayDir, _float& fDis);
-
+	_float Get_iCurRadius() ;
+    _float3 Get_iCurCenter();
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render() override;

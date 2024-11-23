@@ -1,7 +1,6 @@
 #pragma once
 #include "Client_Defines.h"
 #include "PartObject.h"
-#include "Bullet.h"
 BEGIN(Engine)
 class CShader;
 class CModel;
@@ -73,8 +72,9 @@ private:
 	_bool m_bEmissive = false;
 	const _float4x4* m_pWeapon_SocketMatrix[WeaPoneType_END] = { nullptr };
 	_float3 m_fWeaPonOffset{};
-
-	
+	class CShootingUI* m_ShootingUI = { nullptr};
+	_float m_fTimeSum{ 0.f };
+	_bool m_bClack = false;
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

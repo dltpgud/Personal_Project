@@ -64,6 +64,12 @@ void CTerrain::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 
+    if (m_bFire == 1)
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
+            return;
+   }
+
     if (nullptr != m_pNavigationCom)
     {
         m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
@@ -91,6 +97,10 @@ HRESULT CTerrain::Render()
 
     if (FAILED(m_pShaderCom->Bind_Float("g_TimeSum", m_fTimeSum)))
         return E_FAIL;
+
+
+    if (FAILED(m_pShaderCom->Bind_Int("g_onEmissive", m_bFire)))
+            return E_FAIL;
 
     m_pShaderCom->Begin(m_bFire);
 
@@ -154,8 +164,10 @@ HRESULT CTerrain::Add_Components()
 
     if (true == m_bMain)
     {
+        CNavigation::NAVIGATION_DESC Desc{};
+        Desc.iCurrentCellIndex = 0;
         if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
-            TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
+            TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom),&Desc)))
             return E_FAIL;
     }
     return S_OK;
