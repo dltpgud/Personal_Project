@@ -92,6 +92,9 @@ void CBoomBot::Update(_float fTimeDelta)
 
 void CBoomBot::Late_Update(_float fTimeDelta)
 {
+
+   if(FAILED( m_pGameInstance->Add_Monster(this)))
+       return ;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -186,7 +189,6 @@ HRESULT CBoomBot::Add_PartObjects()
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
     BodyDesc.pRimState = &m_iRim;
-    BodyDesc.Fall_Y = &m_fY;
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_BoomBot"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 

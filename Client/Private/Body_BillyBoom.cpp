@@ -2,6 +2,7 @@
 #include "BillyBoom.h"
 #include "GameInstance.h"
 #include "Body_BillyBoom.h"
+#include "BossBullet_Berrle.h"
 #include "Bullet.h"
 CBody_BillyBoom::CBody_BillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
@@ -33,12 +34,12 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
    m_fPlayAniTime = 0.5f;
-
+   m_iEmissiveMashNum = 1;
  // m_pFindBonMatrix = Get_SocketMatrix("R_Canon_02");
 //   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_05"); // ¿ÞÂÊ À§ ÆÈ
 //   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_05"); // ¿À¸¥ ÂÊ À§ ÆÈ
 //   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
-//   m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ½Î´Ù±¸..
+     m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ½Î´Ù±¸..
 
    
     return S_OK;
@@ -74,9 +75,20 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
        
     if (m_iCurMotion == CBillyBoom::ST_Intro)
     {
+        m_iEmissiveMashNum = 1;
         m_fEmissivePower = 5;
+        m_fEmissiveColor = { 1.f, 0.5f, 0.0 }; // ³ë¶û
+        m_fTimeSum += fTimeDelta;
+
+        if (m_fTimeSum > 1.f)
+        {
+            m_bEmissiveStart = true;
+            m_fTimeSum = 0.f;
+        }
     }
- 
+    else {
+        m_bEmissiveStart = false;
+    }
 
     if (*m_pParentState == CBillyBoom::ST_Comp_Poke_Front && m_iCurMotion != CBillyBoom::ST_Comp_Poke_Front)
     {
@@ -103,7 +115,20 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     
 
     if (m_iCurMotion == CBillyBoom::ST_Barre_Shoot) {
-        m_fPlayAniTime = 0.5f;
+        m_fPlayAniTime = 1.f;
+        m_fOffset = { 0.f, 0.2f, 0.f };
+      
+    }
+
+    if (true == m_bBerrle) {
+        m_fTimeSum += fTimeDelta;
+
+        if (m_fTimeSum > 0.8f)
+        {
+            Make_Barre(m_fOffset);
+            m_fTimeSum = 0.f;
+            m_bBerrle = false;
+        }
     }
 
     if (*m_pParentState == CBillyBoom::ST_Barre_In && m_iCurMotion != CBillyBoom::ST_Barre_In)
@@ -115,6 +140,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
     {
+        m_bBerrle = true;
         m_fPlayAniTime = 1.f;
     }
 
@@ -273,6 +299,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         else
         if(m_iCurMotion == CBillyBoom::ST_Barre_In)
         {
+            m_pDamage = 20.f;
            static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Barre_PreShoot);
            m_iCurMotion = CBillyBoom::ST_Barre_PreShoot;
            m_pModelCom->Set_Animation(m_iCurMotion, false);
@@ -280,6 +307,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         else
         if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
         {
+
             static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Barre_Shoot);
             m_iCurMotion = CBillyBoom::ST_Barre_Shoot;
             m_pModelCom->Set_Animation(m_iCurMotion, false);
@@ -314,9 +342,6 @@ HRESULT CBody_BillyBoom::Render()
         return E_FAIL;
 
 
-
-
-
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -327,14 +352,20 @@ HRESULT CBody_BillyBoom::Render()
             return E_FAIL;
 
      
-        if (i == 1 && m_iCurMotion == CBillyBoom::ST_Intro)
-            m_bEmissive = true;
-        else
-            m_bEmissive = false;
+        if (true == m_bEmissiveStart) {
+            if (i == m_iEmissiveMashNum)
+                m_bEmissive = true;
+            else
+                m_bEmissive = false;
 
 
-        if (FAILED(m_pShaderCom->Bind_Bool("g_bEmissive", m_bEmissive)))
-            return E_FAIL;
+            if(4 == m_iEmissiveMashNum)
+                m_bEmissive = true;
+
+
+            if (FAILED(m_pShaderCom->Bind_Bool("g_bEmissive", m_bEmissive)))
+                return E_FAIL;
+        }
 
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
@@ -348,26 +379,40 @@ HRESULT CBody_BillyBoom::Render()
     return S_OK;
 }
 
-void CBody_BillyBoom::Make_Bullet()
+HRESULT CBody_BillyBoom::Make_Barre(_float3 Offset)
 {
- //  _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
- //
- //  _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
- //
- //  _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
- //      - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
- //
- //  CBullet::CBULLET_DESC Desc{};
- //  Desc.fSpeedPerSec = 20.f;
- //  Desc.pTagetPos = Dir;
- //  Desc.vPos = vHPos;
- //  Desc.Damage = &m_pDamage;
- //  Desc.iWeaponType = CBullet::MONSTER_BULLET::TYPE_MECANOBOT; 
- //  Desc.LifTime = 1.f;
- //  CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
- //  m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
- //  m_pGameInstance->Add_MonsterBullet(m_pGameInstance->Get_iCurrentLevel(), pGameObject);
-   
+   _vector Hend_Local_Pos = { m_pFindAttBonMatrix[3]->_41, m_pFindAttBonMatrix[3]->_42,  m_pFindAttBonMatrix[3]->_43,  m_pFindAttBonMatrix[3]->_44};
+ 
+   _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+ 
+   _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
+       - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+   CGameObject* pGameObject{};
+
+
+
+   CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc{};
+   Desc.fSpeedPerSec = 20.f;
+   Desc.pTagetPos = Dir;
+   Desc.vPos = vHPos;
+   pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_BossBullet_Berrle", &Desc);
+   m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+
+
+   CBullet::CBULLET_DESC BDesc{};
+   BDesc.fSpeedPerSec = 20.f;
+   BDesc.pTagetPos = Dir;
+   BDesc.vPos = vHPos;
+   BDesc.fDamage = &m_pDamage;
+   BDesc.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
+   pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &BDesc);
+   m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+ 
+
+
+
+
+   return S_OK;
 }
 
 HRESULT CBody_BillyBoom::Add_Components()
@@ -411,6 +456,9 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Float("g_EmissivePower", m_fEmissivePower)))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_EmissiveColor", &m_fEmissiveColor, sizeof(_float3))))
         return E_FAIL;
 
     if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, 1, aiTextureType_EMISSIVE, 0,

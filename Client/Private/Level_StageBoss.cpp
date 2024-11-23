@@ -141,7 +141,7 @@ HRESULT CLevel_StageBoss::Ready_Layer_Map(const _uint& pLayerTag)
 
 HRESULT CLevel_StageBoss::Ready_Find_cell()
 {
-	  m_pGameInstance->Find_Cell(LEVEL_BOSS);
+	  m_pGameInstance->Find_Cell();
 	return S_OK;
 }
 
@@ -149,12 +149,12 @@ HRESULT CLevel_StageBoss::Ready_Light()
 {
 	m_pGameInstance->Light_Clear();
 	LIGHT_DESC			LightDesc{};
-
 	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
+	LightDesc.vDirection = _float4(1.f, -1.5f, -1.f, 0.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vAmbient = _float4(0.3f, 0.3f, 0.3f, 1.f);
+	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
+
 
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;

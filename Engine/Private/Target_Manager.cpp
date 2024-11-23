@@ -22,7 +22,7 @@ HRESULT CTarget_Manager::Add_RenderTarget(const _wstring& strTargetTag, _uint iW
 	if (nullptr != Find_RenderTarget(strTargetTag))
 		return E_FAIL;
 
-	CRenderTarget* pRenderTarget = CRenderTarget::Create(m_pDevice, m_pContext, iWidth, iHeight, ePixelFormat, vClearColor);
+	CRenderTarget* pRenderTarget = CRenderTarget::Create(m_pDevice, m_pContext,iWidth, iHeight, ePixelFormat, vClearColor);
 	if (nullptr == pRenderTarget)
 		return E_FAIL;
 
@@ -57,7 +57,7 @@ HRESULT CTarget_Manager::Add_MRT(const _wstring& strMRTTag, const _wstring& strT
 	return S_OK;
 }
 
-HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag)
+HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSView, _bool isClear)
 {
 	m_pContext->OMGetRenderTargets(1, &m_pBackBufferView, &m_pDSV);
 
@@ -67,15 +67,16 @@ HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag)
 
 	ID3D11RenderTargetView* RTVs[8] = { nullptr };
 
-	_uint			iNumRenderTargets = pMRTs->size();
+	size_t			iNumRenderTargets = pMRTs->size();
 
 	for (size_t i = 0; i < iNumRenderTargets; i++)
 	{
+		if (true == isClear)
 		(*pMRTs)[i]->Clear();
 		RTVs[i] = (*pMRTs)[i]->Get_RTV();
 	}
 
-	m_pContext->OMSetRenderTargets(iNumRenderTargets, RTVs, m_pDSV);
+	m_pContext->OMSetRenderTargets(static_cast<_uint>(iNumRenderTargets), RTVs, nullptr != pDSView ? pDSView : m_pDSV);
 
 	return S_OK;
 }

@@ -117,7 +117,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             /* TimeDelta : 1.f / 60.0 */
 
         #ifdef _DEBUG
-            pMainApp->Update(1.f / 60.0);
+            pMainApp->Update(1.0 / 60.0);
         #else 
             pMainApp->Update(pGameInstance->Get_TimeDelta(TEXT("Timer_60")));
         #endif

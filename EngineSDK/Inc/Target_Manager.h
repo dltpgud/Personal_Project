@@ -14,7 +14,7 @@ public:
 	HRESULT Initialize();
 	HRESULT Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor);	
 	HRESULT Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
-	HRESULT Begin_MRT(const _wstring& strMRTTag);
+	HRESULT Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSView, _bool isClear = true);
 	HRESULT End_MRT(const _wstring& strMRTTag);
 	HRESULT Bind_SRV(class CShader* pShader, const _char* pConstantName, const _wstring& strTargetTag);
 	HRESULT Copy_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut);

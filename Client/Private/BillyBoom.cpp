@@ -97,8 +97,9 @@ void CBillyBoom::Update(_float fTimeDelta)
 
      if (m_bSkill != true) {
          NON_intersect(fTimeDelta);
-
-         Change_State(fTimeDelta);
+         Set_ShockWave(fTimeDelta);
+        // Set_Barre_Shoot(fTimeDelta);
+        // Change_State(fTimeDelta);
      }
  }
 
@@ -115,6 +116,11 @@ void CBillyBoom::Late_Update(_float fTimeDelta)
             m_iPrAttack[i] = -1;
         }
     }
+
+
+
+    if (FAILED(m_pGameInstance->Add_Monster(this)))
+        return;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -261,6 +267,7 @@ void CBillyBoom::Change_State(_float fTimedelta)
 
 void CBillyBoom::Set_Barre_Shoot(_float fTimedelta)
 {
+  
     m_iState = ST_Barre_In;
     m_bSkill = true;
 }
@@ -349,5 +356,4 @@ CGameObject* CBillyBoom::Clone(void* pArg)
 void CBillyBoom::Free()
 {
     __super::Free();
-    Safe_Release(m_pHP);
 }

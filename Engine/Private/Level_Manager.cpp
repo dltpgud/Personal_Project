@@ -48,7 +48,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
     }
 
     DWORD dwByte(0);
-    DWORD dwStrByte(0);
     _vector Right = {0.f, 0.f, 0.f, 0.f};
     _vector UP = {0.f, 0.f, 0.f, 0.f};
     _vector LOOK = {0.f, 0.f, 0.f, 0.f};
@@ -146,7 +145,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, con
     }
 
     DWORD dwByte(0);
-    DWORD dwStrByte(0);
     _vector Right = {0.f, 0.f, 0.f, 0.f};
     _vector UP = {0.f, 0.f, 0.f, 0.f};
     _vector LOOK = {0.f, 0.f, 0.f, 0.f};
@@ -212,7 +210,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _u
     }
 
     DWORD dwByte(0);
-    DWORD dwStrByte(0);
     _vector Right = {0.f, 0.f, 0.f, 0.f};
     _vector UP = {0.f, 0.f, 0.f, 0.f};
     _vector LOOK = {0.f, 0.f, 0.f, 0.f};
@@ -278,7 +275,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
     }
 
     DWORD dwByte(0);
-    DWORD dwStrByte(0);
     _vector Right = { 0.f, 0.f, 0.f, 0.f };
     _vector UP = { 0.f, 0.f, 0.f, 0.f };
     _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
@@ -349,7 +345,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
     }
 
     DWORD dwByte(0);
-    DWORD dwStrByte(0);
     _vector Right = { 0.f, 0.f, 0.f, 0.f };
     _vector UP = { 0.f, 0.f, 0.f, 0.f };
     _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
@@ -400,6 +395,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+       
             }
             break;
 
@@ -410,6 +406,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+       
             }
             break;
 
@@ -421,6 +418,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+          ;
             }
             break;
 
@@ -431,6 +429,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+            
             }
             break;
 
@@ -441,14 +440,14 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
                 pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+        
             }
             break;
         }
 
         m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-        m_pGameInstance->Add_Monster(iLevelIndex, m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag));
-       
-      
+            m_pGameInstance->Add_Monster(m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag));
+
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
@@ -466,7 +465,6 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _ui
     }
 
     DWORD dwByte(0);
-    DWORD dwStrByte(0);
     _vector Right = { 0.f, 0.f, 0.f, 0.f };
     _vector UP = { 0.f, 0.f, 0.f, 0.f };
     _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
@@ -551,8 +549,9 @@ CLevel_Manager* CLevel_Manager::Create()
 }
 
 void CLevel_Manager::Free()
-{
-    __super::Free();
+{ 
+    __super::Free();   
+   Safe_Release(m_pGameInstance);
     Safe_Release(m_pCurrentLevel);
-    Safe_Release(m_pGameInstance);
+
 }

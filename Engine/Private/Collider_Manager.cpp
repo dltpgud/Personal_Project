@@ -1,20 +1,20 @@
 ﻿#include "Collider_Manager.h"
 #include "Actor.h"
+#include "Skill.h"
 #include "GameInstance.h"
+
 Collider_Manager::Collider_Manager() : m_pGameInstance{CGameInstance::GetInstance()}
 {
 		Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT Collider_Manager::Initialize(_uint Ilevel)
+HRESULT Collider_Manager::Initialize()
 {
-    m_MonsterList = new list <class CActor*>[Ilevel];
-    m_iLevel = Ilevel;
-
+ 
     return S_OK;
 }
 
-HRESULT Collider_Manager::Add_Monster(_uint Ilevel, CGameObject* Monster)
+HRESULT Collider_Manager::Add_Monster( CGameObject* Monster)
 {
     CActor* pMonster = static_cast<CActor*>(Monster);
     if (nullptr == pMonster)
@@ -23,27 +23,31 @@ HRESULT Collider_Manager::Add_Monster(_uint Ilevel, CGameObject* Monster)
         return E_FAIL;
     }
 
-    m_MonsterList[Ilevel].push_back(pMonster);
+    m_MonsterList.push_back(pMonster);
+    Safe_AddRef(pMonster);
     return S_OK;
 }
 
-HRESULT Collider_Manager::Add_MonsterBullet(_uint Ilevel, CGameObject* MonsterBullet)
+HRESULT Collider_Manager::Add_MonsterBullet( CGameObject* MonsterBullet)
 {
-    CGameObject* pMonsterBullet = MonsterBullet;
-    if (nullptr == pMonsterBullet)
+;     CSkill* pBullet = static_cast<CSkill*>(MonsterBullet);
+    if (nullptr == MonsterBullet)
     {
         MSG_BOX("No pMonsterBullet");
         return E_FAIL;
     }
 
-    m_MonsterBullet.push_back(pMonsterBullet);
+    m_MonsterBullet.push_back(pBullet);
+    Safe_AddRef(pBullet);
     return S_OK;
 }
 
 
 
+
 void Collider_Manager::All_Collison_check()
-{        Player_To_Monster_Bullet_Collison_Check();
+{      
+    Player_To_Monster_Bullet_Collison();
     Player_To_Monster_Collison_Check();
 
     if (m_bIsColl)
@@ -57,20 +61,18 @@ void Collider_Manager::All_Collison_check()
 
 HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
 {
-  
      CActor* pPlayer = m_pGameInstance->Get_Player();
-	if (false == pPlayer)
+     if (false == pPlayer)
 		return E_FAIL;
-
-    for (_uint i = 0; i < m_iLevel; i++) {
-        if (0 == m_MonsterList[i].size())
-            continue;
-
-        for (auto& Monster : m_MonsterList[i])
+   
+        if (0 == m_MonsterList.size())
+            return S_OK;
+   
+        for (auto& Monster : m_MonsterList)
         {
             if (nullptr == Monster)
                 continue;
-
+   
             if (true == Monster->Get_Collider()->Intersect(pPlayer->Get_Collider()))
             {
                 pPlayer->Set_bColl(true);
@@ -78,10 +80,8 @@ HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
             }
            
         }
-    }
-
-
-    return S_OK;
+    
+   return S_OK;
 }
 
 HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
@@ -93,30 +93,31 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
     CActor* pPickedObj{};
     _vector vPos{};
 
-    for (_uint i = 0; i < m_iLevel; i++) {
-        if (0 == m_MonsterList[i].size())
-            continue;
+     if (0 == m_MonsterList.size())
+         return S_OK;
 
-        _float fDist{};
-        _float fNewDist = {0xffff};
-        
-        for (auto& Monster : m_MonsterList[i])
-        {
-            if (nullptr == Monster)
-                continue;
-             
-            Monster->Get_Collider()->RayIntersects(RayPos, RayDir, fDist);
+     _float fDist{};
+     _float fNewDist = {0xffff};
+     
+     for (auto& Monster : m_MonsterList)
+     {
+         if (nullptr == Monster)
+             continue;
+          
+         if (true == Monster->Get_Collider()->RayIntersects(RayPos, RayDir, fDist)) {
 
-            if (fDist < fNewDist)
-            {
-                if (fDist != 0) {
-                    fNewDist = fDist;
-                    pPickedObj = Monster;
-                    vPos = RayPos + RayDir*fNewDist;    
-                }
-            }
-        }
-    }
+             if (fDist < fNewDist)
+             {
+                 if (fDist != 0) {
+                     fNewDist = fDist;
+                     pPickedObj = Monster;
+                     vPos = RayPos + RayDir * fNewDist;
+
+                 }
+             }
+         }
+        Safe_Release(Monster);
+     }
 
     if (pPickedObj)
     {
@@ -124,77 +125,90 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
         pPickedObj->Set_bColl(true);
     }
    
+    m_MonsterList.clear();
+
     return S_OK;
 }
 
-HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison_Check()
-{
-    CActor* pPlayer = m_pGameInstance->Get_Player();
-    if (false == pPlayer)
-        return E_FAIL;
+HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
 
-       if (0 == m_MonsterBullet.size())
-           return S_OK;
-      
-       for (auto MonsterBullet = m_MonsterBullet.begin(); MonsterBullet != m_MonsterBullet.end();)
-       {
-           if (nullptr == (*MonsterBullet))
-               continue;
+   CActor* pPlayer = m_pGameInstance->Get_Player();
+   if (nullptr == pPlayer)
+       return E_FAIL;
+  
+  if (m_MonsterBullet.size() == 0)
+       return S_OK;
+  
+  for (auto& pMonsterBullet : m_MonsterBullet)
+  {
+ 
+      if (nullptr != pMonsterBullet) {
 
-           if ((*MonsterBullet)->Get_Dead())
-           {
-             MonsterBullet = m_MonsterBullet.erase(MonsterBullet);
-           }
-       
-           if (0 == m_MonsterBullet.size())
-               return S_OK;
+          if (true == pMonsterBullet->Get_Collider()->Intersect(pPlayer->Get_Collider()))
+          {
+              if (pMonsterBullet->Get_SkillType() == CSkill::STYPE_STURN)
+                  pPlayer->Set_bStun(true);
 
-           if (true == (*MonsterBullet)->Get_Collider()->Intersect(pPlayer->Get_Collider()))
-           {
+             _bool bHit = true;
+             if (CSkill::TYPE_BILLYBOOM== pMonsterBullet->Get_ActorType() && CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
+             {
+                 if (true == pMonsterBullet->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)))
+                 {
+                     bHit = false;
 
-               if ((*MonsterBullet)->Get_Data() == 1)
-                   pPlayer->Set_bStun(true);
-
+                 }
+                 else
+                    bHit = true;   
+             }
+                
+             if(true == bHit)
+             {
                pPlayer->Set_bColl(true);
-               pPlayer->Set_CurrentHP((*MonsterBullet)->Get_Scalra_float());
-               (*MonsterBullet)->Set_Dead(true);
-               MonsterBullet = m_MonsterBullet.erase(MonsterBullet);
-
-           }
-           else
-             MonsterBullet++;
-       }
+               pPlayer->Set_CurrentHP(pMonsterBullet->Get_Damage());
+               pMonsterBullet->Set_Dead(true);
+             }
+          }
+      }
+      Safe_Release(pMonsterBullet);
+  }
+ 
+  m_MonsterBullet.clear();
     return S_OK;
 }
 
-void Collider_Manager::Clear(_uint Ilevel)
+
+void Collider_Manager::Clear()
 {
-    m_MonsterList[Ilevel].clear();
+    for (auto& Monster : m_MonsterList)
+        Safe_Release(Monster);
+    m_MonsterList.clear();
+
+
+    for (auto& Bullet : m_MonsterBullet)
+        Safe_Release(Bullet);
     m_MonsterBullet.clear();
 }
 
-HRESULT Collider_Manager::Find_Cell(_uint Ilevel)
+HRESULT Collider_Manager::Find_Cell()
 {
     m_pGameInstance->Get_Player()->Set_onCell(true);
     m_pGameInstance->Get_Player()->Find_CurrentCell();
 
-
-    if (m_MonsterList[Ilevel].size() != 0) {
-        for (auto& Monster : m_MonsterList[Ilevel])
-        {
-            Monster->Find_CurrentCell();
-        }
+    for (auto& Monster : m_MonsterList)
+    {
+        Monster->Find_CurrentCell();
+        Safe_Release(Monster);
     }
-
+    m_MonsterList.clear();
     return S_OK;
 }
 
-Collider_Manager* Collider_Manager::Create(_uint Ileve)
+Collider_Manager* Collider_Manager::Create()
 {
     Collider_Manager* pInstance = new Collider_Manager();
 
-    if (FAILED(pInstance->Initialize(Ileve)))
-    {
+    if (FAILED(pInstance->Initialize())){
+    
         MSG_BOX("Failed to Created : Collider_Manager");
         Safe_Release(pInstance);
     }
@@ -207,5 +221,11 @@ void Collider_Manager::Free()
     __super::Free();
     Safe_Release(m_pGameInstance);
 
-    Safe_Delete_Array(m_MonsterList);
+    for (auto& Bullet : m_MonsterBullet)
+        Safe_Release(Bullet);
+    m_MonsterBullet.clear();
+
+    for (auto& Monster : m_MonsterList)
+        Safe_Release(Monster);
+    m_MonsterList.clear();
 }

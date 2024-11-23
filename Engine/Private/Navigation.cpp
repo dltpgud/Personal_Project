@@ -93,7 +93,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
 
     _vector Slid{};
     /* 현재 이동하고 난 결과위치가 원래 존재하고 있던 쎌 바깥으로 나갔다. */
-    if (false == m_Cells[m_iCurrentCellIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &Slid))
+        if (false == m_Cells[m_iCurrentCellIndex]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &Slid))
     { /* 나간 방향에 이웃이 있었다면. */
         if (-1 != iNeighborIndex)
         {
@@ -105,7 +105,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                     if (CCell::NOMOVE == m_Cells[iNeighborIndex]->Get_Type())
                     {
                         m_iNonMoveCellIndex = iNeighborIndex;
-                        Slid = XMVectorZero();
+                        *Slide = XMVectorZero();
                         return false;
                     }
 
@@ -113,7 +113,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                         if (CCell::DEMAGE == m_Cells[iNeighborIndex]->Get_Type())
                         {
                             m_iNonMoveCellIndex = iNeighborIndex;
-                            Slid = XMVectorZero();
+                            *Slide = XMVectorZero();
                             return false;
                         }
                     }
@@ -157,7 +157,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                     if (CCell::NOMOVE == m_Cells[iNeighborIndex]->Get_Type())
                     {
                         m_iNonMoveCellIndex = iNeighborIndex;
-                        Slid = XMVectorZero();
+                        *Slide = XMVectorZero();
                         return false;
                     }
 
@@ -166,7 +166,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                         if (CCell::DEMAGE == m_Cells[iNeighborIndex]->Get_Type())
                         {
                             m_iNonMoveCellIndex = iNeighborIndex;
-                            Slid = XMVectorZero();
+                            *Slide = XMVectorZero();
                             return false;
                         }
                     }
@@ -204,6 +204,9 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
 
 HRESULT CNavigation::Render()
 {
+
+    if (m_iCurrentCellIndex == -1)
+        return S_OK;
 
     if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
         return E_FAIL;
@@ -335,7 +338,7 @@ void CNavigation::Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type)
     cout << pPoints[2].x << " " << pPoints[2].y << " " << pPoints[2].z << endl;
 #endif
 
-    CCell* pCell = CCell::Create(m_pDevice, m_pContext, pPoints, m_Cells.size(), Type);
+    CCell* pCell = CCell::Create(m_pDevice, m_pContext, pPoints, static_cast<_uint>(m_Cells.size()), Type);
     if (nullptr == pCell)
     {
 
@@ -414,7 +417,7 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
             Type = CCell::TYPE::NOMAL;
         }
 
-        CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, m_Cells.size(), Type);
+        CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, static_cast<_uint>( m_Cells.size()), Type);
         if (nullptr == pCell)
             return E_FAIL;
 
@@ -515,7 +518,7 @@ void CNavigation::Find_CurrentCell(_vector vWorldPos)
 
         if (true == m_Cells[i]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &slide))
         {
-             m_iCurrentCellIndex = i;
+             m_iCurrentCellIndex = static_cast<_int>(i);
             return;
         }
     }

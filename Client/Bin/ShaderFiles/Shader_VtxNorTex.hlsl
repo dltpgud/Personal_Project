@@ -1,10 +1,7 @@
  #include "Engine_Shader_Defines.hlsli"
 
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-float4 g_vLightDir;
-float4 g_vLightDiffuse;
-float4 g_vLightAmbient;
-float4 g_vLightSpecular;
+
 
 texture2D g_DiffuseTexture;
 
@@ -15,8 +12,8 @@ float4 g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
 float4 g_vCamPosition;
 float g_TimeSum; 
-float2 g_ScrollSpeed;
 
+int g_onEmissive;
 
 struct VS_IN
 {
@@ -69,6 +66,7 @@ struct PS_OUT
     vector vDepth : SV_TARGET2;
     vector vPickDepth : SV_TARGET3;
     vector vEmissive : SV_TARGET5;
+    vector vOutLine : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -102,6 +100,8 @@ PS_OUT PS_MAIN(PS_IN In)
 
 	/* 0 ~ 1 */
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+
+    Out.vOutLine = vector(0.f, 0.f, 1.f, 0.f);
     
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
 /*ÃÖÁ¾ ÇÈ¼¿ »öÀº µðÇ»Áî¿¡ ¹ý¼±À» ÀÌ¿ëÇÑ È¯°æ±¤À» °öÇÏ°í ½ºÆåÅ§·¯µéÀ» °öÇØ¼­ ÃÖÁ¾ ÇÈ¼¿ »öÀ» Á¤ÇÑ´Ù-*/
@@ -128,9 +128,9 @@ PS_OUT PS_Fire(PS_IN In)
   //  float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f); 
 	
     float3 colorStart = float3(1.f, 0.f, 0.f); // »¡°­
-    float3 colorEnd = float3(1.f,1.0, 0.0); // ³ë¶û
+    float3 colorEnd = float3(1.f,0.80, 0.0); // ³ë¶û
 	
-    float3 color = lerp(colorStart, colorEnd, vMtrlDiffuse);
+    float3 color = lerp(colorStart, colorEnd, vMtrlDiffuse.rgb);
 
    // Out.vColor = (g_vLightDiffuse * float4(color, 1.0)) * saturate(vShade) +
 //		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
@@ -140,7 +140,10 @@ PS_OUT PS_Fire(PS_IN In)
     vMtrlDiffuse = float4(color, 1);
     
     
-    Out.vDiffuse = vector(vMtrlDiffuse.rgb, 1.f);
+    if (1 == g_onEmissive)
+      //  Out.vEmissive = vector(vMtrlDiffuse.rgb, 1.f);
+    
+    Out.vDiffuse = vector(vMtrlDiffuse.rgb, 0.8f);
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);

@@ -39,6 +39,12 @@
 #include "SceneCamera.h"
 #include "BossIntroBG.h"
 #include "BossHP.h"
+#include "ShootEffect.h"
+#include "PlayerEffectUI.h"
+#include "ShootingUI.h"
+#include "PlayerBullet.h"
+#include "BossBullet_Berrle.h"
+#include "ShockWave.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -170,8 +176,15 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component Bus Model_nonaniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Bus.dat"), PreTransformMatrix))))
 		return E_FAIL;
+	PreTransformMatrix = XMMatrixIdentity();
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component Bus Model_nonaniObj"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Bus.dat"), PreTransformMatrix))))
+		return E_FAIL;
 
-
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto_Component_ShockWave"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/ShockWave.dat"), PreTransformMatrix))))
+		return E_FAIL;
+	
 
 
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
@@ -181,6 +194,13 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Menu"),
 		CMenu::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_ShockWave"),
+	 	CShockWave::Create(m_pDevice, m_pContext))))
+	  return E_FAIL;
+
+
 
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 	//m_pGameInstance->LoadSoundFile("ST.ogg");
@@ -361,6 +381,11 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Body_Player"),
 		CBody_Player::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_ShootingUI"),
+	 	CShootingUI::Create(m_pDevice, m_pContext))))
+	 	return E_FAIL;
+
 	/* Prototype_GameObject_Weapon */
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Weapon"),
 		CWeapon::Create(m_pDevice, m_pContext))))
@@ -429,7 +454,23 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_Bullet"),
 		CBullet::Create(m_pDevice, m_pContext))))
 			return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_ShootEffect"),
+		CShootEffect::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_PlayerEffectUI"),
+		CPlayerEffectUI::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_PlayerBullet"),
+		CPlayerBullet::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	
 
+
+
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_BossBullet_Berrle"),
+		CBossBullet_Berrle::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	
 
 
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");

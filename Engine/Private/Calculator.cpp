@@ -229,8 +229,8 @@ _bool CCalculator::isPicked(_float3* pOut, _bool IsPlayer)
     }
     if (true == IsPlayer)
     {
-        ptMouse.x = m_iViewportWidth * 0.5f;
-        ptMouse.y = m_iViewportHeight * 0.5f;
+        ptMouse.x = static_cast<LONG> (m_iViewportWidth * 0.5f);
+        ptMouse.y = static_cast<LONG> (m_iViewportHeight * 0.5f);
     }
 
 

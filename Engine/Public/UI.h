@@ -13,8 +13,10 @@ public:
         UIID_Cursor,
         UIID_Loading,
         UIID_PlayerHP,
+        UIID_PlayerState,
         UIID_PlayerWeaPon,
         UIID_PlayerWeaPon_Aim,
+        UIID_PlayerShooting,
         UIID_Monster,
         UIID_InteractiveUI,
         UIID_BossHP,
@@ -49,7 +51,6 @@ public:
     virtual _int Priority_Update(_float fTimeDelta);
     virtual void Update(_float fTimeDelta);
     virtual void Late_Update(_float fTimeDelta);
-    virtual void Update_for_Edit(_float fTimeDelta){};
     virtual HRESULT Render();
 
     void Set_UI_Pos(void* pArg);

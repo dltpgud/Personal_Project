@@ -40,11 +40,11 @@ void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation, _bool 
 
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage)) {
 
-        vPosition += Slide;
+       vPosition += Slide;
     
     }
     else
-        vPosition = vAfterPos;
+       vPosition = vAfterPos;
   
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
@@ -141,7 +141,7 @@ void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation, _bool Dema
 void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNavigation* pNavigation)
 {
 
-    m_fTimeSum += fTimeDelta * 6.8f;
+    m_fTimeSum += fTimeDelta * 2.8f;
  
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
@@ -172,7 +172,7 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNav
 void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
 {
     
-    m_fTimeSumDouble += fTimeDelta * 4.8f;
+    m_fTimeSumDouble += fTimeDelta * 2.8f;
 
     _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
 
@@ -190,11 +190,23 @@ void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
 
 }
 
-void CTransform::GO_Dir(_float fTimeDelta, _vector TagetPos)
+void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigation, _bool* bStop )
 {
     _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
 
-    vPosition += TagetPos * m_fSpeedPerSec * fTimeDelta; ;
+    _vector vAfterPos = vPosition + vDir * m_fSpeedPerSec * fTimeDelta;
+
+    _vector Slide{};
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
+    {
+        vPosition += XMVectorZero();
+
+        if(bStop != nullptr)
+        *bStop = true;
+    }
+    else
+        vPosition = vAfterPos;
+
 
     Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
 }
@@ -233,12 +245,12 @@ void CTransform::Stop_Move()
 void CTransform::Rotation_to_Player(_float fTimeDelta)
 {
 
-       _matrix met = XMMatrixLookAtLH(Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 
+      _matrix met = XMMatrixLookAtLH(Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 
                   m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), XMVectorSet(0.f, 1.f, 0.f, 0.f));
 
-       _matrix Wmet = XMMatrixInverse(nullptr, met);
+      _matrix Wmet = XMMatrixInverse(nullptr, met);
 
-       _float4x4 wmet{};
+      _float4x4 wmet{};
 
       XMStoreFloat4x4(&wmet, Wmet);
       Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
@@ -303,7 +315,7 @@ void CTransform::Turn(_fvector vAxis, _float fTimeDelta)
     _matrix RotationMatrix = XMMatrixRotationAxis(vAxis, m_fRotationPerSec * fTimeDelta);
 
     _vector vNewUp = XMVector3TransformNormal(vUp, RotationMatrix);
-    if (XMVectorGetY(vNewUp) < 0)
+    if (XMVectorGetY(vNewUp) <= 0)
         return;
 
     Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));

@@ -124,7 +124,6 @@ void CDOOR::Update(_float fTimeDelta)
 
         if (m_DoorType == 2 && m_iState == State::OPEN)
         {
-
             m_pGameInstance->Set_Open_Bool(true);
         }
     }
@@ -135,6 +134,8 @@ void CDOOR::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+
+
 }
 
 HRESULT CDOOR::Render()
@@ -146,6 +147,13 @@ HRESULT CDOOR::Render()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
+
+        if (i != 0 && m_pModelName != L"Proto Component ItemDoor Model_aniObj")
+        {
+            if (FAILED(m_pShaderCom->Bind_Bool("g_DoorBool", m_bInterect == true)))
+                return E_FAIL;
+        }
+
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
@@ -154,7 +162,7 @@ HRESULT CDOOR::Render()
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(0)))
+        if (FAILED(m_pShaderCom->Begin(4)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -342,7 +350,13 @@ HRESULT CDOOR::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
- 
+   
+    _float4 Green = { 0.f,1.f,0.f,1.f };
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &Green, sizeof(_float4))))
+        return E_FAIL;
+  
+
+  
     return S_OK;
 }
 

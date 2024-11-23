@@ -187,6 +187,12 @@
     <Filter Include="01.Utility\02.GameObjects\BlendObject">
       <UniqueIdentifier>{c1e7f0e2-13cb-474c-89c5-680138e9761b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Utility\04.Component\VIBuffer\Point">
+      <UniqueIdentifier>{a6e943cf-0bee-4c98-ab4d-884f95aea88c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\02.GameObjects\Skill">
+      <UniqueIdentifier>{d6a3a3f5-a8bb-4067-99d3-e9ae0070ffbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -372,6 +378,12 @@
     <ClInclude Include="..\Public\BlendObject.h">
       <Filter>01.Utility\02.GameObjects\BlendObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Point.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Point</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Skill.h">
+      <Filter>01.Utility\02.GameObjects\Skill</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -544,6 +556,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\BlendObject.cpp">
       <Filter>01.Utility\02.GameObjects\BlendObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Point.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Point</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Skill.cpp">
+      <Filter>01.Utility\02.GameObjects\Skill</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

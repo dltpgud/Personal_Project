@@ -32,9 +32,13 @@ public:
 		STATE_MissileGatling_SHOOT,
 		STATE_HEAVYCROSSBOW_HENDPOSE,
 		STATE_HEAVYCROSSBOW_RELOAD,
-		STATE_HEAVYCROSSBOW_SHOOT
-
+		STATE_HEAVYCROSSBOW_SHOOT,
+		STATE_END
 	};
+	enum STATE_UITYPE {
+		STATE_UI_IDlE, STATE_UI_SPRINT, STATE_UI_HIT, STATE_UI_HEALTH, STATE_UI_END
+	};
+
 private:
 	CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CPlayer(const CPlayer& Prototype);
@@ -61,9 +65,11 @@ public:
 	void Choose_Weapon(const _uint& WeaponNum);
 	_uint Get_Bullet();
 	_uint Get_MaxBullte();
-	_bool Get_jump() { return m_bJump; }
+   virtual _bool Get_bJump() { return m_bJump; }
 	void Set_HitLock(_bool Lock);
-
+	void Set_UIState(_uint state) {
+		m_eUIState = state;
+	}
 private:
 	_uint					m_Type = {};
 	_uint					m_iWeaponType = {};
@@ -76,7 +82,10 @@ private:
 	_float					m_DemageCellTime = { 0.f};
 	CPlayerUI*				m_pPlayerUI = { nullptr };
 	const _float4x4*		m_pCameraBone = { nullptr };
-	_uint m_iJumpCount = 0;
+	_uint					m_iJumpCount = 0;
+	 _uint					m_eUIState{};
+	 _bool					m_bHit = { false };
+	 _float					m_fHitTime{ 0.f };
 
 private:
 	HRESULT Add_Components();

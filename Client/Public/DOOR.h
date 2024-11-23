@@ -57,6 +57,7 @@ private:
 	_uint m_iState = { 0 }; // 현재 문 상태 체크
 	_bool m_bInterect = false;
 	_uint m_DoorType{};
+	_bool m_bGreenRight{};
 	
 public:
 	static CDOOR* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

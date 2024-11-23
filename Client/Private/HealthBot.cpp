@@ -3,6 +3,7 @@
 #include "HealthBot.h"
 #include "Body_HealthBot.h"
 #include "PlayerUI.h"
+#include "Player.h"
 CHealthBot::CHealthBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
 {
 }
@@ -63,6 +64,24 @@ void CHealthBot::Update(_float fTimeDelta)
         intersect(fTimeDelta);
     }
 
+
+
+    if (true == m_bHealth)
+    {
+        m_fTimeSum += fTimeDelta;
+
+
+        if (m_fTimeSum > 1.f) {
+            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_UIState(CPlayer::STATE_UI_IDlE);
+            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false);
+            m_fTimeSum = 0.f;
+            m_bHealth = false;
+        }
+    }
+    
+
+
+
     __super::Update(fTimeDelta);
 }
 
@@ -100,6 +119,9 @@ void CHealthBot::intersect(_float fTimedelta)
 
             if (m_pInteractiveUI->Get_Interactive())
             {
+                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_UIState(CPlayer::STATE_UI_HEALTH);
+                m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, true);
+                m_bHealth = true;
                 m_iState = ST_Interactive;
                 m_bInteract = true;
                 m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
@@ -123,7 +145,6 @@ void CHealthBot::intersect(_float fTimedelta)
     if ( m_bInteract == true && fLength <= 5.f)
     {
 
-       
         m_CPlayerUI->Set_HPGage(100);
         m_pGameInstance->Set_OpenUI_Inverse( CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
     }

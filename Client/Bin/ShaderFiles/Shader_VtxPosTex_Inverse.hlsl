@@ -164,7 +164,7 @@ PS_OUT PS_MAIN_Dissolve(PS_IN In)
     else
     {
         // 디졸브되지 않은 부분은 투명 처리
-        Out.vColor = (0, 0, 0, 0);
+        Out.vColor = 0;
         return Out;
 
     }
@@ -183,6 +183,7 @@ technique11 DefaultTechnique
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_HP_Bar_BackGround();
     }
 
@@ -193,6 +194,7 @@ technique11 DefaultTechnique
         SetBlendState(BS_AlphaBlend, float4(0.f,0.f, 0.f, 0.f), 0xffffffff);
 
 		VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
 		PixelShader = compile ps_5_0 PS_MAIN_HP();
 	}
 
@@ -203,6 +205,7 @@ technique11 DefaultTechnique
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_Dissolve();
     }
 

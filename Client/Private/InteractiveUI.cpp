@@ -102,7 +102,7 @@ HRESULT CInteractiveUI::Render()
 
     m_pVIBufferCom->Render();
 
-
+    if(nullptr !=m_pText)
     m_pGameInstance->Render_Text(TEXT("Robo"), m_pText, _float2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f-20.f ), m_vColor, 0.4f);
 
     return S_OK;

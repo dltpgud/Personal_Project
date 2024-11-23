@@ -26,7 +26,6 @@ public:
 	virtual _int	Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
-	virtual void    Update_for_Edit(_float fTimeDelta) override {};
 	virtual HRESULT Render() override;
 	void Set_Text(const _tchar* pText){
 	 	m_pText = pText;

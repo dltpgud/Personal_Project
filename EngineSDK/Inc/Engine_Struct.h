@@ -85,7 +85,6 @@ namespace Engine
 		static const D3D11_INPUT_ELEMENT_DESC	Elements[2];
 	}VTXPOINT;
 
-
 	typedef struct ENGINE_DLL VTXCUBE
 	{
 		/* 정점의 위치 (Position)*/

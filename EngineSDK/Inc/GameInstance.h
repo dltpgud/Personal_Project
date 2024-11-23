@@ -75,10 +75,10 @@ public: /* For.Object_Manager*/
 	list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _uint& strLayerTag);
 
 public: /* For.Collider_Manager */
-	HRESULT Add_Monster(_uint iClearLevelID, class CGameObject* Monster);
-	HRESULT Add_MonsterBullet(_uint iClearLevelID, class CGameObject* MonsterBUllet);
+	HRESULT Add_Monster( class CGameObject* Monster);
+	HRESULT Add_MonsterBullet( class CGameObject* MonsterBUllet);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
-	HRESULT Find_Cell(_uint Ilevel);
+	HRESULT Find_Cell();
 
 
 public: /* For.UI_Manager*/
@@ -143,7 +143,7 @@ public: /* For.Font_Manager */
 public: /* For.Target_Manager */
 		HRESULT Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor);
 		HRESULT Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
-		HRESULT Begin_MRT(const _wstring& strMRTTag);
+		HRESULT Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV = nullptr, _bool isClear = true);
 		HRESULT End_MRT(const _wstring& strMRTTag);
 		HRESULT Bind_RT_SRV(class CShader* pShader, const _char* pConstantName, const _wstring& strTargetTag);
 		HRESULT Copy_RT_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut);

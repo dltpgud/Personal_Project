@@ -91,6 +91,8 @@ void CMecanoBot::Update(_float fTimeDelta)
 
 void CMecanoBot::Late_Update(_float fTimeDelta)
 {
+    if (FAILED(m_pGameInstance->Add_Monster(this)))
+        return;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -138,7 +140,7 @@ void CMecanoBot::NON_intersect(_float fTimedelta)
         XMStoreFloat3(&fDir, vDir);
 
         m_iState = ST_Run_Front;
-        m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);  
+       m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);  
     }
     if (15.f >= fLength)
     {

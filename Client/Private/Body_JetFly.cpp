@@ -173,12 +173,10 @@ void CBody_JetFly::Make_Bullet()
     Desc.fSpeedPerSec = 20.f;
     Desc.pTagetPos = Dir;
     Desc.vPos = vHPos;
-    Desc.Damage = &m_pDamage;
-    Desc.iWeaponType = CBullet::MONSTER_BULLET:: TYPE_JETFLY;
-    Desc.LifTime = 1.f;
+    Desc.fDamage = &m_pDamage;
+    Desc.iActorType = CSkill::MONSTER:: TYPE_JETFLY;
     CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
     m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
-    m_pGameInstance->Add_MonsterBullet(m_pGameInstance->Get_iCurrentLevel(), pGameObject);
 }
 
 HRESULT CBody_JetFly::Add_Components()
