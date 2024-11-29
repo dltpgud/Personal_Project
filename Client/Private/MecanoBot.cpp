@@ -23,7 +23,7 @@ HRESULT CMecanoBot::Initialize(void* pArg)
     CActor::Actor_DESC Desc{};
     Desc.iNumPartObjects = PART_END;
     Desc.fSpeedPerSec =  5.f;
-    Desc.fRotationPerSec = XMConvertToRadians(60.f);
+    Desc.fRotationPerSec = XMConvertToRadians(90.f);
     Desc.JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(&Desc)))
@@ -51,6 +51,9 @@ _int CMecanoBot::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
+    if (1.f == static_cast<CBody_MecanoBot*>(m_PartObjects[PART_BODY])->Get_interver())
+        m_bDead = true;
 
     if (m_iState != ST_Stagger_Front)
         m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
@@ -112,7 +115,7 @@ void CMecanoBot::HIt_Routine()
     m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CMecanoBot::Dead_Routine()
+void CMecanoBot::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_Stun_Start;
 

@@ -13,7 +13,8 @@ public:
 
     HRESULT Add_Monster( class CGameObject* Monster);
     HRESULT Add_MonsterBullet( class CGameObject* MonsterBullet);
- 
+    HRESULT Add_Collider(_float Damage, class CCollider* Collider);
+    HRESULT Check_Collider_PlayerCollison();
     void All_Collison_check();
     HRESULT Player_To_Monster_Collison_Check();
     HRESULT Player_To_Monster_Ray_Collison_Check();
@@ -32,6 +33,9 @@ private:
     class CGameInstance* m_pGameInstance = { nullptr };
     list <class CActor*> m_MonsterList;
     list <class CSkill*>m_MonsterBullet;
+    list <class CCollider*>m_ColliderList;
+
+    _float m_ColliderDamage{ 0.f };
     _uint   m_iLevel;
     _bool m_bIsColl = { false };
 

@@ -72,7 +72,7 @@ public:
     virtual HRESULT Render() override;
 
     virtual void HIt_Routine()override;
-    virtual void Dead_Routine() override;
+    virtual void Dead_Routine(_float fTimeDelta) override;
     virtual void Stun_Routine()override;
 
     void NON_intersect(_float fTimedelta);
@@ -95,6 +95,7 @@ private:
     _bool            m_bHit = false;
     _float          m_fHitTimeSum = { 0.f };
     _bool m_bStart = true;
+    _float m_DeadTimeSum = { 0.f };
 
 public:
     static CBillyBoom* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

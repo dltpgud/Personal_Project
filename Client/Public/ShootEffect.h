@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Client_Defines.h"
-#include "BlendObject.h"
+#include "UI.h"
 
 BEGIN(Engine)
 class CShader;
@@ -11,13 +11,13 @@ END
 
 BEGIN(Client)
 
-class CShootEffect final : public CBlendObject
+class CShootEffect final : public CUI
 {
 public :
 	enum STATE { NOMAL, BOW, ST_END };
 public: 
 	
-	typedef struct CShootEffect_DESC : public CBlendObject::BLEND_DESC
+	typedef struct CShootEffect_DESC : public CUI::CUI_DESC
 	{
 		_vector vPos{};
 		_vector vTgetPos{};

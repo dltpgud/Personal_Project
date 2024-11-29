@@ -10,7 +10,7 @@
 #include "Collider_Manager.h"
 #include "Font_Manager.h"
 #include "Target_Manager.h"
-
+#include "Frustum.h"
 IMPLEMENT_SINGLETON(CGameInstance)
 
 CGameInstance::CGameInstance()
@@ -83,7 +83,9 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pFont_Manager)
 		return E_FAIL;
 
-
+	m_pFrustum = CFrustum::Create();
+	if (nullptr == m_pFrustum)
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -102,7 +104,7 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pUI_Manager->Priority_Update(fTimeDelta);
 	m_pPipeLine->Update();
 
-
+	m_pFrustum->Update();
 	
 	m_pObject_Manager->Update(fTimeDelta);
 	m_pUI_Manager->Update(fTimeDelta);
@@ -451,6 +453,15 @@ HRESULT CGameInstance::Add_MonsterBullet( CGameObject* MonsterBUllet)
 	return m_pCollider_Manager ->Add_MonsterBullet( MonsterBUllet);
 }
 
+HRESULT CGameInstance::Add_Collider(_float Damage, CCollider* Collider)
+{
+	if (nullptr == m_pCollider_Manager)
+		return E_FAIL;
+
+	return m_pCollider_Manager->Add_Collider(Damage,Collider);
+}
+
+
 HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
 {
 	if (nullptr == m_pCollider_Manager)
@@ -571,11 +582,11 @@ void CGameInstance::Play_Sound(_tchar* pSoundKey, CSound::CHANNELID eID, _float 
 	return m_pSound->Play_Sound(pSoundKey, eID, fVolume);
 }
 
-void CGameInstance::PlayBGM(_tchar* pSoundKey, _float fVolume)
+void CGameInstance::PlayBGM(CSound::CHANNELID eID, _tchar* pSoundKey, _float fVolume)
 {
 	if (m_pSound == nullptr)
 		return;
-	return m_pSound->PlayBGM(pSoundKey, fVolume);
+	return m_pSound->PlayBGM(eID,pSoundKey, fVolume);
 }
 
 void CGameInstance::StopSound(CSound::CHANNELID eID)
@@ -639,6 +650,16 @@ _matrix CGameInstance::Get_TransformMatrix(CPipeLine::TRANSFORM_STATE eState)
 	return m_pPipeLine->Get_TransformMatrix(eState);
 }
 
+const _float4x4* CGameInstance::Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState)
+{
+	return m_pPipeLine->Get_ShadowTransformFloat4x4(eState);
+}
+
+_matrix CGameInstance::Get_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState)
+{
+	return m_pPipeLine->Get_ShadowTransformMatrix(eState);
+}
+
 const _float4x4* CGameInstance::Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState)
 {
 	return m_pPipeLine->Get_TransformFloat4x4_Inverse(eState);
@@ -671,6 +692,13 @@ void CGameInstance::Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmat
 		return;
 
 	return m_pPipeLine->Set_TransformMatrix(eState, TransformMatrix);
+}
+
+void CGameInstance::Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix)
+{
+	if (nullptr == m_pPipeLine)
+		return;
+	return m_pPipeLine->Set_ShadowTransformMatrix(eState, TransformMatrix);
 }
 
 #pragma endregion
@@ -839,9 +867,30 @@ HRESULT CGameInstance::Render_RT_Debug(const _wstring& strMRTTag, CShader* pShad
 #pragma endregion
 #endif // _DEBUG
 
+
+#pragma region FRUSTUM
+
+_bool CGameInstance::isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange)
+{
+	return m_pFrustum->isIn_WorldSpace(vTargetPos, fRange);
+}
+
+_bool CGameInstance::isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange)
+{
+	return m_pFrustum->isIn_LocalSpace(vTargetPos, fRange);
+}
+
+void CGameInstance::Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
+{
+	return m_pFrustum->Transform_To_LocalSpace(WorldMatrixInv);
+}
+
+#pragma endregion
+
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
+	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);
 	Safe_Release(m_pFont_Manager);
 	Safe_Release(m_pCollider_Manager);

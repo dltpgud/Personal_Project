@@ -30,6 +30,7 @@ public:
 
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
     virtual void Set_Buffer(_uint x, _uint y)override;
+
     CVIBuffer_Terrain* Get_buffer()
     {
         return m_pVIBufferCom;

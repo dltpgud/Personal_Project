@@ -130,8 +130,7 @@ PS_OUT PS_MAIN(PS_IN In)
 
 	if (In.vLifeTime.x <= In.vLifeTime.y)
 		discard;
-
-	/* g_Texture라는 텍스에서부터 지정한 텍스쿠드에 위치한 픽셀의 색을 LinearSampler방식을 얻어온다. */
+	
 	Out.vColor = g_Texture.Sample(PointSampler, In.vTexcoord);	
 
 	if (Out.vColor.a == 0.f)

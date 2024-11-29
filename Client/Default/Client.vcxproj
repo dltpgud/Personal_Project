@@ -182,7 +182,7 @@
     <ClInclude Include="..\Public\Body_Player.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
     <ClInclude Include="..\Public\BossBullet_Berrle.h" />
-    <ClInclude Include="..\Public\BossBullet_Missile.h" />
+    <ClInclude Include="..\Public\BossBullet_Laser.h" />
     <ClInclude Include="..\Public\BossHP.h" />
     <ClInclude Include="..\Public\BossIntroBG.h" />
     <ClInclude Include="..\Public\Bullet.h" />
@@ -213,6 +213,7 @@
     <ClInclude Include="..\public\MainApp.h" />
     <ClInclude Include="..\Public\MonsterHP.h" />
     <ClInclude Include="..\Public\NonAniObj.h" />
+    <ClInclude Include="..\Public\Particle_Explosion.h" />
     <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\PlayerBullet.h" />
     <ClInclude Include="..\Public\PlayerEffectUI.h" />
@@ -220,6 +221,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\SceneCamera.h" />
+    <ClInclude Include="..\Public\Shock.h" />
     <ClInclude Include="..\Public\ShockWave.h" />
     <ClInclude Include="..\Public\ShootEffect.h" />
     <ClInclude Include="..\Public\ShootingUI.h" />
@@ -252,7 +254,7 @@
     <ClCompile Include="..\Private\Body_Player.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
     <ClCompile Include="..\Private\BossBullet_Berrle.cpp" />
-    <ClCompile Include="..\Private\BossBullet_Missile.cpp" />
+    <ClCompile Include="..\Private\BossBullet_Laser.cpp" />
     <ClCompile Include="..\Private\BossHP.cpp" />
     <ClCompile Include="..\Private\BossIntroBG.cpp" />
     <ClCompile Include="..\Private\Bullet.cpp" />
@@ -280,6 +282,7 @@
     <ClCompile Include="..\private\MainApp.cpp" />
     <ClCompile Include="..\Private\MonsterHP.cpp" />
     <ClCompile Include="..\Private\NonAniObj.cpp" />
+    <ClCompile Include="..\Private\Particle_Explosion.cpp" />
     <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\PlayerBullet.cpp" />
     <ClCompile Include="..\Private\PlayerEffectUI.cpp" />
@@ -287,6 +290,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\SceneCamera.cpp" />
+    <ClCompile Include="..\Private\Shock.cpp" />
     <ClCompile Include="..\Private\ShockWave.cpp" />
     <ClCompile Include="..\Private\ShootEffect.cpp" />
     <ClCompile Include="..\Private\ShootingUI.cpp" />

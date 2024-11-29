@@ -193,6 +193,9 @@
     <Filter Include="01.Utility\02.GameObjects\Skill">
       <UniqueIdentifier>{d6a3a3f5-a8bb-4067-99d3-e9ae0070ffbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Utility\09. Frustum">
+      <UniqueIdentifier>{9daf459f-7a2b-41ea-b357-d3fe47828e66}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -384,6 +387,9 @@
     <ClInclude Include="..\Public\Skill.h">
       <Filter>01.Utility\02.GameObjects\Skill</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Frustum.h">
+      <Filter>01.Utility\09. Frustum</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -562,6 +568,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Skill.cpp">
       <Filter>01.Utility\02.GameObjects\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Downloads\1120_컬링2\Engine\Private\Frustum.cpp">
+      <Filter>01.Utility\09. Frustum</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

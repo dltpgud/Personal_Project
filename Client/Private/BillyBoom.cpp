@@ -23,7 +23,7 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     CActor::Actor_DESC Desc{};
     Desc.iNumPartObjects = PART_END;
     Desc.fSpeedPerSec =  7.f;
-    Desc.fRotationPerSec = XMConvertToRadians(60.f);
+    Desc.fRotationPerSec = XMConvertToRadians(120.f);
     Desc.JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(&Desc)))
@@ -33,14 +33,17 @@ HRESULT CBillyBoom::Initialize(void* pArg)
    m_fMAXHP = 1000.f;
    m_fHP = m_fMAXHP;
    m_bOnCell = true;
-   m_FixY = 1.f;
+   m_FixY = 0.5f;
    m_DATA_TYPE = CGameObject::DATA_MONSTER;
+
+
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
+
     return S_OK;
 }
 
@@ -48,7 +51,12 @@ _int CBillyBoom::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
+
+     if(true == m_bIntro)
+    m_pTransformCom->Set_Rotation_to_Player();
+
     if (true == m_bStart) {
+
         m_pTransformCom->Rotation_to_Player(fTimeDelta);
         m_bStart = false;
     }
@@ -97,9 +105,8 @@ void CBillyBoom::Update(_float fTimeDelta)
 
      if (m_bSkill != true) {
          NON_intersect(fTimeDelta);
-         Set_ShockWave(fTimeDelta);
-        // Set_Barre_Shoot(fTimeDelta);
-        // Change_State(fTimeDelta);
+    
+       Change_State(fTimeDelta);
      }
  }
 
@@ -137,12 +144,26 @@ void CBillyBoom::HIt_Routine()
     m_bHit = true;
     if (m_bSkill == true)
         return;
-    m_iState = ST_Comp_Poke_Front;
+  //  m_iState = ST_Comp_Poke_Front;
 }
 
-void CBillyBoom::Dead_Routine()
+void CBillyBoom::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_Comp_Idle;
+
+    m_DeadTimeSum += fTimeDelta;
+    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+
+
+
+    if(m_DeadTimeSum > 0.1)
+    m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+    if (m_DeadTimeSum > 0.4)
+        m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+    if (m_DeadTimeSum > 0.8)
+        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+
+
 }
 
 void CBillyBoom::Stun_Routine()
@@ -162,7 +183,7 @@ void CBillyBoom::NON_intersect(_float fTimedelta)
 
 
 
-    if (fLength < 50.f)
+    if (fLength < 40.f)
     {
 
         if ( true == m_bHit)
@@ -174,16 +195,21 @@ void CBillyBoom::NON_intersect(_float fTimedelta)
             m_bStart = true;
         }
 
-         if (fLength < 20.f)
+         if (fLength < 30.f)
          {
              m_bSkill = false;
-                
+         }
+         if (fLength < 25.f)
+         {
              m_iState = ST_Idle;
          }
+
+
     }
+    else {
+        m_bSkill = false;
 
-
-
+    }
 }
 
 void CBillyBoom::Intro_Routine(_float fTimedelta)
@@ -193,6 +219,8 @@ void CBillyBoom::Intro_Routine(_float fTimedelta)
     {
         m_iState = ST_Intro;
 
+     
+        
         CBossHPUI::CBossHPUI_DESC  Desc{};
         Desc.fMaxHP = m_fMAXHP;
         Desc.fHP = m_fHP;
@@ -267,9 +295,10 @@ void CBillyBoom::Change_State(_float fTimedelta)
 
 void CBillyBoom::Set_Barre_Shoot(_float fTimedelta)
 {
-  
+    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->SetDir();
     m_iState = ST_Barre_In;
     m_bSkill = true;
+    m_bStart = true;
 }
 
 void CBillyBoom::Set_Laser(_float fTimedelta)
@@ -280,6 +309,7 @@ void CBillyBoom::Set_Laser(_float fTimedelta)
 
 void CBillyBoom::Set_ShockWave(_float fTimedelta)
 {
+    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->SetDir();
     m_iState = ST_ShockWave_In;
     m_bSkill = true;
 }

@@ -10,7 +10,7 @@ class ENGINE_DLL CSkill abstract : public CGameObject
 public:
  
     enum MONSTER { TYPE_GUNPAWN , TYPE_JETFLY, TYPE_BOOMBOT,  TYPE_MECANOBOT, TYPE_BILLYBOOM };
-    enum SKill { STYPE_NOMAL, STYPE_STURN, STYPE_SHOCKWAVE, STYPE_END};
+    enum SKill { STYPE_NOMAL, STYPE_STURN, STYPE_BERRLE, STYPE_SHOCKWAVE, STYPE_MISSILE, STYPE_LASER, STYPE_END};
     enum COLOR {CSTART, CEND, COLOR_END};
 public:
     typedef struct Skill_DESC : public CGameObject::GAMEOBJ_DESC
@@ -34,6 +34,11 @@ public:
     virtual void Update(_float fTimeDelta);
     virtual void Late_Update(_float fTimeDelta);
     virtual HRESULT Render();
+    virtual void Dead_Rutine(_float fTimeDelta) {};
+
+    void Set_DeadSkill(_bool skill) {
+        m_bDeadSkii = skill;
+    }
       _float Get_Damage();
       _uint Get_SkillType();
       _uint Get_ActorType();
@@ -49,6 +54,8 @@ protected:
     _uint   m_iSkillType = { STYPE_NOMAL };
     _float4 m_Clolor[COLOR_END]{};
     _bool  m_bMoveStop{};
+    _bool  m_bDeadSkii{false};
+   // vector<_vector> m_vTrailPos;
 public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;

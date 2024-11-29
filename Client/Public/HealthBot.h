@@ -51,7 +51,7 @@ private:
     _bool m_bOpenUI = false;
     _bool m_bHealth = false;
     _float m_fTimeSum{ 0.f };
-
+    _bool m_bSound{ true };
 public:
     static CHealthBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

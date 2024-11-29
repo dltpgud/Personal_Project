@@ -5,9 +5,7 @@
 #include "PlayerUI.h"
 #include "Camera_Free.h"
 #include "SceneCamera.h"
-#include "Player.h"
-#include "BillyBoom.h"
-#include "BossIntroBG.h"
+
 
 CLevel_StageBoss::CLevel_StageBoss(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
@@ -16,6 +14,13 @@ CLevel_StageBoss::CLevel_StageBoss(ID3D11Device * pDevice, ID3D11DeviceContext *
 
 HRESULT CLevel_StageBoss::Initialize()
 {
+
+	m_pGameInstance->Get_Player()->Set_onCell(false);
+	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
+	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
+	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
+	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");
+
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
@@ -37,23 +42,13 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
-	
-
-	m_pSceneCam = static_cast<CSceneCamera*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::CAMERA, CGameObject::DATA_CAMERA));
 
 	return S_OK;
 }
 
 void CLevel_StageBoss::Update(_float fTimeDelta)
 {
-	if (nullptr != m_pSceneCam) {
-		if (m_pSceneCam->Get_IsCamEnd())
-		{
-			dynamic_cast<CBillyBoom*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER))->Intro_Routine(fTimeDelta);
 
-		}
-	}
-	
 	__super::Update(fTimeDelta);
 }
 
@@ -108,7 +103,7 @@ HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _uint& pLayerTag)
 
 HRESULT CLevel_StageBoss::Ready_Layer_UI(const _uint& pLayerTag)
 {
-
+	// 보스 인트로 떄문에 다꺼놔
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
@@ -184,5 +179,5 @@ CLevel_StageBoss* CLevel_StageBoss::Create(ID3D11Device* pDevice, ID3D11DeviceCo
 void CLevel_StageBoss::Free()
 {
 	__super::Free();
-	Safe_Release(m_pSceneCam);
+
 }

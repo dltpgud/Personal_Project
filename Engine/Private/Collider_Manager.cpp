@@ -42,11 +42,47 @@ HRESULT Collider_Manager::Add_MonsterBullet( CGameObject* MonsterBullet)
     return S_OK;
 }
 
+HRESULT Collider_Manager::Add_Collider(_float Damage, CCollider* Collider)
+{
+
+    m_ColliderDamage = Damage;
+    m_ColliderList.push_back(Collider);
+    Safe_AddRef(Collider);
+    return S_OK;
+}
+
+HRESULT Collider_Manager::Check_Collider_PlayerCollison()
+{
+
+    CActor* pPlayer = m_pGameInstance->Get_Player();
+    if (false == pPlayer)
+        return E_FAIL;
+
+    if (0 == m_ColliderList.size())
+        return S_OK;
+
+    for (auto& Collider : m_ColliderList)
+    {
+        if (nullptr == Collider)
+            continue;
+
+        if (true == Collider->Intersect(pPlayer->Get_Collider()))
+        {
+            pPlayer->Set_bColl(true);
+            pPlayer->Set_CurrentHP(m_ColliderDamage);
+        }
+        Safe_Release(Collider);
+    }
+    m_ColliderList.clear();
+    return S_OK;
+}
+
 
 
 
 void Collider_Manager::All_Collison_check()
-{      
+{
+    Check_Collider_PlayerCollison();
     Player_To_Monster_Bullet_Collison();
     Player_To_Monster_Collison_Check();
 
@@ -76,11 +112,11 @@ HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
             if (true == Monster->Get_Collider()->Intersect(pPlayer->Get_Collider()))
             {
                 pPlayer->Set_bColl(true);
-                pPlayer->Set_CurrentHP(10.f);
+                pPlayer->Set_CurrentHP(1.f);
             }
-           
-        }
-    
+        }  
+
+        
    return S_OK;
 }
 
@@ -130,10 +166,12 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
     return S_OK;
 }
 
+
+
 HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
 
    CActor* pPlayer = m_pGameInstance->Get_Player();
-   if (nullptr == pPlayer)
+   if (nullptr == pPlayer)  
        return E_FAIL;
   
   if (m_MonsterBullet.size() == 0)
@@ -144,29 +182,41 @@ HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
  
       if (nullptr != pMonsterBullet) {
 
-          if (true == pMonsterBullet->Get_Collider()->Intersect(pPlayer->Get_Collider()))
+
+          _bool bHit = true;
+          if (CSkill::TYPE_BILLYBOOM == pMonsterBullet->Get_ActorType() && CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
           {
-              if (pMonsterBullet->Get_SkillType() == CSkill::STYPE_STURN)
-                  pPlayer->Set_bStun(true);
+              if (true == pMonsterBullet->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)))
+              {
+                  bHit = false;
+              }
+              else
+              {
+                  if (true == pPlayer->Get_bJump())
+                      bHit = false;
+                  else
+                      bHit = true;
+              }
+          }
 
-             _bool bHit = true;
-             if (CSkill::TYPE_BILLYBOOM== pMonsterBullet->Get_ActorType() && CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
-             {
-                 if (true == pMonsterBullet->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)))
-                 {
-                     bHit = false;
+          if (true == bHit)
+          {
 
-                 }
-                 else
-                    bHit = true;   
-             }
-                
-             if(true == bHit)
-             {
-               pPlayer->Set_bColl(true);
-               pPlayer->Set_CurrentHP(pMonsterBullet->Get_Damage());
-               pMonsterBullet->Set_Dead(true);
-             }
+              if (true == pMonsterBullet->Get_Collider()->Intersect(pPlayer->Get_Collider()))
+              {
+                  if (pMonsterBullet->Get_SkillType() == CSkill::STYPE_STURN)
+                      pPlayer->Set_bStun(true);
+
+
+                  pPlayer->Set_bColl(true);
+                  pPlayer->Set_CurrentHP(pMonsterBullet->Get_Damage());
+
+
+                  if (false == CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
+                      pMonsterBullet->Set_DeadSkill(true);
+
+
+              }
           }
       }
       Safe_Release(pMonsterBullet);
@@ -228,4 +278,8 @@ void Collider_Manager::Free()
     for (auto& Monster : m_MonsterList)
         Safe_Release(Monster);
     m_MonsterList.clear();
+
+    for (auto& coll : m_ColliderList)
+        Safe_Release(coll);
+    m_ColliderList.clear();
 }

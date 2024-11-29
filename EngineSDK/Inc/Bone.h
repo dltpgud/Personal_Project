@@ -30,9 +30,13 @@ public:
 		return &m_CombinedTransformationMatrix;
 	}
 
+	_int Get_ParentBoneIndex() {
+		return m_iParentBoneIndex;
+	}
+
 public:
 	void Update_CombinedTransformationMatrix(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix);
-
+	void New_CombinedTransformationMatrix(_fmatrix NewTransformMatrix);
 
 private:
 	_char				m_szName[MAX_PATH] = {};

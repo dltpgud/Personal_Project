@@ -123,9 +123,63 @@ PS_OUT PS_MAIN(PS_IN In)
     
 
     Out.vDiffuse = vMtrlDiffuse;
-   // Out.vEmissive = vMtrlDiffuse;
+
     return Out;
 }
+
+
+PS_OUT PS_PLAYERBULLET(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    
+    vector vMtrlDiffuse = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    
+ 
+    if (vMtrlDiffuse.r == 0.f && vMtrlDiffuse.g == 0.f && vMtrlDiffuse.b == 0.f)
+        discard;
+    
+   
+    vMtrlDiffuse.a = vMtrlDiffuse.r;
+    
+      float3 color = lerp(g_RgbStart.rgb, g_RgbEnd.rgb, vMtrlDiffuse.rgb);
+       
+    Out.vDiffuse = float4(color, vMtrlDiffuse.a);
+    
+    if (Out.vDiffuse.a <= 0.01f)
+        discard;
+    
+    
+
+    Out.vDiffuse = vMtrlDiffuse;
+
+    return Out;
+}
+
+
+PS_OUT PS_PLAYERBULLETDEAD(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    
+    vector vMtrlDiffuse = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    
+    float3 color = lerp(g_RgbStart.rgb, g_RgbEnd.rgb, vMtrlDiffuse.rgb);
+       
+    Out.vDiffuse = float4(color, vMtrlDiffuse.a);
+    
+    if (Out.vDiffuse.a <= 0.f)
+        discard;
+    
+    
+
+    Out.vDiffuse = vMtrlDiffuse;
+
+    return Out;
+}
+
+
+
 
 technique11 DefaultTechnique
 { /*Technique은 특정 렌더링 작업을 정의하는 셰이더 코드 블록*/
@@ -141,4 +195,26 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN();
     }
  
+    pass DefaultPass1
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_PLAYERBULLET();
+    }
+
+
+    pass DefaultPass2
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_PLAYERBULLETDEAD();
+    }
 }

@@ -49,7 +49,7 @@ _int CWeaPonIcon::Priority_Update(_float fTimeDelta)
 
 void CWeaPonIcon::Update(_float fTimeDelta)
 {
-    m_pTransformCom->Rotation_to_Player(fTimeDelta);
+    m_pTransformCom->Set_Rotation_to_Player();
 
 
     if (m_moveTime > 0.f)

@@ -5,6 +5,7 @@
 #include "VIBuffer_Terrain.h"
 #include "VIBuffer_Cube.h"
 #include "VIBuffer_Point.h"
+#include "VIBuffer_Particle_Point.h"
 #include "Navigation.h"
 #include "Model.h"
 #include "Collider.h"

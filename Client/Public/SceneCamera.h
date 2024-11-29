@@ -31,6 +31,7 @@ private:
 	_float m_fRunTime = 0.f;
 	_float m_TimeSum = { 0.f };
 	_bool m_bIsCamEnd = { false };
+	_bool m_bintroSound = { false };
 public:
 	static CSceneCamera* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

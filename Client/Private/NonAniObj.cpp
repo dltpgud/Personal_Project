@@ -45,38 +45,36 @@ void CNonAni::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
- 
+    //if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+    //    return;
+
 }
 
 HRESULT CNonAni::Render_Shadow()
 {
-    //_float4x4			ViewMatrix, ProjMatrix;
-    //
-    //XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(0.f, 10.f, -8.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
-    //XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY, 0.1f, 500.f));
-    //
-    //
-    //if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-    //    return E_FAIL;
-    //
-    //
-    //if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &ViewMatrix)))
-    //    return E_FAIL;
-    //if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &ProjMatrix)))
-    //    return E_FAIL;
-    //
-    //
-    //_uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
-    //
-    //for (size_t i = 0; i < iNumMeshes; i++)
-    //{
-    // 
-    //    if (FAILED(m_pShaderCom->Begin(2)))
-    //        return E_FAIL;
-    //
-    //    m_pModelCom->Render(i);
-    //}
-    //
+    
+    
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+    
+    
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
+        return E_FAIL;
+    
+    
+    _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
+    
+    for (_uint i = 0; i < iNumMeshes; i++)
+    {
+     
+        if (FAILED(m_pShaderCom->Begin(2)))
+            return E_FAIL;
+    
+            m_pModelCom->Render(i);
+    }
+    
     return S_OK;
 }
 
@@ -115,6 +113,9 @@ void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_iPass = 1;
     else
         m_iPass = 0;
+
+   // if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOWBG, this)))
+    //    return;
 }
 
 

@@ -13,7 +13,7 @@ float			g_RimPow;
 
 texture2D		g_DiffuseTexture;
 texture2D       g_EmissiveTexture;
-
+texture2D g_DiffTexture;
 float4			g_vMtrlAmbient	= float4(0.4f, 0.4f, 0.4f, 1.f);
 float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
@@ -26,6 +26,13 @@ bool g_TagetDeadBool;
 bool g_bEmissive;
 float g_EmissivePower;
 float3 g_EmissiveColor;
+bool g_bDoorEmissive;
+float4 g_DoorEmissiveColor;
+
+
+Texture2D g_maskTexture;
+float g_threshold;
+
 
 struct VS_IN
 {
@@ -139,15 +146,30 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    float maskValue = g_maskTexture.Sample(LinearSampler, In.vTexcoord).r;
     if (true == g_TagetDeadBool)
     {
         vector Black = { 0.3f, 0.3f, 0.3f, 0.1f };
         vMtrlDiffuse -= Black;
+    
     }
 	
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
 
+    vector OutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    vector vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
+    
+    if (maskValue > g_threshold)
+    {
+        Out.vDiffuse = vMtrlDiffuse;
+    }
+    else
+    {
+        discard;
+    }
+    
+    
 
     float rim = { 0.f };
     if (true == g_TagetBool)
@@ -169,15 +191,18 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     //{
     //    finalColor = vMtrlDiffuse.rgb * float3(0.9, 0.9, 0.9); // 음영 색상
     //}    
+    
+    
+    
 
     Out.vDiffuse = vMtrlDiffuse ;
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
+    Out.vDepth = vDepth;
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = OutLine;
     return Out;
 }
 
@@ -255,26 +280,90 @@ PS_OUT PS_Door(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-
+    vector vMatEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
+    
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
 
-    float rim = { 0.f };
+    vector vEmissive;
+    vector vDiffuse;
+    if (true == g_bDoorEmissive)
+    {
+        vDiffuse = float4(0.1f, 0.1f, 0.1f, 1.f);
+        vEmissive = vMatEmissive * g_DoorEmissiveColor;
+    }
+    else
+    {
+        vDiffuse = vMtrlDiffuse;
+        vEmissive = vector(0.f, 0.f, 0.f, 0.f);
+    }
+        float rim = { 0.f };
     if (true == g_DoorBool)
     {
         rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
         rim = pow(1 - rim, g_RimPow);
     }
 
-    Out.vDiffuse = vMtrlDiffuse;
+    Out.vDiffuse = vDiffuse;
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vRim = (rim * g_RimColor) ;
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vEmissive = vEmissive;
+    return Out;
+}
+
+
+struct PS_OUT_LIGHTDEPTH
+{
+    vector vLightDepth : SV_TARGET0;
+};
+
+
+PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
+{
+    PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
+	
+    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+
+    return Out;
+}
+
+
+
+PS_OUT PS_MAIN_NPC(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+
+    if (true == g_TagetDeadBool)
+    {
+        vector Black = { 0.3f, 0.3f, 0.3f, 0.1f };
+        vMtrlDiffuse -= Black;
+    
+    }
+	
+    if (vMtrlDiffuse.a <= 0.3f)
+        discard;
+
+    
+    float rim = { 0.f };
+    if (true == g_TagetBool)
+    {
+        rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
+        rim = pow(1 - rim, g_RimPow);
+    }
+    
+    Out.vDiffuse = vMtrlDiffuse;
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    
     return Out;
 }
 
@@ -295,7 +384,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -335,5 +424,31 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_Door();
     }
+
+
+    pass DefaultPass5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_LIGHTDEPTH();
+    }
+
+    pass DefaultPass7
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_NPC();
+    }
+
+
+
 
 }

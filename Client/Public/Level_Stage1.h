@@ -25,7 +25,8 @@ private:
 		HRESULT Ready_Layer_NPC(const _uint& pLayerTag);
 		HRESULT Ready_Find_cell();
 		HRESULT Ready_Light();
-	
+
+		_vector m_Eye =  XMVectorSet(50.f, 150.f, -150.f, 1.f);
 public:
 	static CLevel_Stage1* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void Free() override;

@@ -32,6 +32,8 @@ public:
 
     _uint Get_BoneIndex(const _char* pBoneName) const;
     const _float4x4* Get_BoneMatrix(const _char* pBoneName) const;
+    const void Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatrix) const;
+
 
     HRESULT Bind_Material_ShaderResource(class CShader* pShader, _uint iMeshIndex, aiTextureType eType, _uint iIndex,
                                          const _char* pConstantName);

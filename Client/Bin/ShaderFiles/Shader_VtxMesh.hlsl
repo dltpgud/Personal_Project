@@ -8,16 +8,17 @@ float4			g_vLightAmbient;
 float4			g_vLightSpecular;
 
 texture2D		g_DiffuseTexture;
-
+texture2D       g_EmissiveTexture;
 
 float4			g_vCamPosition;
 
 float4 g_RGB;
 float4 g_RGBEnd;
 float g_TimeSum;
+float4 g_DoorEmissiveColor;
 
-
-
+bool g_bDoorEmissive;
+texture2D g_maskTexture;
 
 
 //float Time; // ½Ã°£ °ª
@@ -298,6 +299,131 @@ PS_OUT PS_FIRE(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_ShockWaveFire(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float uvOffset = g_TimeSum;
+
+    float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, float2(In.vTexcoord.x + uvOffset, In.vTexcoord.y));
+
+    vMtrlDiffuse.a = vMtrlDiffuse.r;
+    
+    float3 Red = { 1.f, 0.f, 0.f };
+    
+    float3 color = lerp(Red, g_RGB.rgb, vMtrlDiffuse.rgb);
+       
+    Out.vDiffuse = float4(color, vMtrlDiffuse.a);
+    
+    if (Out.vDiffuse.a <= 0.01f)
+        discard;
+
+	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+        Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+
+    return Out;
+}
+
+PS_OUT PS_Shock(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+
+
+    float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler,In.vTexcoord);
+
+    vMtrlDiffuse.a = vMtrlDiffuse.r;
+    
+    float3 Red = { 1.f, 0.f, 0.f };
+    
+    float3 color = lerp(Red, g_RGB.rgb, vMtrlDiffuse.rgb);
+       
+    Out.vDiffuse = float4(color, vMtrlDiffuse.a);
+    
+    if (Out.vDiffuse.a <= 0.01f)
+        discard;
+
+	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+
+    return Out;
+}
+
+PS_OUT PS_WALL(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vMatEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
+    
+    if (vMtrlDiffuse.a <= 0.3f)
+        discard;
+
+    vector vEmissive;
+    vector vDiffuse;
+    if (true == g_bDoorEmissive)
+    {
+        vDiffuse.rgb = float3(0.1f, 0.1f, 0.1f);
+        vEmissive = vMatEmissive * g_DoorEmissiveColor;
+    }
+    else
+    {
+        vDiffuse = vMtrlDiffuse;
+        vEmissive = vector(0.f, 0.f, 0.f, 0.f);
+    }
+    
+
+
+    Out.vDiffuse = vDiffuse;
+
+	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vEmissive = vEmissive;
+    return Out;
+}
+
+
+PS_OUT PS_LASER(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+  
+    float4 vDiffuse = g_maskTexture.Sample(LinearSampler, float2(In.vTexcoord)*g_TimeSum);
+
+    float4 color = lerp(float4(1.f
+    , 1.f, 1.f, 1.f),
+    float4(1.f,1.f,0.f, 1.f),  
+ 
+    vDiffuse);
+
+    float rim;
+    rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
+    rim = pow(1 - rim, 1);
+ 
+    float4(color.rgb, vDiffuse.a) + (rim * float4(1.f, 1.f, 1.f, 1.f));
+    
+    Out.vRim = float4(color.rgb, vDiffuse.a) + rim;
+    Out.vDiffuse = float4(color.rgb, vDiffuse.a);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vEmissive = vDiffuse;
+    return Out;
+}
+
+
+
+
+
 technique11 DefaultTechnique
 {
     pass DefaultPass
@@ -308,7 +434,7 @@ technique11 DefaultTechnique
    
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN(); //PS_MAKATOON();
+        PixelShader = compile ps_5_0 PS_MAIN(); 
 
     }
    
@@ -320,7 +446,7 @@ technique11 DefaultTechnique
    
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_NONOUTLINE(); //PS_MAKATOON_ICON();
+        PixelShader = compile ps_5_0 PS_NONOUTLINE(); 
 
     }
 
@@ -347,8 +473,31 @@ technique11 DefaultTechnique
 
     }
 
-
     pass DefaultPass4
+    {
+        SetRasterizerState(RS_NONCULL);
+        SetDepthStencilState(DSS_DefaultNoWrite, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+   
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_ShockWaveFire(); 
+    }
+   
+   
+    pass DefaultPass5
+    {
+        SetRasterizerState(RS_NONCULL);
+        SetDepthStencilState(DSS_DefaultNoWrite, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+   
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_Shock();
+    }
+
+
+    pass DefaultPass6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -356,10 +505,20 @@ technique11 DefaultTechnique
    
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN(); //PS_MAKATOON();
+        PixelShader = compile ps_5_0 PS_WALL();
 
     }
-   
 
+    pass DefaultPass7
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+   
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_LASER();
+
+    }
 
 }

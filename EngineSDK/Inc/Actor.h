@@ -44,7 +44,7 @@ public:
         _uint Get_State() { return m_iState; }
         virtual _bool Get_bJump() { return false; }
         virtual void HIt_Routine() {};
-        virtual void Dead_Routine() {};
+        virtual void Dead_Routine(_float fTimeDelta) {};
         virtual void Stun_Routine() {};
       
 
@@ -55,8 +55,8 @@ public:
         void Height_On_Cell(_float3* fPos);
         void Set_onCell(_bool bonCell) { m_bOnCell = bonCell; }
         void Clear_CNavigation(_tchar* tFPath); // 플레이어 씬전환 후 새로운쎌 부여
- 
-        void Is_onDemageCell();
+         
+        void Is_onDemageCell(_float fTimeDelta);
         //체력관련
         void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
         void Set_HealthCurrentHP(_float Health);
@@ -76,7 +76,7 @@ public:
         _bool   m_bOnCell = { false };
         _uint   m_iRim{}; // 림 연산 할꺼 말꺼
         _bool   m_bStun = {false};
-    
+
     public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;

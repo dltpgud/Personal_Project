@@ -88,6 +88,7 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_SPRINT && m_iCurMotion != CPlayer::STATE_SPRINT)
 	{
+		m_pGameInstance->PlayBGM(CSound::CHANNELID::SOUND_EFFECT_BGM2, L"ST_Player_Footstep_Scuff_Sand_05.ogg", 0.7f);
 		m_iCurMotion = CPlayer::STATE_SPRINT;
 		bMotionChange = true;
 		bLoop = true;
@@ -106,9 +107,20 @@ void CBody_Player::Type0_Update(_float fTimeDelta)
 	}
 	if (*m_pParentState == CPlayer::STATE_RUN && m_iCurMotion != CPlayer::STATE_RUN)
 	{
+		m_pGameInstance->PlayBGM(CSound::CHANNELID::SOUND_EFFECT_BGM,L"ST_Player_Footstep_Scuff_Sand.ogg", 0.7f);
 		m_iCurMotion = CPlayer::STATE_RUN;
 		bMotionChange = true;
 		bLoop = true;
+	}
+	
+	if (*m_pParentState != CPlayer::STATE_SPRINT)
+	{
+		m_pGameInstance->StopSound(CSound::CHANNELID::SOUND_EFFECT_BGM2);
+	}
+
+	if(*m_pParentState != CPlayer::STATE_RUN)
+	{
+		m_pGameInstance->StopSound(CSound::CHANNELID::SOUND_EFFECT_BGM);
 	}
 
 	if (*m_pParentState == CPlayer::STATE_SWITCHIN && m_iCurMotion != CPlayer::STATE_SWITCHIN)
@@ -175,6 +187,7 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_SPRINT2 && m_iCurMotion != CPlayer::STATE_SPRINT2)
 	{
+		m_pGameInstance->PlayBGM(CSound::CHANNELID::SOUND_EFFECT_BGM2, L"ST_Player_Footstep_Scuff_Sand_05.ogg", 0.7f);
 		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_SPRINT2;
 		bMotionChange = true;
@@ -189,11 +202,23 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 	}
 	if (*m_pParentState == CPlayer::STATE_RUN2 && m_iCurMotion != CPlayer::STATE_RUN2)
 	{
+		m_pGameInstance->PlayBGM(CSound::CHANNELID::SOUND_EFFECT_BGM, L"ST_Player_Footstep_Scuff_Sand.ogg", 0.7f);
 		m_fPlayAniTime = 1.f;
 		m_iCurMotion = CPlayer::STATE_RUN2;
 		bMotionChange = true;
 		bLoop = true;
 	}
+
+	if (*m_pParentState != CPlayer::STATE_RUN2)
+	{
+		m_pGameInstance->StopSound(CSound::CHANNELID::SOUND_EFFECT_BGM);
+	}
+
+	if (*m_pParentState != CPlayer::STATE_SPRINT2)
+	{
+		m_pGameInstance->StopSound(CSound::CHANNELID::SOUND_EFFECT_BGM2);
+	}
+
 
 	if (*m_pParentState == CPlayer::STATE_IDLE2 && m_iCurMotion != CPlayer::STATE_IDLE2)
 	{
@@ -220,9 +245,11 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 		bLoop = false;
 	}
 
+
+
 	if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion != CPlayer::STATE_ASSAULTRIFlLE_RELOAD)
 	{
-		m_fPlayAniTime = 1.f;
+		m_fPlayAniTime = 1.2f;
 		m_iCurMotion = CPlayer::STATE_ASSAULTRIFlLE_RELOAD;
 		bMotionChange = true;
 		bLoop = false;
@@ -237,7 +264,7 @@ void CBody_Player::Type2_Update(_float fTimeDelta)
 
 	if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD && m_iCurMotion != CPlayer::STATE_MissileGatling_RELOAD)
 	{
-		m_fPlayAniTime = 1.f;
+		m_fPlayAniTime = 1.2f;
 		m_iCurMotion = CPlayer::STATE_MissileGatling_RELOAD;
 		bMotionChange = true;
 		bLoop = false;

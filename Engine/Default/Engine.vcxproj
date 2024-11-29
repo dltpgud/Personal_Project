@@ -115,7 +115,7 @@
     </Link>
     <PostBuildEvent>
       <Command>cd /d $(SolutionDir)
-call UpdateLIb.bat</Command>
+call UpdateLib.bat</Command>
     </PostBuildEvent>
     <FxCompile>
       <ShaderType>Effect</ShaderType>
@@ -165,7 +165,7 @@ call UpdateLIb.bat</Command>
     </Link>
     <PostBuildEvent>
       <Command>cd /d $(SolutionDir)
-call UpdateLIb.bat</Command>
+call UpdateLib.bat</Command>
     </PostBuildEvent>
     <FxCompile>
       <ShaderType>Effect</ShaderType>
@@ -198,6 +198,7 @@ call UpdateLIb.bat</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\ContainerObject.h" />
+    <ClInclude Include="..\Public\Frustum.h" />
     <ClInclude Include="..\Public\Skill.h" />
     <ClInclude Include="..\Public\CustomFont.h" />
     <ClInclude Include="..\Public\DebugDraw.h" />
@@ -254,6 +255,7 @@ call UpdateLIb.bat</Command>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\Downloads\1120_컬링2\Engine\Private\Frustum.cpp" />
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\private\Base.cpp" />

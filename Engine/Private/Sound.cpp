@@ -52,7 +52,7 @@ void CSound::Play_Sound(_tchar* pSoundKey, CHANNELID eID, _float fVolume)
 	m_pSystem->update();
 }
 
-void CSound::PlayBGM(_tchar* pSoundKey, _float fVolume)
+void CSound::PlayBGM(CHANNELID eID, _tchar* pSoundKey, _float fVolume)
 {
 	map<TCHAR*, Sound*>::iterator iter;
 
@@ -64,9 +64,9 @@ void CSound::PlayBGM(_tchar* pSoundKey, _float fVolume)
 	if (iter == m_mapSound.end())
 		return;
 
-	result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[SOUND_BGM]);
-	m_pChannelArr[SOUND_BGM]->setMode(FMOD_LOOP_NORMAL);
-	m_pChannelArr[SOUND_BGM]->setVolume(fVolume);
+	result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
+	m_pChannelArr[eID]->setMode(FMOD_LOOP_NORMAL);
+	m_pChannelArr[eID]->setVolume(fVolume);
 }
 
 

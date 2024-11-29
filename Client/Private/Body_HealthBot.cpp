@@ -124,8 +124,8 @@ HRESULT CBody_HealthBot::Render()
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(1)))
-            return E_FAIL;
+        if (FAILED(m_pShaderCom->Begin(6)))
+             return E_FAIL;
 
         m_pModelCom->Render(i);
     }
@@ -175,7 +175,7 @@ HRESULT CBody_HealthBot::Bind_ShaderResources()
         return E_FAIL;
 
 
-    return S_OK;
+        return S_OK;
 }
 
 CBody_HealthBot* CBody_HealthBot::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

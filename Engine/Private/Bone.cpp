@@ -18,6 +18,15 @@ void CBone::Update_CombinedTransformationMatrix(const vector<class CBone*>& Bone
 		XMLoadFloat4x4(&m_TransformationMatrix) * Bones[m_iParentBoneIndex]->Get_CombinedTransformationMatrix());
 }
 
+void CBone::New_CombinedTransformationMatrix(_fmatrix NewTransformMatrix)
+{
+
+	XMStoreFloat4x4(&m_CombinedTransformationMatrix,
+		NewTransformMatrix * XMLoadFloat4x4(&m_CombinedTransformationMatrix));
+}
+
+
+
 CBone* CBone::Create(HANDLE& hFile)
 {
 	CBone* pInstance = new CBone();

@@ -61,13 +61,13 @@ void CActor::Late_Update(_float fTimeDelta)
 	       HIt_Routine();
 		}
 
-		if (m_fHP <= 0.f)
-		{
-			Dead_Routine();
-		}
+		
                 m_bColl = false;
 	}
-
+if (m_fHP <= 0.f)
+		{
+			Dead_Routine(fTimeDelta);
+		}
 
 m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
 	
@@ -101,7 +101,7 @@ void CActor::Clear_CNavigation(_tchar* tFPath)
 	m_pNavigationCom->Load(tFPath);
 }
 
-void CActor::Is_onDemageCell()
+void CActor::Is_onDemageCell(_float fTimeDelta)
 {
 	if (nullptr == m_pNavigationCom)
 		return;
@@ -116,7 +116,7 @@ void CActor::Is_onDemageCell()
 
 		if (m_fHP <= 0.f)
 		{
-			Dead_Routine();
+			Dead_Routine(fTimeDelta);
 		}
 	}
 

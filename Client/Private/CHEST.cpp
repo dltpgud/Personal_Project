@@ -54,7 +54,52 @@ void CCHEST::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
 }
+
+HRESULT CCHEST::Render_Shadow()
+{
+    for (_uint i = 0; i < CHEST_END; i++)
+    {
+        if (FAILED(m_pShaderCom[i]->Bind_Matrix("g_WorldMatrix", m_pTransformCom->Get_WorldMatrixPtr())))
+            return E_FAIL;
+
+
+        if (FAILED(m_pShaderCom[i]->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+            return E_FAIL;
+        if (FAILED(m_pShaderCom[i]->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+            return E_FAIL;
+
+
+        _uint		iNumMeshes = m_pModelCom[i]->Get_NumMeshes();
+
+        for (_uint i = 0; i < iNumMeshes; i++)
+        {
+            if (FAILED(m_pModelCom[i]->Bind_Mesh_BoneMatrices(m_pShaderCom[i], i, "g_BoneMatrices")))
+                return E_FAIL;
+
+
+            if (i == ANI)
+            {
+                if (FAILED(m_pShaderCom[i]->Begin(5)))
+                    return E_FAIL;
+            }
+
+            if (i == NONANI)
+            {
+                if (FAILED(m_pShaderCom[i]->Begin(2)))
+                    return E_FAIL;
+            }
+
+
+            
+            m_pModelCom[i]->Render(i);
+        }
+    }
+    return S_OK;
+}
+
 
 HRESULT CCHEST::Render()
 {
@@ -109,6 +154,9 @@ void CCHEST::Set_Model(const _wstring& protoModel, _uint ILevel)
     if (FAILED(__super::Add_Component(ILevel, TEXT("Proto Component ChestWeapon Model_Nonani"),
         TEXT("Com_NonAniModel"), reinterpret_cast<CComponent**>(&m_pModelCom[NONANI]))))
         return ;
+
+
+
 }
 
 void CCHEST::Set_Buffer(_uint x, _uint y)
@@ -151,6 +199,9 @@ void CCHEST::Interactive(_float fTimeDelta)
         m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
         if (true == m_InteractiveUI->Get_Interactive())
         {
+        
+                m_pGameInstance->Play_Sound(L"ST_Chest_Open.ogg", CSound::SOUND_BGM, 1.f);
+            
             m_pModelCom[ANI]->Set_Animation(State::OPEN, false);
             m_InteractiveUI->Set_Interactive(false);
         }
