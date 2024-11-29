@@ -30,7 +30,7 @@ HRESULT CBody_JetFly::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
     m_fPlayAniTime = 0.5f;
-
+    m_DyTime = 2.5f;
     m_pFindBonMatrix = Get_SocketMatrix("Canon_Scale");
     return S_OK;
 }
@@ -49,6 +49,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
 
     if (*m_pParentState == CJetFly::ST_Idle && m_iCurMotion != CJetFly::ST_Idle)
     {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_FLY);
         m_iCurMotion = CJetFly::ST_Idle;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -57,6 +58,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
 
     if (*m_pParentState == CJetFly::ST_Hit_Front && m_iCurMotion != CJetFly::ST_Hit_Front)
     {
+        m_DyingTime = true;
         m_iCurMotion = CJetFly::ST_Hit_Front;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -65,6 +67,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
 
     if (*m_pParentState == CJetFly::ST_Shoot && m_iCurMotion != CJetFly::ST_Shoot)
     {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_FLY);
         Make_Bullet();
         m_iCurMotion = CJetFly::ST_Shoot;
         m_fPlayAniTime = 0.5f;
@@ -82,6 +85,8 @@ void CBody_JetFly::Update(_float fTimeDelta)
 
     if (*m_pParentState == CJetFly::ST_Walk_Back && m_iCurMotion != CJetFly::ST_Walk_Back)
     {
+
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.5f);
         m_iCurMotion = CJetFly::ST_Walk_Back;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -89,6 +94,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
     }
     if (*m_pParentState == CJetFly::ST_Walk_Front && m_iCurMotion != CJetFly::ST_Walk_Front)
     {
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.5f);
         m_iCurMotion = CJetFly::ST_Walk_Front;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -122,6 +128,8 @@ void CBody_JetFly::Update(_float fTimeDelta)
         if (m_iCurMotion == CJetFly::ST_Hit_Front)
             m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
+
+    __super::Update(fTimeDelta);
 }
 
 void CBody_JetFly::Late_Update(_float fTimeDelta)
@@ -130,6 +138,8 @@ void CBody_JetFly::Late_Update(_float fTimeDelta)
     __super::Late_Update(fTimeDelta);
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
 }
 
@@ -160,8 +170,36 @@ HRESULT CBody_JetFly::Render()
     return S_OK;
 }
 
+HRESULT CBody_JetFly::Render_Shadow()
+{
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
+        return E_FAIL;
+
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+
+
+    _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+    for (_uint i = 0; i < iNumMeshes; i++)
+    {
+        if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Begin(5)))
+            return E_FAIL;
+
+        m_pModelCom->Render(i);
+    }
+    return S_OK;
+}
+
 void CBody_JetFly::Make_Bullet()
 {
+    m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", CSound::SOUND_EFFECT, 0.5f);
     _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
@@ -188,6 +226,12 @@ HRESULT CBody_JetFly::Add_Components()
     /* For.Com_Model */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_JetFly_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
+        return E_FAIL;
+
+
+    /* For.Com_Tex */
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
+        TEXT("Com_Texture_Mask"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
     return S_OK;
@@ -219,6 +263,12 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CJetFly::ST_Hit_Front)))
         return E_FAIL;
   
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Float("g_threshold", m_interver)))
+        return E_FAIL;
+
     return S_OK;
 }
 

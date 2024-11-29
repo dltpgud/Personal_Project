@@ -28,7 +28,17 @@ private:
 private:
 	HRESULT Open_Level(LEVELID eLevelID);
 	HRESULT Ready_Prototype_Component_For_Static();
-	HRESULT Ready_Prototype_Component_For_Nomal();
+	HRESULT Ready_Prototype_Component_For_Particle();
+
+
+
+#ifdef _DEBUG
+private:
+	_tchar					m_szFPS[MAX_PATH] = TEXT("");
+	_uint					m_iNumRender = { 0 };
+	_float					m_fTimeAcc = { 0.f };
+#endif
+
 public:
 	static CMainApp*	 Create();
 	virtual void		 Free() override;

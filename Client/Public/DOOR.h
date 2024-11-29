@@ -58,7 +58,13 @@ private:
 	_bool m_bInterect = false;
 	_uint m_DoorType{};
 	_bool m_bGreenRight{};
-	
+	_float m_fSoundTimeSum{ 0.f };
+	_bool m_bSoud{ false };
+	_float4 m_RingColor {};
+	_bool m_bEmissive{ false };
+	_float4 m_fDoorEmissiveColor{};
+
+
 public:
 	static CDOOR* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

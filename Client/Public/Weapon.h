@@ -75,6 +75,14 @@ private:
 	class CShootingUI* m_ShootingUI = { nullptr};
 	_float m_fTimeSum{ 0.f };
 	_bool m_bClack = false;
+
+
+	/*Sound*/
+	_bool m_bHeandGunReLoad = false;
+	_bool m_bAssaultRifleReLoad = false;
+	_bool m_bHeavyCrossbowReload = false;
+	_bool m_bMissileGatlingReload = false;
+
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();

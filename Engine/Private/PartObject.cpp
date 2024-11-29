@@ -37,6 +37,18 @@ _int CPartObject::Priority_Update(_float fTimeDelta)
 
 void CPartObject::Update(_float fTimeDelta)
 {
+	if (true == m_DyingTime)
+	{
+		m_DyTimeSum += fTimeDelta;
+
+		if (m_DyTimeSum >= m_DyTime) {
+			m_interver += fTimeDelta;
+			if (m_interver > 1.f) {
+				m_interver = 1.0f;  // 이미지가 완전히 나타나면 멈춤
+			}
+		}
+	}
+
 	__super::Update(fTimeDelta);
 }
 
@@ -59,11 +71,20 @@ const _float4x4* CPartObject::Get_SocketMatrix(const _char* pBoneName)
 	return m_pModelCom->Get_BoneMatrix(pBoneName);
 }
 
+void CPartObject::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatrix)
+{
+	m_pModelCom->Set_BoneUpdateMatrix(pBoneName, NewMatrix);
+}
+
+
+
+
+
 void CPartObject::Free()
 {
 	__super::Free();
 
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
-
+	Safe_Release(m_pTextureCom);
 }

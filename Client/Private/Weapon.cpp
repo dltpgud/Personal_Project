@@ -7,6 +7,7 @@
 #include "ShootingUI.h"
 #include "PlayerBullet.h"
 #include "ShockWave.h"
+#include"Shock.h"
 CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{ pDevice, pContext }
 {
 }
@@ -172,6 +173,11 @@ void CWeapon::Type0_Update(_float fTimeDelta)
 
         if (m_fTimeSum > 0.6f)
         {
+            if (false == m_bHeandGunReLoad)
+            {
+                m_pGameInstance->Play_Sound(L"ST_Handgun_Reload.ogg", CSound::SOUND_BGM, 1.f);
+                m_bHeandGunReLoad = true;
+            }
             m_ShootingUI->Set_RandomPos(false, true, false);
             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
      
@@ -182,6 +188,9 @@ void CWeapon::Type0_Update(_float fTimeDelta)
                 m_bClack = false;
             }
         }
+    }
+    else {
+        m_bHeandGunReLoad = false;
     }
 
 
@@ -224,7 +233,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
         if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion != Reload)
         {
             m_fEmissivePower = 2.f;
-            m_fPlayAniTime = 1.f;
+            m_fPlayAniTime = 1.2f;
             m_iBullet = CWeapon::AssaultRifle;
             m_iMaxBullet[m_iBullet] = 30;
             m_iCurMotion = Reload;
@@ -253,7 +262,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
     {
 
         if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD && m_iCurMotion != Reload)
-        {     m_fPlayAniTime = 1.f;
+        {     m_fPlayAniTime = 1.2f;
             m_iBullet = CWeapon::MissileGatling;
             m_iMaxBullet[m_iBullet] = 20;
             m_iCurMotion = Reload;
@@ -265,7 +274,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
         if (*m_pParentState == CPlayer::STATE_MissileGatling_SHOOT && m_iCurMotion != Shoot)
         {
             m_fWeaPonOffset = { 1.f,1.f,1.5f };
-
+            m_pGameInstance->Play_Sound(L"ST_MissileGatling_PF_Shoot.ogg", CSound::SOUND_BGM, 0.5f);
             Make_Bullet(m_fWeaPonOffset);
             Make_Bullet(m_fWeaPonOffset);
             Make_Bullet(m_fWeaPonOffset);
@@ -315,9 +324,13 @@ void CWeapon::Type2_Update(_float fTimeDelta)
     if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion == Reload && true == m_bClack)
     {
         m_fTimeSum += fTimeDelta;
-
+            if(false ==m_bAssaultRifleReLoad){
+               m_pGameInstance->Play_Sound(L"ST_AssaultRifle_Reload.ogg", CSound::SOUND_BGM, 0.5f);
+              m_bAssaultRifleReLoad = true;
+            }
         if (m_fTimeSum > 0.65f)
         {
+            
             m_ShootingUI->Set_RandomPos(false, true, false);
             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
 
@@ -329,13 +342,22 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             }
         }
     }
+    else
+    {
+        m_bAssaultRifleReLoad = false;
+    }
 
     if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD && m_iCurMotion == Reload && true == m_bClack)
     {
         m_fTimeSum += fTimeDelta;
 
+            
         if (m_fTimeSum > 0.6f)
         {
+            if (false == m_bMissileGatlingReload) {
+                m_pGameInstance->Play_Sound(L"ST_MissileGatling_Reload.ogg", CSound::SOUND_BGM, 0.5f);
+                m_bMissileGatlingReload = true;
+            }
             m_ShootingUI->Set_RandomPos(false, true, false);
             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
             if (m_fTimeSum > 2.f) {
@@ -346,6 +368,9 @@ void CWeapon::Type2_Update(_float fTimeDelta)
           
         }
     }
+    else {
+        m_bMissileGatlingReload = false;
+    }
 
     if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD && m_iCurMotion == Reload && true == m_bClack)
     {
@@ -353,6 +378,11 @@ void CWeapon::Type2_Update(_float fTimeDelta)
 
         if (m_fTimeSum > 0.9f)
         {
+
+            if (false == m_bHeavyCrossbowReload) {
+                m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_Reload.ogg", CSound::SOUND_BGM, 0.5f);
+                m_bHeavyCrossbowReload = true;
+            }
             m_ShootingUI->Set_RandomPos(false, true, false);
             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
 
@@ -362,6 +392,10 @@ void CWeapon::Type2_Update(_float fTimeDelta)
                 m_bClack = false;
             }
         }
+    }
+    else
+    {
+        m_bHeavyCrossbowReload = false;
     }
 
     if (bMotionChange)
@@ -388,14 +422,24 @@ void CWeapon::Choose_Weapon(const _uint& WeaponNum)
 
 HRESULT CWeapon::Make_Bullet(_float3 Offset)
 {
+    if (m_pWeapon >= WeaPoneType_END || m_pWeapon < HendGun)
+        return E_FAIL;
+
     m_iMaxBullet[m_iBullet] -= 1;
 
-    _float a = 20.f;
-    CShockWave::CShockWave_DESC Dese{};
-    Dese.fDamage = &a;
-    Dese.iSkillType =CSkill::SKill::STYPE_SHOCKWAVE;
-    Dese.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
-    m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, CGameObject::SKILL, L"Prototype_GameObject_ShockWave",nullptr,0,&Dese);
+    switch (m_pWeapon)
+    {
+    case CWeapon::HendGun:
+        m_pGameInstance->Play_Sound(L"ST_Handgun_PF_Shoot.ogg", CSound::SOUND_BGM, 0.5f);
+        break;
+    case CWeapon::AssaultRifle:
+        m_pGameInstance->Play_Sound(L"ST_AssaultRifle_PF_Shoot.ogg", CSound::SOUND_BGM, 0.5f);
+        break;
+    case CWeapon::HeavyCrossbow:
+        m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_SF_Shoot_A.ogg", CSound::SOUND_BGM, 0.5f);
+        break;
+    }
+
     if (0 >= m_iMaxBullet[m_iBullet])
     {
         switch (m_pWeapon)
@@ -429,22 +473,13 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
       At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 10.f;
     }
 
-    if (m_pWeapon >= WeaPoneType_END || m_pWeapon < HendGun)
-        return E_FAIL;
+   
 
     _vector Hend_Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y,
              m_pWeapon_SocketMatrix[m_pWeapon]->_43 * Offset.z, m_pWeapon_SocketMatrix[m_pWeapon]->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
 
-    CGameObject* pGameObject{};
-  //  CPlayerBullet::CPlayerBullet_DESC Desc{};
-  //   Desc.fSpeedPerSec = 150.f;
-  //   Desc.pTagetPos = At;                   
-  //   Desc.vPos = vHPos;
-  //   Desc.iWeaponType = m_pWeapon;
-  //    pGameObject =  m_pGameInstance->Clone_Prototype(L"Prototype GameObject_PlayerBullet", &Desc);
-  //  m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
 
 
     if (0 >= m_iMaxBullet[m_iBullet])
@@ -457,12 +492,8 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
         m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
     }
 
-
-    _vector Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y+5.f,
+ _vector Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y+5.f,
           m_pWeapon_SocketMatrix[m_pWeapon]->_43 * Offset.z, m_pWeapon_SocketMatrix[m_pWeapon]->_44 };
-
-   
-
 
    CShootEffect::CShootEffect_DESC pDesc{};
     pDesc.vPos = vHPos;
@@ -470,10 +501,20 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     pDesc.Local = Local_Pos;
     pDesc.WorldPtr = &m_WorldMatrix;
     pDesc.iWeaponType = m_pWeapon;
-   
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_ShootEffect", nullptr, 0, &pDesc, 0);
  
-    pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_ShootEffect", &pDesc);
-   m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+
+    CPlayerBullet::CPlayerBullet_DESC Desc{};
+    Desc.fSpeedPerSec = 150.f;
+    Desc.pTagetPos = At;
+    Desc.vPos = vHPos;
+    Desc.iSkillType = m_pWeapon;
+    Desc.fDamage = &m_fDamage;
+    Desc.Local = Hend_Local_Pos;
+    Desc.WorldPtr = &m_WorldMatrix;
+    Desc.iWeaponType = m_pWeapon;
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_PlayerBullet", nullptr, 0, &Desc, 0);
+
 
 
 

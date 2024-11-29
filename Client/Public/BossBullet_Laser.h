@@ -3,28 +3,30 @@
 #include "Skill.h"
 
 BEGIN(Engine)
-class CShader;
 class CModel;
-class CNavigation;
+class CTexture;
 END
 
 BEGIN(Client)
 
-class CBossBullet_Missile final : public CSkill
+class CBossBullet_Laser final : public CSkill
 {
 public:
 
 
 public:
-    typedef struct CBossBullet_Missile_DESC : CSkill::Skill_DESC
+    typedef struct CBossBullet_Laser_DESC : CSkill::Skill_DESC
     {
-        _vector pTagetPos{};
+   
+        _bool    bRightLeft{ nullptr };
+        const _float4x4* pSocketMatrix = { nullptr };
+        const _float4x4* pParentMatrix = { nullptr };
 
-    }CBossBullet_Missile_DESC;
+    } CBossBullet_Laser_DESC;
 private:
-    CBossBullet_Missile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-    CBossBullet_Missile(const CBossBullet_Missile& Prototype);
-    virtual ~CBossBullet_Missile() = default;
+    CBossBullet_Laser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+    CBossBullet_Laser(const CBossBullet_Laser& Prototype);
+    virtual ~CBossBullet_Laser() = default;
 
 public:
     /* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
@@ -36,22 +38,28 @@ public:
     virtual _int Priority_Update(_float fTimeDelta) override;
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
+
+    virtual void Dead_Rutine(_float fTimeDelta) override;
     virtual HRESULT Render() override;
 private:
     HRESULT Add_Components();
 
     HRESULT Bind_ShaderResources();
 private:
-
     CModel* m_pModelCom = { nullptr };
-
+    CTexture* m_pTextureCom = { nullptr };
 private:
     _vector m_pTagetPos = {};
-  
-    _vector m_vDir{};
-
+    _vector* m_vNPos{nullptr};
+    _vector* m_vNRight{ nullptr };
+    _vector* m_vNUP{ nullptr };
+    _vector* m_vNLook{ nullptr };
+    const _float4x4* m_pSocketMatrix = { nullptr };
+    const _float4x4* m_pParentMatrix = { nullptr };
+    _float4x4 m_WorldMatrix{};
+    _bool m_bRightLeft = { false };
 public:
-    static CBossBullet_Missile* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+    static CBossBullet_Laser* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;
     virtual void Free() override;
 };

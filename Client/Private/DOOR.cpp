@@ -32,7 +32,7 @@ HRESULT CDOOR::Initialize(void* pArg)
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
-    
+
     return S_OK;
 }
 
@@ -73,6 +73,17 @@ void CDOOR::Update(_float fTimeDelta)
         if (true == m_InteractiveUI->Get_Interactive())
         {
 
+            if (m_pModelName == L"Proto Component StageDoor Model_aniObj")
+                m_pGameInstance->Play_Sound(L"ST_Door_Act1_Open.ogg", CSound::SOUND_BGM, 1.f);
+            
+
+            if (m_pModelName == L"Proto Component BossDoor Model_aniObj")
+                m_pGameInstance->Play_Sound(L"ST_Door_Boss_Act1_Open.ogg", CSound::SOUND_BGM, 1.f);
+
+            if (m_pModelName == L"Proto Component ItemDoor Model_aniObj")
+                m_pGameInstance->Play_Sound(L"ST_Door_Special_Airlock_Open.ogg", CSound::SOUND_BGM, 1.f);
+
+
             if (m_pModelName != L"Proto Component ItemDoor Model_aniObj")
                 m_iState = State::OPEN;
             else
@@ -95,6 +106,8 @@ void CDOOR::Update(_float fTimeDelta)
     }
     if (fLength > 6.f && m_bState == true) {
    
+        if (m_pModelName == L"Proto Component ItemDoor Model_aniObj")
+            m_pGameInstance->Play_Sound(L"ST_Door_Special_Open.ogg", CSound::SOUND_BGM, 1.f);
 
         if(m_pModelName != L"Proto Component ItemDoor Model_aniObj")
             m_iState = State::ClOSE;
@@ -104,6 +117,22 @@ void CDOOR::Update(_float fTimeDelta)
         Go_Move = false;
         m_pModelCom->Set_Animation(m_iState, false);
         m_bState = false;
+        m_bSoud = true;
+    }
+
+    if (true == m_bSoud)
+        m_fSoundTimeSum += fTimeDelta;
+
+    if (m_iState == State::ClOSE)
+    {
+        if (m_fSoundTimeSum > 1.f) {
+            if (m_pModelName == L"Proto Component StageDoor Model_aniObj")
+            {
+                m_pGameInstance->Play_Sound(L"ST_Door_Act1_Close.ogg", CSound::SOUND_BGM, 0.5f);
+                m_fSoundTimeSum = 0.f;
+                m_bSoud = false;
+            }
+        }
 
     }
 
@@ -121,7 +150,6 @@ void CDOOR::Update(_float fTimeDelta)
  
     if (true == m_pModelCom->Play_Animation(fTimeDelta * m_OpenTime)) 
     {
-
         if (m_DoorType == 2 && m_iState == State::OPEN)
         {
             m_pGameInstance->Set_Open_Bool(true);
@@ -154,10 +182,27 @@ HRESULT CDOOR::Render()
                 return E_FAIL;
         }
 
+
+        if (m_pModelName == L"Proto Component ItemDoor Model_aniObj" ) {
+
+            if (i == 1) {
+                m_bEmissive = true;
+                if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
+                    "g_EmissiveTexture")))
+                    return E_FAIL;
+            }
+            else
+                m_bEmissive = false;   
+        }
+        else
+            m_bEmissive = false;
+
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
+        if(FAILED(m_pShaderCom->Bind_Bool("g_bDoorEmissive", m_bEmissive)))
+                return E_FAIL;
         /*애니용 추가*/
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
@@ -184,11 +229,16 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
     if(m_pModelName == L"Proto Component ItemDoor Model_aniObj" )
         m_pModelCom->Set_Animation(2, false);
     else {
-
+        m_RingColor = { 0.f,1.f,0.f,1.f };
         m_iState = State::ClOSE;
         m_pModelCom->Set_Animation(m_iState, false);
     }
-  //  Add_Light();
+
+
+    if (ILevel == LEVEL_STAGE1)
+        m_fDoorEmissiveColor = { 1.f,0.749f,0.2156f, 1.f };
+    else if(ILevel == LEVEL_STAGE2)
+        m_fDoorEmissiveColor = { 1.f,0.f,0.f, 1.f };
 }
 
 void CDOOR::Set_Buffer(_uint x, _uint y)
@@ -350,13 +400,12 @@ HRESULT CDOOR::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-   
-    _float4 Green = { 0.f,1.f,0.f,1.f };
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &Green, sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RingColor, sizeof(_float4))))
         return E_FAIL;
-  
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorEmissiveColor", &m_fDoorEmissiveColor, sizeof(_float4))))
+        return E_FAIL;
 
-  
+
     return S_OK;
 }
 

@@ -5,7 +5,7 @@
 #include "PlayerUI.h"
 #include "Camera_Free.h"
 #include "Player.h"
-
+#include "Level_StageBoss.h"
 CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -13,6 +13,13 @@ CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pCont
 
 HRESULT CLevel_Stage2::Initialize()
 {
+
+	m_pGameInstance->Get_Player()->Set_onCell(false);
+	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
+	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
+	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
+	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
+
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
@@ -44,7 +51,11 @@ void CLevel_Stage2::Update(_float fTimeDelta)
 {
 	if (m_pGameInstance->IsOpenStage())
 	{
-		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_BOSS, GORGE));
+		m_pGameInstance->Set_Open_Bool(false);
+
+//		m_pGameInstance->Open_Level(LEVEL_STAGE2, CLevel_Stage2::Create(m_pDevice, m_pContext));
+
+		m_pGameInstance->Open_Level(LEVEL_BOSS,CLevel_StageBoss::Create(m_pDevice,m_pContext));
 
 	}
 	__super::Update(fTimeDelta);

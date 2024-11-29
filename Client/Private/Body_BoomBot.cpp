@@ -31,7 +31,7 @@ HRESULT CBody_BoomBot::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
    m_fPlayAniTime = 0.5f;
-
+   m_DyTime = 2.f;
    m_pFindBonMatrix = Get_SocketMatrix("Canon_Scale");
     return S_OK;
 }
@@ -49,6 +49,8 @@ void CBody_BoomBot::Update(_float fTimeDelta)
     _bool bMotionChange = {false}, bLoop = {false};
     if (*m_pParentState == CBoomBot::ST_Aim_Down && m_iCurMotion != CBoomBot::ST_Aim_Down)
     {
+        m_DyingTime = true;
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
         m_iCurMotion = CBoomBot::ST_Aim_Down;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -57,6 +59,7 @@ void CBody_BoomBot::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBoomBot::ST_Hit_Front && m_iCurMotion != CBoomBot::ST_Hit_Front)
     {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
         m_iCurMotion = CBoomBot::ST_Hit_Front;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -65,14 +68,39 @@ void CBody_BoomBot::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBoomBot::ST_Idle && m_iCurMotion != CBoomBot::ST_Idle)
     {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
         m_iCurMotion = CBoomBot::ST_Idle;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
         bLoop = true;
     }
 
+
+    if (*m_pParentState == CBoomBot::ST_Run_Front && m_iCurMotion != CBoomBot::ST_Run_Front)
+    {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", CSound::SOUND_MONSTER_ROLL2, 0.5f);
+    
+        m_iCurMotion = CBoomBot::ST_Run_Front;
+        m_fPlayAniTime = 0.5f;
+        bMotionChange = true;
+        bLoop = true;
+    }
+
+
+    if (*m_pParentState == CBoomBot::ST_Run_Back && m_iCurMotion != CBoomBot::ST_Run_Back)
+    {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", CSound::SOUND_MONSTER_ROLL2, 0.5f);
+        m_iCurMotion = CBoomBot::ST_Run_Back;
+        m_fPlayAniTime = 1.f;
+        bMotionChange = true;
+        bLoop = true;
+    }
+
     if (*m_pParentState == CBoomBot::ST_Shoot && m_iCurMotion != CBoomBot::ST_Shoot)
     {
+        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
         Make_Bullet();
         m_iCurMotion = CBoomBot::ST_Shoot;
         m_fPlayAniTime = 0.5f;
@@ -97,15 +125,19 @@ void CBody_BoomBot::Update(_float fTimeDelta)
 
     if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
+      
         m_bFinishAni = true;
         m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
     else
     { 
         m_bFinishAni = false;
+     
         if (m_iCurMotion == CBoomBot::ST_Aim_Down)
         m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
+
+    __super::Update(fTimeDelta);
 }
 
 void CBody_BoomBot::Late_Update(_float fTimeDelta)
@@ -114,6 +146,9 @@ void CBody_BoomBot::Late_Update(_float fTimeDelta)
     __super::Late_Update(fTimeDelta);
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
+
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
 }
 
@@ -145,8 +180,37 @@ HRESULT CBody_BoomBot::Render()
     return S_OK;
 }
 
+HRESULT CBody_BoomBot::Render_Shadow()
+{
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
+        return E_FAIL;
+
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+
+
+    _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+    for (_uint i = 0; i < iNumMeshes; i++)
+    {
+        if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Begin(5)))
+            return E_FAIL;
+
+        m_pModelCom->Render(i);
+    }
+
+    return S_OK;
+}
+
 void CBody_BoomBot::Make_Bullet()
 {
+    m_pGameInstance->Play_Sound(L"ST_MortarPod_Shoot.ogg", CSound::SOUND_EFFECT, 0.5f);
     _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
@@ -178,7 +242,10 @@ HRESULT CBody_BoomBot::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
-    
+    /* For.Com_Tex */
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
+        TEXT("Com_Texture_Mask"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
+        return E_FAIL;
     return S_OK;
 }
 
@@ -208,7 +275,15 @@ HRESULT CBody_BoomBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CBoomBot::ST_Aim_Down)))
         return E_FAIL;
 
-    return S_OK;
+ 
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
+        return E_FAIL;
+
+     if (FAILED(m_pShaderCom->Bind_Float("g_threshold", m_interver)))
+        return E_FAIL;
+
+
+        return S_OK;
 }
 
 CBody_BoomBot* CBody_BoomBot::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

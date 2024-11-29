@@ -125,7 +125,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                     }
                     break;
                 }
-
+               
                 if (-1 == iNeighborIndex) // 여기까지 오면 없는거고
                 {
 
@@ -518,7 +518,7 @@ void CNavigation::Find_CurrentCell(_vector vWorldPos)
 
         if (true == m_Cells[i]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &slide))
         {
-             m_iCurrentCellIndex = static_cast<_int>(i);
+                 m_iCurrentCellIndex = static_cast<_int>(i);
             return;
         }
     }

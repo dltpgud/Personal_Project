@@ -184,14 +184,17 @@
     <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Berrle">
       <UniqueIdentifier>{8c196b0d-3930-43d4-a24c-84cf07d85e14}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\ShockWave">
-      <UniqueIdentifier>{39c9ab58-c735-4170-a077-6cbdbe47c592}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\05. Effect\Shoot">
       <UniqueIdentifier>{2f15e3f3-ad55-47bd-b901-26b4a131c32c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\05. Effect\ShockWave">
-      <UniqueIdentifier>{732a8197-3014-44dc-a2f4-70c1998a49d7}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\ShockWave">
+      <UniqueIdentifier>{39c9ab58-c735-4170-a077-6cbdbe47c592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Laser">
+      <UniqueIdentifier>{72444b90-6979-4007-ba25-d69d87c94671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\05. Effect\Particle">
+      <UniqueIdentifier>{8535d2e8-f356-460a-8ed5-82222297eb58}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -351,17 +354,23 @@
     <ClInclude Include="..\Public\Bullet.h">
       <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\BossBullet_Berrle.h">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BossBullet_Missile.h">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\ShootEffect.h">
       <Filter>02.GameObjects\05. Effect\Shoot</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ShockWave.h">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BossBullet_Berrle.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Shock.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BossBullet_Laser.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Laser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Particle_Explosion.h">
+      <Filter>02.GameObjects\05. Effect\Particle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -509,17 +518,23 @@
     <ClCompile Include="..\Private\Bullet.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BossBullet_Missile.cpp">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\ShootEffect.cpp">
       <Filter>02.GameObjects\05. Effect\Shoot</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ShockWave.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Shock.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossBullet_Laser.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Laser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle_Explosion.cpp">
+      <Filter>02.GameObjects\05. Effect\Particle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

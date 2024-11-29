@@ -3,7 +3,6 @@
 #include "GameInstance.h"
 #include "Level_Loading.h"
 
-
 CMainApp::CMainApp()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
 {
@@ -29,7 +28,7 @@ HRESULT CMainApp::Initialize()
 
 	if (FAILED(Ready_Prototype_Component_For_Static()))
 		return E_FAIL;
-	if (FAILED(Ready_Prototype_Component_For_Nomal()))
+	if (FAILED(Ready_Prototype_Component_For_Particle()))
 		return E_FAIL;
 	/*최초 씬 설정*/
 	if(FAILED(Open_Level(LEVEL_MENU)))
@@ -43,6 +42,12 @@ void CMainApp::Update(_float fTimeDelta)
 	m_pGameInstance->Update(fTimeDelta);
 #ifndef _DEBUG
    m_pGameInstance->Get_FPS(TEXT("Timer_60"), g_hWnd);
+
+#endif
+
+
+#ifdef _DEBUG
+    m_fTimeAcc += fTimeDelta;
 #endif
 }
 
@@ -51,8 +56,27 @@ void CMainApp::Render()
 	if (FAILED(m_pGameInstance->Render_Begin(_float4(0.f, 0.f, 1.f, 1.f))))
 		 return;
 
-	 m_pGameInstance->Draw(); 
+	 
 	
+
+#ifdef _DEBUG
+	 ++m_iNumRender;
+
+	 if (m_fTimeAcc >= 1.f)
+	 {
+ 		 wsprintf(m_szFPS, TEXT("FPS : %d"), m_iNumRender);
+		 m_fTimeAcc = 0.f;
+		 m_iNumRender = 0;
+	 }
+	 m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(500.f, 0.f), XMVectorSet(1.f, 1.f, 1.f, 1.f));
+
+#endif
+
+m_pGameInstance->Draw(); 
+
+
+
+
 	if (FAILED(m_pGameInstance->Render_End()))
 		 return;
 }
@@ -232,9 +256,14 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_spackEffect"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Shooting/spack%d.png"),5))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_TextureAngle_BlurEffect"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Shooting/T_Mask_Angle_Blur.dds")))))
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_PlayerBullet"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/PlayerBullet0.png")))))
 		return E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_PlayerBulletBoom"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/PlayerBullet1.png")))))
+		return E_FAIL;
+
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_MonsterBullet"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/MonsterBullet.png")))))
 		return E_FAIL;
@@ -443,8 +472,6 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component Wall2 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Wall2.dat"), PreTransformMatrix))))
 		return E_FAIL;
-
-
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component BossFloor Model_nonaniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/BossFloor.dat"), PreTransformMatrix))))
 		return E_FAIL;
@@ -505,6 +532,11 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 		return E_FAIL;
 
 
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Prototype_Component_Model_Beam"),
+	 	CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Beam.dat"), PreTransformMatrix))))
+		return E_FAIL;
+
+
 	PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY((XMConvertToRadians(180.f)));
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_Player"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/Player.dat"), PreTransformMatrix))))
@@ -531,23 +563,33 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 
 	/*Prototype_Component_Model_Bullet*/
 
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_FireBallSP"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Prototype_Component_Model_FireBallSP"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/NonAni/Sphere.dat"), PreTransformMatrix))))
 		return E_FAIL;
 
 
-
 	return S_OK;
 }
 
-HRESULT CMainApp::Ready_Prototype_Component_For_Nomal()
+HRESULT CMainApp::Ready_Prototype_Component_For_Particle()
 {
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_T_Tire_N"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Models/Nomal/T_Tire_N.dds")))))
+	CVIBuffer_Instancing::INSTANCING_DESC  ParticleExploDesc{};
+	ParticleExploDesc.iNumInstance = 700;
+	ParticleExploDesc.vCenter = _float3(0.f, 0.f, 0.f);
+	ParticleExploDesc.vRange = _float3(0.5f, 0.5f, 0.5f);
+	ParticleExploDesc.vSize = _float2(0.05f, 0.1f);
+	ParticleExploDesc.vSpeed = _float2(0.3f, 1.f);
+	ParticleExploDesc.vLifeTime = _float2(0.1f, 0.5f);
+	ParticleExploDesc.vPivot = _float3(0.f, -0.5f, 0.f);
+	ParticleExploDesc.isLoop = true;
+
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Particle_Explosion"),
+	     CVIBuffer_Particle_Point::Create(m_pDevice, m_pContext, &ParticleExploDesc))))
 		return E_FAIL;
 
 	return S_OK;
 }
+
 
 
 

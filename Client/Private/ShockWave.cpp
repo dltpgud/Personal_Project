@@ -21,23 +21,16 @@ HRESULT CShockWave::Initialize_Prototype()
 
 HRESULT CShockWave::Initialize(void * pArg)
 {
-	///* 추가적으로 초기화가 필요하다면 수행해준다. */
-	//CShockWave_DESC* pDesc = static_cast<CShockWave_DESC*>(pArg);
-	//
-	//pDesc->fSpeedPerSec = 5.f;
-	//pDesc->fRotationPerSec = XMConvertToRadians(90.0f);
-	m_fLifeTime = 10.f;
-	if (FAILED(__super::Initialize(pArg)))
+	 CShockWave_DESC* pDesc = static_cast<CShockWave_DESC*>(pArg);
+	 pDesc->fLifeTime = 10.f;
+	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
 
 	if (FAILED(Add_Components()))
 		return E_FAIL;
 
-
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(25.f, 0.f, -12.f, 1.f));
-
-	m_fScaleSpeed = 10.f;
-
+	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSetY (m_vPos, 1.7f));
+	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.f;
 	return S_OK;
 }
@@ -48,28 +41,33 @@ _int CShockWave::Priority_Update(_float fTimeDelta)
 		return OBJ_DEAD;
 
 	__super::Priority_Update(fTimeDelta);
-
-
 	return OBJ_NOEVENT;
 }
 
 void CShockWave::Update(_float fTimeDelta)
 {
-
+	m_fTime += fTimeDelta*1.2f;
 	m_fCurrentScale += m_fScaleSpeed * fTimeDelta;
-	m_pTransformCom->Set_Scaling(m_fCurrentScale, 1.5f, m_fCurrentScale);
+	m_pTransformCom->Set_Scaling(m_fCurrentScale, 10.f, m_fCurrentScale);
 	__super::Update(fTimeDelta);
 }
 
 void CShockWave::Late_Update(_float fTimeDelta)
 {
-	
+
+
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
 		return;
+
 
 	if (FAILED(m_pGameInstance->Add_MonsterBullet(this)))
 		return;
 		__super::Late_Update(fTimeDelta);
+}
+
+void CShockWave::Dead_Rutine(_float fTimeDelta)
+{
+	m_bDead = true;
 }
 
 HRESULT CShockWave::Render()
@@ -77,19 +75,21 @@ HRESULT CShockWave::Render()
 	if (FAILED(Bind_ShaderResources()))
 		return E_FAIL;
 
-	_uint iNumMesh = m_pModelCom->Get_NumMeshes();
 
-	for (_uint i = 0; i < iNumMesh; i++)
-	{
+		_uint iNumMesh = m_pModelCom->Get_NumMeshes();
+
+		for (_uint i = 0; i < iNumMesh; i++)
+		{
 			if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
-			"g_DiffuseTexture")))
-			return E_FAIL;
+				"g_DiffuseTexture")))
+				return E_FAIL;
 
-		if (FAILED(m_pShaderCom->Begin(4)))
-			return E_FAIL;
+			if (FAILED(m_pShaderCom->Begin(4)))
+				return E_FAIL;
 
-		m_pModelCom->Render(i);
-	}
+			m_pModelCom->Render(i);
+		}
+	
 	return S_OK;
 }
 
@@ -99,6 +99,7 @@ HRESULT CShockWave::Add_Components()
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_ShockWave"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
 		return E_FAIL;
+
 
 	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
@@ -125,24 +126,22 @@ HRESULT CShockWave::Bind_ShaderResources()
 
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
 		return E_FAIL;
+
  	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
 	 	return E_FAIL;
 
  	if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
 		return E_FAIL;
+
+
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_RGB, sizeof(_float4))))
+		return E_FAIL;
+
+
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTime, sizeof(_float))))
+		return E_FAIL;
+
 	
-	//if (FAILED(m_pShaderCom->Bind_RawValue("Time",&m_fTimedelta, sizeof(_float))))
-	//	return E_FAIL;
-	//
-	//if (FAILED(m_pShaderCom->Bind_RawValue("RingRadius",&m_RingRadius, sizeof(_float))))
-	//	return E_FAIL;
-	//
-	//
-	//if (FAILED(m_pShaderCom->Bind_RawValue("GrowthRate", &m_fScaleSpeed, sizeof(_float))))
-	//	return E_FAIL;
-	//
-
-
 	return S_OK;
 }
 
@@ -177,4 +176,5 @@ void CShockWave::Free()
 	__super::Free();
 
 	Safe_Release(m_pModelCom);
+
 }

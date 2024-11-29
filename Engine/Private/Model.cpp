@@ -30,6 +30,8 @@ HRESULT CModel::Initialize_Proto(TYPE eModelType, const TCHAR* pModelFilePath, _
 
     XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
 
+
+
     Ready_AniModel(pModelFilePath);
 
 
@@ -63,10 +65,36 @@ const _float4x4* CModel::Get_BoneMatrix(const _char* pBoneName) const
     return m_Bones[Get_BoneIndex(pBoneName)]->Get_CombinedTransformationFloat4x4Ptr();
 }
 
+const void CModel::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatrix) const
+{
+    
+    vector<_int> vecParentNum{};
+    _int FindBone = Get_BoneIndex(pBoneName);
+    vecParentNum.reserve(m_Bones.size());
+    vecParentNum.push_back(FindBone);
+
+    m_Bones[FindBone]->New_CombinedTransformationMatrix(NewMatrix);
+
+  for (_int i = FindBone + 1;  i < m_Bones.size(); i++)
+  {
+      for (auto j = vecParentNum.begin(); j != vecParentNum.end(); j++)
+      {
+          if (*j == m_Bones[i]->Get_ParentBoneIndex())
+          {
+              m_Bones[i]->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
+              vecParentNum.push_back(i);
+          }
+      }
+     
+  }
+
+
+}
+
 HRESULT CModel::Bind_Material_ShaderResource(CShader* pShader, _uint iMeshIndex, aiTextureType eType, _uint iIndex,
                                              const _char* pConstantName)
 {
-    if (iMeshIndex >= m_Meshes.size())
+        if (iMeshIndex >= m_Meshes.size())
         return E_FAIL;
 
     _uint iMaterialIndex = m_Meshes[iMeshIndex]->Get_MaterialIndex();

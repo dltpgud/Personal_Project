@@ -6,6 +6,7 @@ BEGIN(Engine)
 
 class ENGINE_DLL CNavigation final : public CComponent
 {
+
 public:
 	typedef struct NAVIGATION_DESC
 	{

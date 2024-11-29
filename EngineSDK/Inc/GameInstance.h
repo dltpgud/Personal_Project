@@ -31,7 +31,7 @@ public:
 
 
 	void Set_Player(CGameObject* pPlayer);
- CActor* Get_Player();
+    CActor* Get_Player();
 
 public: /* For.Graphic_Device */
 	HRESULT Render_Begin(_float4 Color);
@@ -77,6 +77,7 @@ public: /* For.Object_Manager*/
 public: /* For.Collider_Manager */
 	HRESULT Add_Monster( class CGameObject* Monster);
 	HRESULT Add_MonsterBullet( class CGameObject* MonsterBUllet);
+	HRESULT Add_Collider(_float Damage, class CCollider* Collider);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
 	HRESULT Find_Cell();
 
@@ -101,7 +102,7 @@ public: /* For.UI_Manager*/
 
 public: /* For.Sound*/
 	void	Play_Sound(_tchar* pSoundKey,CSound::CHANNELID eID, _float fVolume);
-	void	PlayBGM(_tchar* pSoundKey, _float fVolume);
+	void	PlayBGM(CSound::CHANNELID eID, _tchar* pSoundKey, _float fVolume);
 	void	StopSound(CSound::CHANNELID eID);
 	void	StopAll();
 	void	SetChannelVolume(CSound::CHANNELID eID, _float fVolume);
@@ -113,11 +114,14 @@ public: /* For.Renderer	*/
 public: /* For.PipeLine */
 	const _float4x4* Get_TransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_TransformMatrix(CPipeLine::TRANSFORM_STATE eState);
+	const _float4x4* Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
+	_matrix Get_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState);
 	const _float4x4* Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
+	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 
 public: /* For.Light_Manager */
 	const LIGHT_DESC* Get_LightDesc(_uint iIndex);
@@ -153,6 +157,15 @@ public: /* For.Target_Manager */
 #endif
 
 
+#pragma region FRUSTUM
+public: /* For.Frustum */
+	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
+	_bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
+	void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
+#pragma endregion
+
+
+
 
 private:
 	 CActor*						m_pPlayer			 = { nullptr };   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
@@ -171,6 +184,7 @@ private:
 	class CCalculator*              m_pCalculator		 = { nullptr };
 	class CFont_Manager*			m_pFont_Manager		 = { nullptr };
 	class CTarget_Manager*			m_pTarget_Manager	 = { nullptr };
+	class CFrustum*					m_pFrustum		     = { nullptr };
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;

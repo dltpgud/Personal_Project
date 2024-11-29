@@ -20,6 +20,7 @@ HRESULT CCamera::Initialize_Prototype()
 
 HRESULT CCamera::Initialize(void* pArg)
 {
+
 	if (FAILED(__super::Initialize(pArg)))
 		return E_FAIL;
 
@@ -32,6 +33,7 @@ HRESULT CCamera::Initialize(void* pArg)
 	m_fAspect = pDesc->fAspect;
 	m_fNearZ = pDesc->fNearZ;
 	m_fFarZ = pDesc->fFarZ;
+
 
 	return S_OK;
 }

@@ -3,7 +3,10 @@
 #include "GameInstance.h"
 #include "Body_BillyBoom.h"
 #include "BossBullet_Berrle.h"
+#include "BossBullet_Laser.h"
 #include "Bullet.h"
+
+
 CBody_BillyBoom::CBody_BillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -36,12 +39,12 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
    m_fPlayAniTime = 0.5f;
    m_iEmissiveMashNum = 1;
  // m_pFindBonMatrix = Get_SocketMatrix("R_Canon_02");
-//   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_05"); // ¿ÞÂÊ À§ ÆÈ
-//   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_05"); // ¿À¸¥ ÂÊ À§ ÆÈ
-//   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
-     m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ½Î´Ù±¸..
+   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_04"); // ¿ÞÂÊ À§ ÆÈ
+   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_04"); // ¿À¸¥ ÂÊ À§ ÆÈ
+   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // À§ÆÈ ¸ð¾Æ ½÷
+   m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // ÅÂ¾ç³¯¸®±â
 
-   
+ 
     return S_OK;
 }
 
@@ -55,10 +58,25 @@ _int CBody_BillyBoom::Priority_Update(_float fTimeDelta)
 
 void CBody_BillyBoom::Update(_float fTimeDelta)
 {
+ 
+    _matrix LaserMatrix =  XMMatrixRotationZ(XMConvertToRadians(m_BeamZ))* XMMatrixRotationY(XMConvertToRadians(-m_BeamY));
+
+    if (m_bTurnBeam = true)
+    {
+      
+
+            m_BeamZ += fTimeDelta*-8.f ;
+            m_BeamY += fTimeDelta * 55.f;
+            
+        
+    }
+
+
 
     _bool bMotionChange = {false}, bLoop = {false};
     if (*m_pParentState == CBillyBoom::ST_Idle && m_iCurMotion != CBillyBoom::ST_Idle)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Idle;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -66,7 +84,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     if (*m_pParentState == CBillyBoom::ST_Intro && m_iCurMotion != CBillyBoom::ST_Intro)
     {
-
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Intro;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -92,6 +110,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_Comp_Poke_Front && m_iCurMotion != CBillyBoom::ST_Comp_Poke_Front)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Comp_Poke_Front;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -99,6 +118,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     if (*m_pParentState == CBillyBoom::ST_Comp_Idle && m_iCurMotion != CBillyBoom::ST_Comp_Idle)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Comp_Idle;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -107,6 +127,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_Run_Front && m_iCurMotion != CBillyBoom::ST_Run_Front)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Run_Front;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -116,7 +137,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (m_iCurMotion == CBillyBoom::ST_Barre_Shoot) {
         m_fPlayAniTime = 1.f;
-        m_fOffset = { 0.f, 0.2f, 0.f };
+        m_bTurnBeam = false;
       
     }
 
@@ -125,7 +146,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
         if (m_fTimeSum > 0.8f)
         {
-            Make_Barre(m_fOffset);
+            Make_Barre();
             m_fTimeSum = 0.f;
             m_bBerrle = false;
         }
@@ -133,6 +154,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_Barre_In && m_iCurMotion != CBillyBoom::ST_Barre_In)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Barre_In;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -140,12 +162,13 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
     {
+        m_bTurnBeam = false;
         m_bBerrle = true;
         m_fPlayAniTime = 1.f;
     }
 
     if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
-    {
+    {  
         m_fPlayAniTime = 0.25f;
 
     }
@@ -159,6 +182,9 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_Laser_In && m_iCurMotion != CBillyBoom::ST_Laser_In)
     {
+        m_BeamZ = 35.f;
+        m_BeamY = -120.f;
+
         m_iCurMotion = CBillyBoom::ST_Laser_In;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -167,20 +193,24 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_ShockWave_In && m_iCurMotion != CBillyBoom::ST_ShockWave_In)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_ShockWave_In;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
         bLoop = false;
     }
 
+
     if ( m_iCurMotion == CBillyBoom::ST_ShockWave_PreShoot)
     {
+        m_bTurnBeam = false;
         m_fPlayAniTime = 1.f;
 
     }
 
     if ( m_iCurMotion == CBillyBoom::ST_ShockWave_Shoot)
     {
+        m_bTurnBeam = false;
      
         m_fPlayAniTime = 1.f;
 
@@ -188,13 +218,15 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if ( m_iCurMotion == CBillyBoom::ST_ShockWave_Out)
     {
+        m_bTurnBeam = false;
 
         m_fPlayAniTime = 1.f;
 
     }
 
     if (*m_pParentState == CBillyBoom::ST_Bash_PreShoot && m_iCurMotion != CBillyBoom::ST_Bash_PreShoot)
-    {   
+    {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Bash_PreShoot;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -202,6 +234,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     }
     if ( m_iCurMotion == CBillyBoom::ST_Bash_Shoot)
     {
+        m_bTurnBeam = false;
   
         m_fPlayAniTime = 1.f;
 
@@ -210,6 +243,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_Stun_Start && m_iCurMotion != CBillyBoom::ST_Stun_Start)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Stun_Start;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -219,6 +253,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 
     if (*m_pParentState == CBillyBoom::ST_Stun_Pose && m_iCurMotion != CBillyBoom::ST_Stun_Pose)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Stun_Pose;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -227,6 +262,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     
     if (*m_pParentState == CBillyBoom::ST_Stun_Recover && m_iCurMotion != CBillyBoom::ST_Stun_Recover)
     {
+        m_bTurnBeam = false;
         m_iCurMotion = CBillyBoom::ST_Stun_Recover;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -248,8 +284,11 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
+
+  
     if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
     {
+
         if (m_iCurMotion == CBillyBoom::ST_Bash_Shoot)
             m_bFinishAni = true;
         else
@@ -278,6 +317,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         else
         if (m_iCurMotion == CBillyBoom::ST_ShockWave_PreShoot)
         {
+            Make_ShockWave();
             static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_ShockWave_Shoot);
             m_iCurMotion = CBillyBoom::ST_ShockWave_Shoot;
             m_pModelCom->Set_Animation(m_iCurMotion, false);
@@ -285,6 +325,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         else
         if (m_iCurMotion == CBillyBoom::ST_Laser_In)
         {
+            m_bTurnBeam = false;
             static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Laser_PreShoot);
             m_iCurMotion = CBillyBoom::ST_Laser_PreShoot;
             m_pModelCom->Set_Animation(m_iCurMotion, false);
@@ -292,6 +333,8 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         else
         if (m_iCurMotion == CBillyBoom::ST_Laser_PreShoot)
         {
+      
+            Make_Laser();
             static_cast<CBillyBoom*>(m_pParent)->Set_State(CBillyBoom::ST_Laser_ShootLoop);
             m_iCurMotion = CBillyBoom::ST_Laser_ShootLoop;
             m_pModelCom->Set_Animation(m_iCurMotion, false);
@@ -320,18 +363,42 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
         }
     }
     else
-    {  
+    {
         m_bFinishAni = false;
        if(m_iCurMotion == CBillyBoom::ST_Comp_Idle)
         m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
+    if ( m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop) {
+        Set_BoneUpdateMatrix("R_TopArm_04", LaserMatrix);
+        Set_BoneUpdateMatrix("L_TopArm_04", LaserMatrix);
+    }
+
+
+
+
+
+
+    m_pHeanColl->Update(XMLoadFloat4x4(&m_HeandWorldMatrix));
 }
 
 void CBody_BillyBoom::Late_Update(_float fTimeDelta)
 {
-
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+
+        _matrix SocketMatrix = XMLoadFloat4x4(m_pFindAttBonMatrix[3]);
+
+        for (size_t i = 0; i < 3; i++)
+            SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]); // Ç×µîÀ¸·Î ¸¸µé¾î¼­ ³Ö°Ú´Ù..
+
+        XMStoreFloat4x4(&m_HeandWorldMatrix,
+            SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
+
+
+        if (FAILED(m_pGameInstance->Add_Collider(m_pDamage, m_pHeanColl)))
+            return;
+
+        m_pGameInstance->Add_DebugComponents(m_pHeanColl);
     __super::Late_Update(fTimeDelta);
 }
 
@@ -379,41 +446,93 @@ HRESULT CBody_BillyBoom::Render()
     return S_OK;
 }
 
-HRESULT CBody_BillyBoom::Make_Barre(_float3 Offset)
+HRESULT CBody_BillyBoom::Make_Barre()
 {
-   _vector Hend_Local_Pos = { m_pFindAttBonMatrix[3]->_41, m_pFindAttBonMatrix[3]->_42,  m_pFindAttBonMatrix[3]->_43,  m_pFindAttBonMatrix[3]->_44};
- 
-   _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
- 
-   _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
-       - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-   CGameObject* pGameObject{};
-
+    _vector BHend_Local_Pos = { m_pFindAttBonMatrix[3]->_41, m_pFindAttBonMatrix[3]->_42,  m_pFindAttBonMatrix[3]->_43,  m_pFindAttBonMatrix[3]->_44 };
+   _vector vHPos = XMVector3TransformCoord(BHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
 
 
    CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc{};
    Desc.fSpeedPerSec = 20.f;
-   Desc.pTagetPos = Dir;
+   Desc.pTagetPos = m_AttackDir;
    Desc.vPos = vHPos;
-   pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_BossBullet_Berrle", &Desc);
-   m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+   Desc.iSkillType = CSkill::SKill::STYPE_BERRLE;
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Berrle", nullptr, 0, &Desc, 0);
 
 
    CBullet::CBULLET_DESC BDesc{};
    BDesc.fSpeedPerSec = 20.f;
-   BDesc.pTagetPos = Dir;
+   BDesc.pTagetPos = m_AttackDir;
    BDesc.vPos = vHPos;
    BDesc.fDamage = &m_pDamage;
    BDesc.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
-   pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &BDesc);
-   m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
- 
 
-
-
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_Bullet", nullptr, 0, &BDesc, 0);
 
    return S_OK;
 }
+
+HRESULT CBody_BillyBoom::Make_ShockWave()
+{
+    _vector SHend_Local_Pos = { m_pFindAttBonMatrix[2]->_41 , m_pFindAttBonMatrix[2]->_42 + 1.f,  m_pFindAttBonMatrix[2]->_43,  m_pFindAttBonMatrix[2]->_44 };
+    _vector vHPos = XMVector3TransformCoord(SHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+
+    m_pDamage = 10.f;
+    CBullet::CBULLET_DESC Desc{};
+    Desc.fSpeedPerSec = 20.f;
+    Desc.pTagetPos = m_AttackDir;
+    Desc.vPos = vHPos;
+    Desc.fDamage = &m_pDamage;
+    Desc.iSkillType = CSkill::SKill:: STYPE_SHOCKWAVE;
+
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_Bullet", nullptr, 0, &Desc, 0);
+
+    return S_OK;
+}
+
+HRESULT CBody_BillyBoom::Make_Laser()
+{
+    m_pDamage = 10.f; 
+    _vector RHend_Local_Pos = { m_pFindAttBonMatrix[1]->_41, m_pFindAttBonMatrix[1]->_42+0.5f,  m_pFindAttBonMatrix[1]->_43 +3.f,  m_pFindAttBonMatrix[1]->_44 };
+    _vector LHend_Local_Pos = { m_pFindAttBonMatrix[0]->_41, m_pFindAttBonMatrix[0]->_42+0.5f,  m_pFindAttBonMatrix[0]->_43+3.f,  m_pFindAttBonMatrix[0]->_44 };
+
+    _vector RHPos = XMVector3TransformCoord(RHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+    _vector LHPos = XMVector3TransformCoord(LHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+
+
+   CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc{};
+   Desc.fSpeedPerSec = 20.f;;
+   Desc.fDamage = &m_pDamage;
+   Desc.vPos = RHPos;
+   Desc.LaserRightLeft = true;
+   Desc.LaserpParentMatrix = &m_WorldMatrix;
+   Desc.LaserpSocketMatrix = m_pFindAttBonMatrix[1];
+   Desc.iSkillType = CSkill::STYPE_LASER;
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Berrle", nullptr, 0, &Desc, 0);
+  
+
+   ZeroMemory(&Desc, sizeof(CBossBullet_Berrle::CBossBullet_Berrle_DESC));
+    Desc.fSpeedPerSec = 20.f;
+    Desc.fDamage = &m_pDamage;
+    Desc.vPos = LHPos;
+    Desc.LaserRightLeft = false;
+    Desc.LaserpParentMatrix = &m_WorldMatrix;
+    Desc.LaserpSocketMatrix = m_pFindAttBonMatrix[0];
+    Desc.iSkillType = CSkill::STYPE_LASER;
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Berrle", nullptr, 0, &Desc, 0);
+   
+    m_bTurnBeam = true;
+
+    return S_OK;
+}
+
+void CBody_BillyBoom::SetDir()
+{  
+  m_AttackDir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
+        - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+}
+
+
 
 HRESULT CBody_BillyBoom::Add_Components()
 {
@@ -426,6 +545,16 @@ HRESULT CBody_BillyBoom::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
+
+     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+
+     OBBDesc.vExtents = _float3(1.f, 0.5f, 1.f);
+     OBBDesc.vCenter = _float3(0.f, 0.f, 0.f);
+     OBBDesc.vRotation = { 0.f, 0.f, 0.f };
+     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
+         reinterpret_cast<CComponent**>(&m_pHeanColl), &OBBDesc)))
+         return E_FAIL;
+    
     return S_OK;
 }
 

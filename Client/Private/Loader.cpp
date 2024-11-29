@@ -45,6 +45,8 @@
 #include "PlayerBullet.h"
 #include "BossBullet_Berrle.h"
 #include "ShockWave.h"
+#include "Shock.h"
+#include "BossBullet_Laser.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -184,7 +186,9 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto_Component_ShockWave"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/ShockWave.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto_Component_Shock"),
+		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Shock.dat"), PreTransformMatrix))))
+		return E_FAIL;
 
 
 	m_strLoadingText = TEXT("셰이더 로딩중입니다.");
@@ -199,11 +203,57 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_ShockWave"),
 	 	CShockWave::Create(m_pDevice, m_pContext))))
 	  return E_FAIL;
-
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Shock"),
+		CShock::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 
 
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 	//m_pGameInstance->LoadSoundFile("ST.ogg");
+
+	/*Menu */
+		m_pGameInstance->LoadSoundFile("ST_Button_Hover_In.ogg");
+		m_pGameInstance->LoadSoundFile("ST_Button_Click.ogg");
+		
+	/*interect*/
+	m_pGameInstance->LoadSoundFile("ST_Door_Act1_Open.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Door_Act1_Close.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Door_Boss_Act1_Open.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Door_Special_Open.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Door_Special_Airlock_Open.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Healbot_Use_09_15_2023.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Chest_Open.ogg");
+
+	/*Player*/
+	m_pGameInstance->LoadSoundFile("ST_Player_Stun_Loop.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Footstep_Scuff_Sand.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Footstep_Scuff_Sand_05.ogg");
+	
+	m_pGameInstance->LoadSoundFile("ST_Player_Jump.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_DoubleJump.ogg");
+
+	/*WeaPon*/
+	m_pGameInstance->LoadSoundFile("ST_Handgun_Reload.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Handgun_PF_Shoot.ogg");
+	m_pGameInstance->LoadSoundFile("ST_AssaultRifle_Reload.ogg");
+	m_pGameInstance->LoadSoundFile("ST_AssaultRifle_PF_Shoot.ogg");
+	m_pGameInstance->LoadSoundFile("ST_HeavyCrossbow_Reload.ogg");
+	m_pGameInstance->LoadSoundFile("ST_HeavyCrossbow_SF_Shoot_A.ogg");
+	m_pGameInstance->LoadSoundFile("ST_MissileGatling_Reload.ogg");
+	m_pGameInstance->LoadSoundFile("ST_MissileGatling_PF_Shoot.ogg");
+
+	/*Boss*/
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_Outro.ogg");
+
+
+	/*Enemy*/
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Step_Medium.ogg");
+	m_pGameInstance->LoadSoundFile("ST_MortarPod_Shoot.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Rocket_Shoot.ogg");
+	m_pGameInstance->LoadSoundFile("ST_FlashFly_Shoot_A.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Move_Roll.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Move_Roll2.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Move_Fly_Loop.ogg");
 	
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");
 
@@ -321,6 +371,8 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_MecanoBot"),
 		 	CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_MecanoBot.dat"), PreTransformMatrix))))
 			return E_FAIL;
+
+
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_BillyBoom"),
 			CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, TEXT("../Bin/Data/Ani/SKT_BillyBoom.dat"), PreTransformMatrix))))
 			return E_FAIL;
@@ -470,9 +522,22 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_BossBullet_Berrle"),
 		CBossBullet_Berrle::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_BossBullet_Laser"),
+		CBossBullet_Laser::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 	
 
 
+
+
+
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Boss_HP"),
+		CBossHPUI::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");
@@ -486,11 +551,11 @@ HRESULT CLoader::Loading_For_Stage2Level()
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
-	m_pGameInstance->Get_Player()->Set_onCell(false);
-	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
-	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
-	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
-	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
+	//m_pGameInstance->Get_Player()->Set_onCell(false);
+	//m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
+	//CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
+	//static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
+	//static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
 
 
 
@@ -513,11 +578,11 @@ HRESULT CLoader::Loading_For_BossLevel()
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
-	m_pGameInstance->Get_Player()->Set_onCell(false);
-	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
-	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
-	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
-	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");
+//	m_pGameInstance->Get_Player()->Set_onCell(false);
+//	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
+//	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
+//	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
+//	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");
 
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");
@@ -526,12 +591,7 @@ HRESULT CLoader::Loading_For_BossLevel()
 
 	m_strLoadingText = TEXT("객체원형 로딩중입니다.");
 	/*Prototype_GameObject_SceneCamera*/
-	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_SceneCamera"),
-		CSceneCamera::Create(m_pDevice, m_pContext))))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Boss_HP"),
-		CBossHPUI::Create(m_pDevice, m_pContext))))
-		return E_FAIL;
+
 
 
 

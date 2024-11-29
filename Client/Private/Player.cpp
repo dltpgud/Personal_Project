@@ -81,6 +81,7 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
 
     if (false == m_bHitLock && false == m_bFallLock)
     {
+        if(true == m_bKeyinPut)
         Key_Input(fTimeDelta);
 
     }
@@ -96,13 +97,13 @@ void CPlayer::Update(_float fTimeDelta)
         if (m_pNavigationCom->ISFall())
         {
             Set_onCell(false);
-            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= -7.5f)
+            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= -6.5f)
             {
                 m_bFallLock = true;
                 m_pTransformCom->Go_Down(fTimeDelta);
             }
 
-            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) < -7.5f) {
+            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) < -6.5f) {
                 m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
                 m_DemageCellTime += fTimeDelta;
                 m_bFallLock = false;
@@ -119,17 +120,12 @@ void CPlayer::Update(_float fTimeDelta)
         }
     }
 
-
     __super::Update(fTimeDelta);
-
-
-
-  
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
 {
-    Is_onDemageCell();
+    Is_onDemageCell(fTimeDelta);
     if (false == m_bJump)
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
@@ -154,8 +150,13 @@ void CPlayer::HIt_Routine()
 
 void CPlayer::Stun_Routine()
 {
-   if(false == m_bJump)
-    m_bHitLock = true;
+    if (false == m_bJump)
+    {
+        m_bHitLock = true;
+
+        /*Á» ±æ´Ù?*/
+        m_pGameInstance->Play_Sound(L"ST_Player_Stun_Loop.ogg", CSound::SOUND_BGM, 0.5f);    
+    }
 }
 
 _float CPlayer::Weapon_Damage()
@@ -216,7 +217,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
             if (m_iState != STATE_SPRINT && m_iState != STATE_SPRINT2)
             {
                 if (false == m_bJump)
-                {
+                {               
                     m_Type == T00 ? m_iState = STATE_RUN : m_iState = STATE_RUN2;
                 }
             }
@@ -363,18 +364,32 @@ void CPlayer::Key_Input(_float fTimeDelta)
         }
             m_pTransformCom->Go_jump(fTimeDelta, m_fY, &m_bJump);
 
+            if (false == m_bJumpSound) {
+                m_pGameInstance->Play_Sound(L"ST_Player_Jump.ogg", CSound::SOUND_BGM, 1.f);
+                m_bJumpSound = true;
+            }
+
+
         if (m_iJumpCount >= 2)
         {
             m_bDoubleJump = true;
         }
         if (true == m_bDoubleJump && m_bJump == true)
         {
+
+           if(false == m_bDoubleJumpSound)
+           { m_pGameInstance->Play_Sound(L"ST_Player_DoubleJump.ogg", CSound::SOUND_BGM, 0.5f);
+              m_bDoubleJumpSound = true;
+           }
+
             m_pTransformCom->Go_Doublejump(fTimeDelta);
             m_Type == T00 ? m_iState = STATE_JUMP_RUN_LOW : m_iState = STATE_JUMP_RUN_LOW2;
         }
 
         if (!m_bJump)
         {
+            m_bJumpSound = false;
+            m_bDoubleJumpSound = false;
             m_iJumpCount = 0;
             m_bDoubleJump = false;
             m_bOnCell = true;

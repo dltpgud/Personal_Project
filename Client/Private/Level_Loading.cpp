@@ -45,7 +45,6 @@ void CLevel_Loading::Update(_float fTimeDelta)
     if (true == m_pLoader->Finished())
     {
        
-
         HRESULT hr = {};
 
         /* 다음레벨 아이디에 맞는 실제 레벨을 할당해준다. */
@@ -90,7 +89,7 @@ HRESULT CLevel_Loading::Render()
     if (m_eLodingType == LOADINGID_END)
         return S_OK;
 
-    if ( m_fFinishSum <5.f) {
+    if ( m_fFinishSum <3.f) {
         if (m_fTimeSum <= 0.25f)
         {
             m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 "), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
@@ -121,36 +120,13 @@ HRESULT CLevel_Loading::Render()
         }
     }
 
-    if (true == m_pLoader->Finished() && m_fFinishSum > 5.f) {
+    if (true == m_pLoader->Finished() && m_fFinishSum > 3.f) {
         
-        if (m_fTimeSum <= 0.25f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요 "), _float2(760.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 0.75f), 0.7f);
-        }
-        else if (m_fTimeSum <= 0.5f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요"), _float2(762.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 0.5f), 0.69f);
-        }
-        else if (m_fTimeSum <= 0.75f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요"), _float2(764.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 0.25f), 0.68f);
-        }
-        else if (m_fTimeSum <= 1.f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요"), _float2(766.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 0.5f), 0.67f);
-        }
-        else if (m_fTimeSum <= 1.25f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요"), _float2(764.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 0.75f), 0.68f);
-        }
-        else if (m_fTimeSum <= 1.5f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요"), _float2(762.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.69f);
-        }
-        else if (m_fTimeSum <= 1.75f)
-        {
-            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요"), _float2(760.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.7f);
-        }
+       // if (m_fTimeSum <= 0.25f)
+        //{
+            m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요 "), _float2(760.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.7f);
+     //   }
+      
     }
 
     m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("협곡"), _float2(40.f, 50.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 1.f);

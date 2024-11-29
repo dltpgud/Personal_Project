@@ -25,7 +25,7 @@ HRESULT CSkill::Initialize(void* pArg)
 	   m_iActorType = pDesc->iActorType;
 	   m_iSkillType = pDesc->iSkillType;
 	   if (FAILED(__super::Initialize(pDesc)))
-		return E_FAIL;
+		   return E_FAIL;
 	}
 	else
 	if (FAILED(__super::Initialize(pArg)))
@@ -48,22 +48,26 @@ _int CSkill::Priority_Update(_float fTimeDelta)
 
 	if (m_fTimeSum > m_fLifeTime)
 	{
-		m_bDead = true;
+		Dead_Rutine(fTimeDelta);
 	}
 	return OBJ_NOEVENT;
 }
 
 void CSkill::Update(_float fTimeDelta)
 {
+
+
 	__super::Update(fTimeDelta);
 }
 
 void CSkill::Late_Update(_float fTimeDelta)
 {
-	
+		if(true == m_bDeadSkii)
+		Dead_Rutine(fTimeDelta);
+
 
 	if (true == m_bMoveStop)
-		m_bDead = true;
+		Dead_Rutine(fTimeDelta);
 
 
 	if(m_pNavigationCom != nullptr)
@@ -94,18 +98,14 @@ _uint CSkill::Get_ActorType()
 
 _bool CSkill::Comput_SafeZone(_fvector vPlayerPos)
 {
- _vector vCurrCenter =  XMVectorSetW( XMLoadFloat3(&m_pColliderCom->Get_iCurCenter()), 1.f);
+ _vector vCurrCenter =  XMVectorSetW(XMLoadFloat3(&m_pColliderCom->Get_iCurCenter()), 1.f);;
 
- _vector vDir = vCurrCenter - vPlayerPos;
-
- _float fLength = XMVectorGetX( XMVector3Length(vDir));
-
-
- if (fLength <= m_pColliderCom->Get_iCurRadius())
+ _float fLength = XMVectorGetX( XMVector3Length(vPlayerPos - vCurrCenter ));
+  
+ if (fLength < m_pColliderCom->Get_iCurRadius())
 	 return true;
-
-
- return false;;
+ else
+	 return false;
 }
 
 

@@ -6,7 +6,7 @@
 #include "Camera_Free.h"
 #include "Player.h"
 #include "Actor.h"
-
+#include "Level_Stage2.h"
 CLevel_Stage1::CLevel_Stage1(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -45,19 +45,14 @@ HRESULT CLevel_Stage1::Initialize()
 
 void CLevel_Stage1::Update(_float fTimeDelta)
 {
+	
 
-	if (m_pGameInstance->Get_DIKeyDown(DIK_U))
-	{
 
-		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));
-	}
 
 	if (m_pGameInstance->IsOpenStage())
 	{
 		m_pGameInstance->Set_Open_Bool(false);
-		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE2, GORGE));	
-
-
+		m_pGameInstance->Open_Level(LEVEL_STAGE2, CLevel_Stage2::Create(m_pDevice, m_pContext));
 	}
 
 	__super::Update(fTimeDelta);
@@ -125,6 +120,22 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _uint& pLayerTag)
 		TEXT("Prototype_GameObject_Camera_Free"),nullptr,0, &Desc)))
 		return E_FAIL;
 
+
+
+   _float4x4			ViewMatrix, ProjMatrix;
+
+   _vector m_Eye = XMVectorSet(-20.f, 75.f, 0.f, 1.f);
+   _vector m_Dire = XMVectorSet(1.f, -1.5f, -1.f, 0.f);
+   XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(0.f, 10.f, -8.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+	XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY, 0.1f, 500.f));
+
+	m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
+
+	m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ, XMLoadFloat4x4(&ProjMatrix));
+
+
+
+
 	return S_OK;
 }
 
@@ -155,7 +166,6 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _uint& pLayerTag)
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj",
 		L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
  		return   E_FAIL;
-
 
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, pLayerTag,L"Prototype GameObject_CHEST",
 		L"../Bin/Data/Map/SetMap_Stage1_ani.dat", CGameObject::DATA_CHEST)))

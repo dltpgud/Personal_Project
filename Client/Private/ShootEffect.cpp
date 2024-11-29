@@ -3,12 +3,12 @@
 #include "GameInstance.h"
 #include "Weapon.h"
 CShootEffect::CShootEffect(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
-	: CBlendObject { pDevice, pContext }
+	: CUI{ pDevice, pContext }
 {
 }
 
 CShootEffect::CShootEffect(const CShootEffect& Prototype)
-	: CBlendObject { Prototype }
+	: CUI{ Prototype }
 {
 }
 
@@ -31,23 +31,35 @@ HRESULT CShootEffect::Initialize(void * pArg)
 	m_WorldPtr = pDesc->WorldPtr;
 	m_Local = pDesc->Local;
 	m_iWeaponType = pDesc->iWeaponType;
+	pDesc->UID= UIID_PlayerShooting;
 	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
 
 	if (FAILED(Add_Components()))
 		return E_FAIL;
 
-	if(m_iWeaponType == CWeapon::HendGun)
-	  m_pTransformCom->Set_Scaling(0.3f, 0.3f, 0.3f);
-	else
-	if (m_iWeaponType == CWeapon::AssaultRifle)
-	  m_pTransformCom->Set_Scaling(0.3f, 0.3f, 0.3f);
-	else
-	 if (m_iWeaponType == CWeapon::MissileGatling)
-	  m_pTransformCom->Set_Scaling(0.5f, 0.5f, 0.5f);
-	else
-    if (m_iWeaponType == CWeapon::HeavyCrossbow)
+
+	switch (m_iWeaponType)
+	{
+	case  CWeapon::HendGun :
+		m_pTransformCom->Set_Scaling(0.3f, 0.3f, 0.3f);
+		break;
+
+	case  CWeapon::AssaultRifle:
+		m_pTransformCom->Set_Scaling(0.3f, 0.3f, 0.3f);
+		break;
+
+	case  CWeapon::MissileGatling:
+		m_pTransformCom->Set_Scaling(0.5f, 0.5f, 0.5f);
+		break;
+
+	case  CWeapon::HeavyCrossbow:
 		m_pTransformCom->Set_Scaling(0.4f, 0.4f, 0.4f);
+		break;
+	default:
+		break;
+	}
+
 
 	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_vPos);
 
@@ -59,17 +71,11 @@ _int CShootEffect::Priority_Update(_float fTimeDelta)
 	if (m_bDead)
 		return OBJ_DEAD;
 
-
-
-
 	return OBJ_NOEVENT;
 }
 
 void CShootEffect::Update(_float fTimeDelta)
 {
-	__super::Compute_Depth();
-
-
 	if (m_iWeaponType == CWeapon::HendGun)
 	{
 		m_RGB[0] = {0.f, 0.5f, 1.f, 0.5f};
@@ -130,6 +136,9 @@ void CShootEffect::Late_Update(_float fTimeDelta)
 
 	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vHPos);
 	
+
+
+
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLEND, this)))
 		return;
 }

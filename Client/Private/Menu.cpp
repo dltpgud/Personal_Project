@@ -58,20 +58,22 @@ void CMenu::Update(_float fTimeDelta)
 	
 		if (Desc[i].Hoverst == HS_Hover )
 		{
-			RECT		rcUI = { Desc[i].fX - Desc[i].fSizeX * 0.5f, Desc[i].fY - Desc[i].fSizeY * 0.5f,
-							     Desc[i].fX + Desc[i].fSizeX * 0.5f, Desc[i].fY + Desc[i].fSizeY * 0.5f };
+			RECT		rcUI = {static_cast<LONG> (Desc[i].fX - Desc[i].fSizeX * 0.5f),static_cast<LONG> ( Desc[i].fY - Desc[i].fSizeY * 0.5f),
+							  static_cast<LONG> (Desc[i].fX + Desc[i].fSizeX * 0.5f),static_cast<LONG> ( Desc[i].fY + Desc[i].fSizeY * 0.5f) };
 
 			POINT		ptMouse{};
 
 			GetCursorPos(&ptMouse);
 			ScreenToClient(g_hWnd, &ptMouse);
 
+			
 			if (true == (_bool)PtInRect(&rcUI, ptMouse))
 			{
 				Desc[i].LateUpdate = true;
 
 				if (m_pGameInstance->Get_DIMouseDown(DIM_LB))
 				{
+					m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg", CSound::SOUND_BGM, 1.f); 
 						if (i == 0) {
 							m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1, GORGE));
 						}
@@ -82,9 +84,13 @@ void CMenu::Update(_float fTimeDelta)
 				}
 			}
 			else
+			{
 				Desc[i].LateUpdate = false;
+			}
 		}
+
 	}
+		
 }
 
 void CMenu::Late_Update(_float fTimeDelta)
@@ -127,7 +133,11 @@ HRESULT CMenu::Render()
 			return E_FAIL;
 
 		if (Desc[i].LateUpdate == false)
+		
 			continue;
+	
+
+
 		if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", i)))
 			return E_FAIL;
 
@@ -137,6 +147,8 @@ HRESULT CMenu::Render()
 
 		m_pVIBufferCom->Render();
 	}
+
+
 
 
 	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 시작"), _float2(160.f, 435.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);

@@ -69,19 +69,20 @@ void CHealthBot::Update(_float fTimeDelta)
     if (true == m_bHealth)
     {
         m_fTimeSum += fTimeDelta;
-
-
+        if (true == m_bSound) {
+            m_pGameInstance->Play_Sound(L"ST_Healbot_Use_09_15_2023.ogg", CSound::SOUND_BGM, 1.f);
+            m_bSound = false;
+        }
         if (m_fTimeSum > 1.f) {
+
             static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_UIState(CPlayer::STATE_UI_IDlE);
             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false);
             m_fTimeSum = 0.f;
             m_bHealth = false;
+        
         }
     }
-    
-
-
-
+   
     __super::Update(fTimeDelta);
 }
 

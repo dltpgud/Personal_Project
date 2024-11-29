@@ -61,7 +61,7 @@ public:
 	virtual _float Weapon_Damage() override;
 	const _float4x4* Get_CameraBone();
 	void Key_Input(_float fTimeDelta);
-	
+	void Set_Key(_bool key) { m_bKeyinPut = key; }
 	void Choose_Weapon(const _uint& WeaponNum);
 	_uint Get_Bullet();
 	_uint Get_MaxBullte();
@@ -86,7 +86,9 @@ private:
 	 _uint					m_eUIState{};
 	 _bool					m_bHit = { false };
 	 _float					m_fHitTime{ 0.f };
-
+	 _bool  m_bKeyinPut = true;
+	 _bool  m_bJumpSound = false;
+	 _bool  m_bDoubleJumpSound = false;
 private:
 	HRESULT Add_Components();
 	HRESULT Add_PartObjects();

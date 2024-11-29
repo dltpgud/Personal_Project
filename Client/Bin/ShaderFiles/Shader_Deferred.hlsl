@@ -21,7 +21,7 @@ texture2D g_SpecularTexture;
 texture2D g_ShadeTexture;
 texture2D g_DiffuseTexture;
 texture2D g_LightDepthTexture;
-
+texture2D g_BGLightDepthTexture;
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
 
@@ -260,34 +260,34 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
          vSpecular = 0.f;
    
     
-   // vector vPosition = Compute_WorldPos(In.vTexcoord);
-   //
-   // vPosition = mul(vPosition, g_LightViewMatrix);
-   // vPosition = mul(vPosition, g_LightProjMatrix);
-   //
-   //
-   // float2 vTexcoord = 0.f;
-   //
-   // vTexcoord.x = (vPosition.x / vPosition.w) * 0.5f + 0.5f;
-   // vTexcoord.y = (vPosition.y / vPosition.w) * -0.5f + 0.5f;
-   //
-   // vector vOldDepth = g_LightDepthTexture.Sample(LinearSampler, vTexcoord);
-    //
-    //int iCurID = floor(fCurRimDesc);
-    //float fCurState = fCurRimDesc - iCurID;
-    //float rim = { 0.f };
-    //float4 RimEnd = { 0.f, 0.f, 0.f, 0.f };
-    //if (iCurID == 1 && fCurState >= 0.08f)
-
-    Out.vColor = vDiffuse * vShade * OutLine + vRim + vEmissive + (vSpecular * 0.8f);
-
+   vector vPosition = Compute_WorldPos(In.vTexcoord);
+   
+   vPosition = mul(vPosition, g_LightViewMatrix);
+   vPosition = mul(vPosition, g_LightProjMatrix);
+   
+   
+   float2 vTexcoord = 0.f;
+   
+   vTexcoord.x = (vPosition.x / vPosition.w) * 0.5f + 0.5f;
+   vTexcoord.y = (vPosition.y / vPosition.w) * -0.5f + 0.5f;
+   
+   vector vOldDepth = g_LightDepthTexture.Sample(LinearSampler, vTexcoord);
+    vector vOldDepth2 = g_BGLightDepthTexture.Sample(LinearSampler, vTexcoord);
+    Out.vColor = vDiffuse * vShade * OutLine + vRim + (vSpecular * 0.8f) + vEmissive;
+            
     
-   // if (vPosition.w - 1.5f > vOldDepth.y * 500.f)
-   // {
-   //     Out.vColor.rgb *= 0.6f;
-   //	
-   // }
+    if (vPosition.w - 1.5f > vOldDepth.y * 500.f)
+    {
+        Out.vColor.rgb *= 0.6f;
+   	
+    }
     
+  //  if (vPosition.w - 1.5f > vOldDepth2.y * 500.f)
+  //  {
+  //      Out.vColor.rgb *= 0.6f;
+  // 	
+  //  }
+  //  
         return Out;
     }
 
@@ -297,7 +297,7 @@ PS_OUT PS_MAIN_PURE(PS_IN In)
 { // (다운 샘플링 용도로 사용)
     PS_OUT Out = (PS_OUT) 0;
     
-    vector vDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
     
     Out.vColor = vDiffuse;
     
@@ -314,7 +314,7 @@ PS_OUT PS_MAIN_BLUR_X(PS_IN In)
     int i;
     for (i = 0; i < 5; i++)
     {
-        vDiffuse += Bloom_Weights[i] * g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord + float2(dX, 0.0) * float(i - 2));
+        vDiffuse += Bloom_Weights[i] * g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord + float2(dX, 0.0) * float(i - 2));
     }
     
     Out.vColor = vDiffuse;
@@ -332,7 +332,7 @@ PS_OUT PS_MAIN_BLUR_Y(PS_IN In)
     int i;
     for (i = 0; i < 5; i++)
     {
-        vDiffuse += Bloom_Weights[i] * g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord + float2(0.0, dY) * float(i - 2));
+        vDiffuse += Bloom_Weights[i] * g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord + float2(0.0, dY) * float(i - 2));
     }
     
     Out.vColor = vDiffuse;

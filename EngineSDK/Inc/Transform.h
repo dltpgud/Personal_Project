@@ -26,9 +26,9 @@ public:
     {
         _float fSpeedPerSec{};
         _float fRotationPerSec{};
-        _vector RIGHT{};
-        _vector UP{};
-        _vector LOOK{};
+        _vector RIGHT = XMVectorZero();
+        _vector UP    = XMVectorZero();
+        _vector LOOK  = XMVectorZero();
         _vector POSITION{};
         _float JumpPower{};
     } TRANSFORM_DESC;
@@ -54,17 +54,21 @@ public:
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
     void Go_Doublejump(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void GO_Dir(_float fTimeDelta,  _vector vDir, CNavigation* pNavigation = nullptr, _bool* bStop = nullptr);
-    void Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, _bool* Jumpcheck );
+    void Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavigation* pNavigation = nullptr, _bool* bStop = nullptr);
     void Stop_Move();
     void Rotation_to_Player(_float fTimeDelta);
+    void Set_Rotation_to_Player();
     void Other_set_Pos(CTransform* Other, FIX FixPosWhere,_float FixPos, _float3* Ouput = nullptr);
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
     void Turn(_fvector vAxis, _float fTimeDelta);
     void Turn(_bool bX, _bool bY, _bool bZ, _float fTimeDelta);
+    void Set_Rot(_fvector vAxis, _float Angle);
+
+
 
     /* 항등회전 상태를 기준으로 지정한 각도만큼 회전한다. */
     void Rotation(_float fX, _float fY, _float fZ);
-
+    void Set_ALL_TRANSFORM(_fvector vright, _fvector vup, _fvector vLook, _fvector vPos);
 
 public:
     _vector Get_TRANSFORM(TRANSFORM eTRANSFORM)
@@ -132,7 +136,7 @@ private:
     _float m_JumpPower{};
     _float m_fTimeSum{};
     _float m_fTimeSumDouble{};
-
+    _float m_PreRotationSce{};
 public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;

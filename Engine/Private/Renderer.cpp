@@ -5,8 +5,8 @@
 #include "VIBuffer_Rect.h"
 #include "Shader.h"
 
-_uint g_iSizeX = 8192; // 그림자를 위한 변수
-_uint g_iSizeY = 4608;
+_uint g_iSizeX = 1280*10; // 그림자를 위한 변수
+_uint g_iSizeY = 720*10;
 
 CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{pDevice}, m_pContext{pContext}, m_pGameInstance{CGameInstance::GetInstance()}
@@ -42,6 +42,11 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_LightDepth"), g_iSizeX, g_iSizeY,
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
         return E_FAIL;
+
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_BGLightDepth"), g_iSizeX, g_iSizeY,
+        DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
+        return E_FAIL;
+    
 
     /* For.Target_Shade */
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Shade"), m_iWinSizeX, m_iWinSizeY,
@@ -118,7 +123,7 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_4_Temp"), TEXT("Target_Bloom_4_Temp"))))return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_44_Temp"), TEXT("Target_Bloom_44_Temp"))))return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_444_Temp"), TEXT("Target_Bloom_444_Temp"))))return E_FAIL;
-
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     /* For.MRT_GameObjects */
@@ -145,6 +150,8 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
     /* For.MRT_Shadow */
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("Target_LightDepth"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_ShadowBG"), TEXT("Target_BGLightDepth"))))
         return E_FAIL;
 
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
@@ -180,6 +187,12 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_OutLine"), 200.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_444_Temp"), 200.f, 200.f, 150.f, 150.f)))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 200.f, 350.f, 150.f, 150.f)))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 350.f, 50.f, 150.f, 150.f)))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_BGLightDepth"), 350.f, 200.f, 150.f, 150.f)))
         return E_FAIL;
 
 #endif
@@ -220,6 +233,9 @@ HRESULT CRenderer::Add_RenderGameObject(RENDERGROUP eRenderGroup, CGameObject* p
     if (eRenderGroup >= RG_END || nullptr == pRenderGameObject)
         return E_FAIL;
 
+    if (eRenderGroup < RG_PRIORITY)
+        return E_FAIL;
+
     m_RenderGameObjects[eRenderGroup].push_back(pRenderGameObject);
 
     Safe_AddRef(pRenderGameObject);
@@ -242,6 +258,11 @@ HRESULT CRenderer::Draw()
         return E_FAIL;
     if (FAILED(Render_Shadow()))
         return E_FAIL;
+    if (m_RenderGameObjects[RG_SHADOWBG].size() > 0)
+    {
+        if (FAILED(Render_ShadowBG()))
+            return E_FAIL;
+    }
     if (FAILED(Render_NonBlend()))
         return E_FAIL; 
 
@@ -249,8 +270,8 @@ HRESULT CRenderer::Draw()
         return E_FAIL;
     if (FAILED(Render_Final()))
         return E_FAIL;
-    //if (FAILED(Render_Bloom()))
-     //   return E_FAIL;
+     if (FAILED(Render_Bloom()))
+         return E_FAIL;
     if (FAILED(Render_NonLight()))
         return E_FAIL;
     if (FAILED(Render_Blend()))
@@ -308,6 +329,15 @@ void CRenderer::Initialize_SizeViewPort()
 
     m_fdX[SIZE_DOWN_444] = 64.f / static_cast<_float>(m_iWinSizeX);
     m_fdY[SIZE_DOWN_444] = 64.f / static_cast<_float>(m_iWinSizeY);
+
+    /*그림자 세팅*/
+    ViewPortDesc.Width = (_float)g_iSizeX;
+    ViewPortDesc.Height = (_float)g_iSizeY;
+    m_ViewPortDescs[SIZE_SHADOW] = ViewPortDesc;
+
+    ViewPortDesc.Width = (_float)g_iSizeX;
+    ViewPortDesc.Height = (_float)g_iSizeY;
+    m_ViewPortDescs[SIZE_SHADOWBG] = ViewPortDesc;
 }
 
 HRESULT CRenderer::Render_Priority()
@@ -330,16 +360,8 @@ HRESULT CRenderer::Render_Shadow()
 {
     m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
-    D3D11_VIEWPORT ViewPortDesc;
-    ZeroMemory(&ViewPortDesc, sizeof(D3D11_VIEWPORT));
-    ViewPortDesc.TopLeftX = 0;
-    ViewPortDesc.TopLeftY = 0;
-    ViewPortDesc.Width = (_float)g_iSizeX;
-    ViewPortDesc.Height = (_float)g_iSizeY;
-    ViewPortDesc.MinDepth = 0.f;
-    ViewPortDesc.MaxDepth = 1.f;
 
-    m_pContext->RSSetViewports(1, &ViewPortDesc);
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
 
     if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
         return E_FAIL;
@@ -357,16 +379,40 @@ HRESULT CRenderer::Render_Shadow()
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
         return E_FAIL;
 
-    ZeroMemory(&ViewPortDesc, sizeof(D3D11_VIEWPORT));
-    ViewPortDesc.TopLeftX = 0;
-    ViewPortDesc.TopLeftY = 0;
-    ViewPortDesc.Width = static_cast<_float>(m_iWinSizeX);
-    ViewPortDesc.Height = static_cast<_float>(m_iWinSizeY);
-    ViewPortDesc.MinDepth = 0.f;
-    ViewPortDesc.MaxDepth = 1.f;
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
 
-    m_pContext->RSSetViewports(1, &ViewPortDesc);
+    return S_OK;
+}
 
+HRESULT CRenderer::Render_ShadowBG()
+{
+    m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+
+
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOWBG]);
+
+
+   
+        if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_ShadowBG"), m_pLightDepthStencilView)))
+            return E_FAIL;
+    
+
+
+    for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOWBG])
+    {
+            if (nullptr != pRenderGameObject)
+            pRenderGameObject->Render_Shadow();
+
+        Safe_Release(pRenderGameObject);
+    }
+
+    m_RenderGameObjects[RG_SHADOWBG].clear();
+
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_ShadowBG"))))
+        return E_FAIL;
+
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
+    
     return S_OK;
 }
 
@@ -621,17 +667,10 @@ HRESULT CRenderer::Render_Final()
     if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         return E_FAIL;
 
-    _float4x4 ViewMatrix, ProjMatrix;
-
-    XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(0.f, 10.f, -8.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
-                                                  XMVectorSet(0.f, 1.f, 0.f, 0.f)));
-    XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(
-                                     XMConvertToRadians(120.f),
-                                     static_cast<_float>(m_iWinSizeX) / static_cast<_float>(m_iWinSizeY), 0.1f, 500.f));
-
-    if (FAILED(m_pShader->Bind_Matrix("g_LightViewMatrix", &ViewMatrix)))
+    
+    if (FAILED(m_pShader->Bind_Matrix("g_LightViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix", &ProjMatrix)))
+    if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_ShadeTexture", TEXT("Target_Shade"))))
@@ -646,6 +685,9 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_LightDepthTexture", TEXT("Target_LightDepth"))))
         return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_BGLightDepthTexture", TEXT("Target_BGLightDepth"))))
+        return E_FAIL;
+
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_OutLineTexture", TEXT("Target_OutLine"))))
         return E_FAIL;
 
@@ -675,6 +717,8 @@ HRESULT CRenderer::Render_NonLight()
 
 HRESULT CRenderer::Render_Blend()
 {
+  
+
     m_RenderGameObjects[RG_BLEND].sort(
         [](CGameObject* pSour, CGameObject* pDest) -> _bool
         {
@@ -734,6 +778,7 @@ HRESULT CRenderer::Render_Debug()
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_ShadowBG"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_444_Temp"), m_pShader, m_pVIBuffer);
 
     return S_OK;

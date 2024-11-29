@@ -6,6 +6,13 @@ sampler LinearSampler = sampler_state
     AddressV = WRAP;
 };
 
+sampler LinearSamplerClamp = sampler_state
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = clamp;
+    AddressV = clamp;
+};
+
 sampler PointSampler = sampler_state
 {
     filter = MIN_MAG_MIP_POINT;
@@ -52,6 +59,12 @@ DepthStencilState DSS_Default
 {
     DepthEnable = true;
     DepthWriteMask = all;
+    DepthFunc = less_equal;
+};
+DepthStencilState DSS_DefaultNoWrite
+{
+    DepthEnable = true;
+    DepthWriteMask = zero;
     DepthFunc = less_equal;
 };
 

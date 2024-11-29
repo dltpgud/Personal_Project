@@ -23,7 +23,7 @@ HRESULT CBoomBot::Initialize(void* pArg)
     CActor::Actor_DESC Desc{};
     Desc.iNumPartObjects = PART_END;
     Desc.fSpeedPerSec =  5.f;
-    Desc.fRotationPerSec = XMConvertToRadians(60.f);
+    Desc.fRotationPerSec = XMConvertToRadians(90.f);
     Desc.JumpPower = 3.f;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(&Desc)))
@@ -53,6 +53,9 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
         return OBJ_DEAD;
 
 
+    if (1.f == static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->Get_interver())
+        m_bDead = true;
+
     if (m_iState != ST_Hit_Front)
         m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
 
@@ -65,18 +68,13 @@ _int CBoomBot::Priority_Update(_float fTimeDelta)
     if (m_iState != ST_Hit_Front && m_iState != ST_Aim_Down)
         m_pTransformCom->Rotation_to_Player(fTimeDelta);
 
-    __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
-}
 
-void CBoomBot::Update(_float fTimeDelta)
-{
     if (m_PartObjects[PART_BODY]->Get_Finish())
     {
         if (m_pPartHP != nullptr)
             m_pPartHP->Set_Hit(false);
 
-            m_iState = ST_Idle;
+        m_iState = ST_Idle;
     }
 
 
@@ -87,6 +85,14 @@ void CBoomBot::Update(_float fTimeDelta)
     }
     else
         m_pTransformCom->Go_Backward(fTimeDelta, m_pNavigationCom);
+
+    __super::Priority_Update(fTimeDelta);
+    return OBJ_NOEVENT;
+}
+
+void CBoomBot::Update(_float fTimeDelta)
+{
+    
     __super::Update(fTimeDelta);
 }
 
@@ -114,7 +120,7 @@ void CBoomBot::HIt_Routine()
     m_pPartHP->Set_bLateUpdaet(true);
 }
 
-void CBoomBot::Dead_Routine()
+void CBoomBot::Dead_Routine(_float fTimeDelta)
 {
     m_iState = ST_Aim_Down;
 
@@ -122,6 +128,8 @@ void CBoomBot::Dead_Routine()
         Erase_PartObj(PART_HP);
         m_pPartHP = nullptr;
     }
+
+
 }
 
 void CBoomBot::NON_intersect(_float fTimedelta)
@@ -134,26 +142,28 @@ void CBoomBot::NON_intersect(_float fTimedelta)
 
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
 
-   
-
-    if (20.f > fLength && 10.f < fLength)
+    if (20.f > fLength && 11.f < fLength)
     {
         _float3 fDir{};
         XMStoreFloat3(&fDir, vDir);
 
         m_iState = ST_Run_Front;
-        m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);  
+        m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
     }
-    if (10.f >= fLength)
-        m_iState = ST_Idle;
-    if (8.f > fLength)
-    {
+    if (11.f >= fLength )
         m_iState = ST_Shoot;
+    if (10.f > fLength)
+    {
+        m_iState = ST_Idle;
+    }
+    if (9.f > fLength)
+    {
+        m_iState = ST_Run_Back;
+
         m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
     }
-    else {
-            m_iState = ST_Idle;
-    }
+    if (20.f <fLength)
+    m_iState = ST_Idle;
 
 }
 

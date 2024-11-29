@@ -33,6 +33,9 @@ private:
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr }; 
 
 	CUI_DESC		Desc[3]{};
+	
+
+	_bool m_bHoverSound = { false };
 private:
 	HRESULT Add_Components();
 	

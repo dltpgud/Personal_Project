@@ -91,7 +91,6 @@ HRESULT CTerrain::Render()
         return E_FAIL;
 
 
-
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
@@ -129,6 +128,7 @@ void CTerrain::Set_Buffer(_uint x, _uint y )
 
     m_pVIBufferCom->Set_Buffer(x, y);
 }
+
 
 
 _float3* CTerrain::Get_VtxPos()
