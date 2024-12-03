@@ -25,9 +25,16 @@ HRESULT CParticle_Explosion::Initialize(void * pArg)
 	if (FAILED(__super::Initialize(pArg)))
 		return E_FAIL;
 
+
+	CParticle_Explosion_Desc* pDesc = static_cast<CParticle_Explosion_Desc*>(pArg);
+
+	m_pParentMatrix = pDesc->pParentMatrix;
+
 	if (FAILED(Add_Components()))
 		return E_FAIL;
 
+
+	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
 	return S_OK;
 }
 
@@ -36,12 +43,21 @@ _int CParticle_Explosion::Priority_Update(_float fTimeDelta)
 	if (m_bDead)
 		return OBJ_DEAD;
 	
+
+	m_fTimeSum += fTimeDelta;  
+	
+	if (m_fTimeSum >= 0.1f) 
+	{
+		m_fTimeSum -= 0.1f; 
+		m_currentFrame = (m_currentFrame + 1) % 8; 
+	}
+
+
  	return OBJ_NOEVENT;
 }
 
 void CParticle_Explosion::Update(_float fTimeDelta)
 {
-	_uint iData = 10;
 
 	m_pVIBufferCom->Spread(fTimeDelta);
 }
@@ -50,6 +66,11 @@ void CParticle_Explosion::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
 		return;
+	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
+		return;
+
+
+	XMStoreFloat4x4(&m_NewWordMatrix, m_pTransformCom->Get_WorldMatrix() * m_pParentMatrix);
 }
 
 HRESULT CParticle_Explosion::Render()
@@ -76,9 +97,9 @@ HRESULT CParticle_Explosion::Add_Components()
 	/* 2. 다른 객체가 내 컴포넌트를 검색하고자 할때 스위치케이스가 겁나 늘어나는 상황. */
 
 	/* For.Com_Texture */
-	//if (FAILED(__super::Add_Component(LEVEL_GAMEPLAY, TEXT("Prototype_Component_Texture_Snow"),
-	//	TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
-	//	return E_FAIL;
+	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto Component Fire_Explostion"),
+		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
+		return E_FAIL;
 
 	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Shader_Particle_Point"),
@@ -97,15 +118,36 @@ HRESULT CParticle_Explosion::Add_Components()
 
 HRESULT CParticle_Explosion::Bind_ShaderResources()
 {
-	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_NewWordMatrix)))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
 		return E_FAIL;
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
 		return E_FAIL;
 
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
+		return E_FAIL;
+
+
 	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
 		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_textureSize",&m_textureSize, sizeof(_float2))))
+		return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_frameSize", &m_frameSize, sizeof(_float2))))
+		return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_framesPerRow", &m_framesPerRow, sizeof(_int))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_currentFrame", &m_currentFrame, sizeof(_int))))
+		return E_FAIL;
+	
+
+
+
+
 
 	return S_OK;
 }

@@ -27,7 +27,7 @@ private:
 	
 private :
 	class CSceneCamera* m_pSceneCam = { nullptr};
-
+	_bool m_bstart = false;
 public:
 	static CLevel_StageBoss* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void Free() override;

@@ -115,6 +115,10 @@ CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
 
 CGameObject* CLayer::Recent_GameObject(const _uint& strLayerTag)
 {
+
+    if (m_GameObjects[strLayerTag].size() == 0)
+        return nullptr;
+
     return m_GameObjects[strLayerTag].back();
 }
 

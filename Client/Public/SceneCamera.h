@@ -26,12 +26,18 @@ public:
 	_bool Get_IsCamEnd() {
 		return m_bIsCamEnd;
 	}
+
+	void Set_fade(_bool fade) {
+		m_bfadein = fade;
+	}
 private:
 	_vector	m_vStopPos{};
 	_float m_fRunTime = 0.f;
 	_float m_TimeSum = { 0.f };
 	_bool m_bIsCamEnd = { false };
 	_bool m_bintroSound = { false };
+	_bool m_bfade{ false };
+	_bool m_bfadein{ false };
 public:
 	static CSceneCamera* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

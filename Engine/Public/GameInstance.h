@@ -107,6 +107,7 @@ public: /* For.Sound*/
 	void	StopAll();
 	void	SetChannelVolume(CSound::CHANNELID eID, _float fVolume);
 	void	LoadSoundFile	(const _char* soundFile);
+	
 
 public: /* For.Renderer	*/
 	HRESULT Add_RenderGameObject(CRenderer::RENDERGROUP eRenderGroup, class CGameObject* pRenderGameObject);

@@ -71,8 +71,10 @@ void CMonsterHP::Late_Update(_float fTimeDelta)
 {
 	if (false == m_bLateUpdaet)
 		return;
-	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
-		return;
+
+		if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
+			return;
+
 }
 
 HRESULT CMonsterHP::Render()

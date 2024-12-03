@@ -2,7 +2,7 @@
 #include "MainApp.h"
 #include "GameInstance.h"
 #include "Level_Loading.h"
-
+#include "Pade.h"
 CMainApp::CMainApp()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
 {
@@ -34,6 +34,9 @@ HRESULT CMainApp::Initialize()
 	if(FAILED(Open_Level(LEVEL_MENU)))
 		return E_FAIL;
    
+
+	m_pGameInstance->LoadSoundFile("Menu.mp3");
+	
 	return S_OK;
 }
 
@@ -56,26 +59,7 @@ void CMainApp::Render()
 	if (FAILED(m_pGameInstance->Render_Begin(_float4(0.f, 0.f, 1.f, 1.f))))
 		 return;
 
-	 
-	
-
-#ifdef _DEBUG
-	 ++m_iNumRender;
-
-	 if (m_fTimeAcc >= 1.f)
-	 {
- 		 wsprintf(m_szFPS, TEXT("FPS : %d"), m_iNumRender);
-		 m_fTimeAcc = 0.f;
-		 m_iNumRender = 0;
-	 }
-	 m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(500.f, 0.f), XMVectorSet(1.f, 1.f, 1.f, 1.f));
-
-#endif
-
-m_pGameInstance->Draw(); 
-
-
-
+    m_pGameInstance->Draw(); 
 
 	if (FAILED(m_pGameInstance->Render_End()))
 		 return;
@@ -104,6 +88,7 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	 	CVIBuffer_Point::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Cube"),
 		CVIBuffer_Cube::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
@@ -118,6 +103,9 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex_Inverse"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPosTex_Inverse.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		return E_FAIL;
+
+	
+
 
     if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"),
 			CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
@@ -271,6 +259,7 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/ShokWave_Ground_01_output.dds")))))
 		return E_FAIL;
 	
+
 	
 	
 	
@@ -278,6 +267,12 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Mask/T_Noise_Liquid.dds")))))
 		return E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Pade"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Pade.png")))))
+		return E_FAIL;
+
+
 
 	/* For.Prototype_Component_Collider_AABB */
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
@@ -568,20 +563,27 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 		return E_FAIL;
 
 
+
+
+
+
+	if (FAILED(m_pGameInstance->Add_Prototype(L"Prototype_Gameobject_Pade", CPade::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
 	return S_OK;
 }
 
 HRESULT CMainApp::Ready_Prototype_Component_For_Particle()
 {
 	CVIBuffer_Instancing::INSTANCING_DESC  ParticleExploDesc{};
-	ParticleExploDesc.iNumInstance = 700;
+	ParticleExploDesc.iNumInstance = 90;
 	ParticleExploDesc.vCenter = _float3(0.f, 0.f, 0.f);
-	ParticleExploDesc.vRange = _float3(0.5f, 0.5f, 0.5f);
-	ParticleExploDesc.vSize = _float2(0.05f, 0.1f);
-	ParticleExploDesc.vSpeed = _float2(0.3f, 1.f);
-	ParticleExploDesc.vLifeTime = _float2(0.1f, 0.5f);
-	ParticleExploDesc.vPivot = _float3(0.f, -0.5f, 0.f);
-	ParticleExploDesc.isLoop = true;
+	ParticleExploDesc.vRange = _float3(8.f, 8.f, 7.f);
+	ParticleExploDesc.vSize = _float2(2.f, 2.f);
+	ParticleExploDesc.vSpeed = _float2(0.5f, 0.6f);
+	ParticleExploDesc.vLifeTime = _float2(10.f, 0.5f);
+	ParticleExploDesc.vPivot = _float3(0.f, 9.f, 0.f);
+	ParticleExploDesc.isLoop = false;
 
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Particle_Explosion"),
 	     CVIBuffer_Particle_Point::Create(m_pDevice, m_pContext, &ParticleExploDesc))))
@@ -589,11 +591,6 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Particle()
 
 	return S_OK;
 }
-
-
-
-
-
 
 CMainApp* CMainApp::Create()
 {

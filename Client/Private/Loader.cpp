@@ -47,6 +47,8 @@
 #include "ShockWave.h"
 #include "Shock.h"
 #include "BossBullet_Laser.h"
+#include "Particle_Explosion.h"
+
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -96,7 +98,7 @@ HRESULT CLoader::Loading()
 	case LEVEL_MENU:
 		hr = Loading_For_MenuLevel();
 		break;
-	case LEVEL_STAGE1:
+	case LEVEL_STAGE1:	
 		hr = Loading_For_Stage1Level();
 		break;
 	case LEVEL_STAGE2:
@@ -104,6 +106,11 @@ HRESULT CLoader::Loading()
 		break;
 	case LEVEL_BOSS:
 		hr = Loading_For_BossLevel();
+		break;
+
+	case LEVEL_RETURN_MENU : 
+		m_bFinished = true;
+		hr = S_OK;
 		break;
 	}
 
@@ -166,9 +173,11 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	 	CMonsterHP::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+
+	
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	/* For.Prototype_Component_Texture_Menu */
- 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_MENU, TEXT("Prototype_Component_Texture_Menu"),
+ 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Menu"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/MainMenu/T_MainMenu_Background%d.png"),3))))
 		return E_FAIL;
 
@@ -208,15 +217,26 @@ HRESULT CLoader::Loading_For_MenuLevel()
 		return E_FAIL;
 
 
+
+
 	m_strLoadingText = TEXT("사운드 로딩중입니다.");
 	//m_pGameInstance->LoadSoundFile("ST.ogg");
 
+
+	/*LEVEL*/
+	m_pGameInstance->LoadSoundFile("ST_Ambient_Canyon.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Ambient_Special.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Ambient_EnergyCenter.ogg");
+	
 	/*Menu */
 		m_pGameInstance->LoadSoundFile("ST_Button_Hover_In.ogg");
 		m_pGameInstance->LoadSoundFile("ST_Button_Click.ogg");
 		
+	/*LODING*/
+	m_pGameInstance->LoadSoundFile("ST_Music_Credits.wav");
+		
 	/*interect*/
-	m_pGameInstance->LoadSoundFile("ST_Door_Act1_Open.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Door_Act1_Open.ogg");	
 	m_pGameInstance->LoadSoundFile("ST_Door_Act1_Close.ogg");
 	m_pGameInstance->LoadSoundFile("ST_Door_Boss_Act1_Open.ogg");
 	m_pGameInstance->LoadSoundFile("ST_Door_Special_Open.ogg");
@@ -225,13 +245,17 @@ HRESULT CLoader::Loading_For_MenuLevel()
 	m_pGameInstance->LoadSoundFile("ST_Chest_Open.ogg");
 
 	/*Player*/
-	m_pGameInstance->LoadSoundFile("ST_Player_Stun_Loop.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Stun_Loop.wav");
 	m_pGameInstance->LoadSoundFile("ST_Player_Footstep_Scuff_Sand.ogg");
 	m_pGameInstance->LoadSoundFile("ST_Player_Footstep_Scuff_Sand_05.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Switch_T01.ogg");
 	
 	m_pGameInstance->LoadSoundFile("ST_Player_Jump.ogg");
 	m_pGameInstance->LoadSoundFile("ST_Player_DoubleJump.ogg");
-
+	m_pGameInstance->LoadSoundFile("ST_Player_Burn_Loop.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Burn_Trigger.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Burn_Stop.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Player_Flash_Stop.ogg");
 	/*WeaPon*/
 	m_pGameInstance->LoadSoundFile("ST_Handgun_Reload.ogg");
 	m_pGameInstance->LoadSoundFile("ST_Handgun_PF_Shoot.ogg");
@@ -244,8 +268,17 @@ HRESULT CLoader::Loading_For_MenuLevel()
 
 	/*Boss*/
 	m_pGameInstance->LoadSoundFile("ST_BillyBoom_Outro.ogg");
-
-
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_Hand_Blast_Shoot.ogg");
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_Shockwave_Shoot.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Laser_Loop.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Laser_Loop_Start.ogg");
+	m_pGameInstance->LoadSoundFile("ST_Enemy_Laser_Loop_Stop.ogg");
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_FootStep.ogg");
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_From_Two_Blaster_To_One.ogg");
+	m_pGameInstance->LoadSoundFile("ST_DiggyMole_Shockwave.ogg");
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_Cast_Hand_Blast.ogg");
+	m_pGameInstance->LoadSoundFile("ST_BillyBoom_Presence.ogg");
+	
 	/*Enemy*/
 	m_pGameInstance->LoadSoundFile("ST_Enemy_Step_Medium.ogg");
 	m_pGameInstance->LoadSoundFile("ST_MortarPod_Shoot.ogg");
@@ -277,9 +310,14 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component Fire1_Terrain"),
 			CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Terrain/T_Fire_Pattern_02.dds")))))
 			return E_FAIL;
-		m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
-	
 
+
+		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component Fire_Explostion"),
+			CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/T_FireBallAtlas_02.dds")))))
+			return E_FAIL;
+		
+
+		m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 		CComponent* pComponent =  m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
 
 		static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage1.dat");
@@ -499,6 +537,10 @@ HRESULT CLoader::Loading_For_Stage1Level()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Boss_InstroUI"),
 		CBossIntroBG::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Particle_Explosion"),
+		CParticle_Explosion::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
 
 
 
@@ -551,13 +593,12 @@ HRESULT CLoader::Loading_For_Stage2Level()
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
-	//m_pGameInstance->Get_Player()->Set_onCell(false);
-	//m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
-	//CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
-	//static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
-	//static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
 
-
+	m_pGameInstance->Get_Player()->Set_onCell(false);
+	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
+	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
+	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
+	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");
 
@@ -578,11 +619,11 @@ HRESULT CLoader::Loading_For_BossLevel()
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
-//	m_pGameInstance->Get_Player()->Set_onCell(false);
-//	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
-//	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
-//	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
-//	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");
+	m_pGameInstance->Get_Player()->Set_onCell(false);
+	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
+	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
+	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
+	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");
 
 
 	m_strLoadingText = TEXT("모델 로딩중입니다.");

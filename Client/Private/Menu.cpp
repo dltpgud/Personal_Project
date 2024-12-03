@@ -209,7 +209,7 @@ HRESULT CMenu::Add_Components()
 	/* 2. 다른 객체가 내 컴포넌트를 검색하고자 할때 스위치케이스가 겁나 늘어나는 상황. */
 
 	/* For.Com_Texture */
-	if (FAILED(__super::Add_Component(LEVEL_MENU, TEXT("Prototype_Component_Texture_Menu"),
+	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Menu"),
 		TEXT("Com_Texture_Menu"), reinterpret_cast<CComponent**>(&m_pTextureCom))))  // 다이나믹 캐스팅도 스타틱 캐스팅도 할 수  없는 상황.
 		return E_FAIL;
 

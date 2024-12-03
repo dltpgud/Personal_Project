@@ -616,6 +616,7 @@ void CGameInstance::LoadSoundFile(const _char* soundFile)
 		return;
 	return m_pSound->LoadSoundFile(soundFile);
 }
+
 #pragma endregion
 
 #pragma region Renderer

@@ -2,6 +2,7 @@
 #include "BossBullet_Berrle.h"
 #include "GameInstance.h"
 #include "BossBullet_Laser.h"
+#include "BillyBoom.h"
 CBossBullet_Berrle::CBossBullet_Berrle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -24,6 +25,7 @@ HRESULT CBossBullet_Berrle::Initialize(void* pArg)
       m_LaserpSocketMatrix = pDesc->LaserpSocketMatrix;
       m_LaserpParentMatrix = pDesc->LaserpParentMatrix;
       m_LaserRightLeft = pDesc->LaserRightLeft;
+      m_pParentState = pDesc->state;
       if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
       
@@ -49,6 +51,9 @@ _int CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
 
     __super::Priority_Update(fTimeDelta);
     
+    if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
+        m_bDead = true;
+
     if (m_fScale == 6.f)
     {
         CBossBullet_Laser::CBossBullet_Laser_DESC lDesc{};
@@ -59,6 +64,7 @@ _int CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
         lDesc.fDamage = m_pDamage;
         lDesc.pParentMatrix = m_LaserpParentMatrix;
         lDesc.pSocketMatrix = m_LaserpSocketMatrix;
+        lDesc.state = m_pParentState;
         m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Laser", nullptr, 0, &lDesc, 0);
 
       

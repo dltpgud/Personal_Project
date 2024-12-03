@@ -55,7 +55,7 @@ HRESULT CVIBuffer_Point::Initialize_Prototype()
         return E_FAIL;
 
 #pragma endregion
-
+    Safe_Delete_Array(pVertices);
 #pragma region INDEX_BUFFER
 
     ZeroMemory(&m_BufferDesc, sizeof m_BufferDesc);
@@ -76,7 +76,7 @@ HRESULT CVIBuffer_Point::Initialize_Prototype()
         return E_FAIL;
 #pragma endregion
 
-    Safe_Delete_Array(pVertices);
+
     Safe_Delete_Array(pIndices);
 
     return S_OK;

@@ -6,6 +6,7 @@
 #include "Camera_Free.h"
 #include "Player.h"
 #include "Level_StageBoss.h"
+#include "Pade.h"
 CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -14,11 +15,7 @@ CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pCont
 HRESULT CLevel_Stage2::Initialize()
 {
 
-	m_pGameInstance->Get_Player()->Set_onCell(false);
-	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
-	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
-	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
-	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
+	
 
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
@@ -43,19 +40,26 @@ HRESULT CLevel_Stage2::Initialize()
 
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
-
+	m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_Special.ogg", 0.1f);
 	return S_OK;
 }
 
 void CLevel_Stage2::Update(_float fTimeDelta)
 {
+
+	if (m_bPade == false) {
+		static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
+		m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
+		m_bPade = true;
+	}
+
 	if (m_pGameInstance->IsOpenStage())
 	{
 		m_pGameInstance->Set_Open_Bool(false);
 
 //		m_pGameInstance->Open_Level(LEVEL_STAGE2, CLevel_Stage2::Create(m_pDevice, m_pContext));
-
-		m_pGameInstance->Open_Level(LEVEL_BOSS,CLevel_StageBoss::Create(m_pDevice,m_pContext));
+		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_BOSS, STAGE));
+	//	m_pGameInstance->Open_Level(LEVEL_BOSS,CLevel_StageBoss::Create(m_pDevice,m_pContext));
 
 	}
 	__super::Update(fTimeDelta);
@@ -75,10 +79,21 @@ HRESULT CLevel_Stage2::Render()
 
 HRESULT CLevel_Stage2::Ready_Layer_Monster(const _uint& pLayerTag)
 {
-	//if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_MecanoBot",
-	//	L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_MECANOBOT)))
-	//	return   E_FAIL;
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_GunPawn",
+		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_GUN_PAWN)))
+		return   E_FAIL;
 
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_JetFly",
+		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_JET_FLY)))
+		return   E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_BoomBot",
+		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOOM_BOT)))
+		return   E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_MecanoBot",
+		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_MECANOBOT)))
+		return   E_FAIL;
 	return S_OK;
 }
 

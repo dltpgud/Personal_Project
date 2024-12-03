@@ -71,6 +71,8 @@ void CSound::PlayBGM(CHANNELID eID, _tchar* pSoundKey, _float fVolume)
 
 
 
+
+
 void CSound::StopSound(CHANNELID eID)
 {
 	m_pChannelArr[eID]->stop();

@@ -298,6 +298,6 @@ void CVIBuffer_Terrain::Free()
 {
     __super::Free();
 
-    if (false == m_bClone)
+
         Safe_Delete_Array(m_pPos);
 }

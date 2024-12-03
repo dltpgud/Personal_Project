@@ -14,13 +14,6 @@ CLevel_StageBoss::CLevel_StageBoss(ID3D11Device * pDevice, ID3D11DeviceContext *
 
 HRESULT CLevel_StageBoss::Initialize()
 {
-
-	m_pGameInstance->Get_Player()->Set_onCell(false);
-	m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
-	CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
-	static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
-	static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");
-
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
@@ -42,12 +35,19 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
-
+	m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_EnergyCenter.ogg", 0.1f);
 	return S_OK;
 }
 
 void CLevel_StageBoss::Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->IsOpenStage())
+	{
+		m_pGameInstance->Set_Open_Bool(false);
+		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_RETURN_MENU, STAGE));
+
+	}
+
 
 	__super::Update(fTimeDelta);
 }

@@ -5,7 +5,7 @@ CVIBuffer::CVIBuffer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CCo
 }
 
 CVIBuffer::CVIBuffer(const CVIBuffer& Prototype)
-    : CComponent{Prototype.m_pDevice, Prototype.m_pContext}, m_pVB{Prototype.m_pVB}, m_pIB{Prototype.m_pIB},
+    : CComponent{ Prototype}, m_pVB{Prototype.m_pVB}, m_pIB{Prototype.m_pIB},
       m_iNumVertexBuffers{Prototype.m_iNumVertexBuffers}, m_iVertexStride{Prototype.m_iVertexStride},
       m_iNumVertices{Prototype.m_iNumVertices}, m_iIndexStride{Prototype.m_iIndexStride},
       m_iNumIndexices{Prototype.m_iNumIndexices}, m_eIndexFormat{Prototype.m_eIndexFormat},
