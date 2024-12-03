@@ -196,6 +196,9 @@
     <Filter Include="02.GameObjects\05. Effect\Particle">
       <UniqueIdentifier>{8535d2e8-f356-460a-8ed5-82222297eb58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\04.UI\Pade">
+      <UniqueIdentifier>{d5651fb6-3996-420e-a22d-06221b679f00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -372,6 +375,9 @@
     <ClInclude Include="..\Public\Particle_Explosion.h">
       <Filter>02.GameObjects\05. Effect\Particle</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Pade.h">
+      <Filter>02.GameObjects\04.UI\Pade</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -488,9 +494,6 @@
     <ClCompile Include="..\Private\Level_StageBoss.cpp">
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\BillyBoom.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Body_BillyBoom.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\Boss\Body</Filter>
     </ClCompile>
@@ -535,6 +538,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Particle_Explosion.cpp">
       <Filter>02.GameObjects\05. Effect\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\Boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Pade.cpp">
+      <Filter>02.GameObjects\04.UI\Pade</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,8 @@
 #include "Body_BillyBoom.h"
 #include "BossIntroBG.h"
 #include "BossHP.h"
+#include "Particle_Explosion.h"
+#include"Pade.h"
 CBillyBoom::CBillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
 {
 }
@@ -38,6 +40,8 @@ HRESULT CBillyBoom::Initialize(void* pArg)
 
 
 
+
+
     if (FAILED(Add_Components()))
         return E_FAIL;
 
@@ -49,8 +53,21 @@ HRESULT CBillyBoom::Initialize(void* pArg)
 
 _int CBillyBoom::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
+    if (m_bDead) {
+        if (m_bPade == false) {
+            static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(true);
+            m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
+            m_bPade = true;
+        }
+         if (static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->FinishPade())
+             {
+                 m_pGameInstance->Set_Open_Bool(true);
+                 return OBJ_DEAD;
+             }
+    }
+
+    if(m_iState != ST_Comp_Idle)
+    Set_State_From_Body();
 
      if(true == m_bIntro)
     m_pTransformCom->Set_Rotation_to_Player();
@@ -98,15 +115,14 @@ _int CBillyBoom::Priority_Update(_float fTimeDelta)
 
 void CBillyBoom::Update(_float fTimeDelta)
 {
-
+         
 
 
  if (m_iState != ST_Intro && m_bIntro == false) {
-
+  
      if (m_bSkill != true) {
-         NON_intersect(fTimeDelta);
-    
-       Change_State(fTimeDelta);
+        NON_intersect(fTimeDelta); 
+        Change_State(fTimeDelta); 
      }
  }
 
@@ -139,31 +155,42 @@ HRESULT CBillyBoom::Render()
 
 void CBillyBoom::HIt_Routine()
 {
-
-    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
     m_bHit = true;
-    if (m_bSkill == true)
-        return;
-  //  m_iState = ST_Comp_Poke_Front;
+    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+  
 }
 
 void CBillyBoom::Dead_Routine(_float fTimeDelta)
 {
+    m_bSkill = true;
+    m_bHit = true;
     m_iState = ST_Comp_Idle;
+    m_bOnCell = false;
 
     m_DeadTimeSum += fTimeDelta;
-    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
 
+    if (false == m_bDeadSound) {
+        m_pGameInstance->Play_Sound(L"ST_BillyBoom_Outro.ogg", CSound::SOUND_EFFECT, 1.f);
+        m_bDeadSound = true;
+    }
 
+    if (m_DeadTimeSum > 2.f)
+    {    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+        if (false == m_bBoom)
+        {
 
-    if(m_DeadTimeSum > 0.1)
-    m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-    if (m_DeadTimeSum > 0.4)
-        m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-    if (m_DeadTimeSum > 0.8)
-        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+            CParticle_Explosion::CParticle_Explosion_Desc Desc{};
+            Desc.pParentMatrix = m_pTransformCom->Get_WorldMatrix();
 
+            m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, CGameObject::SKILL, L"Prototype_GameObject_Particle_Explosion", nullptr, 0, &Desc, 0);
+            m_bBoom = true;
+        }   
+        m_pTransformCom->Set_MoveSpeed(2.f);
+        m_pTransformCom->Go_Down(fTimeDelta);
+    }
 
+    if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) < -20.f)
+        m_bDead = true;
 }
 
 void CBillyBoom::Stun_Routine()
@@ -320,6 +347,41 @@ void CBillyBoom::Set_Bash(_float fTimedelta)
     m_bSkill = true;
 }
 
+void CBillyBoom::Set_State_From_Body()
+{
+    switch (static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->Get_BodyState())
+    {
+    case ST_Bash_Shoot:
+        m_iState = ST_Bash_Shoot;
+        break;
+
+    case ST_ShockWave_PreShoot:
+        m_iState = ST_ShockWave_PreShoot;
+        break;
+
+    case ST_ShockWave_Shoot:
+        m_iState = ST_ShockWave_Shoot;
+        break;
+
+    case ST_Laser_PreShoot:
+        m_iState = ST_Laser_PreShoot;
+        break;
+
+
+    case ST_Laser_ShootLoop:
+        m_iState = ST_Laser_ShootLoop;
+        break;
+
+    case ST_Barre_PreShoot:
+        m_iState = ST_Barre_PreShoot;
+        break;
+
+    case ST_Barre_Shoot:
+        m_iState = ST_Barre_Shoot;
+        break;
+    }  
+}
+
 HRESULT CBillyBoom::Add_Components()
 {    
     /* For.Com_Collider_AABB */
@@ -349,8 +411,6 @@ HRESULT CBillyBoom::Add_PartObjects()
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
     BodyDesc.pRimState = &m_iRim;
-    BodyDesc.pPickeObj = this;
-    Safe_AddRef(BodyDesc.pPickeObj);
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_BillyBoom"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 

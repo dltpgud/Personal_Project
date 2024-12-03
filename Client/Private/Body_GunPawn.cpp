@@ -58,7 +58,7 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     if (*m_pParentState == CGunPawn::ST_RUN_BACK && m_iCurMotion != CGunPawn::ST_RUN_BACK)
     {
         m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.5f);
+        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.2f);
         m_iCurMotion = CGunPawn::ST_RUN_BACK;
         bMotionChange = true;
         bLoop = true;
@@ -67,7 +67,7 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     if (*m_pParentState == CGunPawn::ST_RUN_LEFT && m_iCurMotion != CGunPawn::ST_RUN_LEFT)
     {
         m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.5f);
+        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.2f);
         m_iCurMotion = CGunPawn::ST_RUN_LEFT;
         bMotionChange = true;
         bLoop = true;
@@ -75,7 +75,7 @@ void CBody_GunPawn::Update(_float fTimeDelta)
     if (*m_pParentState == CGunPawn::ST_RUN_RIGHT && m_iCurMotion != CGunPawn::ST_RUN_RIGHT)
     {
         m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.5f);
+        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.2f);
         m_iCurMotion = CGunPawn::ST_RUN_RIGHT;
         bMotionChange = true;
         bLoop = true;
@@ -183,10 +183,13 @@ void CBody_GunPawn::Late_Update(_float fTimeDelta)
 
     __super::Late_Update(fTimeDelta);
 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
+    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
+      
+    } // if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+       //     return;
 }
 
 HRESULT CBody_GunPawn::Render()
@@ -246,7 +249,7 @@ HRESULT CBody_GunPawn::Render_Shadow()
 
 HRESULT CBody_GunPawn::Make_Bullet()
 {
-    m_pGameInstance->Play_Sound(L"ST_Enemy_Rocket_Shoot.ogg", CSound::SOUND_EFFECT, 0.5f);
+    m_pGameInstance->Play_Sound(L"ST_Enemy_Rocket_Shoot.ogg", CSound::SOUND_EFFECT, 0.3f);
     _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));

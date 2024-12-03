@@ -215,7 +215,7 @@ HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
                   if (false == CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
                       pMonsterBullet->Set_DeadSkill(true);
 
-
+                 // pMonsterBullet->Set_Dead(true);
               }
           }
       }

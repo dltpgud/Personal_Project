@@ -11,6 +11,8 @@ float2 g_PSize;
 float4 g_RgbStart;
 float4 g_RgbEnd;
 
+
+
 struct VS_IN  
 {
     float3 vPosition : POSITION;
@@ -83,7 +85,6 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Triangles)
     Triangles.Append(Out[3]);
     Triangles.RestartStrip();
 }
-
 
 
 
@@ -181,6 +182,7 @@ PS_OUT PS_PLAYERBULLETDEAD(PS_IN In)
 
 
 
+
 technique11 DefaultTechnique
 { /*Technique은 특정 렌더링 작업을 정의하는 셰이더 코드 블록*/
   /* Pass는 셰이더 실행의 단위로, 정점 셰이더, 픽셀 셰이더 등의 그래픽 파이프라인 단계에서 실행될 셰이더들을 정의함*/
@@ -217,4 +219,6 @@ technique11 DefaultTechnique
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_PLAYERBULLETDEAD();
     }
+
+
 }

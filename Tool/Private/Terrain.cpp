@@ -56,6 +56,7 @@ void CTerrain::Late_Update(_float fTimeDelta)
 
 
 HRESULT CTerrain::Render()
+
 {
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
@@ -73,6 +74,10 @@ HRESULT CTerrain::Render()
         return E_FAIL;
 
   
+
+    if (FAILED(m_pShaderCom->Bind_Int("g_onEmissive", m_bFire)))
+        return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_Float("g_TimeSum", m_fTimeSum)))
         return E_FAIL;
 
@@ -81,6 +86,8 @@ HRESULT CTerrain::Render()
     m_pVIBufferCom->Bind_Buffers();
 
     m_pVIBufferCom->Render();
+
+
 
     return S_OK;
 }

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "BossBullet_Laser.h"
 #include "GameInstance.h"
-
+#include "BillyBoom.h"
 CBossBullet_Laser::CBossBullet_Laser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -23,6 +23,7 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
     m_bRightLeft = pDesc->bRightLeft;
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentMatrix = pDesc->pParentMatrix;
+    m_pParentState = pDesc->state;
     pDesc->fLifeTime= 4.5f;
    if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
@@ -59,14 +60,20 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
 
 _int CBossBullet_Laser::Priority_Update(_float fTimeDelta)
 {
+
     if (m_bDead)
     {
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", CSound::SOUND_EFFECT, 1.f);
+        
+        m_pGameInstance->StopSound(CSound::SOUND_EFFECT_LASER);
             return OBJ_DEAD;
     }  
 
     __super::Priority_Update(fTimeDelta);
    
-        
+    if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
+        m_bDead = true;
+
     m_fTimeSum       += fTimeDelta;
 
     return OBJ_NOEVENT;

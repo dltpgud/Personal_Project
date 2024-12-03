@@ -86,7 +86,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
     if (*m_pParentState == CJetFly::ST_Walk_Back && m_iCurMotion != CJetFly::ST_Walk_Back)
     {
 
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.5f);
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.2f);
         m_iCurMotion = CJetFly::ST_Walk_Back;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -94,7 +94,7 @@ void CBody_JetFly::Update(_float fTimeDelta)
     }
     if (*m_pParentState == CJetFly::ST_Walk_Front && m_iCurMotion != CJetFly::ST_Walk_Front)
     {
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.5f);
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.2f);
         m_iCurMotion = CJetFly::ST_Walk_Front;
         m_fPlayAniTime = 0.5f;
         bMotionChange = true;
@@ -136,11 +136,13 @@ void CBody_JetFly::Late_Update(_float fTimeDelta)
 {
 
     __super::Late_Update(fTimeDelta);
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
+    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
+    
+    }    //if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+          //  return;
 }
 
 HRESULT CBody_JetFly::Render()
@@ -199,7 +201,7 @@ HRESULT CBody_JetFly::Render_Shadow()
 
 void CBody_JetFly::Make_Bullet()
 {
-    m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", CSound::SOUND_EFFECT, 0.5f);
+    m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", CSound::SOUND_EFFECT, 0.3f);
     _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));

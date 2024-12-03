@@ -123,9 +123,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
 
         pGameObject->Set_Buffer(TileX, TileY);
         bMainTile = false;
-        
-        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-
+        if (pGameObject != nullptr) {
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        }
          Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
@@ -189,8 +189,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, con
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-
+        if (pGameObject != nullptr) {
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        }
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
@@ -254,9 +255,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _u
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-
-        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-
+        if (pGameObject != nullptr) {
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        }
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
@@ -324,8 +325,9 @@ HRESULT CLevel_Manager::Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const 
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
             pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
             pGameObject->Set_Buffer(0, WType);
-           
-            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+            if (pGameObject != nullptr) {
+                m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+            }
         }
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
@@ -445,9 +447,12 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Monster(const _uint& iLevelIndex, const
             break;
         }
 
-        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-            m_pGameInstance->Add_Monster(m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag));
 
+        if (pGameObject != nullptr) {
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+            if (FAILED(m_pGameInstance->Add_Monster(m_pGameInstance->Recent_GameObject(iLevelIndex, strLayerTag))))
+                return E_FAIL;
+        }
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
@@ -519,10 +524,10 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _ui
             break;
 
         }
+        if (pGameObject != nullptr) {
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
 
-        m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-       
-
+        }
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);

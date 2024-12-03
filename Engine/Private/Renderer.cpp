@@ -43,10 +43,7 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
         return E_FAIL;
 
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_BGLightDepth"), g_iSizeX, g_iSizeY,
-        DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
-        return E_FAIL;
-    
+   
 
     /* For.Target_Shade */
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Shade"), m_iWinSizeX, m_iWinSizeY,
@@ -151,8 +148,7 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     /* For.MRT_Shadow */
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("Target_LightDepth"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_ShadowBG"), TEXT("Target_BGLightDepth"))))
-        return E_FAIL;
+
 
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
     m_WorldMatrix._11 = static_cast<_float>(m_iWinSizeX);
@@ -192,8 +188,7 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
         return E_FAIL;
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 350.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_BGLightDepth"), 350.f, 200.f, 150.f, 150.f)))
-        return E_FAIL;
+
 
 #endif
 
@@ -258,11 +253,7 @@ HRESULT CRenderer::Draw()
         return E_FAIL;
     if (FAILED(Render_Shadow()))
         return E_FAIL;
-    if (m_RenderGameObjects[RG_SHADOWBG].size() > 0)
-    {
-        if (FAILED(Render_ShadowBG()))
-            return E_FAIL;
-    }
+    
     if (FAILED(Render_NonBlend()))
         return E_FAIL; 
 
@@ -384,37 +375,6 @@ HRESULT CRenderer::Render_Shadow()
     return S_OK;
 }
 
-HRESULT CRenderer::Render_ShadowBG()
-{
-    m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-
-
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOWBG]);
-
-
-   
-        if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_ShadowBG"), m_pLightDepthStencilView)))
-            return E_FAIL;
-    
-
-
-    for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOWBG])
-    {
-            if (nullptr != pRenderGameObject)
-            pRenderGameObject->Render_Shadow();
-
-        Safe_Release(pRenderGameObject);
-    }
-
-    m_RenderGameObjects[RG_SHADOWBG].clear();
-
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_ShadowBG"))))
-        return E_FAIL;
-
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
-    
-    return S_OK;
-}
 
 HRESULT CRenderer::Render_NonBlend()
 {
@@ -685,8 +645,7 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_LightDepthTexture", TEXT("Target_LightDepth"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_BGLightDepthTexture", TEXT("Target_BGLightDepth"))))
-        return E_FAIL;
+
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_OutLineTexture", TEXT("Target_OutLine"))))
         return E_FAIL;

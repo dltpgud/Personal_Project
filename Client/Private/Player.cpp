@@ -55,12 +55,16 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
     if (m_bDead)
         return OBJ_DEAD;
 
+    if (false == m_bUpdate)
+        return OBJ_NOEVENT;
+
      m_pPlayerUI->Set_PlayerHP(m_fHP);
 
 
     if (m_bchange)
     {
         m_iWeaponType == CWeapon::HendGun ? m_Type = T00 : m_Type = T01;
+        m_pGameInstance->Play_Sound(L"ST_Player_Switch_T01.ogg", CSound::SOUND_EFFECT, 1.f);
         m_Type == T00 ? m_iState = STATE_SWITCHIN : m_iState = STATE_SWITCHIN2;
         m_bchange = false;
     }
@@ -79,8 +83,11 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
         m_Type == T00 ? m_iState = STATE_STUN : m_iState = STATE_STUN2;
     }
 
+
+
+
     if (false == m_bHitLock && false == m_bFallLock)
-    {
+    {    
         if(true == m_bKeyinPut)
         Key_Input(fTimeDelta);
 
@@ -92,7 +99,10 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
 
 void CPlayer::Update(_float fTimeDelta)
 {
-    
+
+    if (false == m_bUpdate)
+        return ;
+
     if (false == m_bJump) {
         if (m_pNavigationCom->ISFall())
         {
@@ -104,6 +114,12 @@ void CPlayer::Update(_float fTimeDelta)
             }
 
             if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) < -6.5f) {
+                if (false == m_bBurnSound) {
+     
+                    m_pGameInstance->Play_Sound(L"ST_Player_Burn_Trigger.ogg", CSound::SOUND_HIT, 1.f);
+                    m_pGameInstance->PlayBGM(CSound::SOUND_HIT, L"ST_Player_Burn_Loop.ogg", 0.5f);
+                    m_bBurnSound = true;
+                }
                 m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
                 m_DemageCellTime += fTimeDelta;
                 m_bFallLock = false;
@@ -111,7 +127,10 @@ void CPlayer::Update(_float fTimeDelta)
                 m_fHP -= 10.f/100.f;
                 if (m_DemageCellTime > 1.f) {
                     Set_onCell(true);
-                 
+                    m_bBurnSound = false;
+                    m_pGameInstance->StopSound(CSound::SOUND_HIT);
+                    m_pGameInstance->Play_Sound(L"ST_Player_Burn_Stop.ogg", CSound::SOUND_HIT, 1.f);
+                    
                     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_pNavigationCom->Get_SafePos());
                     m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
                     m_DemageCellTime = 0.f;
@@ -125,6 +144,9 @@ void CPlayer::Update(_float fTimeDelta)
 
 void CPlayer::Late_Update(_float fTimeDelta)
 {
+    if (false == m_bUpdate)
+        return ;
+
     Is_onDemageCell(fTimeDelta);
     if (false == m_bJump)
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
@@ -135,6 +157,8 @@ void CPlayer::Late_Update(_float fTimeDelta)
 
 HRESULT CPlayer::Render()
 {
+
+
 #ifdef _DEBUG
    __super::Render();
 #endif
@@ -143,6 +167,11 @@ HRESULT CPlayer::Render()
 
 void CPlayer::HIt_Routine()
 {
+
+    if (m_pGameInstance->Get_iCurrentLevel() != LEVEL_BOSS) {
+        if (m_bBurnSound == false)
+            m_pGameInstance->Play_Sound(L"ST_Player_Flash_Stop.ogg", CSound::SOUND_HIT, 1.f);
+    }
     m_eUIState = STATE_UI_HIT;
     m_bHit = true;
     m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, true);
@@ -155,7 +184,7 @@ void CPlayer::Stun_Routine()
         m_bHitLock = true;
 
         /*Á» ±æ´Ù?*/
-        m_pGameInstance->Play_Sound(L"ST_Player_Stun_Loop.ogg", CSound::SOUND_BGM, 0.5f);    
+        m_pGameInstance->Play_Sound(L"ST_Player_Stun_Loop.wav", CSound::SOUND_PlAYER_STURN, 0.5f);
     }
 }
 
@@ -272,13 +301,19 @@ void CPlayer::Key_Input(_float fTimeDelta)
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_TAB))
     {
-        if (!m_bturn)
-        {
-            m_bturn = true;
-        }
-        else
-            m_bturn = false;
+   
+            if (!m_bturn)
+            {
+                m_bturn = true;
+            }
+            else
+                m_bturn = false;
+        
+    
     }
+
+
+   
 
     if (true == m_bturn)
     {

@@ -4,7 +4,7 @@
 #include "GameInstance.h"
 #include "Player.h"
 #include "Level_Loading.h"
-
+#include "Pade.h"
 CDOOR::CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -152,7 +152,11 @@ void CDOOR::Update(_float fTimeDelta)
     {
         if (m_DoorType == 2 && m_iState == State::OPEN)
         {
-            m_pGameInstance->Set_Open_Bool(true);
+            static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(true);
+
+           
+                m_pGameInstance->Set_Open_Bool(true);
+            
         }
     }
   

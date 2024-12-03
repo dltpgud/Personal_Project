@@ -70,6 +70,11 @@ public:
 	void Set_UIState(_uint state) {
 		m_eUIState = state;
 	}
+	void Set_bUpdate(_bool SetUpdate)
+	{
+		m_bUpdate = SetUpdate;
+	}
+
 private:
 	_uint					m_Type = {};
 	_uint					m_iWeaponType = {};
@@ -89,6 +94,9 @@ private:
 	 _bool  m_bKeyinPut = true;
 	 _bool  m_bJumpSound = false;
 	 _bool  m_bDoubleJumpSound = false;
+	 _bool m_bBurnSound{ false };
+
+	 _bool m_bUpdate{ true };
 private:
 	HRESULT Add_Components();
 	HRESULT Add_PartObjects();

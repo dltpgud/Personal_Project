@@ -19,6 +19,7 @@ public:
         _vector pTagetPos{};
         const _float4x4* LaserpSocketMatrix = { nullptr };
         const _float4x4* LaserpParentMatrix = { nullptr };
+        const _uint* state = { nullptr };
         _bool LaserRightLeft{};
     }CBossBullet_Berrle_DESC;
 private:
@@ -57,6 +58,7 @@ private:
    const _float4x4* m_LaserpSocketMatrix = { nullptr };
    const   _float4x4*m_LaserpParentMatrix = { nullptr };
    _bool m_LaserRightLeft{};
+   const _uint* m_pParentState = { nullptr };
 public:
     static CBossBullet_Berrle* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

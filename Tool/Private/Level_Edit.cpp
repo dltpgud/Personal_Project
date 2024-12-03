@@ -2029,7 +2029,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
                     if (fdis < Terraindis)
                     {
                         fdis = Terraindis;
-                        index = i;
+                        index = static_cast<_int>(i);
                     }
                 }
                 else

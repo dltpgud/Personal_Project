@@ -213,6 +213,7 @@
     <ClInclude Include="..\public\MainApp.h" />
     <ClInclude Include="..\Public\MonsterHP.h" />
     <ClInclude Include="..\Public\NonAniObj.h" />
+    <ClInclude Include="..\Public\Pade.h" />
     <ClInclude Include="..\Public\Particle_Explosion.h" />
     <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\PlayerBullet.h" />
@@ -282,6 +283,7 @@
     <ClCompile Include="..\private\MainApp.cpp" />
     <ClCompile Include="..\Private\MonsterHP.cpp" />
     <ClCompile Include="..\Private\NonAniObj.cpp" />
+    <ClCompile Include="..\Private\Pade.cpp" />
     <ClCompile Include="..\Private\Particle_Explosion.cpp" />
     <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\PlayerBullet.cpp" />

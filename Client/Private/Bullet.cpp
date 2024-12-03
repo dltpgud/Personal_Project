@@ -4,6 +4,8 @@
 #include "GameObject.h"
 #include "ShockWave.h"
 #include "Shock.h"
+#include "BillyBoom.h"
+#
 CBullet::CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -22,7 +24,7 @@ HRESULT CBullet::Initialize(void* pArg)
 
         CBULLET_DESC* pDesc = static_cast<CBULLET_DESC*>(pArg);
         m_pTagetPos = pDesc->pTagetPos;
-        
+         m_pParentState = pDesc->state;
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL; 
 
@@ -40,6 +42,12 @@ HRESULT CBullet::Initialize(void* pArg)
     Dir = XMVectorSetW(Dir, 0.f);
     m_vDir = XMVector3Normalize(Dir);
     m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+
+
+
+    if (0.f == m_fLifeTime)
+        m_fLifeTime = 1.f;
+
     return S_OK;
 }
 
@@ -49,9 +57,13 @@ _int CBullet::Priority_Update(_float fTimeDelta)
     {
         return OBJ_DEAD;
     }  
-    
-    __super::Priority_Update(fTimeDelta);
 
+    __super::Priority_Update(fTimeDelta);
+    if (m_iActorType == CSkill::MONSTER::TYPE_BILLYBOOM)
+    {
+        if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
+            m_bDead = true;
+    }
 
     if (m_iSkillType == STYPE_SHOCKWAVE)
     {
@@ -66,21 +78,27 @@ _int CBullet::Priority_Update(_float fTimeDelta)
 
 void CBullet::Update(_float fTimeDelta)
 {
+
+ 
     if (m_iSkillType != STYPE_SHOCKWAVE)
     {
         m_pTransformCom->GO_Dir(fTimeDelta, m_vDir, m_pNavigationCom, &m_bMoveStop);
     }
+
 
     __super::Update(fTimeDelta);
 }
 
 void CBullet::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return; 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
-        return;
 
+    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 1.5f))
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
+            return;
+    }
     if (FAILED(m_pGameInstance->Add_MonsterBullet(this)))
         return;
 
@@ -94,7 +112,6 @@ HRESULT CBullet::Render()
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture",0)))
         return E_FAIL;
-
 
     if (FAILED(m_pShaderCom->Begin(0)))
         return E_FAIL;

@@ -8,6 +8,7 @@
 #include "PlayerBullet.h"
 #include "ShockWave.h"
 #include"Shock.h"
+
 CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{ pDevice, pContext }
 {
 }
@@ -280,7 +281,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             Make_Bullet(m_fWeaPonOffset);
             Make_Bullet(m_fWeaPonOffset);
             m_iCurMotion = Shoot;
-            m_fDamage = 25.f;
+            m_fDamage = 20.f;
             m_fPlayAniTime = 2.f;
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 0.6f, 0.6f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -0.6f, 0.6f);
@@ -310,7 +311,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_fWeaPonOffset = { 1.f,1.f,1.5f };
             Make_Bullet(m_fWeaPonOffset);
             m_iCurMotion = Shoot;
-            m_fDamage = 50.f;
+            m_fDamage = 90.f;
        
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
             m_pGameInstance->Set_UI_shaking(CUI::UIID_PlayerHP, 0.2f, -1.f, 1.f);
@@ -514,6 +515,8 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     Desc.WorldPtr = &m_WorldMatrix;
     Desc.iWeaponType = m_pWeapon;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_PlayerBullet", nullptr, 0, &Desc, 0);
+
+
 
 
 

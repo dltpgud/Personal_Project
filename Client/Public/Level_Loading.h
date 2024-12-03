@@ -21,9 +21,9 @@ public:
 	virtual HRESULT Initialize(LEVELID eNextLevelID, LOADINGID eLodingType);
 	virtual void	Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
- ;
-
-
+ 
+	HRESULT Initialize_GORGE(const _uint& pLayerTag);
+	HRESULT Initialize_STAGE(const _uint& pLayerTag);
 private:
 	HRESULT			Ready_Clone_Layer(const _uint& pLayerTag);
 

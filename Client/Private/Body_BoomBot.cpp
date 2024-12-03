@@ -79,7 +79,7 @@ void CBody_BoomBot::Update(_float fTimeDelta)
     if (*m_pParentState == CBoomBot::ST_Run_Front && m_iCurMotion != CBoomBot::ST_Run_Front)
     {
         m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", CSound::SOUND_MONSTER_ROLL2, 0.5f);
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", CSound::SOUND_MONSTER_ROLL2, 0.2f);
     
         m_iCurMotion = CBoomBot::ST_Run_Front;
         m_fPlayAniTime = 0.5f;
@@ -91,7 +91,7 @@ void CBody_BoomBot::Update(_float fTimeDelta)
     if (*m_pParentState == CBoomBot::ST_Run_Back && m_iCurMotion != CBoomBot::ST_Run_Back)
     {
         m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", CSound::SOUND_MONSTER_ROLL2, 0.5f);
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", CSound::SOUND_MONSTER_ROLL2, 0.2f);
         m_iCurMotion = CBoomBot::ST_Run_Back;
         m_fPlayAniTime = 1.f;
         bMotionChange = true;
@@ -145,11 +145,14 @@ void CBody_BoomBot::Late_Update(_float fTimeDelta)
 
     __super::Late_Update(fTimeDelta);
 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
+    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
+    {
+        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+            return;
 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
+
+    }  //      if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        //    return;
 }
 
 HRESULT CBody_BoomBot::Render()
@@ -210,7 +213,7 @@ HRESULT CBody_BoomBot::Render_Shadow()
 
 void CBody_BoomBot::Make_Bullet()
 {
-    m_pGameInstance->Play_Sound(L"ST_MortarPod_Shoot.ogg", CSound::SOUND_EFFECT, 0.5f);
+    m_pGameInstance->Play_Sound(L"ST_MortarPod_Shoot.ogg", CSound::SOUND_EFFECT, 0.3f);
     _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));

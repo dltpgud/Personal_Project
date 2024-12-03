@@ -20,6 +20,7 @@ public:
         UIID_Monster,
         UIID_InteractiveUI,
         UIID_BossHP,
+        UIID_Pade,
         UIID_END
     };
     enum Hover_STATE

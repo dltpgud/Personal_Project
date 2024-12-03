@@ -17,7 +17,7 @@ public:
 public:
     typedef struct CBossBullet_Laser_DESC : CSkill::Skill_DESC
     {
-   
+        const _uint* state = { nullptr };
         _bool    bRightLeft{ nullptr };
         const _float4x4* pSocketMatrix = { nullptr };
         const _float4x4* pParentMatrix = { nullptr };
@@ -58,6 +58,7 @@ private:
     const _float4x4* m_pParentMatrix = { nullptr };
     _float4x4 m_WorldMatrix{};
     _bool m_bRightLeft = { false };
+    const _uint* m_pParentState = { nullptr };
 public:
     static CBossBullet_Laser* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

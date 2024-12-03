@@ -12,7 +12,6 @@ class CBody_BillyBoom : public CPartObject
 public: 
 	typedef struct CBody_BillyBoom_Desc : CPartObject::PARTOBJECT_DESC
 	{
-		CGameObject* pPickeObj{};
     } CBody_BillyBoom_Desc;
 
 private:
@@ -32,6 +31,7 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
+	_int  Get_BodyState() { return m_iParentSt; }
 
 
 	HRESULT Make_Barre( );
@@ -49,7 +49,7 @@ private:
 
 	_float m_fAttackTime{ 0.f };
 	_float m_pDamage = { 4.f };
-	CGameObject* m_pParent = nullptr;
+	//CGameObject* m_pParent = nullptr;
 	
 	_float m_fEmissivePower = false;
 	_bool	m_bEmissive = false;
@@ -63,6 +63,9 @@ private:
 	_vector m_AttackDir{};
 
 
+
+	_float m_DeadTimeSum{};
+
 	_bool m_bTurnBeam = false;
 	_float m_BeamX{};
 	_float m_BeamY{-120.f};
@@ -70,7 +73,7 @@ private:
 
 	const _float4x4* m_pFindAttBonMatrix[4]{};
 
-
+	_int m_iParentSt;
 
 	_float4x4 m_HeandWorldMatrix{};
 

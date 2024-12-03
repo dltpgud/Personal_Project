@@ -21,7 +21,7 @@ texture2D g_SpecularTexture;
 texture2D g_ShadeTexture;
 texture2D g_DiffuseTexture;
 texture2D g_LightDepthTexture;
-texture2D g_BGLightDepthTexture;
+
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
 
@@ -272,7 +272,7 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
    vTexcoord.y = (vPosition.y / vPosition.w) * -0.5f + 0.5f;
    
    vector vOldDepth = g_LightDepthTexture.Sample(LinearSampler, vTexcoord);
-    vector vOldDepth2 = g_BGLightDepthTexture.Sample(LinearSampler, vTexcoord);
+ 
     Out.vColor = vDiffuse * vShade * OutLine + vRim + (vSpecular * 0.8f) + vEmissive;
             
     
@@ -282,12 +282,8 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
    	
     }
     
-  //  if (vPosition.w - 1.5f > vOldDepth2.y * 500.f)
-  //  {
-  //      Out.vColor.rgb *= 0.6f;
-  // 	
-  //  }
-  //  
+
+    
         return Out;
     }
 

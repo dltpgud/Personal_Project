@@ -16,7 +16,7 @@ public:
 public:
     typedef struct CBULLET_DESC : CSkill::Skill_DESC
     {
-
+        const _uint* state = { nullptr };
         _vector pTagetPos{};
     }CBULLET_DESC;
 private:
@@ -50,6 +50,9 @@ private:
     CVIBuffer_Point* m_pVIBufferCom = { nullptr };
     _float m_fCollSize = 0.f;
     _float2 m_pScale{};
+    const _uint* m_pParentState = { nullptr };
+
+
 public:
     static CBullet* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

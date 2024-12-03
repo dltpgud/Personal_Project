@@ -9,7 +9,10 @@ matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D		g_Texture;
 vector			g_vCamPosition;
 
-
+float2 g_textureSize;
+float2 g_frameSize;
+int g_framesPerRow; 
+int g_currentFrame;
 struct VS_IN
 {
 	float3 vPosition : POSITION;
@@ -26,6 +29,7 @@ struct VS_OUT
 	float4 vPosition : POSITION;
 	float2 vPSize : PSIZE;	
 	float2 vLifeTime : TEXCOORD0;
+    row_major float4x4 TransformMatrix : WORLD;
 };
 
 VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
@@ -40,7 +44,7 @@ VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
 	Out.vPosition = vPosition;
 	Out.vPSize = In.vPSize;	
 	Out.vLifeTime = In.vLifeTime;
-
+    Out.TransformMatrix = In.TransformMatrix;
 	return Out;
 }
 
@@ -49,6 +53,7 @@ struct GS_IN
 	float4 vPosition : POSITION;
 	float2 vPSize : PSIZE;
 	float2 vLifeTime : TEXCOORD0;
+    row_major float4x4 TransformMatrix : WORLD;
 };
 
 struct GS_OUT
@@ -64,8 +69,8 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Triangles)
 	GS_OUT			Out[4];
 
 	vector		vLook = g_vCamPosition - In[0].vPosition;
-	float3		vRight = normalize(cross(float3(0.f, 1.f, 0.f), vLook.xyz)) * In[0].vPSize.x * 0.5f;
-	float3		vUp = normalize(cross(vLook.xyz, vRight)) * In[0].vPSize.y * 0.5f;
+    float3 vRight = normalize(cross(float3(0.f, 1.f, 0.f), vLook.xyz)) * length(In[0].TransformMatrix._11_11_11)*0.5f;
+    float3 vUp = normalize(cross(vLook.xyz, vRight)) * length(In[0].TransformMatrix._21_22_23)*0.5f;
 
 	matrix		matVP = mul(g_ViewMatrix, g_ProjMatrix);
 
@@ -131,14 +136,30 @@ PS_OUT PS_MAIN(PS_IN In)
 	if (In.vLifeTime.x <= In.vLifeTime.y)
 		discard;
 	
-	Out.vColor = g_Texture.Sample(PointSampler, In.vTexcoord);	
+    float2 frameUVSize = g_frameSize / g_textureSize;
+	
+    int frameX = g_currentFrame % g_framesPerRow; // 현재 프레임의 X 위치
+    int frameY = g_currentFrame / g_framesPerRow; // 현재 프레임의 Y 위치
+    float2 frameStartUV = float2(frameX, frameY) * frameUVSize;
 
+    // 최종 UV 좌표 계산
+    float2 finalUV = frameStartUV + In.vTexcoord * frameUVSize;
+
+
+
+	
+    Out.vColor = g_Texture.Sample(PointSampler, finalUV);
 	if (Out.vColor.a == 0.f)
 		discard;
+    Out.vColor.r *= 0.4f;
+	
+    Out.vColor.g *= 0.4f;
+    Out.vColor.b *= 0.4f;
 
-	Out.vColor = vector(1.f, 1.f, 1.f, 1.f);
 
-	Out.vColor.a = saturate(In.vLifeTime.x - In.vLifeTime.y);
+//	Out.vColor = vector(1.f, 1.f, 1.f, 1.f);
+
+//	Out.vColor.a = saturate(In.vLifeTime.x - In.vLifeTime.y);
 
 	return Out;
 }

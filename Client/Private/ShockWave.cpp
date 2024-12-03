@@ -32,6 +32,8 @@ HRESULT CShockWave::Initialize(void * pArg)
 	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSetY (m_vPos, 1.7f));
 	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.f;
+	m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg", CSound::SOUND_EFFECT, 1.f);
+	
 	return S_OK;
 }
 

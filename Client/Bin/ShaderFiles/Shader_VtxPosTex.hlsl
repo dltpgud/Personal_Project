@@ -15,7 +15,7 @@ int g_Discard;
 float4 g_Alpha;
 float4 g_RGB;
 float4 g_RGBEnd;
-
+float g_TimeSum;
 
 struct VS_IN_SAMPLE
 {
@@ -308,7 +308,17 @@ PS_OUT PS_MAIN_Shooting(PS_IN In)
 }
 
 
-
+PS_OUT PS_MAIN_Pade(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float4 Texture = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    
+    Out.vColor = Texture;
+    Out.vColor.a *= g_TimeSum;
+    
+    return Out;
+}
 technique11 DefaultTechnique
 { /*Technique은 특정 렌더링 작업을 정의하는 셰이더 코드 블록*/
   /* Pass는 셰이더 실행의 단위로, 정점 셰이더, 픽셀 셰이더 등의 그래픽 파이프라인 단계에서 실행될 셰이더들을 정의함*/
@@ -391,4 +401,16 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_Shooting();
     }
 
+
+
+    pass DefaultPass7
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_Pade();
+    }
 }

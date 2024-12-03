@@ -32,9 +32,13 @@ HRESULT CUI::Initialize(void* pArg)
         m_iDepth = pDesc->iDepth;
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
+
     }
     else if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
+
+
+
 
     // 컨텍스트 디바이스는 원본 이니셜에서 설정해 주지 못함, 원본이 Loader(서브 스레드)에서 만들어 지면서 호출되기 때문
     m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);

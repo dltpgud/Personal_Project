@@ -5,7 +5,8 @@
 #include "Menu.h"
 #include "SpriteTexture.h"
 #include "Aim.h"
-
+#include "Player.h"
+#include "Pade.h"
 /*로보 퀘스트의 로고는 생략하고 이걸 메뉴 클래스로 사용하자.. 로고에 쓸만한 이미지가 없잔아..*/
 
 CLEVEL_MENU::CLEVEL_MENU(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
@@ -15,10 +16,13 @@ CLEVEL_MENU::CLEVEL_MENU(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 
 HRESULT CLEVEL_MENU::Initialize()
 {
+	if (m_pGameInstance->Get_Player() != nullptr)
+	{
+		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_bUpdate(false);
+	}
 
 	if (FAILED(Ready_Layer(CGameObject::GAMEOBJ_TYPE::UI)))
 		return E_FAIL;
-
 
 	/*플레이어 UI꺼 놓고*/
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
@@ -27,19 +31,29 @@ HRESULT CLEVEL_MENU::Initialize()
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
 		return E_FAIL;
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false)))
+		return E_FAIL;
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false)))
+		return E_FAIL;
+
+
+
 	/*Interactive UI꺼 놓고*/
     if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false)))
 		return E_FAIL;
-//m_pGameInstance->PlayBGM(L"ST.ogg",1.f);
+
+	/*pade UI꺼 놓고*/
+	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, false)))
+		return E_FAIL;
 
 
+	m_pGameInstance->PlayBGM(CSound::SOUND_MENU, L"Menu.mp3",0.5f);
 	return S_OK;
 }
 
 void CLEVEL_MENU::Update(_float fTimeDelta)
 {	
-	if(m_pGameInstance->Get_DIKeyDown(DIK_U))
-	m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1, GORGE));
+
 	__super::Update(fTimeDelta);
 
 
@@ -135,6 +149,10 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;
 
+
+
+	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_Gameobject_Pade", nullptr, 0, &Desc)))
+		return E_FAIL;
 
 	return S_OK;
 }

@@ -3,6 +3,7 @@
 #include "GameInstance.h"
 #include "Player.h"
 #include "BillyBoom.h"
+#include "Pade.h"
 CSceneCamera::CSceneCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CCamera{pDevice, pContext}
 {
 }
@@ -35,28 +36,40 @@ _int CSceneCamera::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead) {
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_Key(true);
+        static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
         return OBJ_DEAD;
     }
-    m_TimeSum += fTimeDelta;
 
-    if (m_fRunTime > m_TimeSum) {
-        if (false == m_bintroSound) {
-           // m_pGameInstance->Play_Sound(L"ST_Caterpillar_Intro.ogg", CSound::CHANNELID::SOUND_BGM, 1.f);
-            m_bintroSound = true;
+    if (false == m_bfade)
+    {
+        static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
+        m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
+        if(true == (static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->FinishPade()))
+          m_bfade = true;
+    }
+
+    if (true == m_bfade)
+    {
+        m_TimeSum += fTimeDelta;
+
+        if (m_fRunTime > m_TimeSum) {
+            if (false == m_bintroSound) {
+                m_pGameInstance->Play_Sound(L"ST_BillyBoom_Presence.ogg", CSound::CHANNELID::SOUND_BGM, 0.3f);
+                m_bintroSound = true;
+            }
+            m_pTransformCom->Go_Straight(fTimeDelta);
         }
-        m_pTransformCom->Go_Straight(fTimeDelta);
+        else
+            m_bIsCamEnd = true;
+
+
+        if (true == m_bIsCamEnd) {
+
+            dynamic_cast<CBillyBoom*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER))->Intro_Routine(fTimeDelta);
+        }
+
+        __super::Priority_Update(fTimeDelta);
     }
-    else
-        m_bIsCamEnd = true;
-
-
-    if (true == m_bIsCamEnd) {
-      
-        dynamic_cast<CBillyBoom*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER))->Intro_Routine(fTimeDelta);
-    }
-
-    __super::Priority_Update(fTimeDelta);
-
     return OBJ_NOEVENT;
 }
 

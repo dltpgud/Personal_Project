@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Actor.h"
 #include "Level_Stage2.h"
+#include "Pade.h"
 CLevel_Stage1::CLevel_Stage1(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -39,20 +40,24 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
-
+	m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_Canyon.ogg", 0.1f);
 	return S_OK;
 }
 
 void CLevel_Stage1::Update(_float fTimeDelta)
 {
 	
-
+	if (m_bPade == false) {
+		static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
+		m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
+		m_bPade = true;
+	}
 
 
 	if (m_pGameInstance->IsOpenStage())
 	{
 		m_pGameInstance->Set_Open_Bool(false);
-		m_pGameInstance->Open_Level(LEVEL_STAGE2, CLevel_Stage2::Create(m_pDevice, m_pContext));
+		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_STAGE2, STAGE));
 	}
 
 	__super::Update(fTimeDelta);
@@ -124,9 +129,9 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _uint& pLayerTag)
 
    _float4x4			ViewMatrix, ProjMatrix;
 
-   _vector m_Eye = XMVectorSet(-20.f, 75.f, 0.f, 1.f);
-   _vector m_Dire = XMVectorSet(1.f, -1.5f, -1.f, 0.f);
-   XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(0.f, 10.f, -8.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+   _vector m_Eye = XMVectorSet(0.f, 200.f, 200.f, 1.f);
+   _vector m_Dire = XMVectorSet(0.f, -1.f, -1.5, 0.f);
+   XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye, m_Eye+ m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
 	XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY, 0.1f, 500.f));
 
 	m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
@@ -209,7 +214,7 @@ HRESULT CLevel_Stage1::Ready_Light()
 	LIGHT_DESC			LightDesc{};
 
 	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(1.f, -1.5f, -1.f, 0.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, -1.5f, 0.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);

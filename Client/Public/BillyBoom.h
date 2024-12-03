@@ -83,6 +83,7 @@ public:
     void Set_Laser(_float fTimedelta);
     void Set_ShockWave(_float fTimedelta);
     void Set_Bash(_float fTimedelta);
+    void Set_State_From_Body();
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
@@ -96,7 +97,9 @@ private:
     _float          m_fHitTimeSum = { 0.f };
     _bool m_bStart = true;
     _float m_DeadTimeSum = { 0.f };
-
+    _bool m_bBoom{ false };
+    _bool m_bDeadSound{ false };
+    _bool m_bPade{};
 public:
     static CBillyBoom* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;
