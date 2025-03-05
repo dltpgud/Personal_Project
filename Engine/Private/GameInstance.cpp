@@ -489,29 +489,8 @@ HRESULT CGameInstance::Set_OpenUI(const _uint& uID, _bool UIopen)
 	return m_pUI_Manager->Set_OpenUI(uID, UIopen);
 }
 
-HRESULT CGameInstance::Set_PreUpdateUI(const _uint& uID, _bool UIopen)
-{
-	if (nullptr == m_pUI_Manager)
-		return E_FAIL;
 
-	return m_pUI_Manager->Set_PreUpdateUI(uID, UIopen);
-}
 
-HRESULT CGameInstance::Set_UpdateUI(const _uint& uID, _bool UIopen)
-{
-	if (nullptr == m_pUI_Manager)
-		return E_FAIL;
-
-	return m_pUI_Manager->Set_UpdateUI(uID, UIopen);
-}
-
-HRESULT CGameInstance::Set_LateUpdateUI(const _uint& uID, _bool UIopen)
-{
-	if (nullptr == m_pUI_Manager)
-		return E_FAIL;
-
-	return m_pUI_Manager->Set_LateUpdateUI(uID, UIopen);
-}
 
 CGameObject* CGameInstance::Get_UI(const _uint& iLevel, const _uint& uID)
 {
@@ -876,15 +855,6 @@ _bool CGameInstance::isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange)
 	return m_pFrustum->isIn_WorldSpace(vTargetPos, fRange);
 }
 
-_bool CGameInstance::isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange)
-{
-	return m_pFrustum->isIn_LocalSpace(vTargetPos, fRange);
-}
-
-void CGameInstance::Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
-{
-	return m_pFrustum->Transform_To_LocalSpace(WorldMatrixInv);
-}
 
 #pragma endregion
 

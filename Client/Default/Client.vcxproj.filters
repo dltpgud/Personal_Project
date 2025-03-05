@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="99.Defines">
-      <UniqueIdentifier>{1192db2f-af15-4b8f-bc2a-55009419a294}</UniqueIdentifier>
-    </Filter>
     <Filter Include="98.Default">
       <UniqueIdentifier>{5f3c6167-6678-4dd1-b7d4-a7cd74d5d329}</UniqueIdentifier>
     </Filter>
@@ -199,6 +196,9 @@
     <Filter Include="02.GameObjects\04.UI\Pade">
       <UniqueIdentifier>{d5651fb6-3996-420e-a22d-06221b679f00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="98.Default\99.Defines">
+      <UniqueIdentifier>{1192db2f-af15-4b8f-bc2a-55009419a294}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -220,7 +220,7 @@
       <Filter>00.MainApp</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Client_Defines.h">
-      <Filter>99.Defines</Filter>
+      <Filter>98.Default\99.Defines</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Loading.h">
       <Filter>01.Level\99.Loading</Filter>

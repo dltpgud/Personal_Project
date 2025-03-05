@@ -34,6 +34,7 @@ private:
     list <class CActor*> m_MonsterList;
     list <class CSkill*>m_MonsterBullet;
     list <class CCollider*>m_ColliderList;
+    
 
     _float m_ColliderDamage{ 0.f };
     _uint   m_iLevel;

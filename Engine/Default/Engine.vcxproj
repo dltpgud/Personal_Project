@@ -255,7 +255,6 @@ call UpdateLib.bat</Command>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\Downloads\1120_컬링2\Engine\Private\Frustum.cpp" />
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\private\Base.cpp" />
@@ -279,6 +278,7 @@ call UpdateLib.bat</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\ContainerObject.cpp" />
+    <ClCompile Include="..\Private\Frustum.cpp" />
     <ClCompile Include="..\Private\Skill.cpp" />
     <ClCompile Include="..\Private\CustomFont.cpp" />
     <ClCompile Include="..\Private\DebugDraw.cpp" />

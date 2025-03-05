@@ -14,8 +14,7 @@ public:
 	HRESULT Initialize();
 	void Update();
 	_bool isIn_WorldSpace(_fvector vTargetPos, _float fRange);
-	_bool isIn_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
-	void Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
+
 private:
 	_float3					m_vPoints[8] = {};
 	_float3					m_vWorldPoints[8] = {};

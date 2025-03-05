@@ -100,9 +100,9 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.fX = g_iWinSizeX * 0.5f -10.f;
 	Desc.fY = g_iWinSizeY * 0.5f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
-	Desc.PrUpdate = true;
+
 	Desc.Update = true;
-	Desc.LateUpdate = true;
+
 	Desc.fpositive_OR_negative = -1.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr,0, &Desc)))
 		return E_FAIL;
@@ -114,9 +114,9 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.fX = g_iWinSizeX * 0.5f +10.f;
 	Desc.fY = g_iWinSizeY * 0.5f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
-	Desc.PrUpdate = true;
+
 	Desc.Update = true;
-	Desc.LateUpdate = true;
+
 	Desc.fpositive_OR_negative = 1.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;
@@ -128,9 +128,9 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.fX = g_iWinSizeX * 0.5f;
 	Desc.fY = g_iWinSizeY * 0.5f -10.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
-	Desc.PrUpdate = true;
+
 	Desc.Update = true;
-	Desc.LateUpdate = true;
+
 	Desc.fpositive_OR_negative = +1.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;
@@ -142,9 +142,9 @@ HRESULT CLEVEL_MENU::Ready_Layer(const _uint& pLayerTag)
 	Desc.fX = g_iWinSizeX * 0.5f;
 	Desc.fY = g_iWinSizeY * 0.5f + 10.f;
 	Desc.UID = CUI::UIID_PlayerWeaPon_Aim;
-	Desc.PrUpdate = true;
+
 	Desc.Update = true;
-	Desc.LateUpdate = true;
+
 	Desc.fpositive_OR_negative = -1.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, L"Prototype_GameObject_Player_Aim", nullptr, 0, &Desc)))
 		return E_FAIL;

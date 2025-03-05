@@ -23,20 +23,13 @@ public:
         UIID_Pade,
         UIID_END
     };
-    enum Hover_STATE
-    {
-        HS_Hover,
-        HS_NonHover,
-        HS_END
-    };
 
     typedef struct CUI_DESC : CGameObject::GAMEOBJ_DESC
     {
         _float fX{}, fY{}, fZ{}, fSizeX{}, fSizeY{};
         UIID UID{};
-        _bool PrUpdate{}, Update{}, LateUpdate{};
+        _bool  Update{};
         _uint iDepth{};
-        Hover_STATE Hoverst;
     } CUI_DESC;
 
 protected:
@@ -61,35 +54,12 @@ public:
     public:
     void Set_Open(_bool open)
     {
-        m_bPrUpdate = open;
-        m_bUpdate = open;
-        m_bLateUpdate = open;
-    }
-
-    void Set_PrUpdate(_bool open)
-    {
-        m_bPrUpdate = open;
-    }
-    void Set_Update(_bool open)
-    {
         m_bUpdate = open;
     }
-    void Set_LateUpdate(_bool open)
-    {
-        m_bLateUpdate = open;
-    }
 
-    const _bool& Get_PrUpdate()
-    {
-        return m_bPrUpdate;
-    }
     const _bool& Get_Update()
     {
         return m_bUpdate;
-    }
-    const _bool& Get_LateUpdate()
-    {
-        return m_bLateUpdate;
     }
     const UIID& Get_UIID()
     {
@@ -104,13 +74,12 @@ protected:
     _float m_fX{}, m_fY{}, m_fZ{}, m_fSizeX{}, m_fSizeY{};
     _float4x4 m_ViewMatrix{}, m_ProjMatrix{};
     UIID m_UIID{};
-    Hover_STATE m_Hoverst;
+  
     /*메뉴간 겹치는 지 안겹치는지 소팅을 위한 변수*/
     _uint m_iDepth = {};
     // 프리 업데이트, 레이트 업데이트,
-    _bool m_bPrUpdate{};
     _bool m_bUpdate{};
-    _bool m_bLateUpdate{};
+
 
     /*wincx ,wincy 가져오기*/
     _uint iNumViewports = {1};

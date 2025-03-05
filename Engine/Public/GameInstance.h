@@ -84,9 +84,6 @@ public: /* For.Collider_Manager */
 
 public: /* For.UI_Manager*/
 	HRESULT Set_OpenUI(const _uint& uID, _bool UIopen);
-	HRESULT Set_PreUpdateUI(const _uint& uID, _bool UIopen);
-	HRESULT Set_UpdateUI(const _uint& uID, _bool UIopen);
-	HRESULT Set_LateUpdateUI(const _uint& uID, _bool UIopen);
 	CGameObject* Get_UI(const _uint& iLevel, const _uint& uID);
     HRESULT UI_shaking(const _uint& uID, _float fTimeDelta);    
 	HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY);
@@ -161,8 +158,7 @@ public: /* For.Target_Manager */
 #pragma region FRUSTUM
 public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
-	_bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
-	void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
+
 #pragma endregion
 
 

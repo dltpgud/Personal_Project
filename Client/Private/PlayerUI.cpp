@@ -24,9 +24,9 @@ HRESULT CPlayerUI::Initialize(void* pArg)
     Desc.fSizeX = 450.f;
     Desc.fSizeY = 150.f;
     Desc.UID = CUI::UIID_PlayerHP;
-    Desc.PrUpdate = true;
+
     Desc.Update = true;
-    Desc.LateUpdate = true;
+
     Desc.fSpeedPerSec = 0.f;
     Desc.fRotationPerSec = 0.f;
 

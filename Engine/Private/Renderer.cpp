@@ -170,24 +170,24 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 
 #ifdef _DEBUG
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"), 50.f, 200.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"), 50.f, 350.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Specular"), 50.f, 500.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Rim"), 50.f, 650.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_OutLine"), 200.f, 50.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_444_Temp"), 200.f, 200.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 200.f, 350.f, 150.f, 150.f)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 350.f, 50.f, 150.f, 150.f)))
-        return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"), 50.f, 200.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"), 50.f, 350.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Specular"), 50.f, 500.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Rim"), 50.f, 650.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_OutLine"), 200.f, 50.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_444_Temp"), 200.f, 200.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 200.f, 350.f, 150.f, 150.f)))
+    //    return E_FAIL;
+    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 350.f, 50.f, 150.f, 150.f)))
+    //    return E_FAIL;
 
 
 #endif
@@ -356,17 +356,17 @@ HRESULT CRenderer::Render_Shadow()
 
     if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
         return E_FAIL;
-
+  
     for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
     {
         if (nullptr != pRenderGameObject)
             pRenderGameObject->Render_Shadow();
-
+  
         Safe_Release(pRenderGameObject);
     }
-
+  
     m_RenderGameObjects[RG_SHADOW].clear();
-
+  
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
         return E_FAIL;
 
@@ -724,16 +724,16 @@ HRESULT CRenderer::Render_Debug()
             Safe_Release(pDebugCom);
         }
     }
-    m_DebugComponents.clear();
+      m_DebugComponents.clear();
 
     if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
         return E_FAIL;
-
+   
     if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         return E_FAIL;
-
+   
     m_pVIBuffer->Bind_Buffers();
-
+   
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);

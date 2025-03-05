@@ -117,9 +117,9 @@ HRESULT CLoading::Set_LoadPos(CLoading_DESC* pArg)
 	Desc.fZ = pArg->fZ;
 	Desc.fSizeX = pArg->fSizeX;
 	Desc.fSizeY = pArg->fSizeY;
-	Desc.PrUpdate = true;
+
 	Desc.Update = true;
-	Desc.LateUpdate = true;
+
 	Desc.fSpeedPerSec = pArg->fSpeedPerSec;
 	Desc.TexIndex = pArg->TexIndex;
 

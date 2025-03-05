@@ -204,7 +204,6 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
 
 HRESULT CNavigation::Render()
 {
-
     if (m_iCurrentCellIndex == -1)
         return S_OK;
 

@@ -52,7 +52,9 @@ void CActor::Update(_float fTimeDelta)
 
 void CActor::Late_Update(_float fTimeDelta)
 {
+	m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
 	
+   __super::Late_Update(fTimeDelta);
 	if (m_bColl)
 	{
 		
@@ -69,9 +71,7 @@ if (m_fHP <= 0.f)
 			Dead_Routine(fTimeDelta);
 		}
 
-m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
 	
-   __super::Late_Update(fTimeDelta);	
 }
 
 HRESULT CActor::Render()

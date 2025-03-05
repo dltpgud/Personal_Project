@@ -52,6 +52,7 @@ public:
 
     void Center_Ext(_float3* Center, _float3* extend);
 
+    void Callback(_uint AnimIdx, _int Duration, function<void()> func);
 
 public:
     //   HRESULT Ready_Model(const _tchar* pModelFilePath);

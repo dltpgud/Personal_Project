@@ -58,7 +58,10 @@ void CGameObject::Update(_float fTimeDelta)
 
 void CGameObject::Late_Update(_float fTimeDelta)
 {
-    m_pGameInstance->Add_DebugComponents(m_pColliderCom);
+    if (m_pColliderCom)
+    {
+        m_pGameInstance->Add_DebugComponents(m_pColliderCom);
+    }
 }
 
 HRESULT CGameObject::Render()

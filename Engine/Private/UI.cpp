@@ -25,10 +25,9 @@ HRESULT CUI::Initialize(void* pArg)
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
         m_iDepth = pDesc->iDepth;
-        m_bPrUpdate = pDesc->PrUpdate;
+
         m_bUpdate = pDesc->Update;
-        m_bLateUpdate = pDesc->LateUpdate;
-        m_Hoverst = pDesc->Hoverst;
+
         m_iDepth = pDesc->iDepth;
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
@@ -88,10 +87,7 @@ void CUI::Set_UI_Pos(void* pArg)
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
         m_iDepth = pDesc->iDepth;
-        m_bPrUpdate = pDesc->PrUpdate;
         m_bUpdate = pDesc->Update;
-        m_bLateUpdate = pDesc->LateUpdate;
-        m_Hoverst = pDesc->Hoverst;
         m_iDepth = pDesc->iDepth;
     }
 

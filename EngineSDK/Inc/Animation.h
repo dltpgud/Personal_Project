@@ -13,7 +13,10 @@ public:
 	HRESULT Initialize(HANDLE& hFile);
 	_bool Update_TransformationMatrix(const vector<class CBone*>& Bones, _bool isLoop, _float fTimeDelta);
 	void init_Loop(const vector<class CBone*>& Bones);
-private:
+    void Callback(_int Duration, function<void()> func);
+    void Run_CallbackFunc(_int Duration);
+    void Reset_Callback();
+    private:
 	_char					m_szName[MAX_PATH] = {};
 	_float					m_fDuration = { 0.f };
 	_float					m_fTickPerSecond = { 0.f };
@@ -26,7 +29,8 @@ private:
 
 	vector<KEYFRAME>  m_vLastKeyFrame;
 
-
+	unordered_map<_int, vector<function<void()>>> m_CallbackFunc;
+        
 	_float m_fChangingTime{4.f};
 	_float m_fMotionChangingTIme{ 3.f };
 

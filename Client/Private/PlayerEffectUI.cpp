@@ -24,9 +24,9 @@ HRESULT CPlayerEffectUI::Initialize(void* pArg)
     pDesc->fSizeX = g_iWinSizeX;
     pDesc->fSizeY = g_iWinSizeY;
     pDesc->UID = CUI::UIID_PlayerState;
-    pDesc->PrUpdate = true;
+
     pDesc->Update = true;
-    pDesc->LateUpdate = true;
+
     pDesc->fSpeedPerSec = 0.f;
     pDesc->fRotationPerSec = 0.f;
     m_iPlayerState = pDesc->State;
