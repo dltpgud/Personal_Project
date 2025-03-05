@@ -25,10 +25,8 @@ public:
 
     /*UI랜더 상태를 설정한다.*/
     HRESULT Set_OpenUI(const _uint& uid, _bool open);
-    HRESULT Set_PreUpdateUI(const _uint& uid, _bool open);
-    HRESULT Set_UpdateUI(const _uint& uid, _bool open);
     HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
-    HRESULT Set_LateUpdateUI(const _uint& uid, _bool open);
+
 
 
     CGameObject* Get_UI(const _uint& iLevel, const _uint& uID);

@@ -68,7 +68,7 @@ void CTerrain::Late_Update(_float fTimeDelta)
     {
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
             return;
-   }
+    }
 
     if (nullptr != m_pNavigationCom)
     {

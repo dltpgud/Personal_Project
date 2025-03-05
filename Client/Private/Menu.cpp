@@ -20,16 +20,14 @@ HRESULT CMenu::Initialize_Prototype()
 }
 
 HRESULT CMenu::Initialize(void* pArg)
-{	/* _float3	vTmp = _float3(1.f, 1.f, 1.f);
-	XMStoreFloat3(&vTmp, XMVector3Normalize(XMLoadFloat3(&vTmp)));*/
-
+{	
 	/*상위 클래스에 Arg를 던져 주어 최상위 클래스에 정보를 채워준다.*/
 	/*최상위 부모에게 값을 넘겨 주면서 트렌스 폼을 생성해준다.*/
 	
 	CUI_DESC			Desc{};
-	  Desc.PrUpdate = true;
+
       Desc.Update = true;
-      Desc.LateUpdate = true;
+
 	  Desc.UID = UIID_Menu;
 	if (FAILED(__super::Initialize(&Desc)))
 		 return E_FAIL;
@@ -54,30 +52,27 @@ _int CMenu::Priority_Update(_float fTimeDelta)
 
 void CMenu::Update(_float fTimeDelta)
 {
-	for (size_t i = 0; i < 3; i++) {	
+	for (size_t i = 1; i < 3; i++) {	
 	
-		if (Desc[i].Hoverst == HS_Hover )
-		{
 			RECT		rcUI = {static_cast<LONG> (Desc[i].fX - Desc[i].fSizeX * 0.5f),static_cast<LONG> ( Desc[i].fY - Desc[i].fSizeY * 0.5f),
-							  static_cast<LONG> (Desc[i].fX + Desc[i].fSizeX * 0.5f),static_cast<LONG> ( Desc[i].fY + Desc[i].fSizeY * 0.5f) };
-
+							    static_cast<LONG> (Desc[i].fX + Desc[i].fSizeX * 0.5f),static_cast<LONG> ( Desc[i].fY + Desc[i].fSizeY * 0.5f) };
+	
 			POINT		ptMouse{};
-
+	
 			GetCursorPos(&ptMouse);
 			ScreenToClient(g_hWnd, &ptMouse);
-
-			
+	
 			if (true == (_bool)PtInRect(&rcUI, ptMouse))
 			{
-				Desc[i].LateUpdate = true;
-
+				Desc[i].Update = true;
+	
 				if (m_pGameInstance->Get_DIMouseDown(DIM_LB))
 				{
 					m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg", CSound::SOUND_BGM, 1.f); 
-						if (i == 0) {
+						if (i == 1) {
 							m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1, GORGE));
 						}
-						else if (i == 1)
+						else if (i == 2)
 						{
 							PostQuitMessage(0);
 						}
@@ -85,10 +80,10 @@ void CMenu::Update(_float fTimeDelta)
 			}
 			else
 			{
-				Desc[i].LateUpdate = false;
+				Desc[i].Update = false;
 			}
-		}
-
+		
+	
 	}
 		
 }
@@ -101,16 +96,14 @@ void CMenu::Late_Update(_float fTimeDelta)
 
 HRESULT CMenu::Render()
 {
-
-	Set_UI_Pos(&Desc[2]);
-
+	Set_UI_Pos(&Desc[0]);
+	
 	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
 		return E_FAIL;
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
 		return E_FAIL;
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		return E_FAIL;
-
 
 	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 2)))
 		return E_FAIL;
@@ -120,85 +113,62 @@ HRESULT CMenu::Render()
 	m_pVIBufferCom->Bind_Buffers();
 
 	m_pVIBufferCom->Render();
-
-	for (_uint i = 0; i < 3; i++)
-	{
-		Set_UI_Pos(&Desc[i]);
-		
-		if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-			return E_FAIL;
-		if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-			return E_FAIL;
-		if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-			return E_FAIL;
-
-		if (Desc[i].LateUpdate == false)
-		
-			continue;
 	
+	for (_int i = 1; i < 3; i++) {
 
+		if (false == Desc[i].Update)
+                continue;
+		Set_UI_Pos(&Desc[i]);
 
-		if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", i)))
-			return E_FAIL;
+        if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+            return E_FAIL;
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+            return E_FAIL;
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+            return E_FAIL;
 
-		m_pShaderCom->Begin(0);
+        if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture",i-1 )))
+            return E_FAIL;
 
-		m_pVIBufferCom->Bind_Buffers();
+        m_pShaderCom->Begin(0);
 
-		m_pVIBufferCom->Render();
+        m_pVIBufferCom->Bind_Buffers();
+
+        m_pVIBufferCom->Render();
 	}
-
-
-
 
 	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 시작"), _float2(160.f, 435.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
 	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 종료"), _float2(160.f, 525.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+
 	return S_OK;
 }
 
 HRESULT CMenu::Set_MenuPos()
-{  /*메뉴바 1*/
-	Desc[0].UID = UIID_Menu;
-	Desc[0].fX = 255.f;
-	Desc[0].fY = 475.f;
-	Desc[0].fZ = 0.1f;
-	Desc[0].fSizeX = 255.f;
-	Desc[0].fSizeY = 45.f;
-	Desc[0].PrUpdate = true;
+{   
+	/*메뉴 배경*/
+	Desc[0].fX = g_iWinSizeX * 0.5f;
+	Desc[0].fY = g_iWinSizeY * 0.5f;
+    Desc[0].fZ =  0.5f;
+	Desc[0].fSizeX = g_iWinSizeX;
+	Desc[0].fSizeY = g_iWinSizeY;
 	Desc[0].Update = true;
-	Desc[0].LateUpdate = false;
-	Desc[0].fSpeedPerSec = 0.f;
-	Desc[0].fRotationPerSec = 0.f;
-	Desc[0].Hoverst = HS_Hover;
 
-   /*메뉴바 2*/
-	Desc[1].UID = UIID_Menu;
+	/*메뉴바 1*/
 	Desc[1].fX = 255.f;
-	Desc[1].fY = 565.f;
-	Desc[1].fZ = 0.2f;
+	Desc[1].fY = 475.f;
+    Desc[1].fZ = 0.4f;
 	Desc[1].fSizeX = 255.f;
 	Desc[1].fSizeY = 45.f;
-	Desc[1].PrUpdate = true;
 	Desc[1].Update = true;
-	Desc[1].LateUpdate = false;
-	Desc[1].fSpeedPerSec = 0.f;
-	Desc[1].fRotationPerSec = 0.f;
-	Desc[1].Hoverst = HS_Hover;
 
-   /*메뉴 배경*/
-	Desc[2].UID = UIID_Menu;
-	Desc[2].fX = g_iWinSizeX * 0.5f;
-	Desc[2].fY = g_iWinSizeY * 0.5f;
-	Desc[2].fZ = 0.3f;
-	Desc[2].fSizeX = g_iWinSizeX;
-	Desc[2].fSizeY = g_iWinSizeY;
-	Desc[2].PrUpdate = true;
+   /*메뉴바 2*/
+	Desc[2].fX = 255.f;
+    Desc[2].fY = 565.f;
+    Desc[2].fZ = 0.4f;
+	Desc[2].fSizeX = 255.f;
+	Desc[2].fSizeY = 45.f;
 	Desc[2].Update = true;
-	Desc[2].LateUpdate = true;
-	Desc[2].fSpeedPerSec = 0.f;
-	Desc[2].fRotationPerSec = 0.f;		
-	Desc[2].Hoverst = HS_NonHover;
-
+	
 	return S_OK;
 }
 

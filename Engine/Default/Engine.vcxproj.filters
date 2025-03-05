@@ -569,7 +569,7 @@
     <ClCompile Include="..\Private\Skill.cpp">
       <Filter>01.Utility\02.GameObjects\Skill</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\Downloads\1120_컬링2\Engine\Private\Frustum.cpp">
+    <ClCompile Include="..\Private\Frustum.cpp">
       <Filter>01.Utility\09. Frustum</Filter>
     </ClCompile>
   </ItemGroup>

@@ -22,9 +22,9 @@ HRESULT CPade::Initialize_Prototype()
 HRESULT CPade::Initialize(void* pArg)
 {	
 	CUI_DESC			Desc{};
-	  Desc.PrUpdate = false;
+
       Desc.Update = false;
-      Desc.LateUpdate = false;
+
 	  Desc.UID = UIID_Pade;
 	  Desc.fX = g_iWinSizeX * 0.5f;
 	  Desc.fY = g_iWinSizeY * 0.5f;

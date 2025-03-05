@@ -55,7 +55,7 @@ HRESULT Collider_Manager::Check_Collider_PlayerCollison()
 {
 
     CActor* pPlayer = m_pGameInstance->Get_Player();
-    if (false == pPlayer)
+    if (nullptr == pPlayer)
         return E_FAIL;
 
     if (0 == m_ColliderList.size())
@@ -76,9 +76,6 @@ HRESULT Collider_Manager::Check_Collider_PlayerCollison()
     m_ColliderList.clear();
     return S_OK;
 }
-
-
-
 
 void Collider_Manager::All_Collison_check()
 {
@@ -165,8 +162,6 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
 
     return S_OK;
 }
-
-
 
 HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
 

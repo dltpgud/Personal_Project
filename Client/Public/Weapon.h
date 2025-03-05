@@ -73,15 +73,12 @@ private:
 	const _float4x4* m_pWeapon_SocketMatrix[WeaPoneType_END] = { nullptr };
 	_float3 m_fWeaPonOffset{};
 	class CShootingUI* m_ShootingUI = { nullptr};
-	_float m_fTimeSum{ 0.f };
-	_bool m_bClack = false;
+
 
 
 	/*Sound*/
-	_bool m_bHeandGunReLoad = false;
-	_bool m_bAssaultRifleReLoad = false;
-	_bool m_bHeavyCrossbowReload = false;
-	_bool m_bMissileGatlingReload = false;
+	_bool m_bSound = false;
+
 
 private:
 	HRESULT Add_Components();

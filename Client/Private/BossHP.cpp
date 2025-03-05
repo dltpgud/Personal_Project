@@ -23,9 +23,9 @@ HRESULT CBossHPUI::Initialize(void* pArg)
     Desc->fSizeX = 650.f;
     Desc->fSizeY = 25.f;
     Desc->UID = CUI::UIID_BossHP;
-    Desc->PrUpdate = true;
+
     Desc->Update = true;
-    Desc->LateUpdate = true;
+
     Desc->fSpeedPerSec = 0.f;
     Desc->fRotationPerSec = 0.f;
     m_fHP = Desc->fHP;

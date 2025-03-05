@@ -218,6 +218,11 @@ void CModel::Center_Ext(_float3* Center, _float3* extend)
     };
 }
 
+void CModel::Callback(_uint AnimIdx, _int Duration, function<void()> func)
+{
+    m_Animations[AnimIdx]->Callback(Duration, func);
+}
+
 HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)
 {
     HANDLE hFile = CreateFile(pModelFilePath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);

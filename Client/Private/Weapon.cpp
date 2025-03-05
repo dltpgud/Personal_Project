@@ -80,14 +80,6 @@ _int CWeapon::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead)
         return OBJ_DEAD;
-
-
- 
-   
- 
-    
-
-
     return OBJ_NOEVENT;
 }
 
@@ -99,6 +91,11 @@ void CWeapon::Update(_float fTimeDelta)
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_PlayerWeaPon_Aim, fTimeDelta);
     m_pGameInstance->UI_shaking(CUI::UIID_BossHP, fTimeDelta);
+  
+    if (0 >= m_iMaxBullet[m_iBullet])
+    {
+        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false);
+    }
 }
 
 void CWeapon::Late_Update(_float fTimeDelta)
@@ -162,38 +159,43 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         m_iBullet = CWeapon::HendGun;
         m_iMaxBullet[m_iBullet] = 15;
         m_iCurMotion = Reload;
-        m_bClack = true;
         bMotionChange = true;
         bLoop = false;
     }
 
+   m_pModelCom[m_pWeapon]->Callback(0, 15,
+                                         [this]()
+                                         {
+                                         if (false == m_bSound)
+                                             {
+                                                 m_pGameInstance->Play_Sound(L"ST_Handgun_Reload.ogg",
+                                                                             CSound::SOUND_BGM, 1.f);
+                                                 m_bSound = true;
+                                             }
 
-    if (*m_pParentState == CPlayer::STATE_HENDGUN_RELOAD && m_iCurMotion == Reload && true == m_bClack)
-    {
-        m_fTimeSum += fTimeDelta;
+                                         });
 
-        if (m_fTimeSum > 0.6f)
-        {
-            if (false == m_bHeandGunReLoad)
-            {
-                m_pGameInstance->Play_Sound(L"ST_Handgun_Reload.ogg", CSound::SOUND_BGM, 1.f);
-                m_bHeandGunReLoad = true;
-            }
-            m_ShootingUI->Set_RandomPos(false, true, false);
-            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
-     
-            if (m_fTimeSum > 1.4f) {
-                m_ShootingUI->Set_RandomPos(false, false, false);
-                m_ShootingUI->Set_PosClack(-200.f, 80.f);
-                m_fTimeSum = 0.f;
-                m_bClack = false;
-            }
-        }
-    }
-    else {
-        m_bHeandGunReLoad = false;
-    }
-
+   m_pModelCom[m_pWeapon]->Callback(0, 20,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(false, true, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                           
+                                         }); 
+   
+   m_pModelCom[m_pWeapon]->Callback(0, 40,
+                                        [this]()
+                                        {
+                                            m_ShootingUI->Set_RandomPos(false, false, false);
+                                            m_ShootingUI->Set_PosClack(-200.f, 80.f);
+                                        }); 
+ 
+   m_pModelCom[m_pWeapon]->Callback(2, 1,
+                                        [this]()
+                                        {
+                                                 m_ShootingUI->Set_RandomPos(true, false, false);
+                                              m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                        });
 
 
     if (*m_pParentState == CPlayer::STATE_HENDGUN_SHOOT && m_iCurMotion != Shoot)
@@ -221,6 +223,7 @@ void CWeapon::Type0_Update(_float fTimeDelta)
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE);
         m_iCurMotion = Idle;
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, true);
+        m_bSound = false;
     }
 
 }
@@ -238,7 +241,6 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_iBullet = CWeapon::AssaultRifle;
             m_iMaxBullet[m_iBullet] = 30;
             m_iCurMotion = Reload;
-            m_bClack = true;
             bMotionChange = true;
             bLoop = false;
         }
@@ -267,7 +269,6 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_iBullet = CWeapon::MissileGatling;
             m_iMaxBullet[m_iBullet] = 20;
             m_iCurMotion = Reload;
-            m_bClack = true;
             bMotionChange = true;
             bLoop = false;
         }
@@ -300,7 +301,7 @@ void CWeapon::Type2_Update(_float fTimeDelta)
             m_iBullet = CWeapon::HeavyCrossbow;
             m_iMaxBullet[m_iBullet] = 7;
             m_iCurMotion = Reload;
-            m_bClack = true;
+        
             bMotionChange = true;
             bLoop = false;
         }
@@ -322,82 +323,109 @@ void CWeapon::Type2_Update(_float fTimeDelta)
         }
     }
 
-    if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD && m_iCurMotion == Reload && true == m_bClack)
+  
+
+    if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_RELOAD)
     {
-        m_fTimeSum += fTimeDelta;
-            if(false ==m_bAssaultRifleReLoad){
-               m_pGameInstance->Play_Sound(L"ST_AssaultRifle_Reload.ogg", CSound::SOUND_BGM, 0.5f);
-              m_bAssaultRifleReLoad = true;
-            }
-        if (m_fTimeSum > 0.65f)
-        {
-            
-            m_ShootingUI->Set_RandomPos(false, true, false);
-            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+        m_pModelCom[m_pWeapon]->Callback(0, 15,
+                                         [this]()
+                                         {
+                                             if (false == m_bSound)
+                                             {
+                                                 m_pGameInstance->Play_Sound(L"ST_AssaultRifle_Reload.ogg",
+                                                                             CSound::SOUND_BGM, 1.f);
+                                                 m_bSound = true;
+                                             }
+                                         });
 
-            if (m_fTimeSum > 2.7f) {
-                m_ShootingUI->Set_RandomPos(false, false, false);
-                m_ShootingUI->Set_PosClack(-250.f, 60.f);
-                m_fTimeSum = 0.f;
-                m_bClack = false;
-            }
-        }
+        m_pModelCom[m_pWeapon]->Callback(0, 20,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(false, true, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                         });
+
+         m_pModelCom[m_pWeapon]->Callback(0, 78,
+                                         [this]()
+                                         {
+                                                m_ShootingUI->Set_RandomPos(false, false, false);
+                                                m_ShootingUI->Set_PosClack(-250.f, 60.f);
+                                         });
+
     }
-    else
+    if (*m_pParentState == CPlayer::STATE_ASSAULTRIFlLE_SHOOT) {
+
+           m_pModelCom[m_pWeapon]->Callback(2, 1,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(true, false, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                         });
+    }
+
+
+    if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD)
     {
-        m_bAssaultRifleReLoad = false;
+        m_pModelCom[m_pWeapon]->Callback(0, 15,
+                                         [this]()
+                                         {
+                                             if (false == m_bSound)
+                                             {
+                                                 m_pGameInstance->Play_Sound(L"ST_MissileGatling_Reload.ogg",
+                                                                             CSound::SOUND_BGM, 0.5f);
+                                                 m_bSound = true;
+                                             }
+                                         });
+        m_pModelCom[m_pWeapon]->Callback(0, 30,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(false, true, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                         });
     }
-
-    if (*m_pParentState == CPlayer::STATE_MissileGatling_RELOAD && m_iCurMotion == Reload && true == m_bClack)
+    if (*m_pParentState == CPlayer::STATE_MissileGatling_SHOOT)
     {
-        m_fTimeSum += fTimeDelta;
-
-            
-        if (m_fTimeSum > 0.6f)
-        {
-            if (false == m_bMissileGatlingReload) {
-                m_pGameInstance->Play_Sound(L"ST_MissileGatling_Reload.ogg", CSound::SOUND_BGM, 0.5f);
-                m_bMissileGatlingReload = true;
-            }
-            m_ShootingUI->Set_RandomPos(false, true, false);
-            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
-            if (m_fTimeSum > 2.f) {
-                m_fTimeSum = 0.f;
-                m_bClack = false;
-                m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false);
-            }
-          
-        }
-    }
-    else {
-        m_bMissileGatlingReload = false;
+        m_pModelCom[m_pWeapon]->Callback(2, 1,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(true, false, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                         });
     }
 
-    if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD && m_iCurMotion == Reload && true == m_bClack)
+    if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_RELOAD)
     {
-        m_fTimeSum += fTimeDelta;
+        m_pModelCom[m_pWeapon]->Callback(0, 25,
+                                         [this]()
+                                         {
+                                             if (false == m_bSound)
+                                             {
+                                                 m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_Reload.ogg",
+                                                                             CSound::SOUND_BGM, 0.5f);
+                                                 m_bSound = true;
+                                             }
+                                         }); 
 
-        if (m_fTimeSum > 0.9f)
-        {
-
-            if (false == m_bHeavyCrossbowReload) {
-                m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_Reload.ogg", CSound::SOUND_BGM, 0.5f);
-                m_bHeavyCrossbowReload = true;
-            }
-            m_ShootingUI->Set_RandomPos(false, true, false);
-            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
-
-            if (m_fTimeSum > 1.5f)
-            {
-                m_fTimeSum = 0.f;
-                m_bClack = false;
-            }
-        }
+        m_pModelCom[m_pWeapon]->Callback(0, 30,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(false, true, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                         });
     }
-    else
+
+    if (*m_pParentState == CPlayer::STATE_HEAVYCROSSBOW_SHOOT)
     {
-        m_bHeavyCrossbowReload = false;
+        m_pModelCom[m_pWeapon]->Callback(2, 1,
+                                         [this]()
+                                         {
+                                             m_ShootingUI->Set_RandomPos(true, false, false);
+                                             m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
+                                         });
     }
+
+
+ 
 
     if (bMotionChange)
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, bLoop);
@@ -408,10 +436,13 @@ void CWeapon::Type2_Update(_float fTimeDelta)
         static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::STATE_IDLE2);
         m_iCurMotion = Idle;
         m_pModelCom[m_pWeapon]->Set_Animation(m_iCurMotion, true);
+        m_bSound = false;
     }
   
 
 }
+
+
 
 void CWeapon::Choose_Weapon(const _uint& WeaponNum)
 {
@@ -474,26 +505,12 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
       At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 10.f;
     }
 
-   
-
     _vector Hend_Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y,
              m_pWeapon_SocketMatrix[m_pWeapon]->_43 * Offset.z, m_pWeapon_SocketMatrix[m_pWeapon]->_44 };
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
 
-
-
-    if (0 >= m_iMaxBullet[m_iBullet])
-    {
-        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false);
-    }
-    else {
-        m_ShootingUI->Set_RandomPos(true, false, false);
-
-        m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, true);
-    }
-
- _vector Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y+5.f,
+    _vector Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y+5.f,
           m_pWeapon_SocketMatrix[m_pWeapon]->_43 * Offset.z, m_pWeapon_SocketMatrix[m_pWeapon]->_44 };
 
    CShootEffect::CShootEffect_DESC pDesc{};
@@ -504,7 +521,6 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     pDesc.iWeaponType = m_pWeapon;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_ShootEffect", nullptr, 0, &pDesc, 0);
  
-
     CPlayerBullet::CPlayerBullet_DESC Desc{};
     Desc.fSpeedPerSec = 150.f;
     Desc.pTagetPos = At;
@@ -515,11 +531,6 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     Desc.WorldPtr = &m_WorldMatrix;
     Desc.iWeaponType = m_pWeapon;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_PlayerBullet", nullptr, 0, &Desc, 0);
-
-
-
-
-
 
     return S_OK;
 }

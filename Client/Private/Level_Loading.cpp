@@ -148,9 +148,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load.fZ = 0.6f;
     Load.fSizeX = 8000.f;
     Load.fSizeY = 1340.f;
-    Load.PrUpdate = true;
+
     Load.Update = true;
-    Load.LateUpdate = true;
+
     Load.fSpeedPerSec = 100.f;
     Load.TexIndex = 5;
     if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
@@ -164,9 +164,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load1.fZ = 0.5f;
     Load1.fSizeX = 10480.f;;
     Load1.fSizeY = 720.f;
-    Load1.PrUpdate = true;
+
     Load1.Update = true;
-    Load1.LateUpdate = true;
+   
     Load1.fSpeedPerSec = 250.f;
     Load1.TexIndex = 4;
 
@@ -182,9 +182,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load2.fZ = 0.4f;
     Load2.fSizeX = 2280.f;;
     Load2.fSizeY = 720.f;
-    Load2.PrUpdate = true;
+
     Load2.Update = true;
-    Load2.LateUpdate = true;
+
     Load2.fSpeedPerSec = 300.f;
     Load2.TexIndex = 3;
 
@@ -200,9 +200,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load3.fZ = 0.3f;
     Load3.fSizeX = 20040.f;
     Load3.fSizeY = 200.f;
-    Load3.PrUpdate = true;
+
     Load3.Update = true;
-    Load3.LateUpdate = true;
+   
     Load3.fSpeedPerSec = 350.f;
     Load3.TexIndex = 2;
 
@@ -218,9 +218,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load4.fZ = 0.2f;
     Load4.fSizeX = 550.f;
     Load4.fSizeY = 280.f;
-    Load4.PrUpdate = true;
+
     Load4.Update = true;
-    Load4.LateUpdate = true;
+
     Load4.fSpeedPerSec = 0.f;
     Load4.TexIndex = 1;
 
@@ -237,9 +237,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Smoke1.fZ = 0.19f;
     Smoke1.fSizeX = 100.f;
     Smoke1.fSizeY = 100.f;
-    Smoke1.PrUpdate = true;
+
     Smoke1.Update = true;
-    Smoke1.LateUpdate = true;
+
     Smoke1.fSpeedPerSec = 0.f;
     Smoke1.FilePath = L"Prototype_Component_BusSmokeBack";
     Smoke1.TexIndex = 20;
@@ -256,9 +256,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Smoke2.fZ = 0.19f;
     Smoke2.fSizeX = 100.f;
     Smoke2.fSizeY = 90.f;
-    Smoke2.PrUpdate = true;
+
     Smoke2.Update = true;
-    Smoke2.LateUpdate = true;
+
     Smoke2.fSpeedPerSec = 0.f;
     Smoke2.FilePath = L"Prototype_Component_BusSmokefront";
     Smoke2.TexIndex = 20;
@@ -275,9 +275,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load5.fZ = 0.1f;
     Load5.fSizeX = 4080.f;
     Load5.fSizeY = 720.f;
-    Load5.PrUpdate = true;
+
     Load5.Update = true;
-    Load5.LateUpdate = true;
+
     Load5.fSpeedPerSec = 1000.f;
     Load5.TexIndex = 0;
 
@@ -293,9 +293,9 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     LoadingBar.fZ = 0.09f;
     LoadingBar.fSizeX = 1280.f;
     LoadingBar.fSizeY = 90.f;
-    LoadingBar.PrUpdate = true;
+
     LoadingBar.Update = true;
-    LoadingBar.LateUpdate = true;
+
     LoadingBar.fSpeedPerSec = 0.f;
     LoadingBar.FilePath = L"Prototype_Component_Loading";
     LoadingBar.TexIndex = 1;
@@ -317,9 +317,9 @@ HRESULT CLevel_Loading::Initialize_STAGE(const _uint& pLayerTag)
     Loading.fZ = 0.0f;
     Loading.fSizeX = g_iWinSizeX ;
     Loading.fSizeY = g_iWinSizeY;
-    Loading.PrUpdate = true;
+
     Loading.Update = true;
-    Loading.LateUpdate = true;
+
     Loading.fSpeedPerSec = 0.f;
     Loading.FilePath = L"Prototype_Component_Texture_Pade";
     Loading.TexIndex = 1;

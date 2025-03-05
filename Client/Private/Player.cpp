@@ -158,10 +158,6 @@ void CPlayer::Late_Update(_float fTimeDelta)
 HRESULT CPlayer::Render()
 {
 
-
-#ifdef _DEBUG
-   __super::Render();
-#endif
     return S_OK;
 }
 
@@ -339,6 +335,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
     {
         if (m_iState != STATE_SPRINT && m_iState != STATE_SPRINT2)
         {
+            m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false); 
 
             if (CWeapon::HendGun == m_iWeaponType && T00 == m_Type)
                 m_iState = STATE_HENDGUN_RELOAD;

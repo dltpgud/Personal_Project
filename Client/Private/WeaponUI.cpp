@@ -25,9 +25,9 @@ HRESULT CWeaponUI::Initialize(void* pArg)
     Desc.fSizeX = 500.f;
     Desc.fSizeY = 100.f;
     Desc.UID = CUI::UIID_PlayerWeaPon;
-    Desc.PrUpdate = true;
+
     Desc.Update = true;
-    Desc.LateUpdate = true;
+
     Desc.fSpeedPerSec = 0.f;
     Desc.fRotationPerSec = 0.f;
     m_fXPos = 1150.f;
@@ -191,7 +191,7 @@ void CWeaponUI::Late_Update(_float fTimeDelta)
 
 HRESULT CWeaponUI::Render()
 {
-    if (m_bPrUpdate)
+   // if (m_bPrUpdate)
         Set_UI_Pos(&m_Desc[4]);
     if (false == m_IsShaking)
     {
@@ -221,7 +221,7 @@ HRESULT CWeaponUI::Render()
 
     m_pVIBufferCom->Render();
 
-    if (m_bPrUpdate)
+  //  if (m_bPrUpdate)
         Set_UI_Pos(&m_ScecondDesc[4]);
     if (false == m_IsShaking)
     {
@@ -252,7 +252,7 @@ HRESULT CWeaponUI::Render()
     m_pVIBufferCom->Render();
 
     for (_uint i = 0; i < 4; i++)
-    {if(m_bPrUpdate)
+    {//if(m_bPrUpdate)
         Set_UI_Pos(&m_Desc[i]);
 
         if (m_WeaPonUI != i)
@@ -279,7 +279,7 @@ HRESULT CWeaponUI::Render()
 
     for (_uint i = 4; i < 6; i++)
     {
-        if (m_bPrUpdate)
+        //if (m_bPrUpdate)
         Set_UI_Pos(&m_Desc[i]);
 
         if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
@@ -305,7 +305,7 @@ HRESULT CWeaponUI::Render()
     {
         for (_uint i = 0; i < 4; i++)
         {
-            if (m_bPrUpdate)
+           // if (m_bPrUpdate)
             Set_UI_Pos(&m_ScecondDesc[i]);
 
             if (m_ScecondWeaPonUI != i)
@@ -360,9 +360,8 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[0].fZ = 0.4f;
     m_Desc[0].fSizeX = 220.f;
     m_Desc[0].fSizeY = 75.f;
-    m_Desc[0].PrUpdate = true;
     m_Desc[0].Update = true;
-    m_Desc[0].LateUpdate = true;
+
     m_Desc[0].fSpeedPerSec = 0.f;
 
     /*AssaultRifle*/
@@ -372,9 +371,9 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[1].fZ = 0.4f;
     m_Desc[1].fSizeX = 200.f;
     m_Desc[1].fSizeY = 75.f;
-    m_Desc[1].PrUpdate = true;
+
     m_Desc[1].Update = true;
-    m_Desc[1].LateUpdate = true;
+
     m_Desc[1].fSpeedPerSec = 0.f;
 
     /*MissileGatling*/
@@ -384,9 +383,9 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[2].fZ = 0.4f;
     m_Desc[2].fSizeX = 200.f;
     m_Desc[2].fSizeY = 70.f;
-    m_Desc[2].PrUpdate = true;
+
     m_Desc[2].Update = true;
-    m_Desc[2].LateUpdate = true;
+
     m_Desc[2].fSpeedPerSec = 0.f;
 
     /*HeavyCrossbow*/
@@ -396,9 +395,9 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[3].fZ = 0.4f;
     m_Desc[3].fSizeX = 200.f;
     m_Desc[3].fSizeY = 70.f;
-    m_Desc[3].PrUpdate = true;
+
     m_Desc[3].Update = true;
-    m_Desc[3].LateUpdate = true;
+
     m_Desc[3].fSpeedPerSec = 0.f;
 
     /*Fream*/
@@ -408,9 +407,9 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[4].fZ = 0.5f;
     m_Desc[4].fSizeX = 200.f;
     m_Desc[4].fSizeY = 95.f;
-    m_Desc[4].PrUpdate = true;
+
     m_Desc[4].Update = true;
-    m_Desc[4].LateUpdate = true;
+
     m_Desc[4].fSpeedPerSec = 0.f;
 
     /*Tan*/
@@ -420,9 +419,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[5].fZ = 0.5f;
     m_Desc[5].fSizeX = 70.f;
     m_Desc[5].fSizeY = 55.f;
-    m_Desc[5].PrUpdate = true;
     m_Desc[5].Update = true;
-    m_Desc[5].LateUpdate = true;
     m_Desc[5].fSpeedPerSec = 0.f;
 
     for (_int i = 0; i < 6; i++)
@@ -443,9 +440,9 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[0].fZ = 0.4f;
     m_ScecondDesc[0].fSizeX = 110.f;
     m_ScecondDesc[0].fSizeY = 35.f;
-    m_ScecondDesc[0].PrUpdate = true;
+
     m_ScecondDesc[0].Update = true;
-    m_ScecondDesc[0].LateUpdate = true;
+
     m_ScecondDesc[0].fSpeedPerSec = 0.f;
 
     /*AssaultRifle*/
@@ -455,9 +452,9 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[1].fZ = 0.4f;
     m_ScecondDesc[1].fSizeX = 110.f;
     m_ScecondDesc[1].fSizeY = 35.f;
-    m_ScecondDesc[1].PrUpdate = true;
+
     m_ScecondDesc[1].Update = true;
-    m_ScecondDesc[1].LateUpdate = true;
+
     m_ScecondDesc[1].fSpeedPerSec = 0.f;
 
     /*MissileGatling*/
@@ -467,9 +464,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[2].fZ = 0.4f;
     m_ScecondDesc[2].fSizeX = 110.f;
     m_ScecondDesc[2].fSizeY = 35.f;
-    m_ScecondDesc[2].PrUpdate = true;
     m_ScecondDesc[2].Update = true;
-    m_ScecondDesc[2].LateUpdate = true;
     m_ScecondDesc[2].fSpeedPerSec = 0.f;
 
     /*HeavyCrossbow*/
@@ -479,9 +474,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[3].fZ = 0.4f;
     m_ScecondDesc[3].fSizeX = 120.f;
     m_ScecondDesc[3].fSizeY = 45.f;
-    m_ScecondDesc[3].PrUpdate = true;
     m_ScecondDesc[3].Update = true;
-    m_ScecondDesc[3].LateUpdate = true;
     m_ScecondDesc[3].fSpeedPerSec = 0.f;
 
     /*Fream*/
@@ -491,9 +484,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[4].fZ = 0.5f;
     m_ScecondDesc[4].fSizeX = 120.f;
     m_ScecondDesc[4].fSizeY = 45.f;
-    m_ScecondDesc[4].PrUpdate = true;
     m_ScecondDesc[4].Update = true;
-    m_ScecondDesc[4].LateUpdate = true;
     m_ScecondDesc[4].fSpeedPerSec = 0.f;
 
     for (_int i = 0; i < 5; i++)

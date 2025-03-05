@@ -62,7 +62,7 @@ void CChest::Update(_float fTimeDelta)
 }
 
 void CChest::Late_Update(_float fTimeDelta)
-{
+{   
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
         return;
     __super::Late_Update(fTimeDelta);
@@ -90,7 +90,7 @@ HRESULT CChest::Render()
 
         m_pModelCom->Render(i);
     }
-    __super::Render();
+  
 
     return S_OK;
 }

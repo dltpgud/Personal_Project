@@ -32,7 +32,7 @@ void CUI_Manager::Priority_Update(_float fTimeDelta)
     {
         for (auto veciter = m_UIVec[i].begin(); veciter != m_UIVec[i].end();)
         {
-            if ((*veciter)->Get_PrUpdate() == true)
+            if ((*veciter)->Get_Update() == true)
             {
                 int iResult = (*veciter)->Priority_Update(fTimeDelta);
 
@@ -66,11 +66,13 @@ void CUI_Manager::Late_Update(_float fTimeDelta)
     {
         for (auto& vec : m_UIVec[i])
         {
-            if (vec->Get_LateUpdate() == true)
+            if (vec->Get_Update() == true)
                 vec->Late_Update(fTimeDelta);
         }
     }
 }
+
+
 
 void CUI_Manager::Clear(_uint iClearLevelID)
 {
@@ -88,36 +90,6 @@ HRESULT CUI_Manager::Set_OpenUI(const _uint& uid, _bool open)
             if (vec->Get_UIID() == uid)
             {
                vec->Set_Open(open);
-            }
-        }
-    }
-    return S_OK;
-}
-
-HRESULT CUI_Manager::Set_PreUpdateUI(const _uint& uid, _bool open)
-{
-    for (size_t i = 0; i < m_iLevel; i++)
-    {
-        for (auto& vec : m_UIVec[i])
-        {
-            if (vec->Get_UIID() == uid)
-            {
-                vec->Set_PrUpdate(open);
-            }
-        }
-    }
-    return S_OK;
-}
-
-HRESULT CUI_Manager::Set_UpdateUI(const _uint& uid, _bool open)
-{
-    for (size_t i = 0; i < m_iLevel; i++)
-    {
-        for (auto& vec : m_UIVec[i])
-        {
-            if (vec->Get_UIID() == uid)
-            {
-                vec->Set_Update(open);
             }
         }
     }
@@ -144,20 +116,6 @@ HRESULT CUI_Manager::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloas
     return S_OK;
 }
 
-HRESULT CUI_Manager::Set_LateUpdateUI(const _uint& uid, _bool open)
-{
-    for (size_t i = 0; i < m_iLevel; i++)
-    {
-        for (auto& vec : m_UIVec[i])
-        {
-            if (vec->Get_UIID() == uid)
-            {
-                vec->Set_LateUpdate(open);
-            }
-        }
-    }
-    return S_OK;
-}
 
 CGameObject* CUI_Manager::Get_UI(const _uint& iLevel, const _uint& uID)
 {

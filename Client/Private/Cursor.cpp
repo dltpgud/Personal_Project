@@ -24,8 +24,6 @@ HRESULT CCursor::Initialize(void* pArg)
     Desc.fSizeX = 60.f;
     Desc.fSizeY = 60.f;
     Desc.Update = true;
-    Desc.PrUpdate = true;
-    Desc.LateUpdate = true;
     Desc.UID = UIID_Cursor;
 
     if (FAILED(__super::Initialize(&Desc)))

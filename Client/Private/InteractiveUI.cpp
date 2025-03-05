@@ -24,8 +24,7 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
     Desc.fSizeX = 50.f;
     Desc.fSizeY = 50.f;
     Desc.Update = true;
-    Desc.PrUpdate = true;
-    Desc.LateUpdate = true;
+
     Desc.UID = UIID_InteractiveUI;
 
     if (FAILED(__super::Initialize(&Desc)))

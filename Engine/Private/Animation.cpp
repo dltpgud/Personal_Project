@@ -48,7 +48,7 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
 {
     _float fChannelAnimTime{};
 
-
+   Run_CallbackFunc(m_fCurrentPosition);
     if (m_fChangingTime < m_fMotionChangingTIme)
         m_fChangingTime += m_fTickPerSecond * fTimeDelta;
     else
@@ -77,6 +77,16 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
         m_Channels[i]->Update_TransformationMatrix(Bones, &m_iChannelKeyFrameIndices[i], fChannelAnimTime,
             m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme, m_vLastKeyFrame[i]);
 
+
+    if (m_fCurrentPosition >= m_fDuration )
+    {
+        Reset_Callback();
+       
+       return true;
+    }
+
+
+
     return false;
 }
 
@@ -92,6 +102,36 @@ void CAnimation::init_Loop(const vector<class CBone*>& Bones)
         m_vLastKeyFrame[i].fTrackPosition = m_fMotionChangingTIme;  
 
     }
+}
+
+void CAnimation::Callback(_int Duration, function<void()> func)
+{
+    auto iter = m_CallbackFunc.find(Duration);
+    if (iter == m_CallbackFunc.end())
+    {
+        m_CallbackFunc[Duration] = vector<function<void()>>();
+    }
+
+    // 콜백 함수 추가
+    m_CallbackFunc[Duration].emplace_back([func]() { func(); });
+}
+
+void CAnimation::Run_CallbackFunc(_int Duration)
+{
+ 
+    auto iter = m_CallbackFunc.find(Duration);
+    if (iter == m_CallbackFunc.end())
+        return;
+
+    for (auto& callback : iter->second) { callback(); }
+
+}
+
+void CAnimation::Reset_Callback()
+{
+    m_fCurrentPosition = 0.f;
+    for (auto& KeyIndices : m_iChannelKeyFrameIndices) { KeyIndices = 0; }
+
 }
 
 CAnimation* CAnimation::Create(HANDLE& hFile)

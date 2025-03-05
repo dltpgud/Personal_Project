@@ -31,7 +31,6 @@ HRESULT CCHEST::Initialize(void* pArg)
         return E_FAIL;
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
-    m_InteractiveUI->Set_Text(L"상자 열기");
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
 
     return S_OK;
@@ -47,13 +46,15 @@ _int CCHEST::Priority_Update(_float fTimeDelta)
 
 void CCHEST::Update(_float fTimeDelta)
 {
-    Interactive(fTimeDelta);   
+    Interactive(fTimeDelta);  
+      __super::Update(fTimeDelta);
 }
 
 void CCHEST::Late_Update(_float fTimeDelta)
-{
+{  
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+  __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CCHEST::Render_Shadow()
@@ -245,7 +246,13 @@ HRESULT CCHEST::Add_Components()
                                       TEXT("Com_NONANIShader"), reinterpret_cast<CComponent**>(&m_pShaderCom[NONANI]))))
         return E_FAIL;
 
-
+    CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
+    AABBDesc.vExtents = _float3(1.f, 1.f, 1.f);
+    AABBDesc.vCenter = _float3(0.f, 1.f, 0.f);
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
+                                      TEXT("Com_Collider_AABB"), reinterpret_cast<CComponent**>(&m_pColliderCom),
+                                      &AABBDesc)))
+        return E_FAIL;
     return S_OK;
 }
 
