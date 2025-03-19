@@ -112,7 +112,6 @@ void CAnimation::Callback(_int Duration, function<void()> func)
         m_CallbackFunc[Duration] = vector<function<void()>>();
     }
 
-    // 콜백 함수 추가
     m_CallbackFunc[Duration].emplace_back([func]() { func(); });
 }
 
@@ -130,7 +129,7 @@ void CAnimation::Run_CallbackFunc(_int Duration)
 void CAnimation::Reset_Callback()
 {
     m_fCurrentPosition = 0.f;
-    for (auto& KeyIndices : m_iChannelKeyFrameIndices) { KeyIndices = 0; }
+   // for (auto& KeyIndices : m_iChannelKeyFrameIndices) { KeyIndices = 0; }
 
 }
 
