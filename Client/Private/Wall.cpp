@@ -57,6 +57,13 @@ void CWall::Late_Update(_float fTimeDelta)
 }
 HRESULT CWall::Render()
 {
+    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 15.f))
+    {
+        return S_OK;
+    }
+
+
+
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
