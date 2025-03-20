@@ -46,6 +46,7 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
 
 void CTerrain::Update(_float fTimeDelta)
 {
+
 }
 
 void CTerrain::Late_Update(_float fTimeDelta)
@@ -106,6 +107,7 @@ void CTerrain::Set_Buffer(_uint x, _uint y)
     m_pSize[0] = x;
     m_pSize[1] = y;
     m_pVIBufferCom->Set_Buffer(x, y);
+
 }
 
 void CTerrain::Set_Scalra_uint(_uint scalra)

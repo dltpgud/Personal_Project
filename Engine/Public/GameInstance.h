@@ -158,7 +158,8 @@ public: /* For.Target_Manager */
 #pragma region FRUSTUM
 public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
-
+    _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
+    void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
 #pragma endregion
 
 
