@@ -933,6 +933,8 @@ HRESULT CLevel_Edit::Ready_Light()
     return S_OK;
 }
 
+
+
 void CLevel_Edit::Set_pos()
 {
     // 설정된 값으로 위치를 지정한다
@@ -2219,6 +2221,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         m_PicObjTerrain = m_vTerrain[index];
         Update_Pos();
         Update_Speed();
+  
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_L))

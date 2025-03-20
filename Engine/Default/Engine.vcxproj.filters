@@ -390,6 +390,9 @@
     <ClInclude Include="..\Public\Frustum.h">
       <Filter>01.Utility\09. Frustum</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\QuadTree.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Terrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -571,6 +574,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Frustum.cpp">
       <Filter>01.Utility\09. Frustum</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\QuadTree.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

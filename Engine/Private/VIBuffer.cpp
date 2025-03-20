@@ -10,6 +10,7 @@ CVIBuffer::CVIBuffer(const CVIBuffer& Prototype)
       m_iNumVertices{Prototype.m_iNumVertices}, m_iIndexStride{Prototype.m_iIndexStride},
       m_iNumIndexices{Prototype.m_iNumIndexices}, m_eIndexFormat{Prototype.m_eIndexFormat},
       m_ePrimitiveTopology{Prototype.m_ePrimitiveTopology}
+    //  ,m_pVertexPositions{Prototype.m_pVertexPositions}
 {
     Safe_AddRef(m_pIB);
     Safe_AddRef(m_pVB);
@@ -88,7 +89,10 @@ HRESULT CVIBuffer::Create_Buffer(ID3D11Buffer** ppOut)
 void CVIBuffer::Free()
 {
     __super::Free();
+    //if (false == m_bClone)
+        Safe_Delete_Array(m_pVertexPositions);
 
+
+    Safe_Release(m_pVB); 
     Safe_Release(m_pIB);
-    Safe_Release(m_pVB);
 }

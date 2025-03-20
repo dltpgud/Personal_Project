@@ -57,6 +57,8 @@ _int CTerrain::Priority_Update(_float fTimeDelta)
 
 void CTerrain::Update(_float fTimeDelta)
 {
+    if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
+    m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
 }
 
 void CTerrain::Late_Update(_float fTimeDelta)
@@ -78,6 +80,7 @@ void CTerrain::Late_Update(_float fTimeDelta)
 
 HRESULT CTerrain::Render()
 {
+    
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
@@ -121,12 +124,22 @@ void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 
 }
 
-void CTerrain::Set_Buffer(_uint x, _uint y )
+void CTerrain::Set_Buffer(_uint x, _uint y)
 {
     m_pSize[0] = x;
-    m_pSize[1] = y;
+    m_pSize[1] =y;
 
-    m_pVIBufferCom->Set_Buffer(x, y);
+   
+
+    if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
+    {
+        m_pVIBufferCom->DYNAMIC_Set_Buffer(m_pSize[0], m_pSize[1]);
+        m_pVIBufferCom->Set_QuadTree();
+    }else
+    {
+        m_pVIBufferCom->Set_Buffer(m_pSize[0], m_pSize[1]);
+    }
+
 }
 
 

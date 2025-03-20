@@ -30,7 +30,16 @@ public:
 
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
     virtual void Set_Buffer(_uint x, _uint y)override;
+    _bool isPowerOfTwoPlusOne(_int num)
+    {
+        if (num <= 1)
+            return false; // 1 이하 제외
+        int x = num - 1;  // num - 1이 2의 거듭제곱인지 확인
+        if((x & (x - 1)) == 0)
+            return true;
 
+        return false;
+    }
     CVIBuffer_Terrain* Get_buffer()
     {
         return m_pVIBufferCom;

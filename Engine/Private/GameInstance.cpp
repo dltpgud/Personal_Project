@@ -855,6 +855,17 @@ _bool CGameInstance::isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange)
 	return m_pFrustum->isIn_WorldSpace(vTargetPos, fRange);
 }
 
+_bool CGameInstance::isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange)
+{
+    return m_pFrustum->isIn_LocalSpace(vTargetPos, fRange);
+}
+
+void CGameInstance::Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
+{
+    return m_pFrustum->Transform_To_LocalSpace(WorldMatrixInv);
+
+}
+
 
 #pragma endregion
 

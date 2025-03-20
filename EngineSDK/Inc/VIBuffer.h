@@ -30,9 +30,10 @@ protected:
     _uint m_iNumVertices = {};
     _uint m_iIndexStride = {};
     _uint m_iNumIndexices = {};
+    _float3* m_pVertexPositions = {nullptr};
     DXGI_FORMAT m_eIndexFormat = {};
     D3D_PRIMITIVE_TOPOLOGY m_ePrimitiveTopology = {};
-
+ 
     /*D3D11_BUFFER_DESC : 생성할 버퍼를 서술하는 구조체
       D3D11_SUBRESOURCE_DATA : 버퍼 초가화에 사용할 자료를 서술하는 구조체
       이 두 구조체를 채운 뒤, 다바이스에서 버퍼생성함 수를 호출하면 정점 버퍼가 생성됨
