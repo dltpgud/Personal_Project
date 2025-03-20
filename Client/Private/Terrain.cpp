@@ -130,7 +130,7 @@ void CTerrain::Set_Buffer(_uint x, _uint y)
     m_pSize[1] =y;
 
    
-
+   // 쿼드 트리의 2의n승 + 1의 규칙은 경계 이음매 문제 때문에 이웃하는 LOD와 연결할 수 있는 정점 부족해지는 문제때문에 검사한번하자.
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
     {
         m_pVIBufferCom->DYNAMIC_Set_Buffer(m_pSize[0], m_pSize[1]);
