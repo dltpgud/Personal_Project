@@ -24,14 +24,19 @@ public:
     }
 
     HRESULT Bind_BoneMatrices(class CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName);
-
+    HRESULT Render();
     _float3* Get_pPos(_int i);
     _uint Get_pIndices(_int i);
 
     _uint Get_iNumIndexices();
     _uint Get_iNumVertices();
-   
-private:
+    HRESULT Set_InstanceBuffer(vector<_matrix> vecObjMat);
+    HRESULT Bind_Buffers();
+    ID3D11Buffer* Get_InstBuffer()
+    {
+        return m_pInst_Buffer;
+    };
+    private:
     HRESULT Load_AnimMesh(HANDLE hFile);
     HRESULT Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix);
 
@@ -40,13 +45,17 @@ private:
     _uint			m_iNumBones = {0};
     vector<_uint>			m_Bones;
     vector<_float4x4>		m_OffsetMatrices;
-
+    ID3D11Buffer* m_pInst_Buffer{};
+    _uint m_iInstVertexStride{};
+    _uint m_iNumInstance_Culling{};
+    _uint m_iNumIndexPerInstance{};
+    _uint m_iNumInstance = {0};
+    D3D11_BUFFER_DESC m_Inst_BufferDesc = {};
+    D3D11_SUBRESOURCE_DATA m_Inst_BufferSRD = {};
+    VTXMATRIX_INSTANCE* m_pInst_BufferData{};
     _float3* m_pPos{};
     _uint* m_pIndices{};
 public:
-    //static CMesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _char* pName, _uint iMaterialIndex,
-    //                     _uint iNumVertex, _uint iNumFaces, VTXMESH* pVertex, _uint* pIndices,
-    //                     _fmatrix PreTransformMatrix);
     static CMesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix);
 
     virtual CComponent* Clone(void* pArg) override;

@@ -5,7 +5,9 @@ CMesh::CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CVIBuffer{p
 {
 }
 
-CMesh::CMesh(const CMesh& Prototype) : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex}
+CMesh::CMesh(const CMesh& Prototype)
+    : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex},
+      m_iNumIndexPerInstance{Prototype.m_iNumIndexPerInstance}
 {
     strcpy_s(m_szName, Prototype.m_szName);
 
@@ -26,6 +28,7 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
     _uint iNumFaces;
     bReadFile = ReadFile(hFile, &iNumFaces, sizeof(iNumFaces), &dwByte, nullptr);
     m_iNumIndexices = iNumFaces * 3;
+    m_iNumIndexPerInstance = m_iNumIndexices;
     _uint* pIndices = new _uint[m_iNumIndexices];
     bReadFile = ReadFile(hFile, pIndices, sizeof(_uint) * m_iNumIndexices, &dwByte, nullptr);
 
@@ -146,6 +149,18 @@ HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const vector<class CBone*>& B
     return pShader->Bind_Matrices(pConstantName, BoneMatrices, 512);
 }
 
+HRESULT CMesh::Render()
+{
+
+    if (m_pInst_Buffer == nullptr)
+        return __super::Render();
+    else
+        m_pContext->DrawIndexedInstanced(m_iNumIndexPerInstance, m_iNumInstance_Culling, 0, 0, 0);
+
+
+    return S_OK;
+}
+
 _float3* CMesh::Get_pPos(_int i)
 {
     return &m_pPos[i];
@@ -164,6 +179,86 @@ _uint CMesh::Get_iNumIndexices()
 _uint CMesh::Get_iNumVertices()
 {
     return m_iNumVertices;
+}
+
+HRESULT CMesh::Set_InstanceBuffer(vector<_matrix> vecObjMat)
+{
+
+    m_iNumInstance = (_uint)vecObjMat.size();
+    m_iNumInstance_Culling = m_iNumInstance;
+    m_iInstVertexStride = sizeof VTXMATRIX_INSTANCE;
+    m_iNumVertexBuffers = 2;
+
+    // INSTANCE_BUFFER
+    ZeroMemory(&m_Inst_BufferDesc, sizeof m_Inst_BufferDesc);
+    m_Inst_BufferDesc.ByteWidth = m_iInstVertexStride * m_iNumInstance;
+    m_Inst_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    m_Inst_BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    m_Inst_BufferDesc.CPUAccessFlags = 0;
+    m_Inst_BufferDesc.MiscFlags = 0;
+    m_Inst_BufferDesc.StructureByteStride = m_iInstVertexStride;
+
+    m_pInst_BufferData = new VTXMATRIX_INSTANCE[m_iNumInstance];
+    for (size_t i = 0; i < m_iNumInstance; ++i)
+    {
+        _matrix WorldMat = vecObjMat[i];
+        XMStoreFloat4(&m_pInst_BufferData[i].vRight, WorldMat.r[0]);
+        XMStoreFloat4(&m_pInst_BufferData[i].vUp, WorldMat.r[1]);
+        XMStoreFloat4(&m_pInst_BufferData[i].vLook, WorldMat.r[2]);
+        XMStoreFloat4(&m_pInst_BufferData[i].vPos, WorldMat.r[3]);
+    }
+
+    ZeroMemory(&m_Inst_BufferSRD, sizeof m_Inst_BufferSRD);
+    m_Inst_BufferSRD.pSysMem = m_pInst_BufferData;
+
+    if (FAILED(m_pDevice->CreateBuffer(&m_Inst_BufferDesc, &m_Inst_BufferSRD, &m_pInst_Buffer)))
+        return E_FAIL;
+
+    Safe_Release(m_pIB);
+    m_BufferDesc.ByteWidth = m_iIndexStride * m_iNumIndexices * m_iNumInstance;
+
+    _uint* pIndices = new _uint[m_iNumIndexices * m_iNumInstance];
+    for (_uint i = 0; i < m_iNumInstance; ++i)
+        memcpy(&pIndices[i * m_iNumIndexices], m_pIndices, sizeof(_uint) * m_iNumIndexices);
+
+    D3D11_SUBRESOURCE_DATA m_tInitialData_Inst{};
+    m_tInitialData_Inst.pSysMem = pIndices;
+
+    HRESULT hr = m_pDevice->CreateBuffer(&m_BufferDesc, &m_tInitialData_Inst, &m_pIB);
+    if (FAILED(hr))
+        return E_FAIL;
+
+   Safe_Delete_Array(pIndices);
+   return S_OK;
+}
+
+HRESULT CMesh::Bind_Buffers()
+{
+
+    	if (nullptr == m_pContext)
+        return E_FAIL;
+
+        else if (nullptr == m_pInst_Buffer)
+            return __super::Bind_Buffers();
+
+        ID3D11Buffer* pVertexBuffers[] = {
+            m_pVB,
+            m_pInst_Buffer,
+        };
+
+        _uint iVertexStrides[] = {m_iVertexStride, m_iInstVertexStride};
+
+        _uint iOffsets[] = {
+            0,
+            0,
+        };
+
+        m_pContext->IASetVertexBuffers(0, m_iNumVertexBuffers, pVertexBuffers, iVertexStrides, iOffsets);
+        m_pContext->IASetIndexBuffer(m_pIB, m_eIndexFormat, 0);
+        m_pContext->IASetPrimitiveTopology(m_ePrimitiveTopology);
+
+     
+    return S_OK;
 }
 
 HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
@@ -276,22 +371,6 @@ HRESULT CMesh::Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix)
     return S_OK;
 }
 
-/*
-CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _char* pName, _uint iMaterialIndex,
-                     _uint iNumVertex, _uint iNumFaces, VTXMESH* pVertex, _uint* pIndices, _fmatrix PreTransformMatrix)
-{
-    CMesh* pInstance = new CMesh(pDevice, pContext);
-
-    if (FAILED(pInstance->Initialize_Proto(pName, iMaterialIndex, iNumVertex, iNumFaces, pVertex, pIndices,
-                                           PreTransformMatrix)))
-    {
-        MSG_BOX("Failed To Created : CMesh");
-        Safe_Release(pInstance);
-    }
-
-    return pInstance;
-}*/
-
 CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile,
                      _fmatrix PreTransformMatrix)
 {
@@ -331,4 +410,5 @@ void CMesh::Free()
         Safe_Delete_Array(m_pPos);
         Safe_Delete_Array(m_pIndices);
     }
+    Safe_Release(m_pInst_Buffer);
 }

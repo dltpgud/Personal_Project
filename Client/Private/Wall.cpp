@@ -17,7 +17,6 @@ HRESULT CWall::Initialize_Prototype()
 
 HRESULT CWall::Initialize(void* pArg)
 {
-  //  m_DATA_TYPE = GAMEOBJ_DATA::DATA_WALL;
 
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
@@ -48,22 +47,20 @@ void CWall::Update(_float fTimeDelta)
 void CWall::Late_Update(_float fTimeDelta)
 {
 
-    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 30.f))
-    {
+
+if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 15.f))
+     return ;
+
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
       
-    }
+     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
+   
 }
 HRESULT CWall::Render()
 {
-    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 15.f))
-    {
-        return S_OK;
-    }
-
-
-
+ 
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 

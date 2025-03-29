@@ -137,6 +137,10 @@ HRESULT CLevel_Manager::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const
 HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
                                                    const _tchar* strProtoMapPath, void* Arg)
 {
+ 
+
+    map<wstring, vector<_matrix>> modelNameCount;
+
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
@@ -182,20 +186,38 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, con
             break;
         }
 
-        CGameObject* pGameObject = ProtoObj->Clone(Arg);
 
-        pGameObject->Set_Model(pModel, iLevelIndex);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-        if (pGameObject != nullptr) {
-            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-        }
+              
+         _matrix  transform;
+        transform.r[0] = Right;
+        transform.r[1] = UP;
+        transform.r[2] = LOOK;
+        transform.r[3] = POSITION;
+
+        modelNameCount[pModel].emplace_back(transform);
+
+
+       
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
     CloseHandle(hFile);
+
+    for (const auto& pair : modelNameCount)
+    {
+        const std::wstring& modelName = pair.first;
+        const std::vector<_matrix>& transforms = pair.second;
+
+        CGameObject* pGameObject = ProtoObj->Clone(Arg);
+
+        pGameObject->Set_Model(modelName, iLevelIndex);
+        pGameObject->Set_InstaceBuffer(transforms);
+        if (pGameObject != nullptr)
+        {
+            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+        }
+        
+    }
 
     return S_OK;
 }
@@ -203,6 +225,7 @@ HRESULT CLevel_Manager::Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, con
 HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj,
                                               const _tchar* strProtoMapPath, void* Arg)
 {
+
     HANDLE hFile = CreateFile(strProtoMapPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
@@ -247,21 +270,23 @@ HRESULT CLevel_Manager::Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _u
             Safe_Delete_Array(pPoroto);
             break;
         }
-
-        CGameObject* pGameObject = ProtoObj->Clone(Arg);
-
-     pGameObject->Set_Model(pModel, iLevelIndex);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-        if (pGameObject != nullptr) {
-            m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
-        }
+        
+         CGameObject* pGameObject = ProtoObj->Clone(Arg);
+         
+         pGameObject->Set_Model(pModel, iLevelIndex);
+         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
+         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
+         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
+         pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+         if (pGameObject != nullptr) {
+             m_pGameInstance->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
+         }
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
     }
     CloseHandle(hFile);
+
+   
 
     return S_OK;
 }

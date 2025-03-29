@@ -92,6 +92,9 @@ public:
     virtual void Set_Model(const _wstring& protoModel, _uint iLevel = 0)
     {
     }
+    virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat)
+    {
+    }
      _int  Get_Data()
     {
         return m_DATA_TYPE;
@@ -123,7 +126,7 @@ protected:
     _bool m_bClone{};
 
     CCollider* m_pColliderCom = { nullptr };
-
+ 
 protected:
     /*컴포넌트 사본을 저장하는 맵컨테이너*/
     map<const _wstring, class CComponent*> m_Components;

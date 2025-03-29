@@ -133,6 +133,22 @@ namespace Engine
 		XMFLOAT2		vLifeTime;
 	}VTXMATRIX;
 
+		typedef struct VTXMATRIX_INSTANCE
+        {
+            XMFLOAT4 vRight;
+            XMFLOAT4 vUp;
+            XMFLOAT4 vLook;
+            XMFLOAT4 vPos;
+
+        } VTXMATRIX_INSTANCE;
+
+		struct ENGINE_DLL VTXMESH_INST 
+        {
+            static const unsigned int iNumElement = 8;
+            static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElement];
+        };
+
+
 	typedef struct ENGINE_DLL VTXANIMMESH
 	{
 		XMFLOAT3		vPosition;

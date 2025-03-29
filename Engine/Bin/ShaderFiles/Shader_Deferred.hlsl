@@ -278,7 +278,7 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
     
     if (vPosition.w - 1.5f > vOldDepth.y * 500.f)
     {
-        Out.vColor.rgb *= 0.6f;
+        Out.vColor.rgb *= 0.9f;
    	
     }
     
