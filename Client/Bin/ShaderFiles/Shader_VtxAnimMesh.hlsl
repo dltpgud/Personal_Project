@@ -357,7 +357,7 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
         rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
         rim = pow(1 - rim, g_RimPow);
     }
-    
+   // In.vProjPos.z / In.vProjPos.w(정규화된 깊이값).
     Out.vDiffuse = vMtrlDiffuse;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);

@@ -182,6 +182,18 @@ void CModel::init_Loop()
     m_Animations[m_iCurrentAnimIndex]->init_Loop(m_Bones);
 }
 
+HRESULT CModel::Set_InstanceBuffer(vector<_matrix> vecObjMat)
+{
+
+
+    for (auto& pMesh : m_Meshes)
+        if (FAILED(pMesh->Set_InstanceBuffer(vecObjMat)))
+            return E_FAIL;
+
+
+    return S_OK;
+}
+
 void CModel::Center_Ext(_float3* Center, _float3* extend)
 {
     _float3 minPoint(FLT_MAX, FLT_MAX, FLT_MAX);

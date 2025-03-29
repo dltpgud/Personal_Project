@@ -21,9 +21,7 @@ HRESULT CNonAni::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
+   
     return S_OK;
 }
 
@@ -46,6 +44,8 @@ void CNonAni::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
   
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
 }
 
 HRESULT CNonAni::Render_Shadow()
@@ -78,11 +78,7 @@ HRESULT CNonAni::Render_Shadow()
 
 HRESULT CNonAni::Render()
 {
-    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 5.f))
-    {
-        return S_OK;
-    }
-
+   
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -121,15 +117,36 @@ void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
     //    return;
 }
 
-
-
-HRESULT CNonAni::Add_Components()
+void CNonAni::Set_InstaceBuffer(const vector<_matrix>& worldmat)
 {
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
-                                      reinterpret_cast<CComponent**>(&m_pShaderCom))))
-        return E_FAIL;
-    return S_OK;
+
+   if (1 == worldmat.size())
+    {
+        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
+                                          reinterpret_cast<CComponent**>(&m_pShaderCom))))
+            return ;
+      
+            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, worldmat.front().r[0]);
+        m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_UP, worldmat.front().r[1]);
+            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, worldmat.front().r[2]);
+        m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, worldmat.front().r[3]);
+        
+    }
+   else
+   {
+
+           if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMeshIst"), TEXT("Com_Shader"),
+                                         reinterpret_cast<CComponent**>(&m_pShaderCom))))
+           return ;
+       	m_pModelCom->Set_InstanceBuffer(worldmat);
+   
+   }
+
 }
+
+
+
+
 
 HRESULT CNonAni::Bind_ShaderResources()
 {
