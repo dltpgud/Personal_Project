@@ -576,7 +576,8 @@ HRESULT CWeapon::Bind_ShaderResources()
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
-
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
     if (m_pWeapon != MissileGatling) {
         if (FAILED(m_pShaderCom->Bind_Float("g_EmissivePower", m_fEmissivePower)))
             return E_FAIL;

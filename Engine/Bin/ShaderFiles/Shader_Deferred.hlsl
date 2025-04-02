@@ -38,7 +38,7 @@ vector g_vCamPosition;
 // 텍스쳐에서 한 픽셀의 간격
 float dX;
 float dY;
-
+float g_fCamFar;
  float Bloom_Weights[5] = { 0.0545, 0.2442, 0.4026, 0.2442 , 0.0545 };
 
 
@@ -47,7 +47,7 @@ float4 Compute_WorldPos(float2 vTexcoord)
     float4 vWorldPos = 0.f;
 
     vector vDepthDesc = g_DepthTexture.Sample(PointSampler, vTexcoord);
-    float fViewZ = vDepthDesc.y * 500.f;
+    float fViewZ = vDepthDesc.y * g_fCamFar;
 	
     vWorldPos.x = vTexcoord.x * 2.f - 1.f;
     vWorldPos.y = vTexcoord.y * -2.f + 1.f;
@@ -128,7 +128,7 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
 	/* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴하낟. */
     vector vNormalDesc = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
     vector vDepthDesc = g_DepthTexture.Sample(PointSampler, In.vTexcoord);
-    float fViewZ = vDepthDesc.y * 500.f;
+    float fViewZ = vDepthDesc.y * g_fCamFar;
 	/* 0 ~ 1 -> -1 ~ 1 */
     vector vNormal = float4(vNormalDesc.xyz * 2.f - 1.f, 0.f);
 
@@ -173,7 +173,7 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_POINT(PS_IN In)
 	/* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴하낟. */
     vector vNormalDesc = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
     vector vDepthDesc = g_DepthTexture.Sample(PointSampler, In.vTexcoord);
-    float fViewZ = vDepthDesc.y * 500.f;
+    float fViewZ = vDepthDesc.y * g_fCamFar;
 	/* 0 ~ 1 -> -1 ~ 1 */
     vector vNormal = float4(vNormalDesc.xyz * 2.f - 1.f, 0.f);
 
@@ -225,10 +225,10 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
     vector vRim = g_RimTexture.Sample(LinearSampler, In.vTexcoord);
     vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord); 
     
-    float depthLeft = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(-(1.f / 1280.f), 0.f)).y * 500.f;
-    float depthRight = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2((1.f / 1280.f), 0.f)).y * 500.f;
-    float depthUp = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, -(1.f / 720.f))).y * 500.f;
-    float depthDown = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, (1.f / 720.f))).y * 500.f;
+    float depthLeft = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(-(1.f / 1280.f), 0.f)).y * g_fCamFar;
+    float depthRight = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2((1.f / 1280.f), 0.f)).y * g_fCamFar;
+    float depthUp = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, -(1.f / 720.f))).y * g_fCamFar;
+    float depthDown = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, (1.f / 720.f))).y * g_fCamFar;
     float depthMid = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord).y;
     float depthON_OFF = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord).z;
     float OutLine;
@@ -276,7 +276,7 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
     Out.vColor = vDiffuse * vShade * OutLine + vRim + (vSpecular * 0.8f) + vEmissive;
             
     
-    if (vPosition.w - 1.5f > vOldDepth.y * 500.f)
+    if (vPosition.w - 1.5f > vOldDepth.y * g_fCamFar)
     {
         Out.vColor.rgb *= 0.9f;
    	

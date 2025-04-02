@@ -18,6 +18,7 @@ float4			g_vMtrlAmbient	= float4(0.4f, 0.4f, 0.4f, 1.f);
 float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
 float4			g_vCamPosition;
+float           g_fCamFar;
 
 float4x4		g_BoneMatrices[512];   /*뼈 메트릭스 개수*/
 bool g_TagetBool;
@@ -87,6 +88,9 @@ VS_OUT VS_MAIN(  VS_IN In)
 	Out.vTexcoord = In.vTexcoord;	
 	Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = vPosition;
+    Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
+    Out.vBinormal = vector(normalize(cross(Out.vNormal.xyz, Out.vTangent.xyz)), 0.f);
+
 	return Out;
 }
 
@@ -135,9 +139,9 @@ PS_OUT PS_MAIN(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
 	return Out;
 }
 
@@ -157,8 +161,8 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
 
-    vector OutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    vector vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
+    vector OutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    vector vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
     
     if (maskValue > g_threshold)
     {
@@ -168,8 +172,6 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     {
         discard;
     }
-    
-    
 
     float rim = { 0.f };
     if (true == g_TagetBool)
@@ -178,21 +180,13 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
         rim = pow(1 - rim, g_RimPow);
     }
 
-   
-    //float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
-    //
-    //// 카툰 효과를 위한 색상 임계값
-    //float3 finalColor;
-    //if (NdotL > 0.2)
-    //{
-    //    finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
-    //}
-    //else
-    //{
-    //    finalColor = vMtrlDiffuse.rgb * float3(0.9, 0.9, 0.9); // 음영 색상
-    //}    
-    
-    
+    vector vNormalDesc = g_NormalTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vNormal = vector(vNormalDesc.xyz * 2.f - 1.f, 0.f);
+    vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
+
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
+	
+    vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
     
 
     Out.vDiffuse = vMtrlDiffuse ;
@@ -200,7 +194,7 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vDepth;
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
     Out.vOutLine = OutLine;
     return Out;
@@ -244,12 +238,12 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse;
     Out.vEmissive = vMtrlEmissive;
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     return Out;
 }
 
@@ -265,11 +259,11 @@ PS_OUT PS_WEAPON(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vEmissive = vMtrlEmissive * g_EmissivePower;
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     return Out;
 }
 
@@ -306,12 +300,12 @@ PS_OUT PS_Door(PS_IN In)
 
     Out.vDiffuse = vDiffuse;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor) ;
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vEmissive;
     return Out;
 }
@@ -327,7 +321,7 @@ PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
 	
-    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
 
     return Out;
 }
@@ -360,10 +354,10 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
    // In.vProjPos.z / In.vProjPos.w(정규화된 깊이값).
     Out.vDiffuse = vMtrlDiffuse;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 1.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     return Out;
 }
 

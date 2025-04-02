@@ -6,7 +6,7 @@ float4			g_vLightDir;
 float4			g_vLightDiffuse;
 float4			g_vLightAmbient;
 float4			g_vLightSpecular;
-
+float g_fCamFar;
 texture2D		g_DiffuseTexture;
 texture2D       g_EmissiveTexture;
 
@@ -64,98 +64,6 @@ VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
 	return Out;
 }
 
-//struct VS_INST
-//{
-//    float3 vPosition : POSITION;
-//    float3 vNormal : NORMAL;
-//    float2 vTexcoord : TEXCOORD0;
-//    float3 vTangent : TANGENT;
-//    
-//    float4 vRight : TEXCOORD1;
-//    float4 vUp : TEXCOORD2;
-//    float4 vLook : TEXCOORD3;
-//    float4 vPos : TEXCOORD4;
-//};
-//
-//struct VS_OUTINST
-//{
-//    float4 vPosition : SV_POSITION;
-//    float4 vNormal : NORMAL;
-//    float2 vTexcoord : TEXCOORD0;
-//    float4 vWorldPos : TEXCOORD1;
-//    float4 vProjPos : TEXCOORD2;
-//    float4 vTangent : TANGENT;
-//    float4 vBinormal : BINORMAL;
-//    
-//};
-//
-//VS_OUTINST VSINST_MAIN(VS_INST In)
-//{
-//    VS_OUTINST Out = (VS_OUTINST) 0;
-//    
-//    float4x4 WorldMatrix = float4x4(In.vRight, In.vUp, In.vLook, In.vPos); //월드매트릭스 만들기
-//    
-//    vector vPosition = mul(float4(In.vPosition, 1.f), WorldMatrix);
-//    vPosition = mul(vPosition, g_ViewMatrix);
-//    vPosition = mul(vPosition, g_ProjMatrix);
-//
-//    Out.vPosition = vPosition;
-//
-//    Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), WorldMatrix));
-//    Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), WorldMatrix));
-//    Out.vBinormal = vector(normalize(cross(Out.vNormal.xyz, Out.vTangent.xyz)), 0.f);
-//    Out.vTexcoord = In.vTexcoord;
-//        
-//    Out.vWorldPos = mul(float4(In.vPosition, 1.f), WorldMatrix);
-//    Out.vProjPos = vPosition;
-//    
-//    return Out;
-//}
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-//VS_OUT VS_Shock(VS_IN In)
-//{
-//    VS_OUT Out = (VS_OUT) 0;
-//    
-//
-//    // 시간에 따라 반지름(R) 증가
-//    float newRadius = RingRadius + Time * GrowthRate;
-//
-//    // 반지름 기반으로 Position 재조정
-//    float len = length(In.vPosition.xz); // 중심에서 떨어진 거리 계산
-//    float scaleFactor = newRadius / len; // 새로운 반지름에 맞게 스케일링
-//    float3 scaledPosition = float3(In.vPosition.x * scaleFactor, In.vPosition.y, In.vPosition.z * scaleFactor);
-//
-//    float maxScaleFactor = 5.0; // 텍스처 반복 횟수를 제한하는 상한값
-//    scaleFactor = min(scaleFactor, maxScaleFactor);
-//
-//
-// 
-//        
-//    vector vPosition = mul(float4(scaledPosition, 1.0),
-//    g_WorldMatrix);
-//    vPosition = mul(vPosition, g_ViewMatrix);
-//    vPosition = mul(vPosition, g_ProjMatrix);
-//    
-//    Out.vPosition = vPosition;
-//    Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
-//    Out.vTexcoord = In.vTexcoord ;
-//    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-//    Out.vProjPos = vPosition;
-//    return Out;
-//}
-//
 
 struct PS_IN
 {
@@ -192,10 +100,10 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vDiffuse = vMtrlDiffuse;
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f,1.f);
+    Out.vNormal = In.vNormal;
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     return Out;
 }
@@ -214,8 +122,8 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f,1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     return Out;
 }
@@ -236,8 +144,8 @@ PS_OUT PS_MAKATOON(PS_IN In)
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
    // float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
    // float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
    // float4 vLook = In.vWorldPos - g_vCamPosition;
@@ -284,8 +192,8 @@ PS_OUT PS_MAKATOON_ICON(PS_IN In)
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     
     //float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
     //float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
@@ -323,7 +231,7 @@ PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
 	
-    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
 
     return Out;
 }
@@ -352,8 +260,8 @@ PS_OUT PS_FIRE(PS_IN In)
     Out.vRim = vMtrlDiffuse + (rim * g_RimColor);
     Out.vDiffuse = float4(color.rgb, vMtrlDiffuse) + (rim * g_RimColor);
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     return Out;
 }
@@ -379,9 +287,9 @@ PS_OUT PS_ShockWaveFire(PS_IN In)
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
         Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
 
     return Out;
 }
@@ -407,9 +315,9 @@ PS_OUT PS_Shock(PS_IN In)
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
 
     return Out;
 }
@@ -443,9 +351,9 @@ PS_OUT PS_WALL(PS_IN In)
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vEmissive = vEmissive;
     return Out;
 }
@@ -473,8 +381,8 @@ PS_OUT PS_LASER(PS_IN In)
     Out.vRim = float4(color.rgb, vDiffuse.a) + rim;
     Out.vDiffuse = float4(color.rgb, vDiffuse.a);
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 500.f, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vDiffuse;
     return Out;
 }

@@ -28,6 +28,8 @@ class ENGINE_DLL CCamera abstract : public CGameObject
 	virtual void Late_Update(_float fTimeDelta);
 	virtual HRESULT Render();
 	void Set_Update(_bool bUpdate) { m_bUpdate = bUpdate; }
+
+
  protected:
 	_float					m_fFovy		= { 0.f };
 	_float					m_fAspect	= { 0.f };
