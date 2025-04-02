@@ -263,7 +263,9 @@ HRESULT CMainApp::Ready_Prototype_Component_For_Static()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_ShockWaveEffect"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/ShokWave_Ground_01_output.dds")))))
 		return E_FAIL;
-	
+      if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Nomal_Tire"),
+        CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Models/Nomal/T_Tire_N.dds")))))
+            return E_FAIL;
 
 	
 	

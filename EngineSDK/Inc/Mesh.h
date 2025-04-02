@@ -32,10 +32,6 @@ public:
     _uint Get_iNumVertices();
     HRESULT Set_InstanceBuffer(vector<_matrix> vecObjMat);
     HRESULT Bind_Buffers();
-    ID3D11Buffer* Get_InstBuffer()
-    {
-        return m_pInst_Buffer;
-    };
     private:
     HRESULT Load_AnimMesh(HANDLE hFile);
     HRESULT Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix);

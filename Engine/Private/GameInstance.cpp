@@ -145,6 +145,11 @@ CActor* CGameInstance::Get_Player()
 	return m_pPlayer;
 }
 
+void CGameInstance::Set_Camfar(_float fFar)
+{
+    m_pCamFar = fFar;
+}
+
 void CGameInstance::Release_Engine()
 {
 	CGameInstance::GetInstance()->Free();
@@ -664,6 +669,12 @@ const _float4* CGameInstance::Get_CamLook()
 		return nullptr;
 
 	return m_pPipeLine->Get_CamLook();
+}
+
+const float* CGameInstance::Get_CamFar()
+{
+return &m_pCamFar;
+
 }
 
 void CGameInstance::Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix)

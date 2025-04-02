@@ -132,7 +132,8 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _uint& pLayerTag)
    _vector m_Eye = XMVectorSet(0.f, 200.f, 200.f, 1.f);
    _vector m_Dire = XMVectorSet(0.f, -1.f, -1.5, 0.f);
    XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye, m_Eye+ m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
-	XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY, 0.1f, 500.f));
+   XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY,
+                                                         Desc.fNearZ, Desc.fFarZ));
 
 	m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
 

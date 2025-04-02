@@ -169,8 +169,11 @@ HRESULT CBody_BoomBot::Render()
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
-
-
+        if (i == 2)
+        {
+            if (FAILED(m_pNomalTextureCom->Bind_ShaderResource(m_pShaderCom, "g_NormalTexture", 0)))
+                return E_FAIL;
+        }
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -249,6 +252,11 @@ HRESULT CBody_BoomBot::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
         TEXT("Com_Texture_Mask"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
+
+      if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Nomal_Tire"), TEXT("Com_Nomal_Texture"),
+                                      reinterpret_cast<CComponent**>(&m_pNomalTextureCom))))
+        return E_FAIL;
+    
     return S_OK;
 }
 
@@ -266,6 +274,9 @@ HRESULT CBody_BoomBot::Bind_ShaderResources()
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
+
 
     if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
         return E_FAIL;
@@ -318,4 +329,5 @@ CGameObject* CBody_BoomBot::Clone(void* pArg)
 void CBody_BoomBot::Free()
 {
     __super::Free();
+    Safe_Release(m_pNomalTextureCom);
 }

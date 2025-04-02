@@ -32,6 +32,8 @@ public:
 
 	void Set_Player(CGameObject* pPlayer);
     CActor* Get_Player();
+        void Set_Camfar(_float fFar);
+        const float* Get_CamFar();
 
 public: /* For.Graphic_Device */
 	HRESULT Render_Begin(_float4 Color);
@@ -118,6 +120,8 @@ public: /* For.PipeLine */
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
+
+
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 
@@ -166,6 +170,7 @@ public: /* For.Frustum */
 
 
 private:
+    _float							m_pCamFar{};
 	 CActor*						m_pPlayer			 = { nullptr };   // 플레이어 포인터는 오브젝트 메니저가 지워질때 같이 지워줌으로 따로 지워줄 필요는 없다!.
 	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };

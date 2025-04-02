@@ -40,7 +40,7 @@ private:
 	HRESULT Bind_ShaderResources();
 private:
 	
-
+	CTexture* m_pNomalTextureCom{nullptr};
 	_float m_fAttackTime{ 0.f };
 	_float m_pDamage = { 5.f };
 

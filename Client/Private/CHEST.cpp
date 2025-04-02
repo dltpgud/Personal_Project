@@ -272,7 +272,8 @@ HRESULT CCHEST::Bind_ShaderResources(_int i)
     if (FAILED(m_pShaderCom[i]->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
 
-    
+        if (FAILED(m_pShaderCom[i]->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
 
     return S_OK;
 }

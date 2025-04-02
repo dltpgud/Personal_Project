@@ -47,6 +47,7 @@ _int CCamera::Priority_Update(_float fTimeDelta)
 
 	m_pGameInstance->Set_TransformMatrix(CPipeLine::D3DTS_PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNearZ, m_fFarZ));
 
+	m_pGameInstance->Set_Camfar(m_fFarZ);
 	return OBJ_NOEVENT;
 }
 
