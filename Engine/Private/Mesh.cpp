@@ -155,7 +155,7 @@ HRESULT CMesh::Render()
     if (m_pInst_Buffer == nullptr)
         return __super::Render();
     else
-        m_pContext->DrawIndexedInstanced(m_iNumIndexPerInstance, m_iNumInstance_Culling, 0, 0, 0);
+        m_pContext->DrawIndexedInstanced(m_iNumIndexPerInstance, m_iNumInstance, 0, 0, 0);
 
 
     return S_OK;
@@ -185,7 +185,6 @@ HRESULT CMesh::Set_InstanceBuffer(vector<_matrix> vecObjMat)
 {
 
     m_iNumInstance = (_uint)vecObjMat.size();
-    m_iNumInstance_Culling = m_iNumInstance;
     m_iInstVertexStride = sizeof VTXMATRIX_INSTANCE;
     m_iNumVertexBuffers = 2;
 
@@ -411,4 +410,5 @@ void CMesh::Free()
         Safe_Delete_Array(m_pIndices);
     }
     Safe_Release(m_pInst_Buffer);
+    Safe_Delete(m_pInst_BufferData);
 }
