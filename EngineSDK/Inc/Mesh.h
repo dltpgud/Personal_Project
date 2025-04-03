@@ -43,7 +43,6 @@ public:
     vector<_float4x4>		m_OffsetMatrices;
     ID3D11Buffer* m_pInst_Buffer{};
     _uint m_iInstVertexStride{};
-    _uint m_iNumInstance_Culling{};
     _uint m_iNumIndexPerInstance{};
     _uint m_iNumInstance = {0};
     D3D11_BUFFER_DESC m_Inst_BufferDesc = {};
