@@ -1,5 +1,4 @@
 #include "Cell.h"
-
 #include "VIBuffer_Cell.h"
 
 CCell::CCell(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
@@ -17,7 +16,6 @@ HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex, const _uint& Ty
 	for (size_t i = 0; i < POINT_END; i++)	
 		m_vPoints[i] = pPoints[i];
 
-
 #ifdef _DEBUG
 	m_pVIBuffer = CVIBuffer_Cell::Create(m_pDevice, m_pContext, m_vPoints);
 	if (nullptr == m_pVIBuffer)
@@ -29,11 +27,10 @@ HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex, const _uint& Ty
 
 _bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeighborIndex ,_vector* Slide )
 {
-
 	for (size_t i = 0; i < LINE_END; i++)
-	{
-		_vector		vLine = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]) - XMLoadFloat3(&m_vPoints[i]);  // 점과 점의 방향벡터(라인)을 그린다. 앞에 나누기 연산을 한건 없는 4번째 점을 찾을까봐..
-		_vector		vNormal = XMVectorSet(XMVectorGetZ(vLine) * -1.f, 0.f, XMVectorGetX(vLine), 0.f);// 선들의 법선을 구한다.
+	{  
+		_vector		vLine = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]) - XMLoadFloat3(&m_vPoints[i]);  
+		_vector		vNormal = XMVectorSet(XMVectorGetZ(vLine) * -1.f, 0.f, XMVectorGetX(vLine), 0.f);
 		_vector		vDir = vAfterLocalPos - XMLoadFloat3(&m_vPoints[i]);
 
 		if ( 0 < XMVectorGetX(XMVector3Dot(XMVector3Normalize(vNormal), XMVector3Normalize(vDir))))
@@ -62,8 +59,6 @@ _bool CCell::isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeig
 
 _bool CCell::Compare_Points(_fvector vSour, _fvector vDest)
 {
-	 // XMVector3Equal : bool값 반환
-	// XMVectorEqual : 벡터의 각 요소들을 비교해서 0,1로 표현해 반환
 	if (true == XMVector3Equal(XMLoadFloat3(&m_vPoints[POINT_A]), vSour)) {
 
 		if (true == XMVector3Equal(XMLoadFloat3(&m_vPoints[POINT_B]), vDest))
@@ -91,10 +86,10 @@ _bool CCell::Compare_Points(_fvector vSour, _fvector vDest)
 
 	return false;
 }
+
 #ifdef _DEBUG
 HRESULT CCell::Render()
 {
-
 #ifdef _DEBUG
 	m_pVIBuffer->Bind_Buffers();
 
@@ -102,6 +97,38 @@ HRESULT CCell::Render()
 #endif
 }
 #endif
+
+_bool CCell::Find_TargetCell(_vector WorldPos)
+{
+    for (size_t i = 0; i < LINE_END; i++)
+    { 
+        _vector vLine = XMLoadFloat3(&m_vPoints[(i + 1) % POINT_END]) - XMLoadFloat3(&m_vPoints[i]);
+        _vector vNormal =XMVectorSet(XMVectorGetZ(vLine) * -1.f, 0.f, XMVectorGetX(vLine), 0.f); 
+        _vector vDir = WorldPos - XMLoadFloat3(&m_vPoints[i]);
+
+        if (0 < XMVectorGetX(XMVector3Dot(XMVector3Normalize(vNormal), XMVector3Normalize(vDir))))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+_vector CCell::GetCenter() const
+{
+    _float3 center = (_float3{0, 0, 0});
+    for (int i = 0; i < POINT_END; ++i)
+    {
+        center.x += m_vPoints[i].x;
+        center.y += m_vPoints[i].y;
+        center.z += m_vPoints[i].z;
+    }
+    center.x /= POINT_END;
+    center.y /= POINT_END;
+    center.z /= POINT_END;
+    return XMVectorSet(center.x, center.y, center.z,1.f);
+}
+
 CCell * CCell::Create(ID3D11Device * pDevice, ID3D11DeviceContext * pContext, const _float3 * pPoints, _uint iIndex, const _uint& Type )
 {
 	CCell*		pInstance = new CCell(pDevice, pContext);

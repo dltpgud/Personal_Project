@@ -33,7 +33,7 @@ HRESULT CPlayerEffectUI::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
     m_pTransformCom->Set_Scaling(pDesc->fSizeX, pDesc->fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
                                    XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
     if (FAILED(Add_Components()))
@@ -47,13 +47,9 @@ HRESULT CPlayerEffectUI::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CPlayerEffectUI::Priority_Update(_float fTimeDelta)
+void CPlayerEffectUI::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
- 
-
-    return OBJ_NOEVENT;
+   
 }
 
 void CPlayerEffectUI::Update(_float fTimeDelta)
@@ -148,7 +144,7 @@ HRESULT CPlayerEffectUI::Render()
     {
         for (_int i = 0; i < 3; i++) {
             Set_scale(i);
-            if (FAILED(m_pShaderCom->Bind_Int("g_Discard", i)))
+            if (FAILED(m_pShaderCom->Bind_RawValue("g_Discard", &i, sizeof(_int))))
                 return E_FAIL;
 
             if (FAILED(m_pShaderCom->Bind_RawValue("g_Alpha", &_float3{ m_alpha[0], m_alpha[1],m_alpha[2] }, sizeof(_float3))))

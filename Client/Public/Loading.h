@@ -15,7 +15,7 @@ class CLoading :  public CUI
 public:
 	typedef struct CLoading_DESC : public CUI::CUI_DESC
 	{
-		LOADINGID LoadingID{};
+		
 		_int TexIndex{};
 
 	}CLoading_DESC;
@@ -28,17 +28,16 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-	virtual _int	Priority_Update(_float fTimeDelta) override;
+        virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
 private : 
-	 HRESULT Initialize_GORGE();
 	 HRESULT Set_LoadPos(CLoading_DESC* pArg);
-	 void Roop(const _uint& i, CLoading_DESC desc[], CLoading_DESC pdesc[]);
+
 private:
-	LOADINGID		m_pLoadingID = {};
+	
 	CTexture*	    m_pTextureCom = {};
 	CShader*		m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };

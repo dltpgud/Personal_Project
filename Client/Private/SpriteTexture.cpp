@@ -23,14 +23,14 @@ HRESULT CSpriteTexture::Initialize(void* pArg)
 	CSpriteTexture_DESC* Desc = static_cast <CSpriteTexture_DESC*>(pArg) ;
 
 	m_TexIndex = Desc->TexIndex;
-	m_wKey = Desc->FilePath;
+	m_wKey = Desc->ProtoName;
 	m_interver = Desc->interver;
 	if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
 
 	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 	m_pTransformCom->Set_TRANSFORM(
-		CTransform::TRANSFORM_POSITION,
+		CTransform::T_POSITION,
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 	m_index = 0;
@@ -40,13 +40,9 @@ HRESULT CSpriteTexture::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CSpriteTexture::Priority_Update(_float fTimeDelta)
+void CSpriteTexture::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
 
-
-	return OBJ_NOEVENT;
 }
 
 void CSpriteTexture::Update(_float fTimeDelta)
@@ -101,18 +97,6 @@ HRESULT CSpriteTexture::Render()
 	return S_OK;
 }
 
-HRESULT CSpriteTexture::Initialize_GORGE()
-{
-	if (FAILED(__super::Add_Component(LEVEL_STATIC, m_wKey,
-	TEXT("Com_Texture_Load_Canyon"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
-		return E_FAIL;
-
-	return S_OK;
-}
-
-
-
-
 
 
 HRESULT CSpriteTexture::Add_Components()
@@ -131,13 +115,9 @@ HRESULT CSpriteTexture::Add_Components()
 
 
 	/* For.Com_Texture */
-	switch (m_pLoadingID)
-	{
-	case GORGE :
-		hr = Initialize_GORGE();
-		break;
-	}
-
+	if (FAILED(__super::Add_Component(LEVEL_STATIC, m_wKey, TEXT("Com_Texture_Load_Canyon"),
+                                                   reinterpret_cast<CComponent**>(&m_pTextureCom))))
+                  return E_FAIL;
 
 	return hr;
 

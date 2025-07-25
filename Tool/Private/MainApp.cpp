@@ -79,7 +79,10 @@ void CMainApp::Render()
 	if (FAILED(m_pGameInstance->Render_End()))
 		 return;
 }
-
+void CMainApp::Delete()
+{
+    m_pGameInstance->Delete();
+}
 HRESULT CMainApp::Open_Level(LEVELID eLevelID)
 {
 	m_pGameInstance->Open_Level(LEVEL_EDIT, CLevel_Edit::Create(m_pDevice, m_pContext));

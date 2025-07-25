@@ -31,9 +31,10 @@ HRESULT CGameObject::Initialize(void* pArg)
     if (nullptr != pArg)
     {
         GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    }
-
-     m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pArg);
+        m_iObjectType = pDesc->Object_Type;
+        m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
+    }else
+        m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pArg);
     if (nullptr == m_pTransformCom)
         return E_FAIL;
 
@@ -44,9 +45,9 @@ HRESULT CGameObject::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CGameObject::Priority_Update(_float fTimeDelta)
+void CGameObject::Priority_Update(_float fTimeDelta)
 {
-    return OBJ_NOEVENT;
+    return;
 }
 
 void CGameObject::Update(_float fTimeDelta)
@@ -58,10 +59,14 @@ void CGameObject::Update(_float fTimeDelta)
 
 void CGameObject::Late_Update(_float fTimeDelta)
 {
-    if (m_pColliderCom)
+#ifdef _DEBUG
+
+    if (nullptr!= m_pColliderCom  )
     {
         m_pGameInstance->Add_DebugComponents(m_pColliderCom);
     }
+#endif // _DEBUG
+
 }
 
 HRESULT CGameObject::Render()

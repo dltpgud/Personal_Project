@@ -17,33 +17,31 @@ HRESULT CInteractiveUI::Initialize_Prototype()
 
 HRESULT CInteractiveUI::Initialize(void* pArg)
 {
-    CUI_DESC Desc{};
-    Desc.fX = g_iWinSizeX * 0.5f-40.f;
-    Desc.fY = g_iWinSizeY * 0.5f;
-    Desc.fZ =  0.f;
-    Desc.fSizeX = 50.f;
-    Desc.fSizeY = 50.f;
-    Desc.Update = true;
+    CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
+    pDesc->fX = g_iWinSizeX * 0.5f - 40.f;
+    pDesc->fY = g_iWinSizeY * 0.5f;
+    pDesc->fZ = 0.f;
+    pDesc->fSizeX = 50.f;
+    pDesc->fSizeY = 50.f;
+    pDesc->Update = true;
 
-    Desc.UID = UIID_InteractiveUI;
+     pDesc->UID = UIID_InteractiveUI;
 
-    if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
                                    XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+    m_bUpdate = false;
     return S_OK;
 }
 
-_int CInteractiveUI::Priority_Update(_float fTimeDelta)
+void CInteractiveUI::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F))
     {
@@ -51,9 +49,6 @@ _int CInteractiveUI::Priority_Update(_float fTimeDelta)
         m_bColor = true;
      
     }
-
-
-    return OBJ_NOEVENT;
 }
 
 void CInteractiveUI::Update(_float fTimeDelta)

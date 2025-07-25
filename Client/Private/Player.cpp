@@ -44,19 +44,18 @@ HRESULT CPlayer::Initialize(void* pArg)
     m_fMAXHP = 500.f;
     m_fHP = m_fMAXHP;
 
-    m_pPlayerUI = static_cast<CPlayerUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerHP));
+    m_pPlayerUI = static_cast<CPlayerUI*>(m_pGameInstance->Find_Clone_UIObj(L"playerHP"));
     m_pPlayerUI->Set_PlayerMaxHP(m_fMAXHP);
     m_pPlayerUI->Set_PlayerHP(m_fMAXHP);
     return S_OK;
 }
 
-_int CPlayer::Priority_Update(_float fTimeDelta)
+void CPlayer::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
+  
 
-    if (false == m_bUpdate)
-        return OBJ_NOEVENT;
+   // if (false == m_bUpdate)
+    //    return ;
 
      m_pPlayerUI->Set_PlayerHP(m_fHP);
 
@@ -83,9 +82,6 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
         m_Type == T00 ? m_iState = STATE_STUN : m_iState = STATE_STUN2;
     }
 
-
-
-
     if (false == m_bHitLock && false == m_bFallLock)
     {    
         if(true == m_bKeyinPut)
@@ -94,7 +90,7 @@ _int CPlayer::Priority_Update(_float fTimeDelta)
     }
 
     __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
+    
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -107,13 +103,13 @@ void CPlayer::Update(_float fTimeDelta)
         if (m_pNavigationCom->ISFall())
         {
             Set_onCell(false);
-            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) >= -6.5f)
+            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)) >= -6.5f)
             {
                 m_bFallLock = true;
-                m_pTransformCom->Go_Down(fTimeDelta);
+                m_pTransformCom->Go_Move(CTransform::DOWN ,fTimeDelta);
             }
 
-            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) < -6.5f) {
+            if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)) < -6.5f) {
                 if (false == m_bBurnSound) {
      
                     m_pGameInstance->Play_Sound(L"ST_Player_Burn_Trigger.ogg", CSound::SOUND_HIT, 1.f);
@@ -131,8 +127,8 @@ void CPlayer::Update(_float fTimeDelta)
                     m_pGameInstance->StopSound(CSound::SOUND_HIT);
                     m_pGameInstance->Play_Sound(L"ST_Player_Burn_Stop.ogg", CSound::SOUND_HIT, 1.f);
                     
-                    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_pNavigationCom->Get_SafePos());
-                    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+                    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_pNavigationCom->Get_SafePos());
+                    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
                     m_DemageCellTime = 0.f;
                 }
             }
@@ -247,8 +243,8 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-
-        m_pTransformCom->Go_Straight(fTimeDelta, m_pNavigationCom);
+        m_pTransformCom->Go_Move(CTransform::GO, fTimeDelta, m_pNavigationCom);
+       
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_S))
     {
@@ -262,7 +258,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-        m_pTransformCom->Go_Backward(fTimeDelta, m_pNavigationCom);
+        m_pTransformCom->Go_Move(CTransform::BACK ,fTimeDelta, m_pNavigationCom);
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_A))
@@ -277,7 +273,8 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-        m_pTransformCom->Go_Left(fTimeDelta, m_pNavigationCom);
+
+        m_pTransformCom->Go_Move(CTransform::LEFT,fTimeDelta, m_pNavigationCom);
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_D))
@@ -292,7 +289,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
                 }
             }
         }
-        m_pTransformCom->Go_Right(fTimeDelta, m_pNavigationCom);
+        m_pTransformCom->Go_Move(CTransform::RIGHT, fTimeDelta, m_pNavigationCom);
     }
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_TAB))
@@ -313,7 +310,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
 
     if (true == m_bturn)
     {
-        _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_UP));
+        _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_UP));
 
         m_pGameInstance->MouseFix();
 
@@ -326,7 +323,7 @@ void CPlayer::Key_Input(_float fTimeDelta)
 
         if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
         {
-            m_pTransformCom->Turn(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
+            m_pTransformCom->Turn(m_pTransformCom->Get_TRANSFORM(CTransform::T_RIGHT),
                 fTimeDelta * MouseMove * 0.05f);
         }
     }
@@ -499,11 +496,13 @@ HRESULT CPlayer::Add_PartObjects()
 
 
 
-    CPlayerEffectUI::CPlayerEffectUI_DESC Desc{};
-    Desc.State = &m_eUIState;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, CGameObject::UI, L"Prototype GameObject_PlayerEffectUI",nullptr,0,&Desc)))
-        return E_FAIL;
+    //CPlayerEffectUI::CPlayerEffectUI_DESC Desc{};
+    //Desc.State = &m_eUIState;
+    //Desc.iDeleteLevel = LEVEL_STATIC;
+    //Desc.iMaxLevel = LEVEL_END;
+    //Desc.pEnable_Level = new _bool[LEVEL_END]{false, false, false, true, true, true};
+    //if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Runstate", L"Prototype GameObject_PlayerEffectUI",&Desc)))
+    //    return E_FAIL;
 
 
 

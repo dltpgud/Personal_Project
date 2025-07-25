@@ -22,13 +22,14 @@ HRESULT CBillyBoom::Initialize_Prototype()
 HRESULT CBillyBoom::Initialize(void* pArg)
 {
 
-    CActor::Actor_DESC Desc{};
-    Desc.iNumPartObjects = PART_END;
-    Desc.fSpeedPerSec =  7.f;
-    Desc.fRotationPerSec = XMConvertToRadians(120.f);
-    Desc.JumpPower = 3.f;
+ CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
+    Desc->iNumPartObjects = PART_END;
+    Desc->fSpeedPerSec =  7.f;
+    Desc->fRotationPerSec = XMConvertToRadians(120.f);
+    Desc->JumpPower = 3.f;
+    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::ACTOR;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
-    if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
     m_iState = ST_Idle;
@@ -36,11 +37,6 @@ HRESULT CBillyBoom::Initialize(void* pArg)
    m_fHP = m_fMAXHP;
    m_bOnCell = true;
    m_FixY = 0.5f;
-   m_DATA_TYPE = CGameObject::DATA_MONSTER;
-
-
-
-
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -48,24 +44,13 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
+      if (FAILED(m_pGameInstance->Add_Monster(this)))
+        return E_FAIL;
     return S_OK;
 }
 
-_int CBillyBoom::Priority_Update(_float fTimeDelta)
+void CBillyBoom::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead) {
-        if (m_bPade == false) {
-            static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(true);
-            m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
-            m_bPade = true;
-        }
-         if (static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->FinishPade())
-             {
-                 m_pGameInstance->Set_Open_Bool(true);
-                 return OBJ_DEAD;
-             }
-    }
-
     if(m_iState != ST_Comp_Idle)
     Set_State_From_Body();
 
@@ -110,14 +95,12 @@ _int CBillyBoom::Priority_Update(_float fTimeDelta)
     }   
 
     __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
+    return ;
 }
 
 void CBillyBoom::Update(_float fTimeDelta)
 {
          
-
-
  if (m_iState != ST_Intro && m_bIntro == false) {
   
      if (m_bSkill != true) {
@@ -182,14 +165,15 @@ void CBillyBoom::Dead_Routine(_float fTimeDelta)
             CParticle_Explosion::CParticle_Explosion_Desc Desc{};
             Desc.pParentMatrix = m_pTransformCom->Get_WorldMatrix();
 
-            m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, CGameObject::SKILL, L"Prototype_GameObject_Particle_Explosion", nullptr, 0, &Desc, 0);
+            m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, TEXT("Layer_Skill"),
+                                                     L"Prototype_GameObject_Particle_Explosion", &Desc);
             m_bBoom = true;
         }   
         m_pTransformCom->Set_MoveSpeed(2.f);
-        m_pTransformCom->Go_Down(fTimeDelta);
+        m_pTransformCom->Go_Move(CTransform::DOWN ,fTimeDelta);
     }
 
-    if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) < -20.f)
+    if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)) < -20.f)
         m_bDead = true;
 }
 
@@ -200,9 +184,9 @@ void CBillyBoom::Stun_Routine()
 
 void CBillyBoom::NON_intersect(_float fTimedelta)
 {
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
 
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 
     _vector vDir = vPlayerPos - vPos;
 
@@ -218,7 +202,7 @@ void CBillyBoom::NON_intersect(_float fTimedelta)
         else
         {
             m_iState = ST_Run_Front;
-            m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom, true);
+            m_pTransformCom->Go_Move(CTransform::GO,fTimedelta, m_pNavigationCom, true);
             m_bStart = true;
         }
 
@@ -251,22 +235,23 @@ void CBillyBoom::Intro_Routine(_float fTimedelta)
         CBossHPUI::CBossHPUI_DESC  Desc{};
         Desc.fMaxHP = m_fMAXHP;
         Desc.fHP = m_fHP;
-        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, CGameObject::UI, L"Prototype_GameObject_Boss_HP",
-            nullptr, 0, &Desc)))
+        Desc.Update = false;
+        Desc.iMaxLevel = LEVEL_END;
+        Desc.pEnable_Level = new _bool[LEVEL_END]{false, false, false, false, false, true};
+        if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"BossHP",L"Prototype_GameObject_Boss_HP",&Desc)))
             return;
-
-        m_pGameInstance->Set_OpenUI(CUI::UIID_BossHP, false);
             
-        m_pHP = static_cast< CBossHPUI*>(m_pGameInstance->Get_UI(LEVEL_BOSS, CUI::UIID_BossHP));
+       m_pHP = static_cast<CBossHPUI*>(m_pGameInstance->Find_Clone_UIObj(L"BossHP"));
         m_pHP->Set_BossMaxHP(m_fMAXHP);
 
-       _vector vWorldPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+       _vector vWorldPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
         CBossIntroBG::CBossIntroBG_DESC IntroDesc{};
         IntroDesc.fX = XMVectorGetX(vWorldPos);
         IntroDesc.fY = XMVectorGetY(vWorldPos);
         IntroDesc.fZ = XMVectorGetZ(vWorldPos);
-        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, CGameObject::MAP, L"Prototype_GameObject_Boss_InstroUI",
-            nullptr, 0, &IntroDesc)))
+        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, TEXT("Layer_Map"),
+                                                            L"Prototype_GameObject_Boss_InstroUI",
+             &IntroDesc)))
             return;
 
         m_bIntro = false;

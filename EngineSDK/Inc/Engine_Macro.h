@@ -1,8 +1,6 @@
 ﻿#ifndef Engine_Macro_h__
 #define Engine_Macro_h__
 
-#define		OBJ_NOEVENT	0
-#define		OBJ_DEAD	1	
 
 namespace Engine
 {
@@ -47,6 +45,19 @@ namespace Engine
 		{ MessageBoxW(NULL, _message, L"System Message",MB_OK); __asm { int 3 };return _return;}
 
 
+#define USE_MANY_LOCKS(count) CSpinLock m_locks[count];
+#define USE_LOCK USE_MANY_LOCKS(1)
+#define READ_LOCK_IDX(idx) CReadLockGuard readLockGuard_##idx(m_locks[idx], typeid(this).name());
+#define READ_LOCK READ_LOCK_IDX(0)
+#define WRITE_LOCK_IDX(idx) CWriteLockGuard WriteLockGuard_##idx(m_locks[idx], typeid(this).name());
+#define WRITE_LOCK WRITE_LOCK_IDX(0)
+
+#define CRASH(cause)                                                                                                   \
+    {                                                                                                                  \
+        _uint32* crash = nullptr;                                                                                       \
+        __analysis_assume(crash != nullptr);                                                                           \
+        *crash = 0xDEADBEEF;                                                                                           \
+    }
 
 #define NO_COPY(CLASSNAME)								\
 			private:										\

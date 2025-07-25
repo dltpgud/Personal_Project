@@ -70,7 +70,7 @@ HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencil
 	ID3D11ShaderResourceView* pSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {
 nullptr
 	};
-
+	//셰이더 리소스 배열을 픽셀 셰이더 단계에 바인딩.
 	m_pContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
 
 
@@ -83,6 +83,7 @@ nullptr
 		RTVs[i] = (*pMRTs)[i]->Get_RTV();
 	}
 
+	//픽셀이 최종적으로 출력될 대상(렌더 타겟)을 지정한다.
 	m_pContext->OMSetRenderTargets(static_cast<_uint>(iNumRenderTargets), RTVs, nullptr != pDSView ? pDSView : m_pDSV);
 
 	return S_OK;

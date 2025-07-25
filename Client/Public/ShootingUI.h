@@ -29,7 +29,7 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-	virtual _int	Priority_Update(_float fTimeDelta) override;
+        virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
@@ -38,7 +38,6 @@ public:
 	void Set_RandomPos(_bool WeaponUP, _bool WeaponDown, _bool WeaponSide);
 	void Set_PosClack(_float X, _float Y);
 private:
-	LOADINGID		m_pLoadingID = {};
 	CTexture*	    m_pTextureCom [ShootEF_END] = {};
 	CShader*		m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };

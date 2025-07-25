@@ -22,7 +22,7 @@ HRESULT CNPC::Initialize_Prototype()
 HRESULT CNPC::Initialize(void* pArg)
 {
     GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    m_DATA_TYPE = pDesc->DATA_TYPE;
+    m_iObjectType = pDesc->Object_Type;
 
     size_t iLen = wcslen(pDesc->ProtoName) + 1;
     m_Proto = new wchar_t[iLen];
@@ -39,15 +39,14 @@ HRESULT CNPC::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CNPC::Priority_Update(_float fTimeDelta)
+void CNPC::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
+
     if (m_pGameInstance->Get_DIKeyDown(DIK_K))
         m_istate++;
 
     __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
+
 }
 
 void CNPC::Update(_float fTimeDelta)

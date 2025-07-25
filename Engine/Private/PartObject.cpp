@@ -24,15 +24,15 @@ HRESULT CPartObject::Initialize(void * pArg)
 
 	m_pParentMatrix = pDesc->pParentMatrix;
 
-	if (FAILED(__super::Initialize(pArg)))
+	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;	
 	
 	return S_OK;
 }
 
-_int CPartObject::Priority_Update(_float fTimeDelta)
+void CPartObject::Priority_Update(_float fTimeDelta)
 {
-	return OBJ_NOEVENT;
+	return ;
 }
 
 void CPartObject::Update(_float fTimeDelta)
@@ -54,9 +54,8 @@ void CPartObject::Update(_float fTimeDelta)
 
 void CPartObject::Late_Update(_float fTimeDelta)
 {
-	XMStoreFloat4x4(&m_WorldMatrix, XMLoadFloat4x4(m_pParentMatrix) *
-		m_pTransformCom->Get_WorldMatrix()); // 부모행렬과 내 월드랑 곱해서 그린다
 
+    XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * XMLoadFloat4x4(m_pParentMatrix)); 
 	__super::Late_Update(fTimeDelta);
 }
 
@@ -76,9 +75,22 @@ void CPartObject::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatri
 	m_pModelCom->Set_BoneUpdateMatrix(pBoneName, NewMatrix);
 }
 
+void CPartObject::Rotation(CTransform* Transform)
+{
+    _matrix met = XMMatrixLookAtLH(
+        XMLoadFloat4x4(&m_WorldMatrix).r[3],
+                         Transform->Get_TRANSFORM(CTransform::T_POSITION),
+                         XMVectorSet(0.f, 1.f, 0.f, 0.f));
 
+    _matrix Wmet = XMMatrixInverse(nullptr, met);
 
+    _float4x4 wmet{};
 
+    XMStoreFloat4x4(&wmet, Wmet);
+    XMStoreFloat4((_float4*)&m_WorldMatrix.m[0][0], XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
+    XMStoreFloat4((_float4*)&m_WorldMatrix.m[1][0], XMVectorSet(0.f, 1.f, 0.f, wmet._24));
+    XMStoreFloat4((_float4*)&m_WorldMatrix.m[2][0], XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
+}
 
 void CPartObject::Free()
 {

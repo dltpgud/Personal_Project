@@ -4,11 +4,11 @@
 #include "WeaponUI.h"
 #include "InteractiveUI.h"
 #include "Player.h"
-CWeaPonIcon::CWeaPonIcon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
+CWeaPonIcon::CWeaPonIcon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
 
-CWeaPonIcon::CWeaPonIcon(const CWeaPonIcon& Prototype) : CGameObject{Prototype}
+CWeaPonIcon::CWeaPonIcon(const CWeaPonIcon& Prototype) : CPartObject{Prototype}
 {
 }
 
@@ -19,102 +19,55 @@ HRESULT CWeaPonIcon::Initialize_Prototype()
 
 HRESULT CWeaPonIcon::Initialize(void* pArg)
 {
-    m_DATA_TYPE = GAMEOBJ_DATA::DATA_NONANIMAPOBJ;
-    if (FAILED(__super::Initialize(pArg)))
+    CWeaPonIcon_DESC* pDesc = static_cast<CWeaPonIcon_DESC*>(pArg); 
+      m_weaPon = pDesc->WeaPonIndex;
+      pDesc->fSpeedPerSec = 0.05f;
+      
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-    
-    m_pTransformCom->Set_MoveSpeed(0.05f);
-    m_moveTime = 1.f;
-    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
-    m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
+
+    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
+
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 1.f, 0.f, 1.f));
+
     return S_OK;
 }
 
-_int CWeaPonIcon::Priority_Update(_float fTimeDelta)
+void CWeaPonIcon::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }
-
-
-
-
-
-    return OBJ_NOEVENT;
+    
 }
 
 void CWeaPonIcon::Update(_float fTimeDelta)
 {
-    m_pTransformCom->Set_Rotation_to_Player();
-
-
-    if (m_moveTime > 0.f)
+  
+    m_pColliderCom->Update(XMLoadFloat4x4(&m_WorldMatrix));
+  
+    if (true == m_pColliderCom->IsColl() && false == m_bIsColl)
     {
-        m_moveTime -= fTimeDelta;
-
-        m_pTransformCom->Go_Up(fTimeDelta);
-
-    }
-    if (m_moveTime <= 0.f)
-    {
-        m_pTransformCom->Go_Down(fTimeDelta);
-
-
-        _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
-        if (Y <= m_fY)
+        m_bIsColl = true;
+        switch (m_weaPon)
         {
-            m_moveTime = 1.f;
-            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(m_fX, m_fY, m_fZ, 1.f));
+        case CWeapon::WeaPoneType::HendGun: m_pWeaPonNumName = L"HendGun ÀåÂø"; break;
+        case CWeapon::WeaPoneType::AssaultRifle: m_pWeaPonNumName = L"Assault Rifle ÀåÂø"; break;
+        case CWeapon::WeaPoneType::MissileGatling: m_pWeaPonNumName = L"Missile Gatling ÀåÂø"; break;
+        case CWeapon::WeaPoneType::HeavyCrossbow: m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø"; break;
         }
-    }
-
-
-    _vector vPlayerPos = m_pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vDir = vPos - vPlayerPos;
-
-
-    _float fLength = XMVectorGetX(XMVector3Length(vDir));
-
-
-    if(fLength >6.f)
-        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
-    else
+        m_InteractiveUI->Set_Text(m_pWeaPonNumName);
         m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
-
-
-
-    switch (m_weaPon)
-    {
-    case CWeapon::WeaPoneType::HendGun:
-        m_pWeaPonNumName = L"HendGun ÀåÂø";
-        break;
-    case CWeapon::WeaPoneType::AssaultRifle:
-        m_pWeaPonNumName = L"Assault Rifle ÀåÂø";
-        break;
-    case CWeapon::WeaPoneType::MissileGatling:
-        m_pWeaPonNumName = L"Missile Gatling ÀåÂø";
-        break;
-    case CWeapon::WeaPoneType::HeavyCrossbow:
-        m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø";
-        break;
     }
-    m_InteractiveUI->Set_Text(m_pWeaPonNumName);
-
-
-
-
-   
-    if (true == m_InteractiveUI->Get_Interactive())
+    else if (false == m_pColliderCom->IsColl() && true == m_bIsColl)
     {
-        static_cast<CWeaponUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerWeaPon))
-            ->Set_ScecondWeapon(m_weaPon);
+        m_bIsColl = false;
+        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
+    }
+
+    if (true == m_InteractiveUI->Get_Interactive() && true == m_pColliderCom->IsColl())
+    {
+        static_cast<CWeaponUI*>(m_pGameInstance->Find_Clone_UIObj(L"WeaponUI"))->Set_ScecondWeapon(m_weaPon);
         m_bDead = true;
         m_InteractiveUI->Set_Interactive(false);
         m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim,CUI::UIID_InteractiveUI);
@@ -123,13 +76,19 @@ void CWeaPonIcon::Update(_float fTimeDelta)
 
 void CWeaPonIcon::Late_Update(_float fTimeDelta)
 {
+    __super::Late_Update(fTimeDelta);
+
+    Rotation(m_pGameInstance->Get_Player()->Get_Transform());
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
+
+    if (FAILED(m_pGameInstance->Add_Interctive(this)))
         return;
 }
 
 HRESULT CWeaPonIcon::Render()
 {
-
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -149,22 +108,10 @@ HRESULT CWeaPonIcon::Render()
     return S_OK;
 }
 
-void CWeaPonIcon::Set_WeaPone(const _uint& i)
-{
-    m_weaPon = i; 
-
-}
-
 HRESULT CWeaPonIcon::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
-        return E_FAIL;
-
-
-    if (FAILED(__super::Add_Component(
-        LEVEL_STATIC, TEXT("Proto Component ChestWeapon Model_AssaultRifle_NonAni"), TEXT("Com_Model0"),
-        reinterpret_cast<CComponent**>(&m_pModelCom[0]))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(
@@ -180,23 +127,33 @@ HRESULT CWeaPonIcon::Add_Components()
             reinterpret_cast<CComponent**>(&m_pModelCom[CWeapon::WeaPoneType::HeavyCrossbow]))))
         return E_FAIL;
 
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+
+    _float3 Center{}, Extents{};
+    OBBDesc.vExtents = _float3(4.f, 1.f, 4.f);
+    OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
+    OBBDesc.vRotation = {0.f, 0.f, 0.f};
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return E_FAIL;
+
     return S_OK;
 }
 
 HRESULT CWeaPonIcon::Bind_ShaderResources()
 {
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+    if (FAILED( m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
         return E_FAIL;
-   
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 

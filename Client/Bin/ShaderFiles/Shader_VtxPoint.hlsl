@@ -2,7 +2,7 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D g_Texture;
+texture2D g_Texture, g_Texture1;
 
 float4 g_vCamPosition;
 
@@ -11,7 +11,9 @@ float2 g_PSize;
 float4 g_RgbStart;
 float4 g_RgbEnd;
 
-
+bool g_Hit;
+float g_hp, g_hp_pluse;
+float threshold;
 
 struct VS_IN  
 {
@@ -179,13 +181,81 @@ PS_OUT PS_PLAYERBULLETDEAD(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_MAIN_HP_Bar_BackGround(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    vector Diffuse0 = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    
+    vector Black = { 1.f, 1.f, 1.f, 0.f };
+    
+    Diffuse0 -= Black;
+    vector WHite = { 0.1f, 0.1f, 0.1f, 0.1f };
+    
+    if (true == g_Hit)
+    {
+        Diffuse0 += WHite;
+    }
+    Out.vDiffuse = Diffuse0;
 
+    if (Out.vDiffuse.a == 0.f)  
+        discard;
 
+    
+    return Out;
+}
 
+PS_OUT PS_MAIN_HP(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    vector Red = { 0.f, 1.f, 1.f, 0.f };
+    vector yellow = { 0.f, 0.f, 1.f, 0.f };
+    vector WHite = { 0.1f, 0.1f, 0.1f, 0.1f };
+    vector Diffuse0 = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    vector Diffuse1 = g_Texture1.Sample(LinearSampler, In.vTexcoord);
+  
+    Diffuse0 -= Red;
+    Diffuse1 -= yellow;
+
+    
+    if (true == g_Hit)
+    {
+        Diffuse0 += WHite;
+        Diffuse1 += WHite;
+    }
+    
+    if (In.vTexcoord.x < g_hp)
+        Out.vDiffuse = Diffuse0;
+    else if (In.vTexcoord.x < g_hp_pluse)
+        Out.vDiffuse = Diffuse1;
+
+    if (Out.vDiffuse.a == 0.f)   
+        discard;
+    
+    return Out;
+}
+
+PS_OUT PS_MAIN_Dissolve(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vDiffuse = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    
+    float maskValue = g_Texture1.Sample(LinearSampler, In.vTexcoord).r;
+
+    if (maskValue < threshold)
+    {
+        return Out;
+    }
+    else
+    {
+        Out.vDiffuse = 0;
+        return Out;
+    }
+}
 
 technique11 DefaultTechnique
-{ /*Technique은 특정 렌더링 작업을 정의하는 셰이더 코드 블록*/
-  /* Pass는 셰이더 실행의 단위로, 정점 셰이더, 픽셀 셰이더 등의 그래픽 파이프라인 단계에서 실행될 셰이더들을 정의함*/
+{ 
     pass DefaultPass
     {
         SetRasterizerState(RS_Default);
@@ -220,5 +290,36 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_PLAYERBULLETDEAD();
     }
 
+    pass DefaultPass3
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_HP_Bar_BackGround();
+    }
+
+    pass DefaultPass4
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_HP();
+    }
+
+    pass DefaultPass5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_MAIN_Dissolve();
+    }
 }

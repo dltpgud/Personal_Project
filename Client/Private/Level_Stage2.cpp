@@ -15,28 +15,23 @@ CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pCont
 HRESULT CLevel_Stage2::Initialize()
 {
 
-	
 
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Player(CGameObject::ACTOR)))
+	if (FAILED(Ready_Layer_Player(TEXT("Layer_Player"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Monster(CGameObject::ACTOR)))
+	if (FAILED(Ready_Layer_Monster(TEXT("Layer_Monster"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Camera(CGameObject::CAMERA)))
+	if (FAILED(Ready_Layer_Map(TEXT("Layer_Map"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
+	if (FAILED(Ready_Layer_NPC(TEXT("Layer_NPC"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_NPC(CGameObject::NPC)))
-		return E_FAIL;
-
-	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
-		return E_FAIL;
+	
 
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
@@ -48,7 +43,7 @@ void CLevel_Stage2::Update(_float fTimeDelta)
 {
 
 	if (m_bPade == false) {
-		static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
+            static_cast<CPade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Pade(false);
 		m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
 		m_bPade = true;
 	}
@@ -58,7 +53,7 @@ void CLevel_Stage2::Update(_float fTimeDelta)
 		m_pGameInstance->Set_Open_Bool(false);
 
 //		m_pGameInstance->Open_Level(LEVEL_STAGE2, CLevel_Stage2::Create(m_pDevice, m_pContext));
-		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_BOSS, STAGE));
+		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_BOSS));
 	//	m_pGameInstance->Open_Level(LEVEL_BOSS,CLevel_StageBoss::Create(m_pDevice,m_pContext));
 
 	}
@@ -77,80 +72,72 @@ HRESULT CLevel_Stage2::Render()
 	return S_OK;
 }
 
-HRESULT CLevel_Stage2::Ready_Layer_Monster(const _uint& pLayerTag)
+HRESULT CLevel_Stage2::Ready_Layer_Monster(const _wstring& pLayerTag)
 {
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_GunPawn",
-		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_GUN_PAWN)))
-		return   E_FAIL;
+    CActor::Actor_DESC Desc{};
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_GunPawn",
+                                        L"Proto Component GunPawn_Monster",
+                                        L"../Bin/Data/Monster/Stage2_Monster.dat", &Desc)))
+        return E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_JetFly",
-		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_JET_FLY)))
-		return   E_FAIL;
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_JetFly",
+                                        L"Proto Component JetFly_Monster",
+                                        L"../Bin/Data/Monster/Stage2_Monster.dat", &Desc)))
+        return E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_BoomBot",
-		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOOM_BOT)))
-		return   E_FAIL;
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_BoomBot",
+                                        L"Proto Component BoomBot_Monster",
+                                        L"../Bin/Data/Monster/Stage2_Monster.dat", &Desc)))
+        return E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_MecanoBot",
-		L"../Bin/Data/Monster/Stage2_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_MECANOBOT)))
-		return   E_FAIL;
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_MecanoBot",
+                                        L"Proto Component MecanoBot_Monster", L"../Bin/Data/Monster/Stage2_Monster.dat",
+                                        &Desc)))
+        return E_FAIL;
 	return S_OK;
 }
 
-HRESULT CLevel_Stage2::Ready_Layer_Camera(const _uint& pLayerTag)
+
+
+HRESULT CLevel_Stage2::Ready_Layer_Map(const _wstring& pLayerTag)
 {
+    CGameObject::GAMEOBJ_DESC Desc{};
+    if (FAILED(Load_to_Next_Map_terrain(LEVEL_STAGE2, pLayerTag, L"Proto GameObject_Terrain",
+                                        L"../Bin/Data/Map/SetMap_Stage2_terrain.dat", &Desc)))
+        return E_FAIL;
 
-	return S_OK;
-}
+    if (FAILED(Load_to_Next_Map_NonaniObj(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_NonAniObj",
+                                          L"../Bin/Data/Map/SetMap_Stage2_Nonani.dat", &Desc)))
+        return E_FAIL;
 
-HRESULT CLevel_Stage2::Ready_Layer_UI(const _uint& pLayerTag)
-{
+    if (FAILED(Load_to_Next_Map_AniOBj(LEVEL_STAGE2, pLayerTag, L"Proto GameObject Door_aniObj", 
+                                       L"../Bin/Data/Map/SetMap_Stage2_ani.dat", &Desc)))
+        return E_FAIL;
 
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, true)))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, true)))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true)))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
-		return S_OK;
+    if (FAILED(Load_to_Next_Map_AniOBj(LEVEL_STAGE2, pLayerTag, L"Proto GameObject Chest_aniObj", 
+                                       L"../Bin/Data/Map/SetMap_Stage2_ani.dat", &Desc)))
+        return E_FAIL;
 
-	return S_OK;
-}
-
-HRESULT CLevel_Stage2::Ready_Layer_Map(const _uint& pLayerTag)
-{
- 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Stage2_terrain.dat", CGameObject::DATA_TERRAIN)))
-		return   E_FAIL;
-	
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Stage2_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
- 		return   E_FAIL;
-	
- 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag,L"Prototype GameObject_CHEST", L"../Bin/Data/Map/SetMap_Stage2_ani.dat", CGameObject::DATA_CHEST)))
-		return   E_FAIL;
-	
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_WALL", L"../Bin/Data/Map/SetMap_Stage2_Wall.dat", CGameObject::DATA_WALL)))
-		return   E_FAIL;
-	
- 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_DOOR", L"../Bin/Data/Map/SetMap_Stage2_ani.dat", CGameObject::DATA_DOOR)))
-		return   E_FAIL;
+    if (FAILED(Load_to_Next_Map_Wall(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_WALL",
+                                     L"../Bin/Data/Map/SetMap_Stage2_Wall.dat", &Desc)))
+        return E_FAIL;
 
 	return S_OK;
 }
 
-HRESULT CLevel_Stage2::Ready_Layer_NPC(const _uint& pLayerTag)
+HRESULT CLevel_Stage2::Ready_Layer_NPC(const _wstring& pLayerTag)
 {
-
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_HealthBot",
-		L"../Bin/Data/NPC/Stage2_NPC.dat", CGameObject::DATA_NPC, nullptr, CActor::TYPE_HEALTH_BOT)))
-		return   E_FAIL;
+    CActor::Actor_DESC HealthBotDesc{};
+    if (FAILED(Load_to_Next_Map_NPC(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_HealthBot",
+                                    L"../Bin/Data/NPC/Stage2_NPC.dat", &HealthBotDesc)))
+        return E_FAIL;
 
 	return S_OK;
 }
 
 HRESULT CLevel_Stage2::Ready_Find_cell()
 {
-	 m_pGameInstance->Find_Cell();
+   m_pGameInstance->Find_Cell();
 	return S_OK;
 }
 
@@ -160,7 +147,7 @@ HRESULT CLevel_Stage2::Ready_Light()
 	LIGHT_DESC			LightDesc{};
 
 	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(1.f, -1.5f, -1.f, 0.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, 0.f, 0.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
@@ -172,10 +159,10 @@ HRESULT CLevel_Stage2::Ready_Light()
 	return S_OK;
 }
 
-HRESULT CLevel_Stage2::Ready_Layer_Player(const _uint& pLayerTag)
+HRESULT CLevel_Stage2::Ready_Layer_Player(const _wstring& pLayerTag)
 {
 
-	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(5.f, 0.f, 5.f, 1.f));
+	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(5.f, 0.f, 5.f, 1.f));
 
 	return S_OK;
 }

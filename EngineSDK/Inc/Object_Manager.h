@@ -21,38 +21,44 @@ public:
 	void Priority_Update(_float fTimeDelta);
 	void Update(_float fTimeDelta);
 	void Late_Update(_float fTimeDelta);
-
+        void Delete();
 	/*씬 파괴를 위한 함수*/
 	void Clear(_uint iClearLevelID);
 
 	/*사본을 레이어에 추가 한다.*/
-	HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _uint& strLayerTag, CGameObject* clone);
+        HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& strLayerTag, CGameObject* clone);
 	
 
 	/*원본을 탐색한다*/
 	class CGameObject* Find_Prototype(const _wstring& strPrototypeTag); 
-	class CGameObject* Find_CloneGameObject(_uint iLevelIndex, const _uint& strLayerTag, const _uint& ProtoTag);
+	class CGameObject* Find_CloneGameObject(_uint iLevelIndex, const _wstring& strLayerTag, const _uint& ProtoTag);
 	map<const _wstring, class CGameObject*> Get_ProtoObject_map() { return  m_Prototypes; }
 	class CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg);
 
-private:
+	void Set_Player(const _wstring& ProtoTag, void* pArg);
+        CGameObject* Get_Player()
+        {
+            return m_pPlayer;
+        }
+
+    private:
 	/*레이어를 탐색한다*/
-	class CLayer* Find_Layer(_uint iLevelIndex, const _uint& strLayerTag);
+	class CLayer* Find_Layer(_uint iLevelIndex, const _wstring& strLayerTag);
 	
 public: /*편집씬을 위한 함수*/
-	_bool IsGameObject(_uint iLevelIndex, const _uint& strLayerTag);
+        _bool IsGameObject(_uint iLevelIndex, const _wstring& strLayerTag);
 	CGameObject::PICKEDOBJ_DESC Pking_onMash(_vector RayPos, _vector RayDir);
-	CGameObject* Recent_GameObject(_uint iLevelIndex,  const _uint& strLayerTag);
-	list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _uint& strLayerTag);
+        CGameObject* Recent_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
+        list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
 
 private:
+    USE_LOCK;
 	map<const _wstring, class CGameObject*>				m_Prototypes;
-	/*원형을 복제한  사본객체를 레벨별로 그룹지어 저장한다, 
-	레벨의 enum 정의는 클라에 되있어서 이니셜라이즈에서 동적배열로 할당*/
-	map<const _uint, class CLayer*>*					m_pLayers	 = { nullptr };
+    map<const _wstring, class CLayer*>* m_pLayers = {nullptr};
 	_uint												m_iNumLevels = { 0 };
+        CGameObject* m_pPlayer{};
 
-public:
+    public:
 	static CObject_Manager* Create(_uint iNumLevels);
 	virtual void			Free() override;
 };

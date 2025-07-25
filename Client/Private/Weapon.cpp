@@ -67,20 +67,18 @@ HRESULT CWeapon::Initialize(void* pArg)
     SDesc.fSizeX = 100.f;
     SDesc.fSizeY = 100.f;
     SDesc.UID = CUI::UIID_PlayerShooting;
-    m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, CGameObject::UI, L"Prototype GameObject_ShootingUI",nullptr,0,&SDesc,0);
+    m_pGameInstance->Add_UI_To_CLone(L"Shooting", L"Prototype GameObject_ShootingUI", &SDesc);
     m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false);
 
-    m_ShootingUI = static_cast<CShootingUI*>( m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerShooting));
+    m_ShootingUI = static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"Shooting"));
 
 
     return S_OK;
 }
 
-_int CWeapon::Priority_Update(_float fTimeDelta)
+void CWeapon::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
-    return OBJ_NOEVENT;
+  
 }
 
 void CWeapon::Update(_float fTimeDelta)
@@ -496,14 +494,14 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     _float3	vPickPos{};
     _vector At{};
 
-    if (true == m_pGameInstance->IsPicked(&vPickPos, true)) 
-    {
-        At = XMLoadFloat3(&vPickPos);
-    }
-    if (false == m_pGameInstance->IsPicked(&vPickPos, true))
-    {
+    //if (true == m_pGameInstance->IsPicked(&vPickPos, true)) 
+    //{
+    //    At = XMLoadFloat3(&vPickPos);
+    //}
+    //if (false == m_pGameInstance->IsPicked(&vPickPos, true))
+    //{
       At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 10.f;
-    }
+    //}
 
     _vector Hend_Local_Pos = { m_pWeapon_SocketMatrix[m_pWeapon]->_41 * Offset.x, m_pWeapon_SocketMatrix[m_pWeapon]->_42 * Offset.y,
              m_pWeapon_SocketMatrix[m_pWeapon]->_43 * Offset.z, m_pWeapon_SocketMatrix[m_pWeapon]->_44 };
@@ -519,7 +517,8 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     pDesc.Local = Local_Pos;
     pDesc.WorldPtr = &m_WorldMatrix;
     pDesc.iWeaponType = m_pWeapon;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_ShootEffect", nullptr, 0, &pDesc, 0);
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                             L"Prototype GameObject_ShootEffect", &pDesc);
  
     CPlayerBullet::CPlayerBullet_DESC Desc{};
     Desc.fSpeedPerSec = 150.f;
@@ -530,7 +529,8 @@ HRESULT CWeapon::Make_Bullet(_float3 Offset)
     Desc.Local = Hend_Local_Pos;
     Desc.WorldPtr = &m_WorldMatrix;
     Desc.iWeaponType = m_pWeapon;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_PlayerBullet", nullptr, 0, &Desc, 0);
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                             L"Prototype GameObject_PlayerBullet", &Desc);
 
     return S_OK;
 }
@@ -579,7 +579,7 @@ HRESULT CWeapon::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
     if (m_pWeapon != MissileGatling) {
-        if (FAILED(m_pShaderCom->Bind_Float("g_EmissivePower", m_fEmissivePower)))
+        if (FAILED(m_pShaderCom->Bind_RawValue("g_EmissivePower", &m_fEmissivePower,sizeof(_float))))
             return E_FAIL;
     }
  

@@ -7,145 +7,69 @@ CTransform::CTransform(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : C
 
 void CTransform::Set_Scaling(_float fScaleX, _float fScaleY, _float fScaleZ)
 {
-    _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
-    _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
-    _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
+    _vector vRight = Get_TRANSFORM(T_RIGHT);
+    _vector vUp = Get_TRANSFORM(T_UP);
+    _vector vLook = Get_TRANSFORM(T_LOOK);
 
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3Normalize(vRight) * fScaleX);
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3Normalize(vUp) * fScaleY);
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3Normalize(vLook) * fScaleZ);
+    Set_TRANSFORM(T_RIGHT, XMVector3Normalize(vRight) * fScaleX);
+    Set_TRANSFORM(T_UP, XMVector3Normalize(vUp) * fScaleY);
+    Set_TRANSFORM(T_LOOK, XMVector3Normalize(vLook) * fScaleZ);
 }
 
 void CTransform::LookAt(_fvector vAt)
 {
     _float3 vScaled = Get_Scaled();
 
-    _vector vLook = vAt - Get_TRANSFORM(TRANSFORM_POSITION);
+    _vector vLook = vAt - Get_TRANSFORM(T_POSITION);
     _vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
     _vector vUp = XMVector3Cross(vLook, vRight);
 
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3Normalize(vRight) * vScaled.x);
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3Normalize(vUp) * vScaled.y);
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3Normalize(vLook) * vScaled.z);
+    Set_TRANSFORM(T_RIGHT, XMVector3Normalize(vRight) * vScaled.x);
+    Set_TRANSFORM(T_UP, XMVector3Normalize(vUp) * vScaled.y);
+    Set_TRANSFORM(T_LOOK, XMVector3Normalize(vLook) * vScaled.z);
 }
 
-void CTransform::Go_Straight(_float fTimeDelta, CNavigation* pNavigation, _bool Demage )
+void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigation, _bool Demage)
 {
-    _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
-    _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
+    TRANSFORM Move{};
+    _int Dir{};
 
-    _vector vAfterPos = vPosition + XMVector3Normalize(vLook) * m_fSpeedPerSec * fTimeDelta;
+    switch (MoveType)
+    {
+    case Engine::CTransform::GO: Move = T_LOOK; break;
+    case Engine::CTransform::BACK: Move = T_LOOK; Dir = 1; break;
+    case Engine::CTransform::RIGHT: Move = T_RIGHT; break;
+    case Engine::CTransform::LEFT: Move = T_RIGHT; Dir = 1; break;
+    case Engine::CTransform::UP: Move = T_UP; break;
+    case Engine::CTransform::DOWN: Move = T_UP; Dir = 1; break;
+    default: break;
+    }
+
+    _vector vTrans = Get_TRANSFORM(Move);
+
+    _vector vPosition = Get_TRANSFORM(T_POSITION);
+
+    Dir == 1 ? vTrans *= -1 : vTrans;
+
+    _vector vAfterPos = vPosition + XMVector3Normalize(vTrans) * m_fSpeedPerSec * fTimeDelta;
 
     _vector Slide{};
-
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage)) {
-
        vPosition += Slide;
-    
     }
     else
        vPosition = vAfterPos;
   
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
-}
-
-void CTransform::Go_Left(_float fTimeDelta, CNavigation* pNavigation, _bool Demage)
-{
-    _vector vRight = Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vAfterPos = vPosition + XMVector3Normalize(-vRight) * m_fSpeedPerSec * fTimeDelta;
-
-    _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage)) {
-        vPosition += Slide;
-    }
-    else
-             vPosition = vAfterPos;
-
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
-}
-
-void CTransform::Go_Right(_float fTimeDelta, CNavigation* pNavigation, _bool Demage)
-{
-    _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
-    _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
-
-    _vector vAfterPos = vPosition + XMVector3Normalize(vRight) * m_fSpeedPerSec * fTimeDelta;
-
-    _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage))
-    {
-            vPosition += Slide;
-    }
-    else
-        vPosition = vAfterPos;
-
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
-}
-
-void CTransform::Go_Backward(_float fTimeDelta, CNavigation* pNavigation, _bool Demage)
-{
-    _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vAfterPos = vPosition + XMVector3Normalize(-vLook) * m_fSpeedPerSec * fTimeDelta;
-
-    _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage))
-    {
-        vPosition += Slide;
-    }
-    else
-        vPosition = vAfterPos;
-
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
-}
-
-void CTransform::Go_Up(_float fTimeDelta, CNavigation* pNavigation, _bool Demage)
-{
-    _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * m_fSpeedPerSec * fTimeDelta;
-
-    _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage))
-    {
-        vPosition += Slide;
-    }
-    else
-        vPosition = vAfterPos;
-
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
-}
-
-void CTransform::Go_Down(_float fTimeDelta, CNavigation* pNavigation, _bool Demage)
-{
-    _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-
-    _vector vAfterPos = vPosition + XMVector3Normalize(-vUp) * m_fSpeedPerSec * fTimeDelta;
-
-    _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage))
-    {
-        vPosition += Slide;
-    }
-    else
-        vPosition = vAfterPos;
-
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
+    Set_TRANSFORM(T_POSITION, vPosition);
 }
 
 void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNavigation* pNavigation)
 {
-
     m_fTimeSum += fTimeDelta * 2.8f;
  
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
 
-    _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
+    _vector vUp = Get_TRANSFORM(CTransform::T_UP);
 
     _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
 
@@ -155,14 +79,14 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNav
        vAfterPos += slide;
     }
           
-     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vAfterPos);
+     Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
 
     _float3 Position;
-    XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::T_POSITION));
     if (Position.y <= YPos)
     {
         Position.y = YPos;
-       Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
+       Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
         m_fTimeSum = 0.f;
         m_fTimeSumDouble = 0.f;
         *Jumpcheck = false;
@@ -174,9 +98,9 @@ void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
     
     m_fTimeSumDouble += fTimeDelta * 2.8f;
 
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
 
-    _vector vUp = Get_TRANSFORM(CTransform::TRANSFORM_UP);
+    _vector vUp = Get_TRANSFORM(CTransform::T_UP);
 
     _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower*1.5f - m_fTimeSumDouble) * fTimeDelta * m_fSpeedPerSec;
 
@@ -186,13 +110,13 @@ void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
         vAfterPos += slide;
     }
 
-    Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vAfterPos);
+    Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
 
 }
 
 void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigation, _bool* bStop )
 {
-    _vector vPosition = Get_TRANSFORM(TRANSFORM_POSITION);
+    _vector vPosition = Get_TRANSFORM(T_POSITION);
 
     _vector vAfterPos = vPosition + vDir * m_fSpeedPerSec * fTimeDelta;
 
@@ -208,13 +132,13 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
         vPosition = vAfterPos;
 
 
-    Set_TRANSFORM(TRANSFORM_POSITION, vPosition);
+    Set_TRANSFORM(T_POSITION, vPosition);
 }
 
 void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavigation* pNavigation, _bool* bStop )
 {
 
-    _vector vPosition = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
 
     _vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f) *0.09f;
 
@@ -231,11 +155,11 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
     else
         vPosition = vAfterPos;
 
-     Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vPosition);
+     Set_TRANSFORM(CTransform::T_POSITION, vPosition);
 
-    if ( XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) <= YPos)
+    if ( XMVectorGetY(Get_TRANSFORM(CTransform::T_POSITION)) <= YPos)
     {
-        XMVectorSetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION), YPos);
+        XMVectorSetY(Get_TRANSFORM(CTransform::T_POSITION), YPos);
         if (bStop != nullptr)
            *bStop = false;
     }
@@ -243,19 +167,19 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
 
 void CTransform::Stop_Move()
 {
-    Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    Set_TRANSFORM(CTransform::T_POSITION, Get_TRANSFORM(CTransform::T_POSITION));
 }
 
 void CTransform::Rotation_to_Player(_float fTimeDelta)
 {
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-    _vector vPos = Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+    _vector vPos = Get_TRANSFORM(CTransform::T_POSITION);
 
     _vector vDir = vPlayerPos - vPos;
     _vector vNewDir = XMVectorSetY(vDir, 0.f);
     _vector TargetDir = XMVector3Normalize(vNewDir);
 
-    _vector vLook = XMVector3Normalize(Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
+    _vector vLook = XMVector3Normalize(Get_TRANSFORM(CTransform::T_LOOK));
 
     _float angleBetween = XMVectorGetX(XMVector3AngleBetweenNormals(vLook, TargetDir));
 
@@ -269,79 +193,85 @@ void CTransform::Rotation_to_Player(_float fTimeDelta)
     _matrix RotationMatrix = XMMatrixRotationAxis(rotationAxis, rotationAngle);
 
     // 새로운 방향 벡터 계산
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(Get_TRANSFORM(TRANSFORM_RIGHT), RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(Get_TRANSFORM(TRANSFORM_UP), RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
+    Set_TRANSFORM(T_RIGHT, XMVector3TransformNormal(Get_TRANSFORM(T_RIGHT), RotationMatrix));
+    Set_TRANSFORM(T_UP, XMVector3TransformNormal(Get_TRANSFORM(T_UP), RotationMatrix));
+    Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
     
 }
 
 void CTransform::Set_Rotation_to_Player()
 {
-    _matrix met = XMMatrixLookAtLH(Get_TRANSFORM(CTransform::TRANSFORM_POSITION),
-        m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), XMVectorSet(0.f, 1.f, 0.f, 0.f));
+    _matrix met = XMMatrixLookAtLH(Get_TRANSFORM(CTransform::T_POSITION),
+        m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), XMVectorSet(0.f, 1.f, 0.f, 0.f));
 
     _matrix Wmet = XMMatrixInverse(nullptr, met);
 
     _float4x4 wmet{};
 
     XMStoreFloat4x4(&wmet, Wmet);
-    Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
-    Set_TRANSFORM(CTransform::TRANSFORM_UP, XMVectorSet(0.f, 1.f, 0.f, wmet._24));
-    Set_TRANSFORM(CTransform::TRANSFORM_LOOK, XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
+    Set_TRANSFORM(CTransform::T_RIGHT, XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
+    Set_TRANSFORM(CTransform::T_UP, XMVectorSet(0.f, 1.f, 0.f, wmet._24));
+    Set_TRANSFORM(CTransform::T_LOOK, XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
 }
 
-void CTransform::Other_set_Pos(CTransform* Other, FIX FixPosWhere, _float FixPos, _float3* Ouput)
+void CTransform::Move_TagetAstar(CNavigation* pNavigation, _float fTimedelta)
 {
-    _vector OtherPos{};  // 내위치를 기준으로 다른 오브젝트의 위치를 정한다.
-    switch (FixPosWhere)
+    vector<_uint> vec = pNavigation->Get_PathPoints();
+    if (vec.empty())
+        return;
+
+    if (m_CurrentPathIndex >= vec.size())
     {
-    case FIX_X:
-     OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION))+ FixPos,
-        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) ,
-        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)), 1.f);
-        break;
-
-    case FIX_Y:
-    OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)) + FixPos,
-        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)), 1.f);
-        break;
-
-    case FIX_Z:
-    OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION))+ FixPos, 1.f);
-        break;
-    case  FIX_END:
-    OtherPos = XMVectorSet(XMVectorGetX(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-        XMVectorGetY(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-        XMVectorGetZ(Get_TRANSFORM(CTransform::TRANSFORM_POSITION)), 1.f);
-        break;
+        m_CurrentPathIndex = 0; // 경로 완료
+        return;
     }
 
+    const _uint targetCellIndex = vec[m_CurrentPathIndex];
+    const _vector currentPos = Get_TRANSFORM(CTransform::T_POSITION);
+    const _vector targetPos = pNavigation->Get_TagetPos(targetCellIndex);
 
-    Other->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, OtherPos);
+    const _vector dir = targetPos - currentPos;
+    _vector dirXZ = XMVectorSetY(dir, 0.f);
+    const _float distSq = XMVectorGetX(XMVector3LengthSq(dirXZ));
 
-    if (Ouput != nullptr)
+    constexpr _float thresholdSq = 1.f * 1.f;
+    if (distSq < thresholdSq)
     {
-        _float3 fPos{};
-
-        XMStoreFloat3(&fPos, OtherPos);
-      
-        Ouput->x = fPos.x;
-        Ouput->y = fPos.y;
-        Ouput->z = fPos.z;
-
+        ++m_CurrentPathIndex;
+        return;
     }
 
+    _vector vLook = XMVector3Normalize(XMVectorSetY(Get_TRANSFORM(CTransform::T_LOOK), 0.f));
+    _vector moveDir = XMVectorSetY(dir, 0.f);
+    moveDir = XMVector3Normalize(moveDir);
+
+    const _float angleBetween = XMVectorGetX(XMVector3AngleBetweenNormals(vLook, moveDir));
+    const _float maxAngle = m_fRotationPerSec * fTimedelta;
+
+    const _vector cross = XMVector3Cross(vLook, moveDir);
+    const _float sign = (XMVectorGetY(cross) >= 0.f) ? 1.f : -1.f;
+    const _float rotationAngle = sign * min(angleBetween, maxAngle);
+
+    const _matrix rotMat = XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), rotationAngle);
+
+    Set_TRANSFORM(T_RIGHT, XMVector3TransformNormal(Get_TRANSFORM(T_RIGHT), rotMat));
+    Set_TRANSFORM(T_UP, XMVector3TransformNormal(Get_TRANSFORM(T_UP), rotMat));
+    Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, rotMat));
+
+    const _vector moveDelta = XMVector3Normalize(dir) * (m_fSpeedPerSec * fTimedelta);
+    _vector vAfterPos = currentPos + moveDelta;
+    _vector vSlide{};
+    if (pNavigation && !pNavigation->isMove(vAfterPos, currentPos, &vSlide))
+        Set_TRANSFORM(T_POSITION, currentPos + vSlide);
+    else 
+        Set_TRANSFORM(T_POSITION, vAfterPos);
 }
-
 
 void CTransform::Turn(_fvector vAxis, _float fTimeDelta)
 {
-    _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
-    _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
-    _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
+    _vector vRight = Get_TRANSFORM(T_RIGHT);
+    _vector vUp    = Get_TRANSFORM(T_UP);
+    _vector vLook  = Get_TRANSFORM(T_LOOK);
 
     _matrix RotationMatrix = XMMatrixRotationAxis(vAxis, m_fRotationPerSec * fTimeDelta);
 
@@ -349,16 +279,16 @@ void CTransform::Turn(_fvector vAxis, _float fTimeDelta)
     if (XMVectorGetY(vNewUp) <= 0)
         return;
 
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(vUp, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
+    Set_TRANSFORM(T_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
+    Set_TRANSFORM(T_UP, XMVector3TransformNormal(vUp, RotationMatrix));
+    Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
 }
 
 void CTransform::Turn(_bool bX, _bool bY, _bool bZ, _float fTimeDelta)
 {
-    _vector		vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
-    _vector		vUp    = Get_TRANSFORM(TRANSFORM_UP);
-    _vector		vLook  = Get_TRANSFORM(TRANSFORM_LOOK);
+    _vector		vRight = Get_TRANSFORM(T_RIGHT);
+    _vector		vUp    = Get_TRANSFORM(T_UP);
+    _vector		vLook  = Get_TRANSFORM(T_LOOK);
 
     _float		fRotationSpeed = m_fRotationPerSec * fTimeDelta;
 
@@ -366,27 +296,11 @@ void CTransform::Turn(_bool bX, _bool bY, _bool bZ, _float fTimeDelta)
 
     _matrix		RotationMatrix = XMMatrixRotationQuaternion(vQuaternion);
 
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(vUp, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
+    Set_TRANSFORM(T_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
+    Set_TRANSFORM(T_UP, XMVector3TransformNormal(vUp, RotationMatrix));
+    Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
 }
 
-void CTransform::Set_Rot(_fvector vAxis, _float Angle)
-{
-
-
-    _vector vRight = Get_TRANSFORM(TRANSFORM_RIGHT);
-    _vector vUp = Get_TRANSFORM(TRANSFORM_UP);
-    _vector vLook = Get_TRANSFORM(TRANSFORM_LOOK);
-
-    _matrix RotationMatrix = XMMatrixRotationAxis(vAxis, Angle);
-
-
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(vUp, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
-
-}
 
 void CTransform::Rotation(_float fX, _float fY, _float fZ)
 {
@@ -400,21 +314,10 @@ void CTransform::Rotation(_float fX, _float fY, _float fZ)
 
     _matrix		RotationMatrix = XMMatrixRotationQuaternion(vQuaternion);
 
-    Set_TRANSFORM(TRANSFORM_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_UP, XMVector3TransformNormal(vUp, RotationMatrix));
-    Set_TRANSFORM(TRANSFORM_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
+    Set_TRANSFORM(T_RIGHT, XMVector3TransformNormal(vRight, RotationMatrix));
+    Set_TRANSFORM(T_UP, XMVector3TransformNormal(vUp, RotationMatrix));
+    Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
 }
-
-void CTransform::Set_ALL_TRANSFORM(_fvector vright, _fvector vup, _fvector vLook, _fvector vPos)
-{
-
-    Set_TRANSFORM(TRANSFORM_RIGHT, vright);
-    Set_TRANSFORM(TRANSFORM_UP, vup);
-    Set_TRANSFORM(TRANSFORM_LOOK, vLook);
-    Set_TRANSFORM(TRANSFORM_POSITION, vPos);
-}
-
-
 
 HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstantName)
 {
@@ -423,7 +326,7 @@ HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstant
 
 HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 {    
-  
+    XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
 
     if (nullptr != pTransformDesc)
     {
@@ -431,26 +334,11 @@ HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 
         m_fSpeedPerSec = pDesc->fSpeedPerSec;
         m_fRotationPerSec = pDesc->fRotationPerSec;
-        m_JumpPower = pDesc->JumpPower;
-        m_PreRotationSce = m_fRotationPerSec;
+        m_JumpPower = pDesc->JumpPower;;
 
+        XMStoreFloat4x4(&m_WorldMatrix, pDesc->WorldMatrix);
     }
   
-       XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
-
-
-
-
-    return S_OK;
-}
-
-HRESULT CTransform::Initialize(void* pArg)
-{
-    if (nullptr != pArg)
-    {
-        TRANSFORM_DESC* pDesc = static_cast<TRANSFORM_DESC*>(pArg);
-
-    }
     return S_OK;
 }
 

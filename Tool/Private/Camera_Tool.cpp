@@ -29,21 +29,20 @@ HRESULT CCamera_Tool::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CCamera_Tool::Priority_Update(_float fTimeDelta)
+void CCamera_Tool::Priority_Update(_float fTimeDelta)
 {
 
     if (m_pGameInstance->Get_DIKeyState(DIK_W) & 0x80)
-        m_pTransformCom->Go_Straight(fTimeDelta);
+        m_pTransformCom->Go_Move(CTransform::GO,fTimeDelta);
 
     if (m_pGameInstance->Get_DIKeyState(DIK_S) & 0x80)
-        m_pTransformCom->Go_Backward(fTimeDelta);
+        m_pTransformCom->Go_Move(CTransform::BACK, fTimeDelta);
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_A) & 0x80)
-        m_pTransformCom->Go_Left(fTimeDelta);
+    if (m_pGameInstance->Get_DIKeyState(DIK_A) & 0x80)  
+        m_pTransformCom->Go_Move(CTransform::LEFT, fTimeDelta);
 
     if (m_pGameInstance->Get_DIKeyState(DIK_D) & 0x80)
-        m_pTransformCom->Go_Right(fTimeDelta);
-
+        m_pTransformCom->Go_Move(CTransform::RIGHT, fTimeDelta);
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_TAB))
     {
@@ -67,16 +66,13 @@ _int CCamera_Tool::Priority_Update(_float fTimeDelta)
 
         if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
         {
-            m_pTransformCom->Turn(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT), fTimeDelta * MouseMove * m_fMouseSensor);
+            m_pTransformCom->Turn(m_pTransformCom->Get_TRANSFORM(CTransform::T_RIGHT), fTimeDelta * MouseMove * m_fMouseSensor);
         }
 
         Mouse_Fix();
 
     }
     __super::Priority_Update(fTimeDelta);
-
-
-    return OBJ_NOEVENT;
 }
 
 void CCamera_Tool::Update(_float fTimeDelta)

@@ -38,12 +38,12 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
 
  if (m_bRightLeft == true) {
      m_pTransformCom->Rotation(XMConvertToRadians(0.0f), XMConvertToRadians(-90.0f), XMConvertToRadians(0.0f));
-     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(1.f, -0.7f, 0.f, 1.f));
+     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(1.f, -0.7f, 0.f, 1.f));
  }
  else 
  if (m_bRightLeft == false) {
      m_pTransformCom->Rotation(XMConvertToRadians(0.0f), XMConvertToRadians(90.0f), XMConvertToRadians(0.0f));
-     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(-1.f, 0.7f, 0.f, 1.f));
+     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(-1.f, 0.7f, 0.f, 1.f));
  }
 
 
@@ -58,31 +58,24 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CBossBullet_Laser::Priority_Update(_float fTimeDelta)
+void CBossBullet_Laser::Priority_Update(_float fTimeDelta)
 {
-
-    if (m_bDead)
-    {
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", CSound::SOUND_EFFECT, 1.f);
-        
-        m_pGameInstance->StopSound(CSound::SOUND_EFFECT_LASER);
-            return OBJ_DEAD;
-    }  
-
-    __super::Priority_Update(fTimeDelta);
    
     if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
-        m_bDead = true;
+    {
+        m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", CSound::SOUND_EFFECT, 1.f);
 
-    m_fTimeSum       += fTimeDelta;
+        m_pGameInstance->StopSound(CSound::SOUND_EFFECT_LASER);
+    }
 
-    return OBJ_NOEVENT;
+    m_fTimeSum += fTimeDelta;
 
+    __super::Priority_Update(fTimeDelta);
+    return;
 }
 
 void CBossBullet_Laser::Update(_float fTimeDelta)
 {
- //   __super::Update(fTimeDelta);
     m_pColliderCom->Update(XMLoadFloat4x4(&m_WorldMatrix));
 }
 

@@ -36,12 +36,9 @@ HRESULT CBody_GunPawn::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CBody_GunPawn::Priority_Update(_float fTimeDelta)
+void CBody_GunPawn::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
-
-    return OBJ_NOEVENT;
+ 
 }
 
 void CBody_GunPawn::Update(_float fTimeDelta)
@@ -254,8 +251,8 @@ HRESULT CBody_GunPawn::Make_Bullet()
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
     
-     _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION) 
-                      - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+     _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) 
+                      - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 
     CBullet::CBULLET_DESC Desc{};
     Desc.fSpeedPerSec = 20.f;
@@ -264,7 +261,7 @@ HRESULT CBody_GunPawn::Make_Bullet()
     Desc.fDamage = &m_pDamage;
     Desc.iActorType = CSkill::MONSTER::TYPE_GUNPAWN;
     CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
-    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, pGameObject);
+    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"), pGameObject);
 
     return S_OK;
 }
@@ -305,22 +302,25 @@ HRESULT CBody_GunPawn::Bind_ShaderResources()
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_bool))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower,sizeof(_int))))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CGunPawn::ST_PRESHOOT)))
+    _bool bshoot{};
+    if (m_iCurMotion == CGunPawn::ST_PRESHOOT)
+        bshoot = true;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &bshoot, sizeof(_bool))))
         return E_FAIL;
 
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Float("g_threshold", m_interver)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_interver, sizeof(_float))))
         return E_FAIL;
 
     return S_OK;

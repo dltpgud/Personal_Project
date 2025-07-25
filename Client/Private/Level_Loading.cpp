@@ -13,11 +13,11 @@ CLevel_Loading::CLevel_Loading(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 {
 }
 
-HRESULT CLevel_Loading::Initialize(LEVELID eNextLevelID, LOADINGID eLodingType)
+HRESULT CLevel_Loading::Initialize(LEVELID eNextLevelID, _bool Page )
 {
     m_eNextLevelID = eNextLevelID;
 
-    m_eLodingType = eLodingType;
+  
     /* 로딩화면을 보여주기위한 객체들을 생성한다. */
 
     /* 로딩 작업을 직접 수행할 하청업체를 선정한다. */
@@ -25,11 +25,11 @@ HRESULT CLevel_Loading::Initialize(LEVELID eNextLevelID, LOADINGID eLodingType)
     if (nullptr == m_pLoader)
         return E_FAIL;
 
-    if (m_eLodingType == LOADINGID_END)
-        return S_OK;
-
-     if (FAILED(Ready_Clone_Layer(CGameObject::UI)))
-        return E_FAIL;
+    if (true== Page)
+    {
+        if (FAILED(Ready_Clone_Layer(CGameObject::UI)))
+            return E_FAIL;
+    }
 
     return S_OK;
 }
@@ -42,9 +42,8 @@ void CLevel_Loading::Update(_float fTimeDelta)
     if (m_fTimeSum >= 1.75f  )
         m_fTimeSum = 0;
     /* 로더가 다음레벨에 대한 자원 생성을 끝냈다라면 */
-    if (true == m_pLoader->Finished())
+    if (m_pGameInstance->AllJobCompleted() && true == m_pLoader->Finished())
     {
-       
         HRESULT hr = {};
 
         /* 다음레벨 아이디에 맞는 실제 레벨을 할당해준다. */
@@ -70,10 +69,10 @@ void CLevel_Loading::Update(_float fTimeDelta)
             m_pGameInstance->StopSound(CSound::SOUND_LEVEL);
                 hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_StageBoss::Create(m_pDevice, m_pContext));
             break;
-        case LEVEL_RETURN_MENU:
-            m_pGameInstance->StopSound(CSound::SOUND_LEVEL);
-                hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLEVEL_MENU::Create(m_pDevice, m_pContext));
-            break;
+        //case LEVEL_RETURN_MENU:
+        //    m_pGameInstance->StopSound(CSound::SOUND_LEVEL);
+        //        hr = m_pGameInstance->Open_Level(m_eNextLevelID, CLEVEL_MENU::Create(m_pDevice, m_pContext));
+        //    break;
         }
 
         if (FAILED(hr))
@@ -87,75 +86,64 @@ HRESULT CLevel_Loading::Render()
 #ifdef _DEBUG
     m_pLoader->Output_LoadingState();
 #endif
-
-    if (m_eLodingType == LOADINGID_END)
+    if (m_eNextLevelID == LEVEL_MENU)
         return S_OK;
 
-    if (m_eLodingType == LOADINGID::GORGE) {
-        if (m_fFinishSum < 3.f) {
+        if (false == m_pLoader->Finished())
+        {
             if (m_fTimeSum <= 0.25f)
             {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 "), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 "), _float2(955.f, 635.f),
+                                             XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
             }
             else if (m_fTimeSum <= 0.5f)
             {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ."), _float2(955.f, 635.f),
+                                             XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
             }
             else if (m_fTimeSum <= 0.75f)
             {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 .."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 .."), _float2(955.f, 635.f),
+                                             XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
             }
             else if (m_fTimeSum <= 1.f)
             {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ..."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ..."), _float2(955.f, 635.f),
+                                             XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
             }
-            else if (m_fTimeSum <= 1.25f)
-            {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ...."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
-            }
-            else if (m_fTimeSum <= 1.5f)
-            {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ....."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
-            }
-            else if (m_fTimeSum <= 1.75f)
-            {
-                m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ......"), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
-            }
-        }
+        }       
 
-        if (true == m_pLoader->Finished() && m_fFinishSum > 3.f) {
+        if (true == m_pLoader->Finished()) {
 
-            // if (m_fTimeSum <= 0.25f)
-             //{
             m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요 "), _float2(760.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.7f);
-            //   }
 
         }
 
         m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("협곡"), _float2(40.f, 50.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 1.f);
-    }
+    
 
     return S_OK;
 }
 
-HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
+HRESULT CLevel_Loading::Ready_Clone_Layer(const _uint& pLayerTag)
 {
     CLoading::CLoading_DESC Load{};
-    Load.LoadingID = m_eLodingType;
     Load.UID = CUI::UIID_Loading;
     Load.fX = 3500.f;
     Load.fY = 120.f;
     Load.fZ = 0.6f;
     Load.fSizeX = 8000.f;
     Load.fSizeY = 1340.f;
-
     Load.Update = true;
-
     Load.fSpeedPerSec = 100.f;
     Load.TexIndex = 5;
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
-        nullptr, 0, &Load)))
+    Load.iDeleteLevel = LEVEL_LOADING;
+    Load.iMaxLevel = LEVEL_END;
+    Load.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"bg1", L"Prototype_GameObject_Loading", &Load)))
         return E_FAIL;
+    Safe_Delete_Array(Load.pEnable_Level);
+
 
     CLoading::CLoading_DESC Load1{};
     Load1.UID = CUI::UIID_Loading;
@@ -169,10 +157,12 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
    
     Load1.fSpeedPerSec = 250.f;
     Load1.TexIndex = 4;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
-        nullptr, 0, &Load1)))
+    Load1.iDeleteLevel = LEVEL_LOADING;
+    Load1.iMaxLevel = LEVEL_END;
+    Load1.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"bg2",L"Prototype_GameObject_Loading",&Load1)))
         return E_FAIL;
+    Safe_Delete_Array(Load1.pEnable_Level);
 
     CLoading::CLoading_DESC Load2{};
     /*배경 2 중간에 나오는 배경*/
@@ -182,15 +172,15 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load2.fZ = 0.4f;
     Load2.fSizeX = 2280.f;;
     Load2.fSizeY = 720.f;
-
     Load2.Update = true;
-
     Load2.fSpeedPerSec = 300.f;
     Load2.TexIndex = 3;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
-        nullptr, 0, &Load2)))
+    Load2.iDeleteLevel = LEVEL_LOADING;
+    Load2.iMaxLevel = LEVEL_END;
+    Load2.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"bg3",L"Prototype_GameObject_Loading",&Load2)))
         return E_FAIL;
+    Safe_Delete_Array(Load2.pEnable_Level);
 
     CLoading::CLoading_DESC Load3{};
     /*바닥*/
@@ -200,15 +190,15 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load3.fZ = 0.3f;
     Load3.fSizeX = 20040.f;
     Load3.fSizeY = 200.f;
-
     Load3.Update = true;
-   
     Load3.fSpeedPerSec = 350.f;
     Load3.TexIndex = 2;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
-        nullptr, 0, &Load3)))
+    Load3.iDeleteLevel = LEVEL_LOADING;
+    Load3.iMaxLevel = LEVEL_END;
+    Load3.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Floor",L"Prototype_GameObject_Loading",&Load3)))
         return E_FAIL;
+    Safe_Delete_Array(Load3.pEnable_Level);
 
     /*bus*/
     CLoading::CLoading_DESC Load4{};
@@ -218,16 +208,15 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Load4.fZ = 0.2f;
     Load4.fSizeX = 550.f;
     Load4.fSizeY = 280.f;
-
     Load4.Update = true;
-
     Load4.fSpeedPerSec = 0.f;
     Load4.TexIndex = 1;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
-        nullptr, 0, &Load4)))
+    Load4.iDeleteLevel = LEVEL_LOADING;
+    Load4.iMaxLevel = LEVEL_END;
+    Load4.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"bus",L"Prototype_GameObject_Loading",&Load4)))
         return E_FAIL;
-
+    Safe_Delete_Array(Load4.pEnable_Level);
 
     /* 버스 연기 뒤*/
     CSpriteTexture::CSpriteTexture_DESC Smoke1{};
@@ -237,16 +226,17 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Smoke1.fZ = 0.19f;
     Smoke1.fSizeX = 100.f;
     Smoke1.fSizeY = 100.f;
-
     Smoke1.Update = true;
-
     Smoke1.fSpeedPerSec = 0.f;
-    Smoke1.FilePath = L"Prototype_Component_BusSmokeBack";
+    Smoke1.ProtoName = L"Prototype_Component_BusSmokeBack";
     Smoke1.TexIndex = 20;
     Smoke1.interver = 0.2f;
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_SpriteTexture",
-        nullptr, 0, &Smoke1)))
+    Smoke1.iDeleteLevel = LEVEL_LOADING;
+    Smoke1.iMaxLevel = LEVEL_END;
+    Smoke1.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Smoke1",L"Prototype_GameObject_SpriteTexture",&Smoke1)))
         return E_FAIL;
+    Safe_Delete_Array(Smoke1.pEnable_Level);
 
     /* 버스 연기 앞*/
     CSpriteTexture::CSpriteTexture_DESC Smoke2{};
@@ -256,16 +246,17 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
     Smoke2.fZ = 0.19f;
     Smoke2.fSizeX = 100.f;
     Smoke2.fSizeY = 90.f;
-
     Smoke2.Update = true;
-
     Smoke2.fSpeedPerSec = 0.f;
-    Smoke2.FilePath = L"Prototype_Component_BusSmokefront";
+    Smoke2.ProtoName = L"Prototype_Component_BusSmokefront";
     Smoke2.TexIndex = 20;
     Smoke2.interver = 0.2f;
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_SpriteTexture",
-        nullptr, 0, &Smoke2)))
+    Smoke2.iDeleteLevel = LEVEL_LOADING;
+    Smoke2.iMaxLevel = LEVEL_END;
+    Smoke2.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Smoke2",L"Prototype_GameObject_SpriteTexture",&Smoke2)))
         return E_FAIL;
+    Safe_Delete_Array(Smoke2.pEnable_Level);
 
     /*배경 1 선인장*/
     CLoading::CLoading_DESC Load5{};
@@ -280,97 +271,43 @@ HRESULT CLevel_Loading::Initialize_GORGE(const _uint& pLayerTag)
 
     Load5.fSpeedPerSec = 1000.f;
     Load5.TexIndex = 0;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_Loading",
-        nullptr, 0, &Load5)))
+    Load5.iDeleteLevel = LEVEL_LOADING;
+    Load5.iMaxLevel = LEVEL_END;
+    Load5.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"cactus",L"Prototype_GameObject_Loading",&Load5)))
         return E_FAIL;
-
+    Safe_Delete_Array(Load5.pEnable_Level);
 
     CSpriteTexture::CSpriteTexture_DESC LoadingBar{};
     LoadingBar.UID = CUI::UIID_Loading;
     LoadingBar.fX = 640.f;
     LoadingBar.fY = 685.f;
-    LoadingBar.fZ = 0.09f;
+    LoadingBar.fZ = 0.08f;
     LoadingBar.fSizeX = 1280.f;
     LoadingBar.fSizeY = 90.f;
-
     LoadingBar.Update = true;
-
     LoadingBar.fSpeedPerSec = 0.f;
-    LoadingBar.FilePath = L"Prototype_Component_Loading";
+    LoadingBar.ProtoName = L"Prototype_Component_Loading";
     LoadingBar.TexIndex = 1;
     LoadingBar.interver = 0.f;
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_SpriteTexture",
-        nullptr, 0, &LoadingBar)))
+    LoadingBar.iDeleteLevel = LEVEL_LOADING;
+    LoadingBar.iMaxLevel = LEVEL_END;
+    LoadingBar.pEnable_Level = new _bool[LEVEL_END]{false, true, false, false, false, false};
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"LoadingBar",L"Prototype_GameObject_SpriteTexture",&LoadingBar)))
         return E_FAIL;
+    Safe_Delete_Array(LoadingBar.pEnable_Level);
 
     m_pGameInstance->Play_Sound( L"ST_Music_Credits.wav", CSound::SOUND_LODING, 0.5f);
     return S_OK;
 }
 
-HRESULT CLevel_Loading::Initialize_STAGE(const _uint& pLayerTag)
-{
-    CSpriteTexture::CSpriteTexture_DESC Loading{};
-    Loading.UID = CUI::UIID_Loading;
-    Loading.fX = g_iWinSizeX*0.5f;
-    Loading.fY = g_iWinSizeY * 0.5f;
-    Loading.fZ = 0.0f;
-    Loading.fSizeX = g_iWinSizeX ;
-    Loading.fSizeY = g_iWinSizeY;
-
-    Loading.Update = true;
-
-    Loading.fSpeedPerSec = 0.f;
-    Loading.FilePath = L"Prototype_Component_Texture_Pade";
-    Loading.TexIndex = 1;
-    Loading.interver = 0.f;
-    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_LOADING, pLayerTag, L"Prototype_GameObject_SpriteTexture",
-        nullptr, 0, &Loading)))
-        return E_FAIL;
-
-    return S_OK;
-}
-
-HRESULT CLevel_Loading::Ready_Clone_Layer(const _uint& pLayerTag)
-{
-
-    if (m_eLodingType == GORGE)
-    {
-        if (FAILED(Initialize_GORGE(pLayerTag)))
-            return E_FAIL;
-    }
-
-    if (m_eLodingType == STAGE)
-    {
-        if (FAILED(Initialize_STAGE(pLayerTag)))
-            return E_FAIL;
-    }
-
-
-
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerShooting, false)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerState, false)))
-        return E_FAIL;
-    if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_InteractiveUI, false)))
-        return E_FAIL;
-    return S_OK;
-}
 
 CLevel_Loading* CLevel_Loading::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVELID eNextLevelID,
-                                       LOADINGID eLodingType)
+                                      _bool Page)
 {
     CLevel_Loading* pInstance = new CLevel_Loading(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize(eNextLevelID, eLodingType)))
+    if (FAILED(pInstance->Initialize(eNextLevelID,Page)))
     {
         MSG_BOX("Failed to Created : CLevel_Loading");
         Safe_Release(pInstance);

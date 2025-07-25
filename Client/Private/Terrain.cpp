@@ -17,55 +17,49 @@ HRESULT CTerrain::Initialize_Prototype()
 
 HRESULT CTerrain::Initialize(void* pArg)
 {
-    if (nullptr != pArg) {
-        CGameObject::GAMEOBJ_DESC* pDesc = static_cast <GAMEOBJ_DESC*>(pArg);
+   CGameObject::GAMEOBJ_DESC* pDesc = static_cast <GAMEOBJ_DESC*>(pArg);
    
-        m_DATA_TYPE = pDesc->DATA_TYPE;
+   if (FAILED(__super::Initialize(pDesc)))
+       return E_FAIL;
 
-        if (FAILED(__super::Initialize(pDesc)))
-            return E_FAIL;
-    }
-    else
-    if (FAILED(__super::Initialize(pArg)))
-        return E_FAIL;
-
-
-    if (m_DATA_TYPE == Terrain_TYPE::TYPE_MAIN)
+    if (pDesc->Object_Type == Terrain_TYPE::TYPE_MAIN)
             m_bMain = true;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
+    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
+
+    if (pDesc->CuriLevelIndex != LEVEL_STAGE1)
+    Set_Buffer(pDesc->Buffer[0], pDesc->Buffer[1]);
+    else
+    Set_Buffer(513, 513);
 
     if (m_pNavigationCom != nullptr)
     {
-            m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
+        m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
     }
     return S_OK;
 }
 
-_int CTerrain::Priority_Update(_float fTimeDelta)
+void CTerrain::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }
-
     m_fTimeSum += fTimeDelta / m_iUVoffset;
-
-    return OBJ_NOEVENT;
 }
 
 void CTerrain::Update(_float fTimeDelta)
 {
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
-    m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
+        m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
 }
 
 void CTerrain::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
+        return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
     if (m_bFire == 1)
     {
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
@@ -93,16 +87,11 @@ HRESULT CTerrain::Render()
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Float("g_TimeSum", m_fTimeSum)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
         return E_FAIL;
 
 
-    if (FAILED(m_pShaderCom->Bind_Int("g_onEmissive", m_bFire)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_onEmissive", &m_bFire, sizeof(_int))))
             return E_FAIL;
 
     m_pShaderCom->Begin(m_bFire);
@@ -116,21 +105,16 @@ HRESULT CTerrain::Render()
 
 void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
-
-        if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
-        reinterpret_cast<CComponent**>(&m_pTextureCom))))
-        return;
-
-
-
+  if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
+  reinterpret_cast<CComponent**>(&m_pTextureCom))))
+  return;
 }
 
 void CTerrain::Set_Buffer(_uint x, _uint y)
 {
-    m_pSize[0] = x;
-    m_pSize[1] =y;
+    m_pSize[0] = x;              // Terrain의 X개수
+    m_pSize[1] =  y; // Terrain의  Z개수
 
-   
    // 쿼드 트리의 2의n승 + 1의 규칙은 경계 이음매 문제 때문에 이웃하는 LOD와 연결할 수 있는 정점 부족해지는 문제때문에 검사한번하자.
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
     {
@@ -142,7 +126,36 @@ void CTerrain::Set_Buffer(_uint x, _uint y)
     }
 
 }
+HRESULT CTerrain::Render_Shadow()
+{
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
 
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",
+                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",
+                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
+        return E_FAIL;
+
+    m_pShaderCom->Begin(2);
+
+    m_pVIBufferCom->Bind_Buffers();
+
+    m_pVIBufferCom->Render();
+
+    return S_OK;
+}
 
 
 _float3* CTerrain::Get_VtxPos()

@@ -18,25 +18,27 @@ HRESULT CUI::Initialize(void* pArg)
     if (nullptr != pArg)
     {
         CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
+
+
         m_fX = pDesc->fX;
         m_fY = pDesc->fY;
         m_fZ = pDesc->fZ;
         m_fSizeX = pDesc->fSizeX;
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
-        m_iDepth = pDesc->iDepth;
+        m_iDeleteLevel = pDesc->iDeleteLevel;
 
-        m_bUpdate = pDesc->Update;
+        m_bUpdate = pDesc->Update; 
+        m_pEnable_Level = new _bool[pDesc->iMaxLevel];
+        for (_uint i = 0; i < pDesc->iMaxLevel; i++) 
+            m_pEnable_Level[i] = pDesc->pEnable_Level[i];
 
-        m_iDepth = pDesc->iDepth;
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
 
     }
     else if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
-
-
 
 
     // 컨텍스트 디바이스는 원본 이니셜에서 설정해 주지 못함, 원본이 Loader(서브 스레드)에서 만들어 지면서 호출되기 때문
@@ -50,9 +52,9 @@ HRESULT CUI::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CUI::Priority_Update(_float fTimeDelta)
+void CUI::Priority_Update(_float fTimeDelta)
 {
-    return OBJ_NOEVENT;
+    return ;
 }
 
 void CUI::Update(_float fTimeDelta)
@@ -67,7 +69,7 @@ HRESULT CUI::Render()
 {
 
     m_pTransformCom->Set_TRANSFORM(
-        CTransform::TRANSFORM_POSITION,
+        CTransform::T_POSITION,
         XMVectorSet(m_fX + -ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, 0.f, 1.f));
 
 
@@ -86,16 +88,15 @@ void CUI::Set_UI_Pos(void* pArg)
         m_fSizeX = pDesc->fSizeX;
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
-        m_iDepth = pDesc->iDepth;
-        m_bUpdate = pDesc->Update;
-        m_iDepth = pDesc->iDepth;
+        
+     m_bUpdate = pDesc->Update; 
     }
 
     // 컨텍스트 디바이스는 원본 이니셜에서 설정해 주지 못함, 원본이 Loader(서브 스레드)에서 만들어 지면서 호출되기 때문
 
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
     m_pTransformCom->Set_TRANSFORM(
-        CTransform::TRANSFORM_POSITION,
+        CTransform::T_POSITION,
         XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 }
 
@@ -107,6 +108,12 @@ void CUI::Set_UI_shaking(_float fShakingTime, _float fPowerX, _float fPowerY)
     m_fShakingPower_Y = fPowerY;
     m_IsShaking = true;
 }
+
+_bool CUI::Check_Deleate(_uint Level)
+{
+    return m_iDeleteLevel == Level;
+}
+
 
 void CUI::UI_shaking(_float fTimeDelta)
 {
@@ -131,4 +138,5 @@ void CUI::UI_shaking(_float fTimeDelta)
 void CUI::Free()
 {
     __super::Free();
+    Safe_Delete_Array(m_pEnable_Level);
 }

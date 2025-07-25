@@ -28,7 +28,7 @@ HRESULT CShootingUI::Initialize(void* pArg)
 
 	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 	m_pTransformCom->Set_TRANSFORM(
-		CTransform::TRANSFORM_POSITION,
+		CTransform::T_POSITION,
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 
@@ -38,13 +38,9 @@ HRESULT CShootingUI::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CShootingUI::Priority_Update(_float fTimeDelta)
+void CShootingUI::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
-
-	return OBJ_NOEVENT;
+	
 }
 
 void CShootingUI::Update(_float fTimeDelta)
@@ -61,7 +57,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY + rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponUP = false;
@@ -81,7 +77,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX -50.f) - ViewportDesc.Width * 0.5f, -(m_fY+250.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponDown = false;
@@ -100,7 +96,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX+220.f + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY+30.f +rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponUP = false;
@@ -122,7 +118,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX , m_fSizeY , 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX - 75.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponDown = false;
@@ -144,7 +140,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX*2.f, m_fSizeY*2.f, 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX+60.f + rand()%100)  - ViewportDesc.Width * 0.5f, -(m_fY - 70.f )+ ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponUP = false;
@@ -165,7 +161,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX * 2.f, m_fSizeY * 2.f, 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX - 75.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponDown = false;
@@ -185,7 +181,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX * 1.5f, m_fSizeY * 1.5f, 1.f);
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX + rand() % 100) - ViewportDesc.Width * 0.5f, -(m_fY +10) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponUP = false;
@@ -205,7 +201,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		{
 
 			m_pTransformCom->Set_TRANSFORM(
-				CTransform::TRANSFORM_POSITION,
+				CTransform::T_POSITION,
 				XMVectorSet((m_fX +200.f) - ViewportDesc.Width * 0.5f, -(m_fY + 80.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponDown = false;
@@ -257,7 +253,7 @@ void CShootingUI::Set_RandomPos(_bool WeaponUP, _bool WeaponDown, _bool WeaponSi
 void CShootingUI::Set_PosClack(_float X, _float Y)
 {
 	m_pTransformCom->Set_TRANSFORM(
-		CTransform::TRANSFORM_POSITION,
+		CTransform::T_POSITION,
 		XMVectorSet((m_fX - X) - ViewportDesc.Width * 0.5f, -(m_fY + Y) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 }
 

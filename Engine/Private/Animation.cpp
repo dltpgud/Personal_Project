@@ -46,47 +46,41 @@ HRESULT CAnimation::Initialize(HANDLE& hFile)
 
 _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones, _bool isLoop, _float fTimeDelta)
 {
-    _float fChannelAnimTime{};
+   // 콜백함수 실행
+     Run_CallbackFunc(m_fCurrentPosition);
 
-   Run_CallbackFunc(m_fCurrentPosition);
+    //애니메이션 전환 중 이면 보션 전환 중 시간을 증가시키고
     if (m_fChangingTime < m_fMotionChangingTIme)
-        m_fChangingTime += m_fTickPerSecond * fTimeDelta;
-    else
+        m_fChangingTime += m_fTickPerSecond * fTimeDelta;  
+    else // 전환 중이 아니라면 현재 위치를 증가 시킴
         m_fCurrentPosition += m_fTickPerSecond * fTimeDelta;
 
+    // 애니메이션이 끝까지 재생되면
     if (m_fCurrentPosition >= m_fDuration)
     {
-        if (isLoop)
+        if (isLoop)// 반복하는 애니메이션이라면
         {
             m_fCurrentPosition = 0.f;
 
         }
         else if (false == isLoop)
         {
-
+            // 한 번만 재생하는 애니메이션이라면
              return true;
         }
     }
 
+    _float fChannelAnimTime{};
+    //실제 보간을 위한 시간을 애니메이션 전환 중인 여부 판단으로 넘김 
     if (m_fChangingTime < m_fMotionChangingTIme)
         fChannelAnimTime = m_fChangingTime;
     else
         fChannelAnimTime = m_fCurrentPosition;
 
+    // 각 채널에 대해 변환 행렬을 업데이트
     for (_uint i = 0; i < m_iNumChannels; i++)
         m_Channels[i]->Update_TransformationMatrix(Bones, &m_iChannelKeyFrameIndices[i], fChannelAnimTime,
             m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme, m_vLastKeyFrame[i]);
-
-
-    if (m_fCurrentPosition >= m_fDuration )
-    {
-        Reset_Callback();
-       
-       return true;
-    }
-
-
-
     return false;
 }
 
@@ -106,30 +100,16 @@ void CAnimation::init_Loop(const vector<class CBone*>& Bones)
 
 void CAnimation::Callback(_int Duration, function<void()> func)
 {
-    auto iter = m_CallbackFunc.find(Duration);
-    if (iter == m_CallbackFunc.end())
-    {
-        m_CallbackFunc[Duration] = vector<function<void()>>();
-    }
-
-    m_CallbackFunc[Duration].emplace_back([func]() { func(); });
+    m_CallbackFunc[Duration].emplace_back(func);
 }
 
 void CAnimation::Run_CallbackFunc(_int Duration)
 {
- 
     auto iter = m_CallbackFunc.find(Duration);
     if (iter == m_CallbackFunc.end())
         return;
 
     for (auto& callback : iter->second) { callback(); }
-
-}
-
-void CAnimation::Reset_Callback()
-{
-    m_fCurrentPosition = 0.f;
-   // for (auto& KeyIndices : m_iChannelKeyFrameIndices) { KeyIndices = 0; }
 
 }
 

@@ -4,6 +4,7 @@
 #include "Client_Defines.h"
 #include "Base.h"
 
+
 BEGIN(Engine)
 class CGameInstance;
 END
@@ -35,6 +36,11 @@ public:
 #endif
 
 private:
+    HRESULT                     Loading_For_ProtoObject();
+    HRESULT                     Loading_For_Sound();
+    HRESULT                     Loading_For_Static_ComPonent();
+    HRESULT                     Loading_For_Static_Texture();
+
 	HRESULT						Loading_For_MenuLevel();
 	HRESULT						Loading_For_Stage1Level();
 	HRESULT						Loading_For_Stage2Level();

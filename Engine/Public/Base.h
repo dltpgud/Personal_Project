@@ -21,8 +21,7 @@ public :
 
 private:
 	_uint			m_iRefCnt = { 0 };
-
-public:
+ public :
 	virtual void Free() ; // 소멸자 대체.. 순수 가상으로 놓아도 됨
 
 };

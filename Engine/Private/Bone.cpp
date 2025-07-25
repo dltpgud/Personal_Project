@@ -4,6 +4,31 @@ CBone::CBone()
 {
 }
 
+HRESULT CBone::Initialize(HANDLE& hFile)
+{
+     DWORD dwByte = { 0 };
+    _bool bReadFile;
+
+	void* pInstance = malloc(sizeof (CBone));
+    bReadFile = ReadFile(hFile, pInstance, sizeof(CBone), &dwByte, nullptr);
+
+    CBone* pData = reinterpret_cast<CBone*>(pInstance);
+
+    if (!bReadFile || dwByte != sizeof(CBone) || pData == nullptr)
+    {
+        free(pInstance);
+        return E_FAIL;
+    }
+ 
+    memcpy(m_szName, pData->m_szName, sizeof(m_szName));
+    memcpy(&m_TransformationMatrix, &pData->m_TransformationMatrix, sizeof(_float4x4));
+    memcpy(&m_CombinedTransformationMatrix, &pData->m_CombinedTransformationMatrix, sizeof(_float4x4));
+
+    m_iParentBoneIndex = pData->m_iParentBoneIndex;
+	free(pInstance);
+    return S_OK;
+}
+
 void CBone::Update_CombinedTransformationMatrix(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix)
 {
 	if (m_iParentBoneIndex == -1)
@@ -20,35 +45,20 @@ void CBone::Update_CombinedTransformationMatrix(const vector<class CBone*>& Bone
 
 void CBone::New_CombinedTransformationMatrix(_fmatrix NewTransformMatrix)
 {
-
 	XMStoreFloat4x4(&m_CombinedTransformationMatrix,
 		NewTransformMatrix * XMLoadFloat4x4(&m_CombinedTransformationMatrix));
 }
 
-
-
 CBone* CBone::Create(HANDLE& hFile)
 {
-	CBone* pInstance = new CBone();
-	CBone* pNew = nullptr;
-	DWORD dwByte = { 0 };
-	_bool bReadFile;
+    CBone* pInstance = new CBone();
 
-	bReadFile = ReadFile(hFile, pInstance, sizeof(CBone), &dwByte, nullptr);
-
-	pNew = pInstance->Clone();
-
-	delete static_cast<void*>(pInstance);
-	
-	if (!bReadFile)
-	{
-		MSG_BOX("Failed to Created : CBone");
-		Safe_Release(pInstance);
-	}
-
-
-
- 	return pNew;
+    if (FAILED(pInstance->Initialize( hFile)))
+    {
+        MSG_BOX("Failed to Created : CBone");
+        Safe_Release(pInstance);
+    }
+   return pInstance;
 }
 
 CBone* CBone::Clone()

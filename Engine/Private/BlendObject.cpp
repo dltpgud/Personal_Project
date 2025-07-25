@@ -26,13 +26,9 @@ HRESULT CBlendObject::Initialize(void * pArg)
 	return S_OK;
 }
 
-_int CBlendObject::Priority_Update(_float fTimeDelta)
+void CBlendObject::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
-
-	return OBJ_NOEVENT;
+	return;
 }
 
 void CBlendObject::Update(_float fTimeDelta)
@@ -50,7 +46,7 @@ HRESULT CBlendObject::Render()
 
 void CBlendObject::Compute_Depth()
 {
-	m_fDepth = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPosition()) - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)));	
+	m_fDepth = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPosition()) - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)));	
 }
 
 void CBlendObject::Free()

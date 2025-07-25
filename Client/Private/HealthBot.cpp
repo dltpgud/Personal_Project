@@ -20,13 +20,14 @@ HRESULT CHealthBot::Initialize_Prototype()
 HRESULT CHealthBot::Initialize(void* pArg)
 {
 
-    CActor::Actor_DESC Desc{};
-    Desc.iNumPartObjects = PART_END;
-    Desc.fSpeedPerSec = 3.f;
-    Desc.fRotationPerSec = XMConvertToRadians(60.f);
-    Desc.JumpPower = 3.f;
+    CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
+    Desc->iNumPartObjects = PART_END;
+    Desc->fSpeedPerSec = 3.f;
+    Desc->fRotationPerSec = XMConvertToRadians(60.f);
+    Desc->JumpPower = 3.f;
+    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::NPC;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
-                if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
@@ -41,19 +42,18 @@ HRESULT CHealthBot::Initialize(void* pArg)
     m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     m_bOnCell = true;
-    m_DATA_TYPE = CGameObject::DATA_NPC;
-    m_pInteractiveUI = static_cast <CInteractiveUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_InteractiveUI));
-    m_CPlayerUI = static_cast <CPlayerUI*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_PlayerHP));
+   
+    m_pInteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
+    m_CPlayerUI = static_cast<CPlayerUI*>(m_pGameInstance->Find_Clone_UIObj(L"playerHP"));
     return S_OK;
+    
 }
 
-_int CHealthBot::Priority_Update(_float fTimeDelta)
+void CHealthBot::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
-
+ 
     __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
+
 }
 
 void CHealthBot::Update(_float fTimeDelta)
@@ -102,9 +102,9 @@ HRESULT CHealthBot::Render()
 
 void CHealthBot::intersect(_float fTimedelta)
 {
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
 
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 
     _vector vDir = vPlayerPos - vPos;
 

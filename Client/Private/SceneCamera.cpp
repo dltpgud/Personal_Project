@@ -20,31 +20,31 @@ HRESULT CSceneCamera::Initialize_Prototype()
 HRESULT CSceneCamera::Initialize(void* pArg)
 {
     CSceneCamera_DESC* pDesc = static_cast<CSceneCamera_DESC*>(pArg);
-    m_DATA_TYPE = CGameObject::DATA_CAMERA;
+    pDesc->Object_Type = CGameObject::GAMEOBJ_TYPE::CAMERA;
     m_vStopPos = pDesc->vStopPos;
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    _vector vDir = m_vStopPos - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vDir = m_vStopPos - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
      m_fRunTime = fLength / pDesc->fSpeedPerSec;
      static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_Key(false);
      return S_OK;
 }
 
-_int CSceneCamera::Priority_Update(_float fTimeDelta)
+void CSceneCamera::Priority_Update(_float fTimeDelta)
 {
     if (m_bDead) {
-        static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_Key(true);
-        static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
-        return OBJ_DEAD;
+  
+    //    static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
+        return ;
     }
 
     if (false == m_bfade)
     {
-        static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->Set_Pade(false);
+       static_cast<CPade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Pade(false);
         m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
-        if(true == (static_cast<CPade*>(m_pGameInstance->Get_UI(LEVEL_STATIC, CUI::UIID_Pade))->FinishPade()))
+      if(true ==  static_cast<CPade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->FinishPade())
           m_bfade = true;
     }
 
@@ -57,7 +57,8 @@ _int CSceneCamera::Priority_Update(_float fTimeDelta)
                 m_pGameInstance->Play_Sound(L"ST_BillyBoom_Presence.ogg", CSound::CHANNELID::SOUND_BGM, 0.3f);
                 m_bintroSound = true;
             }
-            m_pTransformCom->Go_Straight(fTimeDelta);
+            m_pTransformCom->Go_Move(CTransform::GO,fTimeDelta);
+            
         }
         else
             m_bIsCamEnd = true;
@@ -65,12 +66,13 @@ _int CSceneCamera::Priority_Update(_float fTimeDelta)
 
         if (true == m_bIsCamEnd) {
 
-            dynamic_cast<CBillyBoom*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER))->Intro_Routine(fTimeDelta);
+         dynamic_cast<CBillyBoom*>(
+                m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Monster"), CGameObject::ACTOR))
+                ->Intro_Routine(fTimeDelta);
         }
 
         __super::Priority_Update(fTimeDelta);
     }
-    return OBJ_NOEVENT;
 }
 
 void CSceneCamera::Update(_float fTimeDelta)

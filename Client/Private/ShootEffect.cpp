@@ -61,17 +61,14 @@ HRESULT CShootEffect::Initialize(void * pArg)
 	}
 
 
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_vPos);
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
 
 	return S_OK;
 }
 
-_int CShootEffect::Priority_Update(_float fTimeDelta)
+void CShootEffect::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
-	return OBJ_NOEVENT;
+	
 }
 
 void CShootEffect::Update(_float fTimeDelta)
@@ -134,7 +131,7 @@ void CShootEffect::Late_Update(_float fTimeDelta)
 
 	_vector vHPos = XMVector3TransformCoord(m_Local, XMLoadFloat4x4(m_WorldPtr));
 
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vHPos);
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, vHPos);
 	
 
 

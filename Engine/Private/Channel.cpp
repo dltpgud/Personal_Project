@@ -40,38 +40,42 @@ void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _u
     // 전환 중일 때
     if (bMotionChanging)
     {
-        // 전환 비율을 계산 (전환 경과 시간에 따른 비율)
+        // 전환 비율을 계산 (전환 경과 시간에 따른 비율, 현재 애니메이션 위치/ 애니메이션 트렉 위치)
         _float fTransitionRatio = fCurrentPosition / tLasKey.fTrackPosition;
 
+
+        // 현재 키프레임 인덱스에 따른 크기, 회전, 위치 벡터를 가져옴
         _vector vCurrentDestScale = XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vScale);
         _vector vCurrentDestRotation = XMLoadFloat4(&m_KeyFrames[*pCurrentKeyFrameIndex].vRotation);
         _vector vCurrentDestPosition = XMVectorSetW(XMLoadFloat3(&m_KeyFrames[*pCurrentKeyFrameIndex].vPosition), 1.f);
 
+        // 전환 비율 이용한 보간을 통해 크기, 회전, 위치를 계산
         vScale = XMVectorLerp(XMLoadFloat3(&tLasKey.vScale), vCurrentDestScale, fTransitionRatio);
         vRotation = XMQuaternionSlerp(XMLoadFloat4(&tLasKey.vRotation), vCurrentDestRotation, fTransitionRatio);
         vPosition = XMVectorLerp(XMLoadFloat3(&tLasKey.vPosition), vCurrentDestPosition, fTransitionRatio);
 
-        _matrix TransformMatrix =
-            XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
-
-        Bones[m_iBoneIndex]->Set_TransformationMatrix(TransformMatrix);
-
-        return;
+    
     }
-    else if (fCurrentPosition >= LastKeyFrame.fTrackPosition)
+    else if (fCurrentPosition >= LastKeyFrame.fTrackPosition) // 마지막 키프레임을 초과한 경우
     {
+        // 마지막 키프레임의 크기, 회전, 위치 벡터를 가져옴
         vScale = XMLoadFloat3(&LastKeyFrame.vScale);
         vRotation = XMLoadFloat4(&LastKeyFrame.vRotation);
         vPosition = XMVectorSetW(XMLoadFloat3(&LastKeyFrame.vPosition), 1.f);
     }
     else
-    {
+    {// 일반적인 애니메이션이 진행되는 경우
+        
+        // 애니메이션이 처음 시작되면 현재 키프레임 인덱스도 0으로 초기화
         if (0.f == fCurrentPosition)
             *pCurrentKeyFrameIndex = 0;
 
-        /*프레임 드랍시 키 프레임이 넓게 찍혀서 모델이 깨지는 현상을 막음*/
-        while (fCurrentPosition >= m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition) ++*pCurrentKeyFrameIndex;
+        /*while문은 찾아 프레임 드랍시 키 프레임이 넓게 찍혀서 모델이 깨지는 현상을 막음*/
+        // 현재 위치가 프레임드랍으로 훌쩍 넘어가면 원래의 그 다음 프래임을 놓치지 않고 따라야함
+        while (fCurrentPosition >= m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition) 
+            ++*pCurrentKeyFrameIndex; // 현재 위치가 다음 키프레임의 위치보다 크거나 같으면 인덱스를 증가.
 
+        // 현채 위치가 다음 프레임 사이에 얼마나 위치하는지 비율을 계산
         _float fLinearRatio = (fCurrentPosition - m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition) /
             (m_KeyFrames[*pCurrentKeyFrameIndex + 1].fTrackPosition -
                 m_KeyFrames[*pCurrentKeyFrameIndex].fTrackPosition);
@@ -92,11 +96,13 @@ void CChannel::Update_TransformationMatrix(const vector<class CBone*>& Bones, _u
         vRotation = XMQuaternionSlerp(vSourRotation, vDestRotation, fLinearRatio);
         vPosition = XMVectorLerp(vSourPosition, vDestPosition, fLinearRatio);
     }
-
+    // 보간된 크기, 회전, 위치를 이용해 변환 행렬 생성
     _matrix TransformMatrix =
         XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
-
+    // 뼈에 변환 행렬 설정
     Bones[m_iBoneIndex]->Set_TransformationMatrix(TransformMatrix);
+
+    return;
 }
 
 KEYFRAME CChannel::Init_LastKeyFrame(const vector<class CBone*>& Bones)

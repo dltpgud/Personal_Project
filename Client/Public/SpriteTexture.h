@@ -15,7 +15,7 @@ class CSpriteTexture :  public CUI
 public:
 	typedef struct CSpriteTexture_DESC : public CUI::CUI_DESC
 	{
-		LOADINGID LoadingID{};
+	
 		_int TexIndex{};
 		_float interver{};
 		
@@ -29,17 +29,15 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-	virtual _int	Priority_Update(_float fTimeDelta) override;
+        virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-private : 
-	 HRESULT Initialize_GORGE();
 
 
 private:
-	LOADINGID		m_pLoadingID = {};
+	
 	CTexture*	    m_pTextureCom = {};
 	CShader*		m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };

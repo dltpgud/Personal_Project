@@ -29,7 +29,7 @@ HRESULT CShockWave::Initialize(void * pArg)
 	if (FAILED(Add_Components()))
 		return E_FAIL;
 
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSetY (m_vPos, 1.7f));
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY (m_vPos, 1.7f));
 	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.f;
 	m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg", CSound::SOUND_EFFECT, 1.f);
@@ -37,13 +37,11 @@ HRESULT CShockWave::Initialize(void * pArg)
 	return S_OK;
 }
 
-_int CShockWave::Priority_Update(_float fTimeDelta)
+void CShockWave::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
 
 	__super::Priority_Update(fTimeDelta);
-	return OBJ_NOEVENT;
+	return ;
 }
 
 void CShockWave::Update(_float fTimeDelta)
@@ -98,7 +96,7 @@ HRESULT CShockWave::Render()
 HRESULT CShockWave::Add_Components()
 {
 	/* For.Com_Model */
-	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_ShockWave"),
+	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto_Component_ShockWave"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
 		return E_FAIL;
 

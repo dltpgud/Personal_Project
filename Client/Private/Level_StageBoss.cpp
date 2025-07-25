@@ -17,19 +17,19 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Player(CGameObject::ACTOR)))
+	if (FAILED(Ready_Layer_Player(TEXT("Layer_Player"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Monster(CGameObject::ACTOR)))
+	if (FAILED(Ready_Layer_Monster(TEXT("Layer_Monster"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Camera(CGameObject::CAMERA)))
+	if (FAILED(Ready_Layer_Camera(TEXT("Layer_Camera"))))
 	 	return E_FAIL;
 
-	if (FAILED(Ready_Layer_Map(CGameObject::MAP)))
+	if (FAILED(Ready_Layer_Map(TEXT("Layer_Map"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_UI(CGameObject::UI)))
+	if (FAILED(Ready_UI()))
 		return E_FAIL;
 
 	if (FAILED(Ready_Find_cell()))
@@ -44,7 +44,7 @@ void CLevel_StageBoss::Update(_float fTimeDelta)
 	if (m_pGameInstance->IsOpenStage())
 	{
 		m_pGameInstance->Set_Open_Bool(false);
-		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_RETURN_MENU, STAGE));
+	//	m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_RETURN_MENU, STAGE));
 
 	}
 
@@ -63,26 +63,28 @@ HRESULT CLevel_StageBoss::Render()
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Layer_Monster(const _uint& pLayerTag)
+HRESULT CLevel_StageBoss::Ready_Layer_Monster(const _wstring& pLayerTag)
 {
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag, L"Prototype_GameObject_BillyBoom",
-		L"../Bin/Data/Monster/BossStage_Monster.dat", CGameObject::DATA_MONSTER, nullptr, CActor::TYPE_BOSS)))
-		return   E_FAIL;
-
+    CActor::Actor_DESC Desc{};
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_BOSS, pLayerTag, L"Prototype_GameObject_BillyBoom",
+                                        L"Proto Component Boss_Monster", L"../Bin/Data/Monster/BossStage_Monster.dat",
+                                              &Desc)))
+        return E_FAIL;
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _uint& pLayerTag)
+HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _wstring& pLayerTag)
 {
-	static_cast<CCamera_Free*>(m_pGameInstance->Find_CloneGameObject(LEVEL_STATIC, CGameObject::CAMERA, CGameObject::DATA_CAMERA))->Set_Update(false);
+	static_cast<CCamera_Free*>(m_pGameInstance->Find_CloneGameObject(LEVEL_STATIC,pLayerTag, CGameObject::GAMEOBJ_TYPE::CAMERA))->Set_Update(false);
 
-	CGameObject* pMonster = m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, CGameObject::ACTOR, CGameObject::DATA_MONSTER);
+	CGameObject* pMonster =
+            m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Monster"), CGameObject::ACTOR);
 
 	CSceneCamera::CSceneCamera_DESC			Desc{};
 	_float4 fEye = { 50.f, 5.f, 16.f, 1.f };
 	
  	_float4 fCamPos{};
- 	XMStoreFloat4(&fCamPos, pMonster->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+ 	XMStoreFloat4(&fCamPos, pMonster->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
 	
 	_float4 At = { fCamPos.x, 5.f, fCamPos.z, fCamPos.w };
 
@@ -95,13 +97,13 @@ HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _uint& pLayerTag)
 	Desc.fSpeedPerSec = 10.f;
 	Desc.vStopPos = XMVectorSet(50.f, 5, fCamPos.z -20.f, fCamPos.w);
 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag,
-		TEXT("Prototype_GameObject_SceneCamera"), nullptr, 0, &Desc)))
+		TEXT("Prototype_GameObject_SceneCamera"), &Desc)))
 		return E_FAIL;
 
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Layer_UI(const _uint& pLayerTag)
+HRESULT CLevel_StageBoss::Ready_UI()
 {
 	// 보스 인트로 떄문에 다꺼놔
 	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
@@ -116,19 +118,25 @@ HRESULT CLevel_StageBoss::Ready_Layer_UI(const _uint& pLayerTag)
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Layer_Map(const _uint& pLayerTag)
+HRESULT CLevel_StageBoss::Ready_Layer_Map(const _wstring& pLayerTag)
 {
- 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag, L"Proto GameObject_Terrain", L"../Bin/Data/Map/SetMap_Boss_terrain.dat", CGameObject::DATA_TERRAIN)))
-		return   E_FAIL;
-	
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_NonAniObj", L"../Bin/Data/Map/SetMap_Boss_Nonani.dat", CGameObject::DATA_NONANIMAPOBJ)))
- 		return   E_FAIL;
-	
-	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_WALL", L"../Bin/Data/Map/SetMap_Boss_Wall.dat", CGameObject::DATA_WALL)))
-		return   E_FAIL;
-	
- 	if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_DOOR", L"../Bin/Data/Map/SetMap_Boss_ani.dat", CGameObject::DATA_DOOR)))
-		return   E_FAIL;
+    CGameObject::GAMEOBJ_DESC Desc{};
+
+    if (FAILED(Load_to_Next_Map_terrain(LEVEL_BOSS, pLayerTag, L"Proto GameObject_Terrain",
+                                        L"../Bin/Data/Map/SetMap_Boss_terrain.dat", &Desc)))
+        return E_FAIL;
+
+    if (FAILED(Load_to_Next_Map_NonaniObj(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_NonAniObj",
+                                          L"../Bin/Data/Map/SetMap_Boss_Nonani.dat")))
+        return E_FAIL;
+
+    if (FAILED(Load_to_Next_Map_AniOBj(LEVEL_BOSS, pLayerTag, L"Proto GameObject Door_aniObj",
+                                       L"../Bin/Data/Map/SetMap_Boss_ani.dat", &Desc)))
+        return E_FAIL;
+
+    if (FAILED(Load_to_Next_Map_Wall(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_WALL",
+                                     L"../Bin/Data/Map/SetMap_Boss_Wall.dat", &Desc)))
+        return E_FAIL;
 
 	return S_OK;
 }
@@ -145,11 +153,10 @@ HRESULT CLevel_StageBoss::Ready_Light()
 	m_pGameInstance->Light_Clear();
 	LIGHT_DESC			LightDesc{};
 	LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-	LightDesc.vDirection = _float4(1.f, -1.5f, -1.f, 0.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
-
+	LightDesc.vDirection = _float4(0.f, -1.f, 2.f, 0.f);
+	LightDesc.vDiffuse = _float4(0.9f, 0.9f, 0.9f, 1.f);
+	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	LightDesc.vSpecular = _float4(0.1f, 0.1f, 0.1f, 0.1f);
 
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;
@@ -157,9 +164,9 @@ HRESULT CLevel_StageBoss::Ready_Light()
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Layer_Player(const _uint& pLayerTag)
+HRESULT CLevel_StageBoss::Ready_Layer_Player(const _wstring& pLayerTag)
 {
-	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(50.f, 0.f, 15.f, 1.f));
+	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(50.f, 0.f, 15.f, 1.f));
 	return S_OK;
 }
 

@@ -67,7 +67,6 @@ const _float4x4* CModel::Get_BoneMatrix(const _char* pBoneName) const
 
 const void CModel::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatrix) const
 {
-    
     vector<_int> vecParentNum{};
     _int FindBone = Get_BoneIndex(pBoneName);
     vecParentNum.reserve(m_Bones.size());
@@ -75,8 +74,8 @@ const void CModel::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatr
 
     m_Bones[FindBone]->New_CombinedTransformationMatrix(NewMatrix);
 
-  for (_int i = FindBone + 1;  i < m_Bones.size(); i++)
-  {
+    for (_int i = FindBone + 1;  i < m_Bones.size(); i++)
+    {
       for (auto j = vecParentNum.begin(); j != vecParentNum.end(); j++)
       {
           if (*j == m_Bones[i]->Get_ParentBoneIndex())
@@ -84,11 +83,8 @@ const void CModel::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatr
               m_Bones[i]->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
               vecParentNum.push_back(i);
           }
-      }
-     
-  }
-
-
+      } 
+    }
 }
 
 HRESULT CModel::Bind_Material_ShaderResource(CShader* pShader, _uint iMeshIndex, aiTextureType eType, _uint iIndex,
@@ -102,6 +98,16 @@ HRESULT CModel::Bind_Material_ShaderResource(CShader* pShader, _uint iMeshIndex,
     return m_Materials[iMaterialIndex]->Bind_ShaderResource(pShader, eType, iIndex, pConstantName);
 }
 
+HRESULT CModel::InsertAiTexture(aiTextureType eTextureType, _uint MashiIndex, const _tchar* Path)
+{
+        if (MashiIndex >= m_Meshes.size())
+            return E_FAIL;
+
+        _uint iMaterialIndex = m_Meshes[MashiIndex]->Get_MaterialIndex();
+
+        return m_Materials[iMaterialIndex]->InsertAiTexture(eTextureType, Path);
+  
+}
 
 
 HRESULT CModel::Render(_uint iMeshIndex)
@@ -119,15 +125,11 @@ HRESULT CModel::Bind_Mesh_BoneMatrices(CShader* pShader, _uint iMeshIndex, const
 
 _bool CModel::Play_Animation(_float fTimeDelta)
 {
-    /* 모델의 뼈의 행렬(TransformationMatrix)을 현재 애니메이션에 맞는 상태로 갱신해준다. */
     _bool isFinished = m_Animations[m_iCurrentAnimIndex]->Update_TransformationMatrix(m_Bones, m_IsLoop, fTimeDelta);
-
-    /* 모든 뼈들의 CombinedTransformationMatrix를 갱신한다. */
 
     for (auto& pBone : m_Bones)
     {
-        /*컴바인된 메트릭스 자체를 m_PreTransformMatrix로 회전시켜 올바른 위치를 바라 보게 하자 */
-            pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
+      pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
     }
 
     return isFinished;
@@ -182,15 +184,11 @@ void CModel::init_Loop()
     m_Animations[m_iCurrentAnimIndex]->init_Loop(m_Bones);
 }
 
-HRESULT CModel::Set_InstanceBuffer(vector<_matrix> vecObjMat)
+HRESULT CModel::Set_InstanceBuffer(const vector<_matrix>& vecObjMat)
 {
-
-
     for (auto& pMesh : m_Meshes)
         if (FAILED(pMesh->Set_InstanceBuffer(vecObjMat)))
             return E_FAIL;
-
-
     return S_OK;
 }
 

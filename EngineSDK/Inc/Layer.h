@@ -10,22 +10,23 @@ private:
 	virtual ~CLayer() = default;
 	
 public:
-	HRESULT Add_GameObject(class CGameObject* pGameObject, const _uint& strLayerTag);
+	HRESULT Add_GameObject(class CGameObject* pGameObject);
 	void	Priority_Update(_float fTimeDelta);
 	void	Update(_float fTimeDelta);
 	void	Late_Update(_float fTimeDelta);
-	CGameObject* Get_GameObject(const _uint& strLayerTag, const _uint& ProtoTag);
+        void Delete();
+	CGameObject* Get_GameObject( const _uint& ProtoTag);
 
 
 	/*for_EDIT*/
-	_bool IsGameObject(const _uint& strLayerTag);
+	_bool IsGameObject();
 	CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir);
-	CGameObject* Recent_GameObject(const _uint& strLayerTag);
-	list<class CGameObject*> Get_ALL_GameObject(const _uint& strLayerTag);
+	CGameObject* Recent_GameObject();
+	list<class CGameObject*> Get_GameObject_List();
 
 private :
-    _uint					m_iObjType = CGameObject::GAMEOBJ_TYPE_END;
-	list<class CGameObject*> m_GameObjects[CGameObject::GAMEOBJ_TYPE_END] ;
+
+	list<class CGameObject*> m_GameObjects ;
 
 
 public : 

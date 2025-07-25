@@ -27,7 +27,7 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-	virtual _int	Priority_Update(_float fTimeDelta) override;
+        virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
@@ -57,7 +57,9 @@ private:
 	_float m_fRatio = { 0.f };
 	_bool m_bLateUpdaet = { false };
 	_bool m_bHit = { false };
-private:
+        _float2 m_fPsize{1.2f, 0.1f};
+
+    private:
 	HRESULT Add_Components();
 	
 

@@ -26,7 +26,7 @@ HRESULT CCamera::Initialize(void* pArg)
 
 	CAMERA_DESC* pDesc = static_cast<CAMERA_DESC*>(pArg);
 
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMLoadFloat4(&pDesc->vEye));
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMLoadFloat4(&pDesc->vEye));
 	m_pTransformCom->LookAt(XMLoadFloat4(&pDesc->vAt));
 	m_vEye = pDesc->vEye;
 	m_fFovy = pDesc->fFovy;
@@ -38,17 +38,17 @@ HRESULT CCamera::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CCamera::Priority_Update(_float fTimeDelta)
+void CCamera::Priority_Update(_float fTimeDelta)
 {
 	if(false == m_bUpdate)
-		return OBJ_NOEVENT;
+		return ;
 
 	m_pGameInstance->Set_TransformMatrix(CPipeLine::D3DTS_VIEW, m_pTransformCom->Get_WorldMatrix_Inverse());
 
 	m_pGameInstance->Set_TransformMatrix(CPipeLine::D3DTS_PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNearZ, m_fFarZ));
 
 	m_pGameInstance->Set_Camfar(m_fFarZ);
-	return OBJ_NOEVENT;
+	return ;
 }
 
 void CCamera::Update(_float fTimeDelta)

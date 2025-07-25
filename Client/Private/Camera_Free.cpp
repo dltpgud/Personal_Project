@@ -18,7 +18,7 @@ HRESULT CCamera_Free::Initialize_Prototype()
 HRESULT CCamera_Free::Initialize(void* pArg)
 {
     CAMERA_FREE_DESC* pDesc = static_cast<CAMERA_FREE_DESC*>(pArg);
-    m_DATA_TYPE = CGameObject::DATA_CAMERA;
+    pDesc->Object_Type = CGameObject::GAMEOBJ_TYPE::CAMERA;
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
     m_pPlayer = static_cast<CPlayer*>(m_pGameInstance->Get_Player());
@@ -27,26 +27,25 @@ HRESULT CCamera_Free::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CCamera_Free::Priority_Update(_float fTimeDelta)
+void CCamera_Free::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
+   
  
     _vector  vEye = {  m_PlayerEye->_41, m_PlayerEye->_42, m_PlayerEye->_43, m_PlayerEye->_44 };
  
     _vector Eye = XMVector3TransformCoord(vEye, m_pPlayer->Get_Transform()->Get_WorldMatrix());
  
-     m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Eye);
+     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, Eye);
 
      _float4 At;
     XMStoreFloat4(&At, Eye+
-       + m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK));
+       + m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_LOOK));
    m_pTransformCom->LookAt(XMLoadFloat4(&At));
    
 
     __super::Priority_Update(fTimeDelta);
 
-    return OBJ_NOEVENT;
+
 }
 
 void CCamera_Free::Update(_float fTimeDelta)

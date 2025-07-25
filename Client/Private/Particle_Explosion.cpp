@@ -34,15 +34,12 @@ HRESULT CParticle_Explosion::Initialize(void * pArg)
 		return E_FAIL;
 
 
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
 	return S_OK;
 }
 
-_int CParticle_Explosion::Priority_Update(_float fTimeDelta)
+void CParticle_Explosion::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-	
 
 	m_fTimeSum += fTimeDelta;  
 	
@@ -52,8 +49,6 @@ _int CParticle_Explosion::Priority_Update(_float fTimeDelta)
 		m_currentFrame = (m_currentFrame + 1) % 8; 
 	}
 
-
- 	return OBJ_NOEVENT;
 }
 
 void CParticle_Explosion::Update(_float fTimeDelta)

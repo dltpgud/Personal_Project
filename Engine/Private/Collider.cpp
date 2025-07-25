@@ -26,6 +26,11 @@ CCollider::CCollider(const CCollider& Prototype)
 #endif
 }
 
+_bool CCollider::IsColl()
+{
+    return m_isColl;
+}
+
 HRESULT CCollider::Initialize_Prototype(TYPE eColliderType)
 {
 	m_eColliderType = eColliderType;
@@ -49,9 +54,6 @@ HRESULT CCollider::Initialize_Prototype(TYPE eColliderType)
 	m_pDevice->CreateInputLayout(VertexPositionColor::InputElements, VertexPositionColor::InputElementCount, pShaderByteCode, iShaderByteCodeLength, &m_pInputLayout);
 
 #endif
-
-
-
 
 	return S_OK;
 }

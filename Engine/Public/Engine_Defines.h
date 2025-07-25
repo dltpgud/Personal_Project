@@ -27,6 +27,15 @@
 using namespace DirectX;
 
 
+#include <thread>
+#include <chrono>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <functional>
+#include <future>
+#include <atomic>
+
 #include <map>
 #include <vector>
 #include <unordered_map>
@@ -41,7 +50,8 @@ using namespace std;
 #include "Engine_Macro.h"
 #include "Engine_Function.h"
 #include "Engine_Struct.h"
-
+#include "SPinLock.h"
+#include "TLS.h"
 using namespace Engine;
 
 namespace Engine

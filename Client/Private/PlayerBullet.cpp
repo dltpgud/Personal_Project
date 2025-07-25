@@ -44,21 +44,14 @@ HRESULT CPlayerBullet::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CPlayerBullet::Priority_Update(_float fTimeDelta)
+void CPlayerBullet::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
+
+    if (true == m_bStart)
     {
-        return OBJ_DEAD;
-    }  
-    __super::Priority_Update(fTimeDelta);
-
-
-
-    if (true == m_bStart) {
         m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
     }
-
-    return OBJ_NOEVENT;
+    __super::Priority_Update(fTimeDelta);
 
 }
 
@@ -72,15 +65,15 @@ void CPlayerBullet::Late_Update(_float fTimeDelta)
     if (false == m_bStart) {
         _vector vHPos = XMVector3TransformCoord(m_Local, XMLoadFloat4x4(m_WorldPtr));
 
-        m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vHPos);
-        _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+        m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, vHPos);
+        _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
         Dir = XMVectorSetW(Dir, 0.f);
         m_vDir = XMVector3Normalize(Dir);
 
         m_bStart = true;
     }
 
-    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 1.5f))
+    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 1.5f))
     {
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;

@@ -48,12 +48,12 @@ private:
     void Wall_ListBox();
     void Monster_ListBox();
     void NPC_ListBox();
-    HRESULT Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, _int Iindex, _uint Comindex);
+    HRESULT Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTag, _int Iindex, _uint Comindex);
 
     void Push_Proto_vec();
     void Push_ProtoCom_vec();
     void Create_Leyer_Botton(POROTO_TYPE type, _uint Objnum, _uint Comnum);
-    HRESULT Ready_ToolCamera(const _uint& pLayerTag);
+    HRESULT Ready_ToolCamera(const _wstring& pLayerTag);
     HRESULT Ready_Light();
 
     void Msg_collection();
@@ -156,7 +156,10 @@ private:
     CGameObject* m_Terrain = {nullptr};
     CComponent* m_pNavigation = {nullptr};
     _int m_DoorType{ 0 };
-   
+   // float a = 865, b = 502, c = -1500, d = -1139,e =208,f =203;
+    //_vector m_Eye = XMVectorSet(143, 394, 432, 0.f);
+    //_vector m_Dire = XMVectorSet(139, 17, 2, 0.f);
+    float a = 143, b = 394, c = 432, d = 139, e = 10.f, f = 0;
 
 public:
     static CLevel_Edit* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

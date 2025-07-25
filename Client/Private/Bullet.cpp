@@ -36,12 +36,12 @@ HRESULT CBullet::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_vPos);
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
 
-    _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
     Dir = XMVectorSetW(Dir, 0.f);
     m_vDir = XMVector3Normalize(Dir);
-    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 
 
 
@@ -51,12 +51,9 @@ HRESULT CBullet::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CBullet::Priority_Update(_float fTimeDelta)
+void CBullet::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }  
+     
 
     __super::Priority_Update(fTimeDelta);
     if (m_iActorType == CSkill::MONSTER::TYPE_BILLYBOOM)
@@ -72,7 +69,7 @@ _int CBullet::Priority_Update(_float fTimeDelta)
         else
             Dead_Rutine(fTimeDelta);
     }
-    return OBJ_NOEVENT;
+    return ;
 
 }
 
@@ -92,7 +89,7 @@ void CBullet::Update(_float fTimeDelta)
 void CBullet::Late_Update(_float fTimeDelta)
 {
 
-    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 1.5f))
+    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 1.5f))
     {
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
@@ -133,11 +130,13 @@ void CBullet::Dead_Rutine(_float fTimeDelta)
         Desc.fDamage = m_pDamage;
         Desc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
         Desc.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
-        Desc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, CGameObject::SKILL, L"Prototype_GameObject_ShockWave", nullptr, 0, &Desc);
+        Desc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
+        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Skill"), L"Prototype_GameObject_ShockWave",
+                                                 &Desc);
         CShock::CShock_DESC SDesc{};
-        SDesc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, CGameObject::SKILL, L"Prototype_GameObject_Shock", nullptr, 0, &SDesc);
+        SDesc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
+        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Skill"), L"Prototype_GameObject_Shock",
+                                                 &SDesc);
 
         m_bMakeWave = false;
     }

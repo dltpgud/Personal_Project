@@ -18,7 +18,7 @@ HRESULT CTerrain::Initialize(void* pArg)
 {
 
     GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    m_DATA_TYPE = pDesc->DATA_TYPE;
+    m_iObjectType = pDesc->Object_Type;
 
     size_t iLen = wcslen(pDesc->ProtoName) + 1;
     m_Proto = new wchar_t[iLen];
@@ -33,15 +33,9 @@ HRESULT CTerrain::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CTerrain::Priority_Update(_float fTimeDelta)
+void CTerrain::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }
     m_fTimeSum += fTimeDelta /m_iUVoffset;
-
-    return OBJ_NOEVENT;
 }
 
 void CTerrain::Update(_float fTimeDelta)
@@ -52,6 +46,8 @@ void CTerrain::Update(_float fTimeDelta)
 void CTerrain::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
 }
 
@@ -76,10 +72,10 @@ HRESULT CTerrain::Render()
 
   
 
-    if (FAILED(m_pShaderCom->Bind_Int("g_onEmissive", m_bFire)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_onEmissive", &m_bFire, sizeof(_int))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Float("g_TimeSum", m_fTimeSum)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum,sizeof(_float))))
         return E_FAIL;
 
      m_pShaderCom->Begin(m_bFire);
@@ -116,6 +112,38 @@ void CTerrain::Set_Scalra_uint(_uint scalra)
 
 void CTerrain::Set_Scalra_float(_float scalra)
 {  m_iUVoffset = scalra; 
+}
+
+HRESULT CTerrain::Render_Shadow()
+{
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
+     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+
+    if (FAILED(
+            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",
+                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
+        return E_FAIL;
+
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
+        return E_FAIL;
+
+    m_pShaderCom->Begin(2);
+
+    m_pVIBufferCom->Bind_Buffers();
+
+    m_pVIBufferCom->Render();
+
+    return S_OK;
 }
 
 _float3* CTerrain::Get_VtxPos()

@@ -51,6 +51,15 @@ HRESULT Collider_Manager::Add_Collider(_float Damage, CCollider* Collider)
     return S_OK;
 }
 
+HRESULT Collider_Manager::Add_Interctive(CGameObject* Interctive)
+{
+
+    m_interctiveList.push_back(Interctive);
+    Safe_AddRef(Interctive);
+
+    return S_OK;
+}
+
 HRESULT Collider_Manager::Check_Collider_PlayerCollison()
 {
 
@@ -77,12 +86,36 @@ HRESULT Collider_Manager::Check_Collider_PlayerCollison()
     return S_OK;
 }
 
+HRESULT Collider_Manager::Check_Inetrect_Player()
+{
+    CActor* pPlayer = m_pGameInstance->Get_Player();
+
+    if (nullptr == pPlayer)
+        return E_FAIL;
+
+    if (0 == m_interctiveList.size())
+        return S_OK;
+
+    for (auto& Collider : m_interctiveList)
+    {
+       if (nullptr == Collider)
+           continue;
+
+        Collider->Get_Collider()->Intersect(pPlayer->Get_Collider());
+    
+        Safe_Release(Collider);
+    }
+    m_interctiveList.clear();
+
+    return S_OK;
+}
+
 void Collider_Manager::All_Collison_check()
 {
     Check_Collider_PlayerCollison();
     Player_To_Monster_Bullet_Collison();
     Player_To_Monster_Collison_Check();
-
+    Check_Inetrect_Player();
     if (m_bIsColl)
     {
         Player_To_Monster_Ray_Collison_Check();
@@ -181,7 +214,7 @@ HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
           _bool bHit = true;
           if (CSkill::TYPE_BILLYBOOM == pMonsterBullet->Get_ActorType() && CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
           {
-              if (true == pMonsterBullet->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)))
+              if (true == pMonsterBullet->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)))
               {
                   bHit = false;
               }
@@ -245,6 +278,12 @@ HRESULT Collider_Manager::Find_Cell()
         Safe_Release(Monster);
     }
     m_MonsterList.clear();
+    return S_OK;
+}
+
+HRESULT Collider_Manager::changeCellType(_int type)
+{
+    m_pGameInstance->Get_Player()->Set_NavigationType(type);
     return S_OK;
 }
 
