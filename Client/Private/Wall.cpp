@@ -17,50 +17,44 @@ HRESULT CWall::Initialize_Prototype()
 
 HRESULT CWall::Initialize(void* pArg)
 {
-
-    if (FAILED(__super::Initialize(pArg)))
+    GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-
+    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
      
    
     return S_OK;
 }
 
-_int CWall::Priority_Update(_float fTimeDelta)
+void CWall::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }
-
-    return OBJ_NOEVENT;
+   
 
 }
 
 void CWall::Update(_float fTimeDelta)
 {
+     
 }
 
 void CWall::Late_Update(_float fTimeDelta)
 {
-
-
-if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), 15.f))
-     return ;
-
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-            return;
-      
-     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
         return;
-   
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
+    if (false ==
+        m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 15.f))
+        return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
+
 }
 HRESULT CWall::Render()
 {
- 
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -71,8 +65,6 @@ HRESULT CWall::Render()
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
-
-       
 
             if (m_pModelName == L"Proto Component DoorRock Model_Wall") {
           
@@ -85,16 +77,14 @@ HRESULT CWall::Render()
                 else
                     m_bEmissive = false;
 
-
                 if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorEmissiveColor", &m_fDoorEmissiveColor, sizeof(_float4))))
                     return E_FAIL;
 
-              
             }
             else
                 m_bEmissive = false;
           
-            if (FAILED(m_pShaderCom->Bind_Bool("g_bDoorEmissive", m_bEmissive)))
+            if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &m_bEmissive, sizeof(_bool))))
                     return E_FAIL;
 
         if (FAILED(m_pShaderCom->Begin(6)))
@@ -107,6 +97,8 @@ HRESULT CWall::Render()
 
 HRESULT CWall::Render_Shadow()
 {
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
 
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
@@ -143,10 +135,8 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_fDoorEmissiveColor = { 1.f,0.749f,0.2156f, 1.f };
     else if (ILevel == LEVEL_STAGE2)
         m_fDoorEmissiveColor = { 1.f,0.f,0.f, 1.f };
-
-   // if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOWBG, this)))
-   //     return ;
 }
+
 
 
 

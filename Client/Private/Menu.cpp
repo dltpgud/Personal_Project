@@ -21,15 +21,13 @@ HRESULT CMenu::Initialize_Prototype()
 
 HRESULT CMenu::Initialize(void* pArg)
 {	
-	/*상위 클래스에 Arg를 던져 주어 최상위 클래스에 정보를 채워준다.*/
-	/*최상위 부모에게 값을 넘겨 주면서 트렌스 폼을 생성해준다.*/
 	
-	CUI_DESC			Desc{};
+ CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
-      Desc.Update = true;
+      pDesc->Update = true;
 
-	  Desc.UID = UIID_Menu;
-	if (FAILED(__super::Initialize(&Desc)))
+	  pDesc->UID = UIID_Menu;
+	if (FAILED(__super::Initialize(pDesc)))
 		 return E_FAIL;
 
 	if (FAILED(Add_Components()))
@@ -41,14 +39,10 @@ HRESULT CMenu::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CMenu::Priority_Update(_float fTimeDelta)
+void CMenu::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
-
-	return OBJ_NOEVENT;
 }
+
 
 void CMenu::Update(_float fTimeDelta)
 {
@@ -70,7 +64,7 @@ void CMenu::Update(_float fTimeDelta)
 				{
 					m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg", CSound::SOUND_BGM, 1.f); 
 						if (i == 1) {
-							m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1, GORGE));
+							m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1,true));
 						}
 						else if (i == 2)
 						{
@@ -179,7 +173,7 @@ HRESULT CMenu::Add_Components()
 	/* 2. 다른 객체가 내 컴포넌트를 검색하고자 할때 스위치케이스가 겁나 늘어나는 상황. */
 
 	/* For.Com_Texture */
-	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Menu"),
+	if (FAILED(__super::Add_Component(LEVEL_MENU, TEXT("Prototype_Component_Texture_Menu"),
 		TEXT("Com_Texture_Menu"), reinterpret_cast<CComponent**>(&m_pTextureCom))))  // 다이나믹 캐스팅도 스타틱 캐스팅도 할 수  없는 상황.
 		return E_FAIL;
 

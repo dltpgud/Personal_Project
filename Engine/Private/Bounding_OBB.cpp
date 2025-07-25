@@ -23,7 +23,6 @@ HRESULT CBounding_OBB::Initialize(const BOUND_DESC* pBoundDesc)
 
 void CBounding_OBB::Update(_fmatrix WorldMatrix)
 {
-	
 	m_pBoundDesc_Original->Transform(*m_pBoundDesc, WorldMatrix);
 }
 
@@ -54,6 +53,16 @@ _bool CBounding_OBB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
 	isColl = m_pBoundDesc->Intersects(RayPos, RayDir,fDis);
 
 	return isColl;
+}
+
+_float CBounding_OBB::Get_iCurRadius()
+{
+    return m_pBoundDesc->Extents.y;
+}
+
+_float3 CBounding_OBB::Get_iCurCenter()
+{
+    return m_pBoundDesc->Center;
 }
 
 #ifdef _DEBUG

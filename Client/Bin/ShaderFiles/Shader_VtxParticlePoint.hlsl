@@ -145,21 +145,10 @@ PS_OUT PS_MAIN(PS_IN In)
     // 최종 UV 좌표 계산
     float2 finalUV = frameStartUV + In.vTexcoord * frameUVSize;
 
-
-
-	
-    Out.vColor = g_Texture.Sample(PointSampler, finalUV);
+    Out.vColor = g_Texture.Sample(PointSampler, finalUV);;
 	if (Out.vColor.a == 0.f)
 		discard;
-    Out.vColor.r *= 0.4f;
-	
-    Out.vColor.g *= 0.4f;
-    Out.vColor.b *= 0.4f;
-
-
-//	Out.vColor = vector(1.f, 1.f, 1.f, 1.f);
-
-//	Out.vColor.a = saturate(In.vLifeTime.x - In.vLifeTime.y);
+    Out.vColor.rgb *= 0.4f;
 
 	return Out;
 }

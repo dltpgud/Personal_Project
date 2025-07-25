@@ -37,10 +37,10 @@ HRESULT CSkill::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CSkill::Priority_Update(_float fTimeDelta)
+void CSkill::Priority_Update(_float fTimeDelta)
 {
 	if(true == m_bDead )
-		return OBJ_DEAD;
+		return ;
 
 	m_fTimeSum += fTimeDelta;
 
@@ -50,7 +50,7 @@ _int CSkill::Priority_Update(_float fTimeDelta)
 	{
 		Dead_Rutine(fTimeDelta);
 	}
-	return OBJ_NOEVENT;
+	return ;
 }
 
 void CSkill::Update(_float fTimeDelta)

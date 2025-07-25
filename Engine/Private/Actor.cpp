@@ -29,20 +29,23 @@ HRESULT CActor::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CActor::Priority_Update(_float fTimeDelta)
+void CActor::Priority_Update(_float fTimeDelta)
 {
-if (true == m_bOnCell && nullptr != m_pNavigationCom ) {
+ 
+    if (true == m_bOnCell && nullptr != m_pNavigationCom ) {
 		_float3 fPos{};
+
 		Height_On_Cell(&fPos);
-		m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(fPos.x, m_fY, fPos.z, 1.f));
+		m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY(Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), m_fY));
 	}
+
 	if (m_bStun)
 	{
 		Stun_Routine();
 		m_bStun = false;
 	}
 	__super::Priority_Update(fTimeDelta);
-	return OBJ_NOEVENT;
+	return ;
 }
 
 void CActor::Update(_float fTimeDelta)
@@ -52,26 +55,27 @@ void CActor::Update(_float fTimeDelta)
 
 void CActor::Late_Update(_float fTimeDelta)
 {
+#ifdef _DEBUG
+
+    if (m_pNavigationCom)
 	m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
-	
-   __super::Late_Update(fTimeDelta);
+#endif // _DEBUG
+
 	if (m_bColl)
-	{
-		
+	{	
 		if (m_fHP > 0.f)
 		{
 	       HIt_Routine();
 		}
-
-		
-                m_bColl = false;
-	}
-if (m_fHP <= 0.f)
-		{
-			Dead_Routine(fTimeDelta);
-		}
-
 	
+        m_bColl = false;
+	}
+	if (m_fHP <= 0.f)
+	{
+		Dead_Routine(fTimeDelta);
+	}
+
+	__super::Late_Update(fTimeDelta);
 }
 
 HRESULT CActor::Render()
@@ -86,13 +90,15 @@ void CActor::Set_NavigationType(_uint i)
 
 void CActor::Find_CurrentCell()
 {
-	m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+
+	m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 }
 
 void CActor::Height_On_Cell(_float3* fPos)
 {
 	m_pGameInstance->Compute_Y(m_pNavigationCom, m_pTransformCom, fPos);
 	m_fY = fPos->y + m_FixY;	
+
 }
 
 void CActor::Clear_CNavigation(_tchar* tFPath)

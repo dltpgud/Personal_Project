@@ -18,26 +18,24 @@ HRESULT CWeaponUI::Initialize_Prototype()
 
 HRESULT CWeaponUI::Initialize(void* pArg)
 {
-    CUI_DESC Desc{};
+    CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
-    Desc.fX = 1170.f;
-    Desc.fY = 640.f;
-    Desc.fSizeX = 500.f;
-    Desc.fSizeY = 100.f;
-    Desc.UID = CUI::UIID_PlayerWeaPon;
-
-    Desc.Update = true;
-
-    Desc.fSpeedPerSec = 0.f;
-    Desc.fRotationPerSec = 0.f;
+    pDesc->fX = 1170.f;
+    pDesc->fY = 640.f;
+    pDesc->fSizeX = 500.f;
+    pDesc->fSizeY = 100.f;
+    pDesc->UID = CUI::UIID_PlayerWeaPon;
+      pDesc->Update = true;
+       pDesc->fSpeedPerSec = 0.f;
+    pDesc->fRotationPerSec = 0.f;
     m_fXPos = 1150.f;
 
-    if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    m_pTransformCom->Set_Scaling(Desc.fSizeX, Desc.fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
-                                   XMVectorSet(Desc.fX - g_iWinSizeX * 0.5f, -Desc.fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
+    m_pTransformCom->Set_Scaling(pDesc->fSizeX, pDesc->fSizeY, 1.f);
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
+        XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -51,12 +49,8 @@ HRESULT CWeaponUI::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CWeaponUI::Priority_Update(_float fTimeDelta)
+void CWeaponUI::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
-   
-
     if (m_IsShaking)
     {
         if (m_fShakingTime > 0.f)
@@ -89,9 +83,6 @@ _int CWeaponUI::Priority_Update(_float fTimeDelta)
             }
         }
     }
-   
-
-    return OBJ_NOEVENT;
 }
 
 void CWeaponUI::Update(_float fTimeDelta)
@@ -197,7 +188,7 @@ HRESULT CWeaponUI::Render()
     {
         m_pTransformCom->Set_Scaling(m_Desc[4].fSizeX, m_Desc[4].fSizeY, 1.f);
         m_pTransformCom->Set_TRANSFORM(
-            CTransform::TRANSFORM_POSITION,
+            CTransform::T_POSITION,
             XMVectorSet(m_Desc[4].fX - ViewportDesc.Width * 0.5f, -m_Desc[4].fY + ViewportDesc.Height * 0.5f, 0.5f, 1.f));
 
 
@@ -227,7 +218,7 @@ HRESULT CWeaponUI::Render()
     {
         m_pTransformCom->Set_Scaling(m_ScecondDesc[4].fSizeX, m_ScecondDesc[4].fSizeY, 1.f);
         m_pTransformCom->Set_TRANSFORM(
-            CTransform::TRANSFORM_POSITION,
+            CTransform::T_POSITION,
             XMVectorSet(m_ScecondDesc[4].fX - ViewportDesc.Width * 0.5f, -m_ScecondDesc[4].fY + ViewportDesc.Height * 0.5f, 0.5f, 1.f));
    
    

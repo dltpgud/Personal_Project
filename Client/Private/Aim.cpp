@@ -28,7 +28,7 @@ HRESULT CAim::Initialize(void* pArg)
 
 	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 	m_pTransformCom->Set_TRANSFORM(
-		CTransform::TRANSFORM_POSITION,
+		CTransform::T_POSITION,
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 	
@@ -43,13 +43,9 @@ HRESULT CAim::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CAim::Priority_Update(_float fTimeDelta)
+void CAim::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
 
-
-	return OBJ_NOEVENT;
 }
 
 void CAim::Update(_float fTimeDelta)

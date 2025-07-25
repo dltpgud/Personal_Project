@@ -30,12 +30,12 @@ namespace Engine
 
 	typedef struct RIM_LIGHT_DESC
 	{
+            // RimLight 상태.
 		enum STATE { STATE_NORIM, STATE_RIM };
 
-		const _uint*		eState;
-		XMFLOAT4			fcolor;
-		_int				iPower;
-		XMFLOAT4			vPosition;
+		const _uint* eState;     //현재 RimLight 상태
+            XMFLOAT4 fcolor;     // RimLight 색상
+              _float iPower;     // RimLight 세기
 	}RIM_LIGHT_DESC;
 
 
@@ -133,20 +133,16 @@ namespace Engine
 		XMFLOAT2		vLifeTime;
 	}VTXMATRIX;
 
-		typedef struct VTXMATRIX_INSTANCE
+		typedef struct ENGINE_DLL VTXMATRIX_INSTANCE
         {
             XMFLOAT4 vRight;
             XMFLOAT4 vUp;
             XMFLOAT4 vLook;
             XMFLOAT4 vPos;
-
-        } VTXMATRIX_INSTANCE;
-
-		struct ENGINE_DLL VTXMESH_INST 
-        {
             static const unsigned int iNumElement = 8;
             static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElement];
-        };
+        } VTXMATRIX_INSTANCE;
+
 
 
 	typedef struct ENGINE_DLL VTXANIMMESH

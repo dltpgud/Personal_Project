@@ -6,38 +6,6 @@ CMeshMaterial::CMeshMaterial(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
     Safe_AddRef(m_pDevice);
     Safe_AddRef(m_pContext);
 }
-/*
-HRESULT CMeshMaterial::Initialize(_uint* iNumTexture, const _tchar*** pTextureFilePath)
-{
-    for (_uint i = 0; i < AI_TEXTURE_TYPE_MAX; i++)
-    {
-        for (_uint j = 0; j < iNumTexture[i]; j++)
-        {
-            ID3D11ShaderResourceView* pSRV = {nullptr};
-
-            HRESULT hr{};
-            _tchar szExt[MAX_PATH] = {};
-            _wsplitpath_s(pTextureFilePath[i][j], nullptr, 0, nullptr, 0, nullptr, 0, szExt, MAX_PATH);
-
-            if (!lstrcmpW(szExt, TEXT(".dds")))
-                hr = CreateDDSTextureFromFile(m_pDevice, pTextureFilePath[i][j], nullptr, &pSRV);
-            else if (!lstrcmpW(szExt, TEXT(".tga")))
-                hr = E_FAIL;
-            else
-                hr = CreateWICTextureFromFile(m_pDevice, pTextureFilePath[i][j], nullptr, &pSRV);
-
-            if (FAILED(hr))
-            {
-                MSG_BOX("Failed : LoadTexture");
-                return E_FAIL;
-            }
-
-            m_Materials[i].push_back(pSRV);
-        }
-    }
-
-    return S_OK;
-}*/
 
 HRESULT CMeshMaterial::Bind_ShaderResource(CShader* pShader, aiTextureType eTextureType, _uint iIndex,
                                            const _char* pConstantName)
@@ -90,21 +58,26 @@ HRESULT CMeshMaterial::Initialize(HANDLE& hFile)
     return S_OK;
 }
 
-/*
-CMeshMaterial* CMeshMaterial::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint* iNumTexture,
-                                     const _tchar*** pTextureFilePath)
+HRESULT CMeshMaterial::InsertAiTexture(aiTextureType eTextureType, const _tchar* Path)
 {
-    CMeshMaterial* pInstance = new CMeshMaterial(pDevice, pContext);
+    _tchar szTextureFilePath[MAX_PATH] = TEXT("");
 
-    if (FAILED(pInstance->Initialize(iNumTexture, pTextureFilePath)))
-    {
-        MSG_BOX("Failed To Created : CMeshMaterial");
-        Safe_Release(pInstance);
-    }
+    wsprintf(szTextureFilePath, Path,0);
 
-    return pInstance;
-}*/
+    _tchar szEXT[MAX_PATH] = TEXT("");
 
+    _wsplitpath_s(szTextureFilePath, nullptr, 0, nullptr, 0, nullptr, 0, szEXT, MAX_PATH);
+
+    ID3D11ShaderResourceView* pSRV = {nullptr};
+    HRESULT hr{};
+    if (false == lstrcmpW(szEXT, TEXT(".dds")))
+      hr =   CreateDDSTextureFromFile(m_pDevice, szTextureFilePath, nullptr, &pSRV);
+
+   if (hr != E_FAIL)
+        m_Materials[eTextureType].push_back(pSRV);
+    return S_OK;
+}
+    
 CMeshMaterial* CMeshMaterial::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HANDLE& hFile)
 {
     CMeshMaterial* pInstance = new CMeshMaterial(pDevice, pContext);

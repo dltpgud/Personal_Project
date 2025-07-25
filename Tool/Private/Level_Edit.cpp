@@ -40,7 +40,7 @@ HRESULT CLevel_Edit::Initialize()
 
     for (_uint i = 0; i < 3; i++) { m_fscale[i] = 1; }
 
-    if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
+    if (FAILED(Ready_ToolCamera(TEXT("Layer_Camera"))))
         return E_FAIL;
 
     if (FAILED(Ready_Light()))
@@ -55,9 +55,9 @@ HRESULT CLevel_Edit::Initialize()
 
 void CLevel_Edit::Update(_float fTimeDelta)
 {
-    if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::CAMERA))
+    if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Camera")))
     {
-        if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
+        if (FAILED(Ready_ToolCamera(TEXT("Layer_Camera"))))
             return;
     }
 
@@ -70,6 +70,49 @@ void CLevel_Edit::Update(_float fTimeDelta)
 
     if (m_Key)
     {
+        CCamera_Tool ::CAMERA_DESC Desc{};
+        Desc.fNearZ = 0.1f;
+        Desc.fFarZ = 500.f;
+        _float4x4 ViewMatrix, ProjMatrix;
+
+        if (m_pGameInstance->Get_DIKeyState(DIK_1))
+            a += 1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_2))
+            a -= 1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_3))
+            b += 1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_4))
+            b -= 1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_5))
+            c += 1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_6))
+            c -= 1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_7))
+            d+=0.1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_8))
+            d -= 0.1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_9))
+            e+=0.1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_0))
+            e -=0.1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_V))
+            f += 0.1;
+        if (m_pGameInstance->Get_DIKeyState(DIK_C))
+            f -= 0.1;
+        cout << a << " " << b << " " << c << " " << d << " " << e << " " << f << endl;
+        //_vector m_Eye = XMVectorSet(143, 394, 432, 0.f);
+        //_vector m_Dire = XMVectorSet(139, 17, 2, 0.f);
+        _vector dir = XMVectorSet(a, b, c, 0.f);
+        _vector pos = XMVectorSet(d, e, f, 1.f);
+        XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(dir, dir+pos, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+        XMStoreFloat4x4(&ProjMatrix,
+                        XMMatrixOrthographicLH(g_iWinSizeX , g_iWinSizeY,
+                                                 Desc.fNearZ, 1000));
+
+        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
+
+        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ, XMLoadFloat4x4(&ProjMatrix));
+
         Key_input(fTimeDelta);
     }
 
@@ -396,8 +439,6 @@ void CLevel_Edit::Terrain_ListBox()
 
     Set_Tile();
     ImGui::Checkbox("Fire", &m_bFireTile);
-
-
    
     ImGui::Text("Fire_speed");
     ImGui::SameLine(100, 0);
@@ -411,7 +452,7 @@ void CLevel_Edit::Terrain_ListBox()
     ImGui::PopStyleColor(3);
     if (ret)
     {
-        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             return;
 
         if(nullptr != m_PicObjTerrain)
@@ -518,11 +559,11 @@ void CLevel_Edit::NPC_ListBox()
 
 #pragma endregion
 
-HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, _int Iindex, _uint Comindex)
+HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTag, _int Iindex, _uint Comindex)
 {
-    if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::CAMERA))
+    if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
     {
-        if (FAILED(Ready_ToolCamera(CGameObject::CAMERA)))
+        if (FAILED(Ready_ToolCamera(TEXT("Layer_Camera"))))
             return E_FAIL;
     }
     // char로 변형했단 키값들을 다시 와일드 문자로 변형한다.
@@ -562,10 +603,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
         if (1 > m_iBufferCount[0] || 1 > m_iBufferCount[1])
             return E_FAIL;
 
-
-        
-
-        pDec.DATA_TYPE = CGameObject::DATA_TERRAIN;
+        pDec.Object_Type = DATA_TERRAIN;
         CGameObject* pTerrain = m_pGameInstance->Clone_Prototype(protKey, &pDec);
         if (true == m_bFireTile) {
             static_cast<CTerrain*>(pTerrain)->Set_Scalra_uint(1);
@@ -594,7 +632,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     break;
     case Tool::CLevel_Edit::WALL:
     {
-        pDec.DATA_TYPE = CGameObject::DATA_WALL;
+        pDec.Object_Type = DATA_WALL;
         CGameObject* pObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
         pObj->Set_Model(protcomKey);
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, pObj);
@@ -602,7 +640,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     break;
     case Tool::CLevel_Edit::NONANIMAPOBJ:
     {
-        pDec.DATA_TYPE = CGameObject::DATA_NONANIMAPOBJ;
+        pDec.Object_Type = DATA_NONANIMAPOBJ;
         CGameObject* nObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
         nObj->Set_Model(protcomKey);
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, nObj);
@@ -612,7 +650,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     {
         if (false == lstrcmpW(protKey, L"Proto GameObject Door_aniObj"))
         {
-            pDec.DATA_TYPE = CGameObject::DATA_DOOR;
+            pDec.Object_Type = DATA_DOOR;
             CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
             if (m_WeaPon < 0 || m_WeaPon > 3)
@@ -622,7 +660,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
         }
         if (false == lstrcmpW(protKey, L"Proto GameObject Chest_aniObj"))
         {
-            pDec.DATA_TYPE = CGameObject::DATA_CHEST;
+            pDec.Object_Type = DATA_CHEST;
             CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
 
@@ -638,7 +676,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     {
         if (false == lstrcmpW(protKey, L"Proto GameObject Monster_Monster"))
         {
-            pDec.DATA_TYPE = CGameObject::DATA_MONSTER;
+            pDec.Object_Type = DATA_MONSTER;
             CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
@@ -649,7 +687,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     {
         if (false == lstrcmpW(protKey, L"Proto GameObject NPC_NPC"))
         {
-            pDec.DATA_TYPE = CGameObject::DATA_NPC;
+            pDec.Object_Type = DATA_NPC;
             CGameObject* aObj = m_pGameInstance->Clone_Prototype(protKey, &pDec);
             aObj->Set_Model(protcomKey);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
@@ -658,7 +696,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _uint& pLayerTag, 
     break;
     }
 
-    m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, CGameObject::MAP)->Get_Transform();
+    m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))->Get_Transform();
     Safe_Delete_Array(protKey);
     Safe_Delete_Array(protcomKey);
     return S_OK;
@@ -856,11 +894,11 @@ void CLevel_Edit::Create_Leyer_Botton(POROTO_TYPE type, _uint Objnum, _uint Comn
 
         re_setting();
 
-        Create_Layer_Obj(type, CGameObject::MAP, Objnum, Comnum);
+        Create_Layer_Obj(type, TEXT("Layer_Map"), Objnum, Comnum);
     }
 }
 
-HRESULT CLevel_Edit::Ready_ToolCamera(const _uint& pLayerTag)
+HRESULT CLevel_Edit::Ready_ToolCamera(const _wstring& pLayerTag)
 {
     // 카메라 세팅..
     CCamera_Tool::CAMERA_Tool_DESC Desc{};
@@ -869,14 +907,14 @@ HRESULT CLevel_Edit::Ready_ToolCamera(const _uint& pLayerTag)
     Desc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
     Desc.fFovy = XMConvertToRadians(30.0f); // 클라랑 같게 할것
     Desc.fNearZ = 0.1f;
-    Desc.fFarZ = 500.f;
+    Desc.fFarZ = 1000.f;
     Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
     Desc.fSpeedPerSec = 50.f;
     Desc.fRotationPerSec = XMConvertToRadians(60.0f);
     Desc.fMouseSensor = 0.1f;
 
     if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_EDIT, pLayerTag, TEXT("ProtoGameObject_CameraTool"),
-                                                        nullptr, 0, &Desc)))
+                                                         &Desc)))
         return E_FAIL;
 
     return S_OK;
@@ -919,17 +957,17 @@ void CLevel_Edit::re_setting()
 
 HRESULT CLevel_Edit::Ready_Light()
 {
-    LIGHT_DESC			LightDesc{};
+   
+    LIGHT_DESC LightDesc{};
 
     LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-    LightDesc.vDirection = _float4(1.f, -1.5f, 1.f, 0.f);
+    LightDesc.vDirection = _float4(0.f, -1.f, 0.f, 0.f);
     LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vAmbient = _float4(0.3f, 0.3f, 0.3f, 1.f);
+    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
     LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
-
     return S_OK;
 }
 
@@ -950,11 +988,11 @@ void CLevel_Edit::Set_pos()
     ImGui::PopStyleColor(3);
     if (ret)
     {
-        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             return;
 
         _vector vPos = XMVectorSet(m_fposition[0], m_fposition[1], m_fposition[2], 1.f);
-        m_pObjTransform->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, vPos);
+        m_pObjTransform->Set_TRANSFORM(CTransform::T_POSITION, vPos);
     }
 }
 
@@ -973,7 +1011,7 @@ void CLevel_Edit::Set_scale()
     ImGui::PopStyleColor(3);
     if (ret)
     {
-        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             return;
 
         if (m_fscale[0] <= 0.01f || m_fscale[1] <= 0.01f || m_fscale[2] <= 0.01f)
@@ -1008,10 +1046,10 @@ void CLevel_Edit::Msg_Del_Box()
         // 버튼들: OK와 Cancel
         if (ImGui::Button("Delete OK"))
         {
-            m_pGameInstance->Recent_GameObject(LEVEL_EDIT, CGameObject::MAP)
+            m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))
                 ->Set_Dead(true); // 가장 최근에 추가한 마지막 오브젝트를 삭제한다.
 
-            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             {
                 re_setting();
             }
@@ -1038,7 +1076,7 @@ void CLevel_Edit::Msg_ALL_Del_Box()
         {
             m_pGameInstance->ObjClear(LEVEL_EDIT); // 씬의 모든 오브젝들 삭제한다
 
-            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP)) // 다 지워 졌다면..
+            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map"))) // 다 지워 졌다면..
             {
                 re_setting(); // gui창의 데이터들을 기본값으로
             }
@@ -1107,7 +1145,7 @@ void CLevel_Edit::Msg_Load_box()
             Load_NonAniObj(m_tFPath[2]);
             Load_NPC(m_tFPath[6]);
             // 로드가 완료되면 현재 오브젝트의 트랜스폼을 마지막으로 로드한 오브젝트의 트랜스 폼으로 정해준다.
-            m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, CGameObject::MAP)->Get_Transform();
+            m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))->Get_Transform();
 
             m_bshow_Load_MessageBox = false; // 메시지 상자 닫기
         }
@@ -1123,7 +1161,7 @@ void CLevel_Edit::Msg_Load_box()
 void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
 {
 
-    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
 
     HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -1133,10 +1171,7 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
     DWORD dwByte(0);
     DWORD dwStrByte(0);
 
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix Worldmat = XMMatrixIdentity();
     _uint Type{0};
     _wstring pModel;
     _tchar* pPoroto;
@@ -1147,24 +1182,19 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
     for (auto& ObjList : AllSave)
     {
 
-        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
-        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
-        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        Type = ObjList->Get_Data();
+        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        Type = ObjList->Get_ObjectType();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
         bFire = ObjList-> Get_Scalra();
         FireOffset = ObjList-> Get_Scalra_float();
-        if (Type == CGameObject::DATA_TERRAIN)
+        if (Type == DATA_TERRAIN)
         {
             TileX = static_cast<CTerrain*>(ObjList)->Get_SizeX();
             TileY = static_cast<CTerrain*>(ObjList)->Get_SizeY();
 
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
+          
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             WriteFile(hFile, &TileX, sizeof(_uint), &dwByte, nullptr);
@@ -1191,7 +1221,7 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
 
 void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
 {
-    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
 
     HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -1199,11 +1229,7 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
         return;
 
     DWORD dwByte(0);
-
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix Worldmat = XMMatrixIdentity();
     _uint Type = {0};
     _wstring pModel = {};
     _tchar* pPoroto = {};
@@ -1211,20 +1237,16 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
     for (auto& ObjList : AllSave)
     {
 
-        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
-        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
-        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        Type = ObjList->Get_Data();
+        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+      
+        Type = ObjList->Get_ObjectType();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-        if (Type == CGameObject::DATA_NONANIMAPOBJ)
+        if (Type == DATA_NONANIMAPOBJ)
         {
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
+        
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
@@ -1244,7 +1266,7 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
 
 void CLevel_Edit::Save_Wall(const _tchar* tFPath)
 {
-    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
 
     HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -1252,11 +1274,7 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
         return;
 
     DWORD dwByte(0);
-
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix Worldmat = XMMatrixIdentity();
     _uint Type = {0};
     _wstring pModel = {};
     _tchar* pPoroto = {};
@@ -1264,20 +1282,15 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
     for (auto& ObjList : AllSave)
     {
 
-        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
-        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
-        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        Type = ObjList->Get_Data();
+        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        Type = ObjList->Get_ObjectType();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-        if (Type == CGameObject::DATA_WALL)
+        if (Type == DATA_WALL)
         {
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
+          
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
@@ -1297,7 +1310,7 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
 
 void CLevel_Edit::Save_Ani(const _tchar* tFPath)
 {
-    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
 
     HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -1305,11 +1318,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
         return;
 
     DWORD dwByte(0);
-
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix Worldmat = XMMatrixIdentity();
     _uint Type = {0};
     _wstring pModel = {};
     _tchar* pPoroto = {};
@@ -1317,26 +1326,22 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
     for (auto& ObjList : AllSave)
     {
 
-        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
-        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
-        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        Type = ObjList->Get_Data();
+  
+        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        Type = ObjList->Get_ObjectType();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
         WeaPonType = ObjList->Get_Scalra();
 
        
 
-        if (Type == CGameObject::DATA_DOOR)
+        if (Type == DATA_DOOR)
         {
             if (WeaPonType < 0 || WeaPonType > 3)  // 사실 문 설정값이야
                 WeaPonType = 0;
 
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
+         
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
@@ -1352,15 +1357,12 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
 
             WriteFile(hFile, &WeaPonType, sizeof(_uint), &dwByte, nullptr);
         }
-        else if (Type == CGameObject::DATA_CHEST)
+        else if (Type == DATA_CHEST)
         {
             if (WeaPonType < 1 || WeaPonType > 3)
                 WeaPonType = rand() % 4;
 
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+           WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
@@ -1387,7 +1389,7 @@ void CLevel_Edit::Save_Navigation(const _tchar* tFPath)
 
 void CLevel_Edit::Save_Monster(const _tchar* tFPath)
 {
-    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
 
     HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -1396,32 +1398,20 @@ void CLevel_Edit::Save_Monster(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+_matrix Worldmat = XMMatrixIdentity();
     _uint Type = { 0 };
     _wstring pModel = {};
     _tchar* pPoroto = {};
     for (auto& ObjList : AllSave)
     {
-
-        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
-        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
-        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        Type = ObjList->Get_Data();
+        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        Type = ObjList->Get_ObjectType();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-
-
-        if (Type == CGameObject::DATA_MONSTER)
+        if (Type == DATA_MONSTER)
         {
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
@@ -1435,14 +1425,13 @@ void CLevel_Edit::Save_Monster(const _tchar* tFPath)
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
         }
-       
     }
     CloseHandle(hFile);
 }
 
 void CLevel_Edit::Save_NPC(const _tchar* tFPath)
 {
-    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, CGameObject::MAP);
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
 
     HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -1451,32 +1440,20 @@ void CLevel_Edit::Save_NPC(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+ _matrix Worldmat = XMMatrixIdentity();
     _uint Type = { 0 };
     _wstring pModel = {};
     _tchar* pPoroto = {};
     for (auto& ObjList : AllSave)
     {
-
-        Right = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT);
-        UP = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_UP);
-        LOOK = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_LOOK);
-        POSITION = ObjList->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
-        Type = ObjList->Get_Data();
+        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        Type = ObjList->Get_ObjectType();
         pModel = ObjList->Get_ComPonentName();
         pPoroto = ObjList->Get_ProtoName();
 
-
-
-        if (Type == CGameObject::DATA_NPC)
+        if (Type == DATA_NPC)
         {
-            WriteFile(hFile, &Right, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &UP, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &LOOK, sizeof(_vector), &dwByte, nullptr);
-            WriteFile(hFile, &POSITION, sizeof(_vector), &dwByte, nullptr);
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
             DWORD strLength = static_cast<DWORD>(pModel.size() + 1);
@@ -1493,8 +1470,6 @@ void CLevel_Edit::Save_NPC(const _tchar* tFPath)
 
     }
     CloseHandle(hFile);
-
-
 }
 
 void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
@@ -1507,10 +1482,7 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
     }
 
     DWORD dwByte(0);
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix WorldMat = XMMatrixIdentity();
     _uint Type{0};
     _tchar* pPoroto{};
     _uint TileX{0};
@@ -1522,10 +1494,7 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
     {
         _bool bFile(false);
 
-        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+       bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
         bFile = ReadFile(hFile, &(TileX), sizeof(_uint), &dwByte, nullptr);
         bFile = ReadFile(hFile, &(TileY), sizeof(_uint), &dwByte, nullptr);
@@ -1560,18 +1529,15 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Buffer(TileX, TileY);
         pGameObject->Set_Model(pModel);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
         pGameObject->Set_Scalra_float(FireOffset);
         pGameObject->Set_Scalra_uint(bFire);
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         m_vTerrain.push_back(pGameObject);
 
@@ -1598,11 +1564,7 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
     }
 
     DWORD dwByte(0);
-
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix WorldMat = XMMatrixIdentity();
     _uint Type = {0};
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
@@ -1610,10 +1572,7 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
     {
         _bool bFile(false);
 
-        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+       bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
 
         // wstring 문자열 길이
@@ -1643,16 +1602,14 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+  
 
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
@@ -1672,10 +1629,7 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+    _matrix WorldMat = XMMatrixIdentity();
     _uint Type = {0};
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
@@ -1683,10 +1637,8 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
     {
         _bool bFile(false);
 
-        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+         bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
+        
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
 
         // wstring 문자열 길이
@@ -1716,16 +1668,14 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+ 
 
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
@@ -1745,10 +1695,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = {0.f, 0.f, 0.f, 0.f};
-    _vector UP = {0.f, 0.f, 0.f, 0.f};
-    _vector LOOK = {0.f, 0.f, 0.f, 0.f};
-    _vector POSITION = {0.f, 0.f, 0.f, 0.f};
+   _matrix WorldMat = XMMatrixIdentity();
     _uint Type = {0};
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
@@ -1757,10 +1704,7 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
     {
         _bool bFile(false);
 
-        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
 
         // wstring 문자열 길이
@@ -1793,18 +1737,16 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
+  ;
      
             pGameObject->Set_Buffer(0, WaPonType);
         
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
@@ -1828,11 +1770,7 @@ void CLevel_Edit::Load_Monster(const _tchar* tFPath)
     }
 
     DWORD dwByte(0);
-
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+    _matrix WorldMat = XMMatrixIdentity();
     _uint Type = { 0 };
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
@@ -1841,10 +1779,7 @@ void CLevel_Edit::Load_Monster(const _tchar* tFPath)
     {
         _bool bFile(false);
 
-        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+      bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
 
         // wstring 문자열 길이
@@ -1875,16 +1810,13 @@ void CLevel_Edit::Load_Monster(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel, LEVEL_EDIT);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+        
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
@@ -1903,10 +1835,7 @@ void CLevel_Edit::Load_NPC(const _tchar* tFPath)
 
     DWORD dwByte(0);
 
-    _vector Right = { 0.f, 0.f, 0.f, 0.f };
-    _vector UP = { 0.f, 0.f, 0.f, 0.f };
-    _vector LOOK = { 0.f, 0.f, 0.f, 0.f };
-    _vector POSITION = { 0.f, 0.f, 0.f, 0.f };
+  _matrix WorldMat = XMMatrixIdentity();
     _uint Type = { 0 };
     wchar_t* pModel = {};
     _tchar* pPoroto = {};
@@ -1915,10 +1844,8 @@ void CLevel_Edit::Load_NPC(const _tchar* tFPath)
     {
         _bool bFile(false);
 
-        bFile = ReadFile(hFile, &(Right), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(UP), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(LOOK), sizeof(_vector), &dwByte, nullptr);
-        bFile = ReadFile(hFile, &(POSITION), sizeof(_vector), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
+       
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
 
         // wstring 문자열 길이
@@ -1949,16 +1876,13 @@ void CLevel_Edit::Load_NPC(const _tchar* tFPath)
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.DATA_TYPE = static_cast<CGameObject::GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, Right);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_UP, UP);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, LOOK);
-        pGameObject->Get_Transform()->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, POSITION);
-
-        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, CGameObject::MAP, pGameObject);
+       
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         Safe_Delete_Array(pModel);
         Safe_Delete_Array(pPoroto);
@@ -1978,6 +1902,8 @@ void CLevel_Edit::ChsetWeapon()
 
 void CLevel_Edit::Key_input(_float ftimedelta)
 {
+   
+
 
 #pragma region 삭제 단축키
     if (m_pGameInstance->Get_DIKeyDown(DIK_DELETE)) //  전체 삭제
@@ -1997,7 +1923,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             _vector RayPos, RayDir;
             m_pGameInstance->Make_Ray( m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                                       m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
-
+                                      
             CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
 
             if (Desc.pPickedObj)
@@ -2064,37 +1990,38 @@ void CLevel_Edit::Key_input(_float ftimedelta)
 #pragma region 위치 이동 방향키
     if (m_pGameInstance->Get_DIKeyState(DIK_UP))
     {
-        m_pObjTransform->Go_Straight(ftimedelta);
+        m_pObjTransform->Go_Move(CTransform::GO, ftimedelta);
+
         Update_Pos();
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_DOWN))
     {
-        m_pObjTransform->Go_Backward(ftimedelta);
+        m_pObjTransform->Go_Move(CTransform::BACK, ftimedelta);
         Update_Pos();
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_RIGHT))
     {
-        m_pObjTransform->Go_Right(ftimedelta);
+        m_pObjTransform->Go_Move(CTransform::RIGHT, ftimedelta);
         Update_Pos();
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_LEFT))
     {
-        m_pObjTransform->Go_Left(ftimedelta);
+        m_pObjTransform->Go_Move(CTransform::LEFT, ftimedelta);
         Update_Pos();
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_N))
     {
-        m_pObjTransform->Go_Up(ftimedelta);
+        m_pObjTransform->Go_Move(CTransform::UP, ftimedelta);
         Update_Pos();
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_M))
     {
-        m_pObjTransform->Go_Down(ftimedelta);
+        m_pObjTransform->Go_Move(CTransform::DOWN, ftimedelta);
         Update_Pos();
     }
 #pragma endregion
@@ -2112,7 +2039,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Y))
             {
                 // 현재 오브젝트를 X축 회전한다.
-                m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_RIGHT),
+                m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::T_RIGHT),
                                       ftimedelta * MouseMove * m_fRotfspped);
             }
         }
@@ -2121,7 +2048,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Z))
             {
                 // 현재 오브젝트를 X축 회전한다.
-                m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_UP),
+                m_pObjTransform->Turn(m_pObjTransform->Get_TRANSFORM(CTransform::T_UP),
                     ftimedelta * MouseMove * m_fRotfspped);
             }
         }
@@ -2132,7 +2059,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
     {
         if (false == m_bCell)
         {
-            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+            if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
                 return;
             else
                 Picking_Pos();
@@ -2238,7 +2165,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             if (Desc.pPickedObj)
             {
                 _vector Set = RayPos + RayDir * Desc.fDis;
-                m_pObjTransform->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, Set);
+                m_pObjTransform->Set_TRANSFORM(CTransform::T_POSITION, Set);
                 Update_Pos();
             }
         }
@@ -2250,9 +2177,9 @@ void CLevel_Edit::Key_input(_float ftimedelta)
 void CLevel_Edit::Update_Pos()
 {
     // imgui 창에 위치 값들을 갱신한다.
-    _float3 vPos = {XMVectorGetX(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-                    XMVectorGetY(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)),
-                    XMVectorGetZ(m_pObjTransform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION))};
+    _float3 vPos = {XMVectorGetX(m_pObjTransform->Get_TRANSFORM(CTransform::T_POSITION)),
+                    XMVectorGetY(m_pObjTransform->Get_TRANSFORM(CTransform::T_POSITION)),
+                    XMVectorGetZ(m_pObjTransform->Get_TRANSFORM(CTransform::T_POSITION))};
 
     m_fposition[0] = vPos.x;
     m_fposition[1] = vPos.y;
@@ -2281,7 +2208,7 @@ void CLevel_Edit::Set_Speed()
     ImGui::PopStyleColor(3);
     if (ret)
     {
-        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             return;
         m_pObjTransform->Set_MoveSpeed(m_fspped);
     }
@@ -2299,7 +2226,7 @@ void CLevel_Edit::Set_Speed()
     ImGui::PopStyleColor(3);
     if (rt)
     {
-        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, CGameObject::MAP))
+        if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             return;
         m_pObjTransform->Set_RotSpeed(m_fRotfspped);
     }
@@ -2336,7 +2263,7 @@ void CLevel_Edit::Picking_Pos()
             continue;
     }
     // 피킹된 좌표로 현재 선택한 오브젝트의 위치를 정해준다.
-    m_pObjTransform->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(Pick.x, Pick.y, Pick.z, 1.f));
+    m_pObjTransform->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(Pick.x, Pick.y, Pick.z, 1.f));
     Update_Pos();
 }
 

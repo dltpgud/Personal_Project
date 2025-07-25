@@ -18,8 +18,10 @@ public:
 	HRESULT				 Initialize();
 	void				 Update(_float fTimeDelta);
 	void				 Render();
+        void Delete();
 
-private:
+
+    private:
 	CGameInstance*		 m_pGameInstance = { nullptr };
 
 	ID3D11Device*		 m_pDevice = { nullptr };

@@ -26,7 +26,7 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-	virtual _int	Priority_Update(_float fTimeDelta) override;
+        virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
@@ -63,7 +63,7 @@ private:
 	_float m_fPrXPos{}, m_fPrYPos{};
 	_int   m_iGageCount = {-1};
 	_float m_fHealthHP{};
-
+        _float m_CurRito{};
 
 	_tchar	m_tfHP[50];
 

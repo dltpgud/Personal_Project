@@ -18,8 +18,9 @@ public:
 	HRESULT				 Initialize();
 	void				 Update(_float fTimeDelta);
 	void				 Render();
+        void Delete();
 
-private:
+    private:
 	CGameInstance*		 m_pGameInstance = { nullptr };
 
 	ID3D11Device*		 m_pDevice = { nullptr };
@@ -27,9 +28,6 @@ private:
 
 private:
 	HRESULT Open_Level(LEVELID eLevelID);
-	HRESULT Ready_Prototype_Component_For_Static();
-	HRESULT Ready_Prototype_Component_For_Particle();
-
 
 
 #ifdef _DEBUG

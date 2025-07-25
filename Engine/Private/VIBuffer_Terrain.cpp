@@ -52,7 +52,7 @@ void CVIBuffer_Terrain::Set_HightMap(const _tchar* pHeightMapFilePath)
     m_iNumIndexices = (m_iNumVerticesX - 1) * (m_iNumVerticesZ - 1) * 2 * 3;
     m_iNumVertexBuffers = 1;
     m_eIndexFormat = DXGI_FORMAT_R32_UINT;
-    m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    m_ePrimitiveTopology =  D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 #pragma endregion
 
@@ -155,9 +155,6 @@ void CVIBuffer_Terrain::Set_HightMap(const _tchar* pHeightMapFilePath)
     Safe_Delete_Array(pVertices);
     Safe_Delete_Array(pIndices);
     Safe_Delete_Array(pPixel);
-
-    	m_pQuadTree = CQuadTree::Create(m_iNumVerticesX * m_iNumVerticesZ - m_iNumVerticesX,
-                                    m_iNumVerticesX * m_iNumVerticesZ - 1, m_iNumVerticesX - 1, 0);
 }
 
 void CVIBuffer_Terrain::Set_Buffer(_int x, _int z)
@@ -184,7 +181,7 @@ void CVIBuffer_Terrain::Set_Buffer(_int x, _int z)
             _uint iIndex = i * m_iNumVerticesX + j;
 
             pVertices[iIndex].vPosition = m_pVertexPositions[iIndex] =
-                _float3(static_cast<_float>(j), 0.f, static_cast<_float>(i)); // y가 파란색인 픽셀로 높이맵
+                _float3(static_cast<_float>(j), 0.f, static_cast<_float>(i)); 
 
             m_pPos[iIndex] = pVertices[iIndex].vPosition;
 
@@ -301,7 +298,7 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
             _uint iIndex = i * m_iNumVerticesX + j;
 
             pVertices[iIndex].vPosition = m_pVertexPositions[iIndex] =
-                _float3(static_cast<_float>(j), 0.f, static_cast<_float>(i)); // y가 파란색인 픽셀로 높이맵
+                _float3(static_cast<_float>(j), 0.f, static_cast<_float>(i)); 
 
             m_pPos[iIndex] = pVertices[iIndex].vPosition;
 
@@ -395,12 +392,15 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
 
 void CVIBuffer_Terrain::Set_QuadTree()
 {
+    /// m_iNumVerticesX : Terrain의 X개수
+    // m_iNumVerticesZ : Terrain의 Z개수
     m_pQuadTree = CQuadTree::Create(m_iNumVerticesX * m_iNumVerticesZ - m_iNumVerticesX,
                                     m_iNumVerticesX * m_iNumVerticesZ -1, m_iNumVerticesX - 1, 0);
 }
 
 void CVIBuffer_Terrain::Culling(_fmatrix WorldMatrixInverse)
 {
+    // 투영공간에 정의해둔 절두체를 로컬공간으로 변환
     m_pGameInstance->Frustum_Transform_To_LocalSpace(WorldMatrixInverse);
 
     _uint iNumIndices = {0};
@@ -412,7 +412,6 @@ void CVIBuffer_Terrain::Culling(_fmatrix WorldMatrixInverse)
     _uint* pIndices = static_cast<_uint*>(SubResource.pData);
 
     m_pQuadTree->Culling(m_pGameInstance, m_pVertexPositions, pIndices, &iNumIndices, WorldMatrixInverse);
-
 
     m_pContext->Unmap(m_pIB, 0);
 
@@ -449,7 +448,6 @@ void CVIBuffer_Terrain::Free()
 {
     __super::Free();
 
-    
 	Safe_Release(m_pQuadTree);
-        Safe_Delete_Array(m_pPos);
+    Safe_Delete_Array(m_pPos);
 }

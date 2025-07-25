@@ -36,15 +36,13 @@ HRESULT CContainerObject::Initialize(void * pArg)
 	return S_OK;
 }
 
-_int CContainerObject::Priority_Update(_float fTimeDelta)
+void CContainerObject::Priority_Update(_float fTimeDelta)
 {
 	for (auto& pPartObject : m_PartObjects)
 	{
 		if (nullptr != pPartObject)
 			pPartObject->Priority_Update(fTimeDelta);
 	}
-
-	return OBJ_NOEVENT;
 }
 
 void CContainerObject::Update(_float fTimeDelta)

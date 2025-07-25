@@ -33,12 +33,9 @@ HRESULT CBody_HealthBot::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CBody_HealthBot::Priority_Update(_float fTimeDelta)
+void CBody_HealthBot::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
-
-    return OBJ_NOEVENT;
+   
 }
 
 void CBody_HealthBot::Update(_float fTimeDelta)
@@ -153,11 +150,10 @@ HRESULT CBody_HealthBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
         return E_FAIL;
 
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
@@ -165,17 +161,22 @@ HRESULT CBody_HealthBot::Bind_ShaderResources()
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_bool))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_float))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CHealthBot::ST_Dead)))
+    
+    _bool bshoot{};
+    if (m_iCurMotion == CHealthBot::ST_Dead)
+        bshoot = true;
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &bshoot, sizeof(_bool))))
         return E_FAIL;
-
 
         return S_OK;
 }

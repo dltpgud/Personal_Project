@@ -17,20 +17,20 @@ HRESULT CCursor::Initialize_Prototype()
 
 HRESULT CCursor::Initialize(void* pArg)
 {
-    CUI_DESC Desc{};
-    Desc.fX = g_iWinSizeX * 0.5f;
-    Desc.fY = g_iWinSizeY * 0.5f;
-    Desc.fZ =  0.f;
-    Desc.fSizeX = 60.f;
-    Desc.fSizeY = 60.f;
-    Desc.Update = true;
-    Desc.UID = UIID_Cursor;
+    CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
+    pDesc->fX = g_iWinSizeX * 0.5f;
+    pDesc->fY = g_iWinSizeY * 0.5f;
+    pDesc->fZ =  0.f;
+    pDesc->fSizeX = 60.f;
+    pDesc->fSizeY = 60.f;
+    pDesc->Update = true;
+    pDesc->UID = UIID_Cursor;
 
-    if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
                                    XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
     if (FAILED(Add_Components()))
@@ -39,12 +39,9 @@ HRESULT CCursor::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CCursor::Priority_Update(_float fTimeDelta)
+void CCursor::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
 
-    return OBJ_NOEVENT;
 }
 
 void CCursor::Update(_float fTimeDelta)
@@ -54,7 +51,7 @@ void CCursor::Update(_float fTimeDelta)
     ScreenToClient(g_hWnd, &ptCursor);
 
     m_pTransformCom->Set_TRANSFORM(
-        CTransform::TRANSFORM_POSITION,
+        CTransform::T_POSITION,
         XMVectorSet((_float)ptCursor.x - g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f - (_float)ptCursor.y, 0.f, 1.f));
 }
 
@@ -90,7 +87,7 @@ HRESULT CCursor::Render()
 
 HRESULT CCursor::Add_Components()
 {
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Cusor"), TEXT("Com_Texture_Menu"),
+    if (FAILED(__super::Add_Component(LEVEL_MENU, TEXT("Prototype_Component_Texture_Cusor"), TEXT("Com_Texture_Cusor"),
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 

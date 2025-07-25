@@ -42,12 +42,8 @@ HRESULT CBossBullet_Berrle::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
+void CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-     return OBJ_DEAD;
-    }  
 
     __super::Priority_Update(fTimeDelta);
     
@@ -65,7 +61,8 @@ _int CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
         lDesc.pParentMatrix = m_LaserpParentMatrix;
         lDesc.pSocketMatrix = m_LaserpSocketMatrix;
         lDesc.state = m_pParentState;
-        m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Laser", nullptr, 0, &lDesc, 0);
+        m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                                 L"Prototype GameObject_BossBullet_Laser", &lDesc);
 
       
 
@@ -90,11 +87,7 @@ _int CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
 
 
 
-      
     }
-
-
-    return OBJ_NOEVENT;
 }
 
 void CBossBullet_Berrle::Update(_float fTimeDelta)
@@ -159,16 +152,16 @@ HRESULT CBossBullet_Berrle::Initialize_SkillType()
     {
     case CSkill::SKill::STYPE_BERRLE :
 
-        m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, m_vPos);
+        m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
 
-       _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+       _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
        Dir = XMVectorSetW(Dir, 0.f);
        m_vDir = XMVector3Normalize(Dir);
         m_Clolor[CSkill::COLOR::CSTART] = { 0.f, 0.f, 0.f,0.5f };
         m_Clolor[CSkill::COLOR::CEND] = { 1.f, 0.f, 0.f,1.f };
 
         m_pTransformCom->Set_Scaling(3.f, 3.f, 3.f);
-        m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+        m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 
         break;
 
@@ -185,12 +178,12 @@ HRESULT CBossBullet_Berrle::Initialize_SkillType()
 
         if (m_LaserRightLeft == true) {
 
-            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(3.f, -0.7f, 0.f, 1.f));
+            m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(3.f, -0.7f, 0.f, 1.f));
         }
         else
         if (m_LaserRightLeft == false) {
 
-            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSet(-3.f, 0.7f, 0.f, 1.f));
+            m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(-3.f, 0.7f, 0.f, 1.f));
         }
 
         break;

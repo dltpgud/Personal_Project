@@ -17,22 +17,17 @@ HRESULT CNonAni::Initialize_Prototype()
 
 HRESULT CNonAni::Initialize(void* pArg)
 {
-    m_DATA_TYPE = GAMEOBJ_DATA::DATA_NONANIMAPOBJ;
-    if (FAILED(__super::Initialize(pArg)))
+    GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
    
     return S_OK;
 }
 
-_int CNonAni::Priority_Update(_float fTimeDelta)
+void CNonAni::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }
 
-    return OBJ_NOEVENT;
 }
 
 void CNonAni::Update(_float fTimeDelta)
@@ -46,18 +41,21 @@ void CNonAni::Late_Update(_float fTimeDelta)
   
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
+        return;
 }
 
 HRESULT CNonAni::Render_Shadow()
 {
-    
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
     
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
     
-    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
     
@@ -119,34 +117,11 @@ void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
 
 void CNonAni::Set_InstaceBuffer(const vector<_matrix>& worldmat)
 {
-
-   if (1 == worldmat.size())
-    {
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
-                                          reinterpret_cast<CComponent**>(&m_pShaderCom))))
-            return ;
-      
-            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_RIGHT, worldmat.front().r[0]);
-        m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_UP, worldmat.front().r[1]);
-            m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_LOOK, worldmat.front().r[2]);
-        m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, worldmat.front().r[3]);
-        
-    }
-   else
-   {
-
-           if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMeshIst"), TEXT("Com_Shader"),
-                                         reinterpret_cast<CComponent**>(&m_pShaderCom))))
-           return ;
-       	m_pModelCom->Set_InstanceBuffer(worldmat);
-   
-   }
-
+   if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMeshIst"), TEXT("Com_Shader"),
+                                 reinterpret_cast<CComponent**>(&m_pShaderCom))))
+   return ;
+  m_pModelCom->Set_InstanceBuffer(worldmat);
 }
-
-
-
-
 
 HRESULT CNonAni::Bind_ShaderResources()
 {

@@ -48,6 +48,9 @@ private:
     map<const _wstring, class CComponent*>* m_pPrototypes = {nullptr};
     typedef map<const _wstring, class CComponent*> PROTOTYPES;
 
+    //USE_LOCK;
+    mutex m_Component_Mutex;
+
 private:
 
 

@@ -20,13 +20,14 @@ HRESULT CGunPawn::Initialize_Prototype()
 HRESULT CGunPawn::Initialize(void* pArg)
 {
 
-    CActor::Actor_DESC Desc{};
-    Desc.iNumPartObjects = PART_END;
-    Desc.fSpeedPerSec = 3.f;
-    Desc.fRotationPerSec = XMConvertToRadians(90.f);
-    Desc.JumpPower = 3.f;
+    CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
+    Desc->iNumPartObjects = PART_END;
+    Desc->fSpeedPerSec = 3.f;
+    Desc->fRotationPerSec = XMConvertToRadians(90.f);
+    Desc->JumpPower = 3.f;
+    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::ACTOR;
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
-    if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
@@ -35,22 +36,23 @@ HRESULT CGunPawn::Initialize(void* pArg)
     m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     m_bOnCell = true;
-    m_DATA_TYPE = CGameObject::DATA_MONSTER;
+
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
     m_iState = ST_IDLE;
 
     m_pPartHP = static_cast<CMonsterHP*>(m_PartObjects[PART_HP]);
+    m_pPartHP->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
 
+
+      if (FAILED(m_pGameInstance->Add_Monster(this)))
+        return E_FAIL;
     return S_OK;
 }
 
-_int CGunPawn::Priority_Update(_float fTimeDelta)
+void CGunPawn::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
-
     if (1.f == static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_interver())
         m_bDead = true;
 
@@ -60,14 +62,13 @@ _int CGunPawn::Priority_Update(_float fTimeDelta)
     if (m_pPartHP != nullptr)
     {
         m_pPartHP->Set_Monster_HP(m_fHP);
-        m_pTransformCom->Other_set_Pos(m_pPartHP->Get_Transform(), CTransform::FIX_Y, 3.f);
     }
 
     if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
         m_pTransformCom->Rotation_to_Player(fTimeDelta);
 
     __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
+    return ;
 }
 
 void CGunPawn::Update(_float fTimeDelta)
@@ -125,9 +126,9 @@ void CGunPawn::Dead_Routine(_float fTimeDelta)
 
 void CGunPawn::NON_intersect(_float fTimedelta)
 {
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
 
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 
     _vector vDir = vPlayerPos - vPos;
 
@@ -143,21 +144,21 @@ void CGunPawn::NON_intersect(_float fTimedelta)
 
         if (m_iState == ST_RUN_BACK_FRONT)
         {
-            m_pTransformCom->Go_Straight(fTimedelta, m_pNavigationCom);
+            m_pTransformCom->Go_Move(CTransform::GO, fTimedelta, m_pNavigationCom);
         }
 
         if (m_iState == ST_RUN_BACK)
         {
-            m_pTransformCom->Go_Backward(fTimedelta, m_pNavigationCom);
+            m_pTransformCom->Go_Move(CTransform::BACK, fTimedelta, m_pNavigationCom);
         }
         if (m_iState == ST_RUN_LEFT)
         {
-            m_pTransformCom->Go_Left(fTimedelta, m_pNavigationCom);
+            m_pTransformCom->Go_Move(CTransform::LEFT, fTimedelta, m_pNavigationCom);
         }
 
         if (m_iState == ST_RUN_RIGHT)
         {
-            m_pTransformCom->Go_Right(fTimedelta, m_pNavigationCom);
+            m_pTransformCom->Go_Move(CTransform::RIGHT, fTimedelta, m_pNavigationCom);
         }
 
         if (15.f > fLength)
@@ -216,7 +217,7 @@ HRESULT CGunPawn::Add_PartObjects()
     CMonsterHP::CMonsterHP_DESC HpDesc{};
     HpDesc.fMaxHP = m_fMAXHP;
     HpDesc.fHP = m_fHP;
-
+    HpDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
         return E_FAIL;
 

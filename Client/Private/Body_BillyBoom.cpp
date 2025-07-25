@@ -33,7 +33,7 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
     /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
-    m_DATA_TYPE = CGameObject::DATA_MONSTER;
+
     if (FAILED(Add_Components()))
         return E_FAIL;
    m_fPlayAniTime = 0.5f;
@@ -48,12 +48,9 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CBody_BillyBoom::Priority_Update(_float fTimeDelta)
+void CBody_BillyBoom::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead) {
-        return OBJ_DEAD;
-    }
-    return OBJ_NOEVENT;
+ 
 }
 
 void CBody_BillyBoom::Update(_float fTimeDelta)
@@ -303,6 +300,7 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
     if (bMotionChange)
         m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
 
+    
 
   
     if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
@@ -386,7 +384,11 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
        if(m_iCurMotion == CBillyBoom::ST_Comp_Idle)
         m_pModelCom->Set_Animation(m_iCurMotion, false);
     }
-    if ( m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop) {
+
+
+
+    if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
+    {
         Set_BoneUpdateMatrix("R_TopArm_04", LaserMatrix);
         Set_BoneUpdateMatrix("L_TopArm_04", LaserMatrix);
     }
@@ -415,7 +417,7 @@ void CBody_BillyBoom::Late_Update(_float fTimeDelta)
             SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
 
 
-        if (FAILED(m_pGameInstance->Add_Collider(m_pDamage, m_pHeanColl)))
+        if (FAILED(m_pGameInstance->Add_Collider(m_pHeanColl, m_pDamage)))
             return;
 
         m_pGameInstance->Add_DebugComponents(m_pHeanColl);
@@ -453,7 +455,7 @@ HRESULT CBody_BillyBoom::Render()
                 m_bEmissive = true;
 
 
-            if (FAILED(m_pShaderCom->Bind_Bool("g_bEmissive", m_bEmissive)))
+            if (FAILED(m_pShaderCom->Bind_RawValue("g_bEmissive", &m_bEmissive, sizeof(_bool))))
                 return E_FAIL;
         }
 
@@ -484,7 +486,8 @@ HRESULT CBody_BillyBoom::Make_Barre()
    Desc.vPos = vHPos;
    Desc.state = &m_iCurMotion;
    Desc.iSkillType = CSkill::SKill::STYPE_BERRLE;
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Berrle", nullptr, 0, &Desc, 0);
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                            L"Prototype GameObject_BossBullet_Berrle", &Desc);
 
 
    CBullet::CBULLET_DESC BDesc{};
@@ -495,7 +498,8 @@ HRESULT CBody_BillyBoom::Make_Barre()
    BDesc.fDamage = &m_pDamage;
    BDesc.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
 
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_Bullet", nullptr, 0, &BDesc, 0);
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                            L"Prototype GameObject_Bullet", &BDesc);
 
    return S_OK;
 }
@@ -515,7 +519,8 @@ HRESULT CBody_BillyBoom::Make_ShockWave()
     Desc.fDamage = &m_pDamage;
     Desc.iSkillType = CSkill::SKill:: STYPE_SHOCKWAVE;
 
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_Bullet", nullptr, 0, &Desc, 0);
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                             L"Prototype GameObject_Bullet", &Desc);
 
     return S_OK;
 }
@@ -542,19 +547,20 @@ HRESULT CBody_BillyBoom::Make_Laser()
    Desc.LaserpParentMatrix = &m_WorldMatrix;
    Desc.LaserpSocketMatrix = m_pFindAttBonMatrix[1];
    Desc.iSkillType = CSkill::STYPE_LASER;
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Berrle", nullptr, 0, &Desc, 0);
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                            L"Prototype GameObject_BossBullet_Berrle", &Desc);
   
-
-   ZeroMemory(&Desc, sizeof(CBossBullet_Berrle::CBossBullet_Berrle_DESC));
-    Desc.fSpeedPerSec = 20.f;
-    Desc.fDamage = &m_pDamage;
-    Desc.vPos = LHPos;
-    Desc.state = &m_iCurMotion;
-    Desc.LaserRightLeft = false;
-    Desc.LaserpParentMatrix = &m_WorldMatrix;
-    Desc.LaserpSocketMatrix = m_pFindAttBonMatrix[0];
-    Desc.iSkillType = CSkill::STYPE_LASER;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), CGameObject::SKILL, L"Prototype GameObject_BossBullet_Berrle", nullptr, 0, &Desc, 0);
+   CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc2{};
+    Desc2.fSpeedPerSec = 20.f;
+    Desc2.fDamage = &m_pDamage;
+    Desc2.vPos = LHPos;
+    Desc2.state = &m_iCurMotion;
+    Desc2.LaserRightLeft = false;
+    Desc2.LaserpParentMatrix = &m_WorldMatrix;
+    Desc2.LaserpSocketMatrix = m_pFindAttBonMatrix[0];
+    Desc2.iSkillType = CSkill::STYPE_LASER;
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(),TEXT("Layer_Skill"),
+                                             L"Prototype GameObject_BossBullet_Berrle", &Desc2);
    
     m_bTurnBeam = true;
 
@@ -563,8 +569,8 @@ HRESULT CBody_BillyBoom::Make_Laser()
 
 void CBody_BillyBoom::SetDir()
 {  
-  m_AttackDir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::TRANSFORM_POSITION)
-        - m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION);
+  m_AttackDir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)
+        - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 }
 
 
@@ -610,18 +616,21 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetBool", *m_RimDesc.eState)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_bool))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Int("g_RimPow", m_RimDesc.iPower)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_int))))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
+    _bool stun{false};
+     if (m_iCurMotion == CBillyBoom::ST_Stun_Start)
+        stun= true;
 
-    if (FAILED(m_pShaderCom->Bind_Bool("g_TagetDeadBool", m_iCurMotion == CBillyBoom::ST_Stun_Start)))
+     if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &stun, sizeof(_bool))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Float("g_EmissivePower", m_fEmissivePower)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_EmissivePower", &m_fEmissivePower, sizeof(_float))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_EmissiveColor", &m_fEmissiveColor, sizeof(_float3))))

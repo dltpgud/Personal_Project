@@ -7,9 +7,6 @@
     <Filter Include="01.Utility">
       <UniqueIdentifier>{88433979-e468-4c93-82dc-e96b4cd80380}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\99.SuperClass">
-      <UniqueIdentifier>{49df260b-e795-437f-b5ee-783b955be444}</UniqueIdentifier>
-    </Filter>
     <Filter Include="99.Defines">
       <UniqueIdentifier>{8e5fa206-56a3-4207-9b85-df63c3f4b3ba}</UniqueIdentifier>
     </Filter>
@@ -48,9 +45,6 @@
     </Filter>
     <Filter Include="01.Utility\04.Component\Texture">
       <UniqueIdentifier>{23190282-4fc2-4c4d-8082-60626c1bec69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Manager">
-      <UniqueIdentifier>{f23ab11d-bdef-4a46-ba75-ec5b87d49916}</UniqueIdentifier>
     </Filter>
     <Filter Include="01.Utility\04.Component\VIBuffer">
       <UniqueIdentifier>{8a87f759-4910-415d-81f3-58640ec44ffa}</UniqueIdentifier>
@@ -166,9 +160,6 @@
     <Filter Include="01.Utility\04.Component\VIBuffer\Instancing\Point">
       <UniqueIdentifier>{eeafeb07-28c6-422a-9feb-a15c7c31f6e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\04.Component\VIBuffer\Instancing\Rect">
-      <UniqueIdentifier>{64885f50-435d-488c-b3cb-ce1da897bbda}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Utility\04.Component\Navigation">
       <UniqueIdentifier>{12bbd5b6-f40a-450c-81c1-348cf97e5121}</UniqueIdentifier>
     </Filter>
@@ -184,9 +175,6 @@
     <Filter Include="02.ShaderFiles">
       <UniqueIdentifier>{c8765a11-7d92-4e54-914a-be038a5d86e7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\02.GameObjects\BlendObject">
-      <UniqueIdentifier>{c1e7f0e2-13cb-474c-89c5-680138e9761b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Utility\04.Component\VIBuffer\Point">
       <UniqueIdentifier>{a6e943cf-0bee-4c98-ab4d-884f95aea88c}</UniqueIdentifier>
     </Filter>
@@ -195,6 +183,15 @@
     </Filter>
     <Filter Include="01.Utility\09. Frustum">
       <UniqueIdentifier>{9daf459f-7a2b-41ea-b357-d3fe47828e66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\99.SuperClass">
+      <UniqueIdentifier>{49df260b-e795-437f-b5ee-783b955be444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00.System\Thread">
+      <UniqueIdentifier>{50471be8-1700-4938-874d-89d0182cbe2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Manager">
+      <UniqueIdentifier>{f23ab11d-bdef-4a46-ba75-ec5b87d49916}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -369,17 +366,11 @@
     <ClInclude Include="..\Public\VIBuffer_Particle_Point.h">
       <Filter>01.Utility\04.Component\VIBuffer\Instancing\Point</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Particle_Rect.h">
-      <Filter>01.Utility\04.Component\VIBuffer\Instancing\Rect</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\RenderTarget.h">
       <Filter>01.Utility\08.RenderTaget</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Target_Manager.h">
       <Filter>01.Utility\08.RenderTaget\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BlendObject.h">
-      <Filter>01.Utility\02.GameObjects\BlendObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point.h">
       <Filter>01.Utility\04.Component\VIBuffer\Point</Filter>
@@ -392,6 +383,18 @@
     </ClInclude>
     <ClInclude Include="..\Public\QuadTree.h">
       <Filter>01.Utility\04.Component\VIBuffer\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BlendObject.h">
+      <Filter>01.Utility\02.GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ThreadPool.h">
+      <Filter>00.System\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SPinLock.h">
+      <Filter>00.System\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\TLS.h">
+      <Filter>99.Defines</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -551,9 +554,6 @@
     <ClCompile Include="..\Private\VIBuffer_Instancing.cpp">
       <Filter>01.Utility\04.Component\VIBuffer\Instancing</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Particle_Rect.cpp">
-      <Filter>01.Utility\04.Component\VIBuffer\Instancing\Rect</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Particle_Point.cpp">
       <Filter>01.Utility\04.Component\VIBuffer\Instancing\Point</Filter>
     </ClCompile>
@@ -562,9 +562,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\Target_Manager.cpp">
       <Filter>01.Utility\08.RenderTaget\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BlendObject.cpp">
-      <Filter>01.Utility\02.GameObjects\BlendObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Point.cpp">
       <Filter>01.Utility\04.Component\VIBuffer\Point</Filter>
@@ -577,6 +574,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\QuadTree.cpp">
       <Filter>01.Utility\04.Component\VIBuffer\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BlendObject.cpp">
+      <Filter>01.Utility\02.GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ThreadPool.cpp">
+      <Filter>00.System\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SPinLock.cpp">
+      <Filter>00.System\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\TLS.cpp">
+      <Filter>99.Defines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

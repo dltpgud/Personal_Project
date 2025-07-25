@@ -11,25 +11,29 @@ class ENGINE_DLL CTransform final : public CComponent
 public:
     enum TRANSFORM
     {
-        TRANSFORM_RIGHT,
-        TRANSFORM_UP,
-        TRANSFORM_LOOK,
-        TRANSFORM_POSITION,
-        TRANSFORM_END
+        T_RIGHT,
+        T_UP,
+        T_LOOK,
+        T_POSITION,
+        T_END
     };
 
-    enum FIX
+    enum MOVE
     {
-        FIX_X, FIX_Y, FIX_Z,FIX_END
+        GO,
+        BACK,
+        RIGHT,
+        LEFT,
+        UP,
+        DOWN,
+        M_END
     };
+  
     typedef struct TRANSFORM_DESC
     {
         _float fSpeedPerSec{};
         _float fRotationPerSec{};
-        _vector RIGHT = XMVectorZero();
-        _vector UP    = XMVectorZero();
-        _vector LOOK  = XMVectorZero();
-        _vector POSITION{};
+        _matrix WorldMatrix = XMMatrixIdentity();
         _float JumpPower{};
     } TRANSFORM_DESC;
 
@@ -43,14 +47,10 @@ public:
     { /*XMStore- 보관하는 함수*/
         XMStoreFloat4((_float4*)&m_WorldMatrix.m[eTRANSFORM][0], vState);
     }
+
     void Set_Scaling(_float fScaleX, _float fScaleY, _float fScaleZ);
     void LookAt(_fvector vAt);
-    void Go_Straight(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
-    void Go_Left(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
-    void Go_Right(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
-    void Go_Backward(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
-    void Go_Up(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
-    void Go_Down(_float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
+    void Go_Move(MOVE MoveType , _float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
     void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck, class CNavigation* pNavigation = nullptr);
     void Go_Doublejump(_float fTimeDelta, class CNavigation* pNavigation = nullptr);
     void GO_Dir(_float fTimeDelta,  _vector vDir, CNavigation* pNavigation = nullptr, _bool* bStop = nullptr);
@@ -58,17 +58,13 @@ public:
     void Stop_Move();
     void Rotation_to_Player(_float fTimeDelta);
     void Set_Rotation_to_Player();
-    void Other_set_Pos(CTransform* Other, FIX FixPosWhere,_float FixPos, _float3* Ouput = nullptr);
+    void Move_TagetAstar(CNavigation* pNavigation, _float fTimedelta);
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
     void Turn(_fvector vAxis, _float fTimeDelta);
     void Turn(_bool bX, _bool bY, _bool bZ, _float fTimeDelta);
-    void Set_Rot(_fvector vAxis, _float Angle);
-
-
 
     /* 항등회전 상태를 기준으로 지정한 각도만큼 회전한다. */
     void Rotation(_float fX, _float fY, _float fZ);
-    void Set_ALL_TRANSFORM(_fvector vright, _fvector vup, _fvector vLook, _fvector vPos);
 
 public:
     _vector Get_TRANSFORM(TRANSFORM eTRANSFORM)
@@ -91,12 +87,16 @@ public:
         return XMLoadFloat4x4(&m_WorldMatrix);
     }
 
+    void Set_WorldMatrix(_fmatrix mat)
+    {
+        return XMStoreFloat4x4(&m_WorldMatrix,mat);
+    }
+
     _float3 Get_Scaled()
     {
-        return _float3(XMVectorGetX(XMVector3Length(Get_TRANSFORM(
-                           TRANSFORM_RIGHT))), // 길이는 _vector을 리턴하고 _float 타입을 리턴함으로 get한다
-                       XMVectorGetX(XMVector3Length(Get_TRANSFORM(TRANSFORM_UP))),
-                       XMVectorGetX(XMVector3Length(Get_TRANSFORM(TRANSFORM_LOOK))));
+        return _float3(XMVectorGetX(XMVector3Length(Get_TRANSFORM(T_RIGHT))),
+                       XMVectorGetX(XMVector3Length(Get_TRANSFORM(T_UP))),
+                       XMVectorGetX(XMVector3Length(Get_TRANSFORM(T_LOOK))));
     }
 
     void Set_MoveSpeed(_float Speed)
@@ -121,14 +121,16 @@ public:
     {
         return m_JumpPower;
     }
+
+
 public:
     HRESULT Bind_ShaderResource(class CShader* pShader, const _char* pConstantName);
 
 public:
     virtual HRESULT Initialize_Prototype(void* pTransformDesc);
-    virtual HRESULT Initialize(void* pArg) override;
 
 private:
+ 
     _float4x4 m_WorldMatrix = {};
     _float m_fSpeedPerSec = {};
     _float m_fRotationPerSec = {};
@@ -136,8 +138,8 @@ private:
     _float m_JumpPower{};
     _float m_fTimeSum{};
     _float m_fTimeSumDouble{};
-    _float m_PreRotationSce{};
-public:
+    _int m_CurrentPathIndex{};
+ public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;
     virtual void Free() override;

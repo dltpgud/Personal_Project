@@ -15,7 +15,15 @@ namespace Engine
 	typedef		unsigned short				_ushort;
 
 	typedef		signed int					_int;
+    typedef     signed __int32              int32;
+    typedef     signed __int64              int64;  
+       
+
 	typedef		unsigned int				_uint;
+    typedef     unsigned __int16            _uint16;
+    typedef     unsigned __int32            _uint32;
+   
+
 
 	typedef		signed long					_long;
 	typedef		unsigned long				_ulong;

@@ -16,15 +16,15 @@ CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RaDir, _bool forPlayer )
 {   
     _uint iNumViewports = {1};
-       D3D11_VIEWPORT ViewportDesc{};
- _float3 vMousePos;
+    D3D11_VIEWPORT ViewportDesc{};
+    _float3 vMousePos;
+     m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
+
     if (false == forPlayer)
-    {
+     { // 맵툴에서는 마우스 위치에 따라서 Ray를 쏘는 위치가 바뀌어야 한다.
         POINT ptMouse{};
         GetCursorPos(&ptMouse);
         ScreenToClient(g_hWnd, &ptMouse);
-
-        m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
 
         // 뷰 포트 -> 투영
         vMousePos.x = ptMouse.x / (ViewportDesc.Width * 0.5f) - 1.f;
@@ -32,19 +32,16 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
         vMousePos.z = 0.f;
     }
     else if (true == forPlayer)
-    { 
+    {  //1인칭 슈팅게임 클라이언트에서 Ray를 쏘는 위치는 고정되어있다.
          POINT ptPlayerAim{};
                  ptPlayerAim.x = 640;
                  ptPlayerAim.y = 360;
-
-         m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
 
         // 뷰 포트 -> 투영
          vMousePos.x = ptPlayerAim.x / (ViewportDesc.Width * 0.5f) - 1.f;
          vMousePos.y = ptPlayerAim.y / -(ViewportDesc.Height * 0.5f) + 1.f;
          vMousePos.z = 0.f;
     }
-
 
     // 투영 -> 뷰 스페이스
     _float4x4 matProj;
@@ -106,9 +103,6 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
             _float3 v2 = pTerrainVtx[dwVtxIdx[2]];
 
             _float fDist{};
-
-            // V1 + U(V2 - V1) + V(V3 - V1)     FXMVECTOR Origin, FXMVECTOR Direction, FXMVECTOR V0, GXMVECTOR V1,
-            // HXMVECTOR V2, float& Dist
             if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2),
                                                    fDist))
             {
@@ -128,22 +122,21 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
             v0 = pTerrainVtx[dwVtxIdx[0]];
             v1 = pTerrainVtx[dwVtxIdx[1]];
             v2 = pTerrainVtx[dwVtxIdx[2]];
-            // V1 + U(V2 - V1) + V(V3 - V1)
 
              if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2),
                                                    fDist))
             {
-                _float3 Las_pos{};
+                _float3 Last_pos{};
                 _vector pos = RPos + RDIR * fDist;
                 *fDis = fDist;
-                XMStoreFloat3(&Las_pos, XMVector3TransformCoord(pos, Transform->Get_WorldMatrix()));
+                XMStoreFloat3(&Last_pos, XMVector3TransformCoord(pos, Transform->Get_WorldMatrix()));
 
-                return Las_pos;
+                return Last_pos;
             }
         }
     }
 
-    return _float3(0xffff,0xffff,0xffff);
+    return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
 HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewportHeight)
@@ -179,15 +172,66 @@ HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewport
 
 HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
 {
-   _float3 fPos{};
-   XMStoreFloat3(&fPos, Transform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
-    _float fY =  pNavigation->Compute_HeightOnCell(&fPos);
-    
+    _float3 fPos{};
+   XMStoreFloat3(&fPos, Transform->Get_TRANSFORM(CTransform::T_POSITION));  
 
+    _float fY{0.f};
+   
+
+    
+  //      _float3 nPos{};
+   // isComputeHeight(Transform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), &nPos);
+    //    fY = nPos.y;
+
+         fY = pNavigation->Compute_HeightOnCell(&fPos);
+    
     *Pos = { fPos.x, fY, fPos.z };
 
 
     return S_OK;
+}
+
+_bool CCalculator::isComputeHeight(_fvector vTargetPos, _float3* pOut)
+{ /* 받아온 객체의 월드위치를 직교투영한 상태대로 투영공간상의 위치로 변환하고. */
+    /* 그 투영공간상의 좌표를 텍스쳐 상의 좌표로 변환한다. */
+
+    _float4x4 ViewMatrix, ProjMatrix;
+
+    // XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(64.5f, 20.f, 64.5f, 1.f), XMVectorSet(64.5f,
+    // 0.f, 64.5f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+
+    _matrix matView = XMMatrixIdentity();
+    matView.r[0] = XMVectorSet(1.f, 0.f, 0.f, 0.f);
+    matView.r[1] = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+    matView.r[2] = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+    matView.r[3] = XMVectorSet(64.5f, 20.f, 64.5f, 1.f);
+
+    XMStoreFloat4x4(&ViewMatrix, XMMatrixInverse(nullptr, matView));
+    XMStoreFloat4x4(&ProjMatrix, XMMatrixOrthographicLH(513.f, 513.f, 0.f, 30.f));
+
+    _vector vProjPos = XMVector3TransformCoord(vTargetPos, XMLoadFloat4x4(&ViewMatrix));
+    vProjPos = XMVector3TransformCoord(vProjPos, XMLoadFloat4x4(&ProjMatrix));
+
+    _float2 vTexcoord;
+    vTexcoord.x = XMVectorGetX(vProjPos) * m_iViewportWidth * 0.5f + m_iViewportWidth * 0.5f;
+    vTexcoord.y = XMVectorGetY(vProjPos) * m_iViewportHeight * -0.5f + m_iViewportHeight * 0.5f;
+
+    _uint iIndex = (_uint)vTexcoord.y * m_iViewportWidth + (_uint)vTexcoord.x;
+
+    m_pGameInstance->Copy_RT_Resource(TEXT("Target_Height"), m_pTexture2D);
+
+    D3D11_MAPPED_SUBRESOURCE SubResource{};
+
+    m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ_WRITE, 0, &SubResource);
+
+    _float4* pPixel = static_cast<_float4*>(SubResource.pData) + iIndex;
+
+    m_pContext->Unmap(m_pTexture2D, 0);
+
+    XMStoreFloat3(pOut, XMVectorSetY(vTargetPos, pPixel->x));
+
+    return _bool(pPixel->w);
+    ;
 }
 
 _vector CCalculator::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)

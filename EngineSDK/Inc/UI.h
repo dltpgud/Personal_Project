@@ -28,8 +28,11 @@ public:
     {
         _float fX{}, fY{}, fZ{}, fSizeX{}, fSizeY{};
         UIID UID{};
-        _bool  Update{};
-        _uint iDepth{};
+        _uint iDeleteLevel{};
+        _uint iMaxLevel{};
+        _bool* pEnable_Level = {nullptr};
+        _bool Update{};
+
     } CUI_DESC;
 
 protected:
@@ -42,7 +45,7 @@ public:
 
     virtual HRESULT Initialize(void* pArg);
 
-    virtual _int Priority_Update(_float fTimeDelta);
+    virtual void Priority_Update(_float fTimeDelta);
     virtual void Update(_float fTimeDelta);
     virtual void Late_Update(_float fTimeDelta);
     virtual HRESULT Render();
@@ -50,40 +53,41 @@ public:
     void Set_UI_Pos(void* pArg);
     void UI_shaking(_float fTimeDelta);
     void Set_UI_shaking( _float fShakingTime, _float fPowerX, _float fPowerY);
-    
-    public:
+    _bool Check_Deleate(_uint Level);
+    _bool Check_Level(_uint iLEVEL)
+    {
+        return static_cast<_bool>(m_pEnable_Level[iLEVEL]);
+    }
+    _bool Check_Update()
+    {
+        return m_bUpdate;
+    }
+    _float Get_fz()
+    {
+        return m_fZ;
+    } 
+ public:
     void Set_Open(_bool open)
     {
         m_bUpdate = open;
     }
 
-    const _bool& Get_Update()
-    {
-        return m_bUpdate;
-    }
+  
     const UIID& Get_UIID()
     {
         return m_UIID;
     }
-    const _uint& Get_iDepth()
-    {
-        return m_iDepth;
-    }
-
 protected:
     _float m_fX{}, m_fY{}, m_fZ{}, m_fSizeX{}, m_fSizeY{};
     _float4x4 m_ViewMatrix{}, m_ProjMatrix{};
     UIID m_UIID{};
-  
-    /*메뉴간 겹치는 지 안겹치는지 소팅을 위한 변수*/
-    _uint m_iDepth = {};
-    // 프리 업데이트, 레이트 업데이트,
-    _bool m_bUpdate{};
-
-
+ 
+    _uint m_iDeleteLevel{};
+    _bool* m_pEnable_Level = {nullptr};
+    _bool m_bUpdate{true};
     /*wincx ,wincy 가져오기*/
     _uint iNumViewports = {1};
-    D3D11_VIEWPORT ViewportDesc{};
+     D3D11_VIEWPORT ViewportDesc{};
     _float m_fShaking_X{}, m_fShaking_Y{}, m_fShakingTime{}, m_fShakingPower_X{}, m_fShakingPower_Y{};
     _bool m_IsShaking = false;
 public:

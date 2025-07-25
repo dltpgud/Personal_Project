@@ -21,9 +21,10 @@ HRESULT CComponent_Manager::Add_Prototype(_uint iLevelIndex, const _wstring& str
     /*인자로 받아온 레벨 인덱스가 할당된 맴버보다 크거나 이미 키값이 정해져 있으면 리턴 시켜버린다.*/
     if (iLevelIndex >= m_iNumLevels || nullptr != Find_Prototype(iLevelIndex, strPrototypeTag))
         return E_FAIL;
-
+   // WRITE_LOCK;
+    m_Component_Mutex.lock();
     m_pPrototypes[iLevelIndex].emplace(strPrototypeTag, pPrototype);
-
+    m_Component_Mutex.unlock();
     return S_OK;
 }
 

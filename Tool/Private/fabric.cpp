@@ -18,7 +18,7 @@ HRESULT Cfabric::Initialize_Prototype()
 HRESULT Cfabric::Initialize(void* pArg)
 {
     GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    m_DATA_TYPE = pDesc->DATA_TYPE;
+    m_iObjectType = pDesc->Object_Type;
     
 
     size_t iLen = wcslen(pDesc->ProtoName) + 1;
@@ -34,14 +34,11 @@ HRESULT Cfabric::Initialize(void* pArg)
     return S_OK;
 }
 
-_int Cfabric::Priority_Update(_float fTimeDelta)
+void Cfabric::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-    {
-        return OBJ_DEAD;
-    }
+ 
     __super::Priority_Update(fTimeDelta);
-    return OBJ_NOEVENT;
+
 }
 
 void Cfabric::Update(_float fTimeDelta)
@@ -61,6 +58,8 @@ void Cfabric::Late_Update(_float fTimeDelta)
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
     }
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
        
     __super::Late_Update(fTimeDelta);
 }
@@ -86,6 +85,34 @@ HRESULT Cfabric::Render()
     }
     
     
+    return S_OK;
+}
+
+HRESULT Cfabric::Render_Shadow()
+{
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
+
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix(
+            "g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix(
+            "g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
+        return E_FAIL;
+
+    _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+    for (_uint i = 0; i < iNumMeshes; i++)
+    {
+
+        if (FAILED(m_pShaderCom->Begin(2)))
+            return E_FAIL;
+
+        m_pModelCom->Render(i);
+    }
     return S_OK;
 }
 

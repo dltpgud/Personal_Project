@@ -37,6 +37,7 @@ struct VS_INST
     float4 vUp : TEXCOORD2;
     float4 vLook : TEXCOORD3;
     float4 vPos : TEXCOORD4;
+
 };
 
 struct VS_OUTINST
@@ -48,6 +49,7 @@ struct VS_OUTINST
     float4 vProjPos : TEXCOORD2;
     float4 vTangent : TANGENT;
     float4 vBinormal : BINORMAL;
+
     
 };
 

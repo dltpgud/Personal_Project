@@ -27,7 +27,7 @@ public:
 
 
 private:	
-
+	USE_LOCK;
 
 	// 사운드 리소스 정보를 갖는 객체 
 	map<TCHAR*, Sound*> m_mapSound;

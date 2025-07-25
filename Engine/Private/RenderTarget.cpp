@@ -95,6 +95,8 @@ HRESULT CRenderTarget::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 
 	pVIBuffer->Render();
 
+
+
 	return S_OK;
 }
 #endif

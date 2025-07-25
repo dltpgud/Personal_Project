@@ -36,22 +36,17 @@ HRESULT CShock::Initialize(void * pArg)
 		return E_FAIL;
 
 
-	m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION, XMVectorSetY(m_vPos, 1.7f));
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY(m_vPos, 1.7f));
 	m_fLifeTime = 10.f;
 	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.0f;
 	return S_OK;
 }
 
-_int CShock::Priority_Update(_float fTimeDelta)
+void CShock::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
 	__super::Priority_Update(fTimeDelta);
-
-
-	return OBJ_NOEVENT;
+	return ;
 }
 
 void CShock::Update(_float fTimeDelta)
@@ -98,7 +93,7 @@ HRESULT CShock::Render()
 HRESULT CShock::Add_Components()
 {
 	/* For.Com_Model */
-	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_Shock"),
+	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto_Component_Shock"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
 		return E_FAIL;
 

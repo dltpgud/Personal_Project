@@ -21,13 +21,7 @@ private:
 	_uint								m_iNumKeyFrames = {};
 	vector<KEYFRAME>					m_KeyFrames;
 	_int								m_iBoneIndex = {};
-	/*
 
-	_float m_fChangeTime;
-	_vector								m_vLastScale = {};
-	_vector								m_vLastRotation = {};
-	_vector								m_vLastPosition = {};
-	*/
 public:
 	static CChannel* Create(HANDLE& hFile);
 	virtual void Free() override;

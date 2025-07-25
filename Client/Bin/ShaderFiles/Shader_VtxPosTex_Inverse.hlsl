@@ -157,9 +157,7 @@ PS_OUT PS_MAIN_Dissolve(PS_IN In)
     // 마스크 값이 threshold 이상일 때만 색상을 보여줌
     if (maskValue < threshold)
     {
-   
         return Out;
-
     }
     else
     {

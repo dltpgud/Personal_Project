@@ -15,13 +15,12 @@ protected:
 	CCollider(const CCollider& Prototype);
 	virtual ~CCollider() = default;
 
-
-
-public:
+ public:
 	virtual HRESULT Initialize_Prototype(TYPE eColliderType);
 	virtual HRESULT Initialize(void* pArg) override;
+     _bool IsColl();
 
-public:
+    public:
 	_bool Intersect(CCollider* pTargetCollider);
 	_bool RayIntersects(_vector RayPos, _vector RayDir, _float& fDis);
 	_float Get_iCurRadius() ;

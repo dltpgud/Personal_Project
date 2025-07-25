@@ -20,12 +20,10 @@ HRESULT CBossHPUI::Initialize(void* pArg)
     CBossHPUI_DESC* Desc = static_cast <CBossHPUI_DESC*>(pArg);
     Desc->fX = g_iWinSizeX * 0.5f;
     Desc->fY = 50.f;
+    Desc->fZ = 0.1f;
     Desc->fSizeX = 650.f;
     Desc->fSizeY = 25.f;
-    Desc->UID = CUI::UIID_BossHP;
-
-    Desc->Update = true;
-
+    Desc->UID = CUI::UIID_BossHP ;
     Desc->fSpeedPerSec = 0.f;
     Desc->fRotationPerSec = 0.f;
     m_fHP = Desc->fHP;
@@ -33,29 +31,24 @@ HRESULT CBossHPUI::Initialize(void* pArg)
 
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
-    m_pTransformCom->Set_Scaling(Desc->fSizeX, Desc->fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
-                                   XMVectorSet(Desc->fX - g_iWinSizeX * 0.5f, -Desc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
+    m_pTransformCom->Set_Scaling(Desc->fSizeX, Desc->fSizeY, 1.f);
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
+                                   XMVectorSet(Desc->fX - g_iWinSizeX * 0.5f, -Desc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
     m_fPrXPos = Desc->fX;
     m_fPrYPos = Desc->fY;
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-
     m_fHP_Pluse = m_fHP  / m_fMaxHP;
     m_fRatio = m_fHP * 0.001f / m_fMaxHP;
-
     
-
     m_fHealthHP = 1.f;
     return S_OK;
 }
 
-_int CBossHPUI::Priority_Update(_float fTimeDelta)
+void CBossHPUI::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
   if (m_IsShaking) {
       if (m_fShakingTime > 0.f)
       {
@@ -69,8 +62,6 @@ _int CBossHPUI::Priority_Update(_float fTimeDelta)
           m_fY = m_fPrYPos;
       }
   }
-
-    return OBJ_NOEVENT;
 }
 
 void CBossHPUI::Update(_float fTimeDelta)
@@ -88,6 +79,7 @@ void CBossHPUI::Update(_float fTimeDelta)
 
 void CBossHPUI::Late_Update(_float fTimeDelta)
 {
+    m_CurRito = m_fHP / m_fMaxHP; 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this))) 
         return;
 }
@@ -103,9 +95,9 @@ HRESULT CBossHPUI::Render()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Float("g_hp", m_fHP / m_fMaxHP)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_hp",  &m_CurRito , sizeof(_float))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Float("g_hp_pluse", m_fHP_Pluse)))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_hp_pluse",&m_fHP_Pluse, sizeof(_float))))
         return E_FAIL;
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture",0)))

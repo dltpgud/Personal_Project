@@ -28,7 +28,7 @@ HRESULT CLoading::Initialize(void* pArg)
 
 	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
 	m_pTransformCom->Set_TRANSFORM(
-		CTransform::TRANSFORM_POSITION,
+		CTransform::T_POSITION,
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 	m_fFirstX = m_fX;
@@ -44,24 +44,20 @@ HRESULT CLoading::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CLoading::Priority_Update(_float fTimeDelta)
+void CLoading::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
-
-	return OBJ_NOEVENT;
 }
 
 void CLoading::Update(_float fTimeDelta)
 {
-	m_pTransformCom->Go_Left(fTimeDelta);
+    m_pTransformCom->Go_Move(CTransform::LEFT, fTimeDelta);
+
 }
 
 void CLoading::Late_Update(_float fTimeDelta)
 {
 	_float3 vPos{};
-	XMStoreFloat3(&vPos, m_pTransformCom->Get_TRANSFORM(CTransform::TRANSFORM_POSITION));
+	XMStoreFloat3(&vPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 
 
 	if (vPos.x < m_fFirstX *-2) {
@@ -100,14 +96,7 @@ HRESULT CLoading::Render()
 	return S_OK;
 }
 
-HRESULT CLoading::Initialize_GORGE()
-{
-	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Loading_Canyon"),
-	TEXT("Com_Texture_Load_Canyon"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
-		return E_FAIL;
 
-	return S_OK;
-}
 
 HRESULT CLoading::Set_LoadPos(CLoading_DESC* pArg)
 {
@@ -130,8 +119,6 @@ HRESULT CLoading::Set_LoadPos(CLoading_DESC* pArg)
 
 HRESULT CLoading::Add_Components()
 {
-	HRESULT hr = {};
-
 	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
@@ -142,17 +129,14 @@ HRESULT CLoading::Add_Components()
 		TEXT("Com_VIBufferRoop"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;
 
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Loading_Canyon"),
+                                          TEXT("Com_Texture_Load_Canyon"),
+                                          reinterpret_cast<CComponent**>(&m_pTextureCom))))
+       return E_FAIL;
 
-	/* For.Com_Texture */
-	switch (m_pLoadingID)
-	{
-	case GORGE :
-		hr = Initialize_GORGE();
-		break;
-	}
-
-
-	return hr;
+	
+	
+	return S_OK;
 
 }
 

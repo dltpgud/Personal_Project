@@ -21,33 +21,25 @@ HRESULT CPade::Initialize_Prototype()
 
 HRESULT CPade::Initialize(void* pArg)
 {	
-	CUI_DESC			Desc{};
-
-      Desc.Update = false;
-
-	  Desc.UID = UIID_Pade;
-	  Desc.fX = g_iWinSizeX * 0.5f;
-	  Desc.fY = g_iWinSizeY * 0.5f;
-	  Desc.fZ = 0.f;
-	  Desc.fSizeX = g_iWinSizeX ;
-	  Desc.fSizeY = g_iWinSizeY;
-	if (FAILED(__super::Initialize(&Desc)))
+    CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
+	  pDesc->UID = UIID_Pade;
+      pDesc->fX = g_iWinSizeX * 0.5f;
+      pDesc->fY = g_iWinSizeY * 0.5f;
+      pDesc->fZ =0.f;
+      pDesc->fSizeX = g_iWinSizeX;
+      pDesc->fSizeY = g_iWinSizeY;
+          if (FAILED(__super::Initialize(pDesc)))
 		 return E_FAIL;
 
-	Set_UI_Pos(&Desc);
 	if (FAILED(Add_Components()))
 		return E_FAIL;
 
 	return S_OK;
 }
 
-_int CPade::Priority_Update(_float fTimeDelta)
+void CPade::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
-
-
-	return OBJ_NOEVENT;
+;
 }
 
 void CPade::Update(_float fTimeDelta)

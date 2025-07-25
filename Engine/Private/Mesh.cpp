@@ -6,8 +6,7 @@ CMesh::CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CVIBuffer{p
 }
 
 CMesh::CMesh(const CMesh& Prototype)
-    : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex},
-      m_iNumIndexPerInstance{Prototype.m_iNumIndexPerInstance}
+    : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex}
 {
     strcpy_s(m_szName, Prototype.m_szName);
 
@@ -28,7 +27,6 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
     _uint iNumFaces;
     bReadFile = ReadFile(hFile, &iNumFaces, sizeof(iNumFaces), &dwByte, nullptr);
     m_iNumIndexices = iNumFaces * 3;
-    m_iNumIndexPerInstance = m_iNumIndexices;
     _uint* pIndices = new _uint[m_iNumIndexices];
     bReadFile = ReadFile(hFile, pIndices, sizeof(_uint) * m_iNumIndexices, &dwByte, nullptr);
 
@@ -66,67 +64,7 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
 
     return S_OK;
 }
-/*
-HRESULT CMesh::Initialize_Proto(_char* pName, _uint iMaterialIndex, _uint iNumVertex, _uint iNumFaces, VTXMESH* pVertex,
-                                _uint* pIndices, _fmatrix PreTransformMatrix)
-{
-    strcpy_s(m_szName, pName);
-    m_iMaterialIndex = iMaterialIndex;
-    m_iVertexStride = sizeof(VTXMESH);
-    m_iNumVertices = iNumVertex;
-    m_iIndexStride = sizeof(_uint);
-    m_iNumIndexices = iNumFaces * 3;
-    m_iNumVertexBuffers = 1;
-    m_eIndexFormat = DXGI_FORMAT_R32_UINT;
-    m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-#pragma region VERTEX_BUFFER
-    // dx9 : 정점버퍼를 할당하고 -> 락언락해서 정점버퍼에 초기값을 채운다.
-    // dx9 : 정점버퍼에 초기값을 채우면서 정점버퍼를 할당한다
-    ZeroMemory(&m_BufferDesc, sizeof m_BufferDesc);
-
-    // 할당하고자하는 메모리공간의 크기(Byte)
-    m_BufferDesc.ByteWidth = m_iVertexStride * m_iNumVertices;
-
-    // 버퍼의 속성 (정적, 동적)
-    m_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    m_BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    m_BufferDesc.CPUAccessFlags = 0;
-    m_BufferDesc.MiscFlags = 0;
-    m_BufferDesc.StructureByteStride = m_iVertexStride;
-
-    ZeroMemory(&m_InitialDesc, sizeof m_InitialDesc);
-    m_InitialDesc.pSysMem = pVertex;
-
-    if (FAILED(__super::Create_Buffer(&m_pVB)))
-        return E_FAIL;
-
-#pragma endregion
-
-#pragma region INDEX_BUFFER
-
-    ZeroMemory(&m_BufferDesc, sizeof m_BufferDesc);
-
-    m_BufferDesc.ByteWidth = m_iIndexStride * m_iNumIndexices;
-    m_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    m_BufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    m_BufferDesc.CPUAccessFlags = 0;
-    m_BufferDesc.MiscFlags = 0;
-    m_BufferDesc.StructureByteStride = 0;
-
-    ZeroMemory(&m_InitialDesc, sizeof m_InitialDesc);
-    m_InitialDesc.pSysMem = pIndices;
-
-    _uint iNumIndices = {0};
-
-    if (FAILED(__super::Create_Buffer(&m_pIB)))
-        return E_FAIL;
-
-#pragma endregion
-
-    return S_OK;
-}
-*/
 HRESULT CMesh::Initialize(void* pArg)
 {
     return S_OK;
@@ -153,9 +91,9 @@ HRESULT CMesh::Render()
 {
 
     if (m_pInst_Buffer == nullptr)
-        return __super::Render();
-    else
-        m_pContext->DrawIndexedInstanced(m_iNumIndexPerInstance, m_iNumInstance, 0, 0, 0);
+        return __super::Render(); // 인스턴싱이 아닐경우 , 상위 렌더 함수 호출
+    else   // 인스턴싱
+        m_pContext->DrawIndexedInstanced(m_iNumIndexices, m_iNumInstance, 0, 0, 0);
 
 
     return S_OK;
@@ -181,15 +119,14 @@ _uint CMesh::Get_iNumVertices()
     return m_iNumVertices;
 }
 
-HRESULT CMesh::Set_InstanceBuffer(vector<_matrix> vecObjMat)
+HRESULT CMesh::Set_InstanceBuffer(const vector<_matrix>& vecObjMat)
 {
+    m_iNumInstance = (_uint)vecObjMat.size();         //인스턴싱할 월드 메트리스 개수
+    m_iInstVertexStride = sizeof VTXMATRIX_INSTANCE;  //인스턴스 데이터를 구성하는 정점 하나당 바이트 크기
+    m_iNumVertexBuffers = 2;                         // 사용할 버퍼개수
 
-    m_iNumInstance = (_uint)vecObjMat.size();
-    m_iInstVertexStride = sizeof VTXMATRIX_INSTANCE;
-    m_iNumVertexBuffers = 2;
-
-    // INSTANCE_BUFFER
-    ZeroMemory(&m_Inst_BufferDesc, sizeof m_Inst_BufferDesc);
+   // 인스턴스 버퍼 설정
+    ZeroMemory(&m_Inst_BufferDesc, sizeof m_Inst_BufferDesc); 
     m_Inst_BufferDesc.ByteWidth = m_iInstVertexStride * m_iNumInstance;
     m_Inst_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
     m_Inst_BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -197,9 +134,11 @@ HRESULT CMesh::Set_InstanceBuffer(vector<_matrix> vecObjMat)
     m_Inst_BufferDesc.MiscFlags = 0;
     m_Inst_BufferDesc.StructureByteStride = m_iInstVertexStride;
 
+
+    // m_pInst_BufferData :: 인스턴싱할 월드 메트릭스 정보를 담은 VTXMATRIX_INSTANCE 구조체 변수
     m_pInst_BufferData = new VTXMATRIX_INSTANCE[m_iNumInstance];
-    for (size_t i = 0; i < m_iNumInstance; ++i)
-    {
+    for (size_t i = 0; i < m_iNumInstance; ++i)  
+    {  // 인스터싱할 월드 메트리스 개수 만큼 반복하여 월드 메트릭스 정보를 채워준다.
         _matrix WorldMat = vecObjMat[i];
         XMStoreFloat4(&m_pInst_BufferData[i].vRight, WorldMat.r[0]);
         XMStoreFloat4(&m_pInst_BufferData[i].vUp, WorldMat.r[1]);
@@ -210,21 +149,20 @@ HRESULT CMesh::Set_InstanceBuffer(vector<_matrix> vecObjMat)
     ZeroMemory(&m_Inst_BufferSRD, sizeof m_Inst_BufferSRD);
     m_Inst_BufferSRD.pSysMem = m_pInst_BufferData;
 
-    if (FAILED(m_pDevice->CreateBuffer(&m_Inst_BufferDesc, &m_Inst_BufferSRD, &m_pInst_Buffer)))
+    if (FAILED(m_pDevice->CreateBuffer(&m_Inst_BufferDesc, &m_Inst_BufferSRD, &m_pInst_Buffer))) // 인스턴싱 버퍼를 생성한다
         return E_FAIL;
 
-    Safe_Release(m_pIB);
+    Safe_Release(m_pIB); //기존의 인덱버퍼를 해제하고, 인스턴싱 개수를 반영해 다시 만든다.
     m_BufferDesc.ByteWidth = m_iIndexStride * m_iNumIndexices * m_iNumInstance;
 
     _uint* pIndices = new _uint[m_iNumIndexices * m_iNumInstance];
-    for (_uint i = 0; i < m_iNumInstance; ++i)
-        memcpy(&pIndices[i * m_iNumIndexices], m_pIndices, sizeof(_uint) * m_iNumIndexices);
+      for (_uint i = 0; i < m_iNumInstance; ++i)
+         memcpy(&pIndices[i * m_iNumIndexices], m_pIndices, sizeof(_uint) * m_iNumIndexices);
 
     D3D11_SUBRESOURCE_DATA m_tInitialData_Inst{};
     m_tInitialData_Inst.pSysMem = pIndices;
 
-    HRESULT hr = m_pDevice->CreateBuffer(&m_BufferDesc, &m_tInitialData_Inst, &m_pIB);
-    if (FAILED(hr))
+    if (FAILED(m_pDevice->CreateBuffer(&m_BufferDesc, &m_tInitialData_Inst, &m_pIB)))
         return E_FAIL;
 
    Safe_Delete_Array(pIndices);
@@ -233,16 +171,15 @@ HRESULT CMesh::Set_InstanceBuffer(vector<_matrix> vecObjMat)
 
 HRESULT CMesh::Bind_Buffers()
 {
-
     	if (nullptr == m_pContext)
         return E_FAIL;
 
         else if (nullptr == m_pInst_Buffer)
-            return __super::Bind_Buffers();
+            return __super::Bind_Buffers(); // 인스턴싱이 아닐 경우, 하나의 버텍스 버퍼를 사용해 그리게 한다.
 
         ID3D11Buffer* pVertexBuffers[] = {
-            m_pVB,
-            m_pInst_Buffer,
+            m_pVB,  // 정점 버퍼
+            m_pInst_Buffer, // 인스턴스 버퍼
         };
 
         _uint iVertexStrides[] = {m_iVertexStride, m_iInstVertexStride};
@@ -251,11 +188,13 @@ HRESULT CMesh::Bind_Buffers()
             0,
             0,
         };
-
+        /*정점들을 장치에 바인딩 한다*/
         m_pContext->IASetVertexBuffers(0, m_iNumVertexBuffers, pVertexBuffers, iVertexStrides, iOffsets);
+        /* 인덱스를 장치에 바인딩한다. */ 
         m_pContext->IASetIndexBuffer(m_pIB, m_eIndexFormat, 0);
-        m_pContext->IASetPrimitiveTopology(m_ePrimitiveTopology);
 
+        //기본 형식 및 입력 어셈블러 단계의 입력 데이터를 설명하는 데이터 순서에 대한 정보를 바인딩
+        m_pContext->IASetPrimitiveTopology(m_ePrimitiveTopology);
      
     return S_OK;
 }

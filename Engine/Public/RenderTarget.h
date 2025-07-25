@@ -42,6 +42,8 @@ private:
 private:
 	_float4x4							m_WorldMatrix = {}; // 직교 투영을 위한 월드 행렬
 
+	class CGameInstance* m_pGameInstance ={nullptr};
+    _wstring m_DebugText = L"";	
 #endif
 
 

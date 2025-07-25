@@ -28,8 +28,10 @@ void CFrustum::Update()
 	/* 월드 스페이스로 이전시키자. */
 	for (size_t i = 0; i < 8; i++)
 	{
-		XMStoreFloat3(&m_vWorldPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vPoints[i]), m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_PROJ)));
-		XMStoreFloat3(&m_vWorldPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPoints[i]), m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_VIEW)));
+		XMStoreFloat3(&m_vWorldPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vPoints[i]),
+						m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_PROJ)));
+		XMStoreFloat3(&m_vWorldPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPoints[i]),
+						m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_VIEW)));
 	}
 
 	Make_Planes(m_vWorldPoints, m_WorldPlanes);

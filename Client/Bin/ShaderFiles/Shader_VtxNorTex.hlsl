@@ -75,24 +75,7 @@ PS_OUT PS_MAIN(PS_IN In)
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord * 30.f);
 	
-    //vector vSourDiffuse = g_DiffuseTexture[0].Sample(LinearSampler, In.vTexcoord * 30.f);
-    //vector vDestDiffuse = g_DiffuseTexture[1].Sample(LinearSampler, In.vTexcoord * 30.f);
-    //vector vMask = g_MaskTexture.Sample(LinearSampler, In.vTexcoord);
-	//
-    //vector vMtrlDiffuse = vDestDiffuse * vMask + vSourDiffuse * (1.f - vMask);
-	
-	///*빛의 역방향을 정규화하고 법선을 정규화하고  이둘을 내적하면 범위가 정해짐, 최소는 0 거기에 환경광을 더하면 픽셀 색이 정해진다. 법선벡터로 색을 정한다.*/
-    //float4 vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
-    //
-    //float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));   /*반사각 구하기*/
-    //float4 vLook = In.vWorldPos - g_vCamPosition;  /*카메라의 룩벡터*/
-    //
-    //float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);   /*정반사 구하기,스펙큘러의 세기는 코사인 세타, 즉, 곡선으로 떨어짐으로 이걸 최대한 제곱하면 정확한 스펙큘러를 구할 수 있음*/
-	//
-    //Out.vColor = (g_vLightDiffuse * vMtrlDiffuse) * saturate(vShade) +
-	//	(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;;
-    
-    
+ 
     Out.vDiffuse = vector(vMtrlDiffuse.rgb, 1.f);
 
 	/* -1.f ~ 1.f -> 0.f ~ 1.f */
@@ -118,30 +101,16 @@ PS_OUT PS_Fire(PS_IN In)
     
     float2 movedTexCoord = In.vTexcoord + uvOffset;
     
-    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord).r;
-
-    //float4 vShade = max(dot(normalize(g_vLightDir) * -1.f, normalize(In.vNormal)), 0.f) + (g_vLightAmbient * g_vMtrlAmbient);
-
-//    float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal)); 
- //   float4 vLook = In.vWorldPos - g_vCamPosition; 
-
-  //  float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f); 
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord);
+ 
 	
     float3 colorStart = float3(1.f, 0.f, 0.f); // 빨강
     float3 colorEnd = float3(1.f,0.80, 0.0); // 노랑
 	
     float3 color = lerp(colorStart, colorEnd, vMtrlDiffuse.rgb);
 
-   // Out.vColor = (g_vLightDiffuse * float4(color, 1.0)) * saturate(vShade) +
-//		(g_vLightSpecular * g_vMtrlSpecular) * fSpecular;
-/*최종 픽셀 색은 디퓨즈에 법선을 이용한 환경광을 곱하고 스펙큘러들을 곱해서 최종 픽셀 색을 정한다-*/
-    
- 
     vMtrlDiffuse = float4(color, 1);
     
-    
-    if (1 == g_onEmissive)
-      //  Out.vEmissive = vector(vMtrlDiffuse.rgb, 1.f);
     
     Out.vDiffuse = vector(vMtrlDiffuse.rgb, 0.8f);
 
@@ -153,6 +122,23 @@ PS_OUT PS_Fire(PS_IN In)
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     return Out;
 }
+
+struct PS_OUT_LIGHTDEPTH
+{
+    vector vLightDepth : SV_TARGET0;
+};
+
+
+
+PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
+{
+    PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
+	
+    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
 	pass DefaultPass
@@ -166,7 +152,7 @@ technique11 DefaultTechnique
 		PixelShader = compile ps_5_0 PS_MAIN();
 	}
 
-    pass DefaultPass2
+    pass DefaultPass1
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -175,5 +161,17 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_Fire();
+    }
+
+
+    pass DefaultPass2
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_LIGHTDEPTH();
     }
 }

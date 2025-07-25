@@ -2,6 +2,7 @@
 #include "GameInstance.h"
 #include "GameObject.h"
 #include "BlendObject.h"
+#include "UI.h"
 #include "VIBuffer_Rect.h"
 #include "Shader.h"
 
@@ -43,7 +44,10 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
         return E_FAIL;
 
-   
+   	/* For.Target_Height */
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Height"), m_iWinSizeX, m_iWinSizeX,
+                                                 DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
+        return E_FAIL;
 
     /* For.Target_Shade */
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Shade"), m_iWinSizeX, m_iWinSizeY,
@@ -149,6 +153,9 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("Target_LightDepth"))))
         return E_FAIL;
 
+    	/* For.MRT_Height */
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Height"), TEXT("Target_Height"))))
+        return E_FAIL;
 
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
     m_WorldMatrix._11 = static_cast<_float>(m_iWinSizeX);
@@ -170,24 +177,28 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 
 #ifdef _DEBUG
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"), 50.f, 200.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"), 50.f, 350.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Specular"), 50.f, 500.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Rim"), 50.f, 650.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_OutLine"), 200.f, 50.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_444_Temp"), 200.f, 200.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 200.f, 350.f, 150.f, 150.f)))
-    //    return E_FAIL;
-    //if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 350.f, 50.f, 150.f, 150.f)))
-    //    return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"),  50.f, 200.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"),   50.f, 350.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Specular"), 200.f, 50.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Rim"),     200.f, 200.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_OutLine"), 200.f, 350.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_44"), 350.f, 50.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_444"), 350.f, 200.f, 150.f, 150.f)))
+   //     return E_FAIL;    
+   //
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom"), 500.f, 50.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 650.f, 50.f, 150.f, 150.f)))
+   //     return E_FAIL;
+   //
 
 
 #endif
@@ -251,12 +262,10 @@ HRESULT CRenderer::Draw()
 {
     if (FAILED(Render_Priority()))
         return E_FAIL;
-    if (FAILED(Render_Shadow()))
+      if (FAILED(Render_Shadow()))
         return E_FAIL;
-    
     if (FAILED(Render_NonBlend()))
         return E_FAIL; 
-
     if (FAILED(Render_Lights()))
         return E_FAIL;
     if (FAILED(Render_Final()))
@@ -273,7 +282,7 @@ HRESULT CRenderer::Draw()
 
 #ifdef _DEBUG
     if (FAILED(Render_Debug()))
-        return E_FAIL;
+       return E_FAIL;
 #endif
 
     return S_OK;
@@ -488,9 +497,8 @@ HRESULT CRenderer::Render_Bloom()
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_444_Temp")))) 
         return E_FAIL;
 
-
     // Y 블러
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_44]);
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_44]);//16배 다운 샘플링 뷰포트
     if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44"),nullptr,false)))
         return E_FAIL;  //기존 텍스처를 밀지말고 이미지를 가져와라
 
@@ -501,8 +509,6 @@ HRESULT CRenderer::Render_Bloom()
     m_pVIBuffer->Render();
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_44"))))
         return E_FAIL;
-
-
 
     // 16배 텍스쳐에 대한 블러와 업스케일링, 4 텍스쳐에 대한 add 연산
    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_44], sizeof(_float) )))// 16배 뷰포트에 텍스쳐 쿠드 좌표를 쉐이더로 던져라
@@ -572,10 +578,31 @@ HRESULT CRenderer::Render_Bloom()
 
     //최종 적용
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom")))) return E_FAIL;
-    m_pShader->Begin(4);
-    
-    m_pVIBuffer->Bind_Buffers();
-    m_pVIBuffer->Render();   
+     m_pShader->Begin(4);
+     
+     m_pVIBuffer->Bind_Buffers();
+     m_pVIBuffer->Render();   
+    return S_OK;
+}
+
+HRESULT CRenderer::Render_Height()
+{
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Height"))))
+        return E_FAIL;
+
+    for (auto& pRenderGameObject : m_RenderGameObjects[RG_HEIGHT])
+    {
+        if (nullptr != pRenderGameObject)
+                pRenderGameObject->Render_Height();
+
+        Safe_Release(pRenderGameObject);
+    }
+
+    m_RenderGameObjects[RG_HEIGHT].clear();
+
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Height"))))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -633,6 +660,9 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
+
+    _float2 WindowSize = {(_float)m_iWinSizeX,(_float) m_iWinSizeY};
+    m_pShader->Bind_RawValue("g_WinDowSize", &WindowSize, sizeof(_float2));
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_ShadeTexture", TEXT("Target_Shade"))))
         return E_FAIL;
@@ -701,6 +731,15 @@ HRESULT CRenderer::Render_Blend()
 
 HRESULT CRenderer::Render_UI()
 {
+
+     m_RenderGameObjects[RG_UI].sort(
+        [](CGameObject* pSour, CGameObject* pDest) -> _bool
+        {
+            return static_cast<CUI*>(pSour)->Get_fz() > static_cast<CUI*>(pDest)->Get_fz();
+        }); /// 알파 소팅
+
+    
+
     for (auto& pRenderGameObject : m_RenderGameObjects[RG_UI])
     {
         if (nullptr != pRenderGameObject)
@@ -740,8 +779,10 @@ HRESULT CRenderer::Render_Debug()
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_ShadowBG"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_444_Temp"), m_pShader, m_pVIBuffer);
-
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_44"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_444"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom"), m_pShader, m_pVIBuffer);
+ ;
     return S_OK;
 }
 

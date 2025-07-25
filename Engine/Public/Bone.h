@@ -9,6 +9,8 @@ private:
 	 ~CBone() = default;
 
 public:
+   HRESULT Initialize(HANDLE& hFile);
+
 	const _char* Get_Name() const {
 		return m_szName;
 	}
@@ -33,6 +35,10 @@ public:
 	_int Get_ParentBoneIndex() {
 		return m_iParentBoneIndex;
 	}
+
+
+
+
 
 public:
 	void Update_CombinedTransformationMatrix(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix);

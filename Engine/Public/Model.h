@@ -37,7 +37,7 @@ public:
 
     HRESULT Bind_Material_ShaderResource(class CShader* pShader, _uint iMeshIndex, aiTextureType eType, _uint iIndex,
                                          const _char* pConstantName);
-
+    HRESULT InsertAiTexture(aiTextureType eTextureType, _uint MashiIndex, const _tchar* Path);
 
     HRESULT Render(_uint iMeshIndex);
 
@@ -49,13 +49,13 @@ public:
     _float Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform, _vector* vPos);
 
     void init_Loop();
-    HRESULT Set_InstanceBuffer(vector<_matrix> vecObjMat);
+    HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
     void Center_Ext(_float3* Center, _float3* extend);
 
     void Callback(_uint AnimIdx, _int Duration, function<void()> func);
 
 public:
-    //   HRESULT Ready_Model(const _tchar* pModelFilePath);
+
     HRESULT Ready_AniModel(const _tchar* pModelFilePath);
 
 private:

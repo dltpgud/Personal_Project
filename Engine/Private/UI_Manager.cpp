@@ -6,69 +6,100 @@ CUI_Manager::CUI_Manager()
 {
 }
 
-HRESULT CUI_Manager::Initialize(_uint iNumLevels)
+HRESULT CUI_Manager::Initialize()
 {
-    m_iLevel = iNumLevels;
-
-    m_UIVec = new vector<class CUI*>[iNumLevels];
-
     return S_OK;
 }
 
-HRESULT CUI_Manager::Add_UI(CGameObject* pPrototype, _uint iLevelIndex)
+HRESULT CUI_Manager::Add_UI_To_Proto(const _wstring& strProtoTag, CGameObject* pUI)
 {
-    CUI* pUI = dynamic_cast<CUI*>(pPrototype);
-    if (pUI == nullptr)
+
+    CUI* UIObj = dynamic_cast<CUI*>(pUI);
+
+    WRITE_LOCK;
+    auto result = m_UIObj[UIOBJECT::UI_PROTO].emplace(strProtoTag, UIObj);
+
+    if (!result.second)
+    {
         return E_FAIL;
+    }
+    return S_OK;
+}
 
-    m_UIVec[iLevelIndex].push_back(pUI);
+HRESULT CUI_Manager::Add_UI_To_CLone(const _wstring& strCloneTag, const _wstring& strProtoTag, void* pArg)
+{
+
+    auto& ui = m_UIObj[UIOBJECT::UI_PROTO].find(strProtoTag);
+
+    CUI* UIObj = dynamic_cast<CUI*>(ui->second->Clone(pArg));
+
+    m_UIObj[UIOBJECT::UI_CLONE].emplace(strCloneTag, UIObj);
 
     return S_OK;
 }
+
+CUI* CUI_Manager::Find_Proto_UIObj(const _wstring& strProtoUITag)
+{
+
+     auto iter = m_UIObj[UIOBJECT::UI_PROTO].find(strProtoUITag);
+
+    if (iter == m_UIObj[UIOBJECT::UI_PROTO].end())
+        return nullptr;
+
+    return iter->second;
+}
+
+CUI* CUI_Manager::Find_Clone_UIObj(const _wstring& strCloneTag)
+{
+    auto iter = m_UIObj[UIOBJECT::UI_CLONE].find(strCloneTag);
+
+    if (iter == m_UIObj[UIOBJECT::UI_CLONE].end())
+        return nullptr;
+
+    return iter->second;
+}
+
 
 void CUI_Manager::Priority_Update(_float fTimeDelta)
 {
-    for (_uint i = 0; i < m_iLevel; i++)
+    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
     {
-        for (auto veciter = m_UIVec[i].begin(); veciter != m_UIVec[i].end();)
-        {
-            if ((*veciter)->Get_Update() == true)
-            {
-                int iResult = (*veciter)->Priority_Update(fTimeDelta);
-
-                if (OBJ_DEAD == iResult)
-                {
-
-                    Safe_Release((*veciter));
-                    veciter= m_UIVec[i].erase(veciter);
-                }
-            }
-            veciter++;
-        }
+        if (true == iter.second->Check_Update() && true == iter.second->Check_Level(m_iCurLevel))
+            iter.second->Priority_Update(fTimeDelta);
     }
 }
 
 void CUI_Manager::Update(_float fTimeDelta)
 {
-    for (_uint i = 0; i < m_iLevel; i++)
+ 
+    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
     {
-        for (auto& vec : m_UIVec[i])
-        {
-            if (vec->Get_Update() == true)
-                vec->Update(fTimeDelta);
-        }
+        if (true == iter.second->Check_Update() && true == iter.second->Check_Level(m_iCurLevel))
+            iter.second->Update(fTimeDelta);
     }
+   
 }
 
 void CUI_Manager::Late_Update(_float fTimeDelta)
 {
-    for (_uint i = 0; i < m_iLevel; i++)
+    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
     {
-        for (auto& vec : m_UIVec[i])
+        if (true == iter.second->Check_Update()&& true == iter.second->Check_Level(m_iCurLevel))
+                iter.second->Late_Update(fTimeDelta);
+    }
+}
+
+void CUI_Manager::Delete()
+{
+    for (auto& iter  = m_UIObj[UIOBJECT::UI_CLONE].begin(); iter != m_UIObj[UIOBJECT::UI_CLONE].end();)
+    {
+        if ((*iter).second && true == (*iter).second->Get_Dead())
         {
-            if (vec->Get_Update() == true)
-                vec->Late_Update(fTimeDelta);
+            Safe_Release((*iter).second);
+            iter = m_UIObj[UIOBJECT::UI_CLONE].erase(iter);
         }
+        else
+            iter++;
     }
 }
 
@@ -76,97 +107,83 @@ void CUI_Manager::Late_Update(_float fTimeDelta)
 
 void CUI_Manager::Clear(_uint iClearLevelID)
 {
-    for (auto& vec : m_UIVec[iClearLevelID]) { Safe_Release(vec); }
-    m_UIVec[iClearLevelID].clear();
-    m_UIVec[iClearLevelID].shrink_to_fit();
+  //for (auto iter = m_UIObj[UIOBJECT::UI_CLONE].begin(); iter != m_UIObj[UIOBJECT::UI_CLONE].end();)
+  //{
+  //    if ( true == (*iter).second->Check_Deleate(iClearLevelID-1))
+  //    {
+  //       Safe_Release((*iter).second);
+  //      iter = m_UIObj[UIOBJECT::UI_CLONE].erase(iter);
+  //    }
+  //    else
+  //        iter++;
+  //}
 }
 
 HRESULT CUI_Manager::Set_OpenUI(const _uint& uid, _bool open)
 {
-    for (size_t i = 0; i < m_iLevel; i++)
-    {
-        for (auto& vec : m_UIVec[i])
-        {
-            if (vec->Get_UIID() == uid)
-            {
-               vec->Set_Open(open);
-            }
-        }
-    }
+     for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+     {
+         if (iter.second->Get_UIID() == uid)
+         {
+                 iter.second->Set_Open(open);
+         }
+     }
+  
     return S_OK;
 }
 
 HRESULT CUI_Manager::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)
 {
-    for (size_t i = 0; i < m_iLevel; i++)
+   
+    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
     {
-        for (auto& vec : m_UIVec[i])
+        if (iter.second->Get_UIID() == Openuid)
         {
-            if (vec->Get_UIID() == Openuid)
-            {
-                vec->Set_Open(true);
-            }
+            iter.second->Set_Open(true);
+        }
 
-            if (vec->Get_UIID() == Cloaseduid)
-            {
-                vec->Set_Open(false);
-            }
+        if (iter.second->Get_UIID() == Cloaseduid)
+        {
+            iter.second->Set_Open(false);
         }
     }
+    
     return S_OK;
 }
 
 
-CGameObject* CUI_Manager::Get_UI(const _uint& iLevel, const _uint& uID)
-{
-    for (auto& vec : m_UIVec[iLevel])
-    {
-        if (vec->Get_UIID() == uID)
-        {
-            return vec;
-        }
-    }
 
-    return nullptr;
-}
 HRESULT CUI_Manager::Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY)
 {
-    for (size_t i = 0; i < m_iLevel; i++)
-    {
-        for (auto& vec : m_UIVec[i])
-        {
-            if (vec->Get_UIID() == uID)
-            {
-                vec->Set_UI_shaking(fShakingTime, fPowerX, fPowerY);
-     
-            }
-        }
-    }
+  
+     for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+     {
+         if (iter.second->Get_UIID() == uID)
+         {
+             iter.second->Set_UI_shaking(fShakingTime, fPowerX, fPowerY);
+         }
+     }
+  
     return S_OK;
 }
 
 HRESULT CUI_Manager::UI_shaking(const _uint& uID, _float fTimeDelta)
 {
-
-    for (size_t i = 0; i < m_iLevel; i++)
+    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
     {
-        for (auto& vec : m_UIVec[i])
+        if (iter.second->Get_UIID() == uID)
         {
-            if (vec->Get_UIID() == uID)
-            {
-                vec->UI_shaking(fTimeDelta);
-            }
-        }
+            iter.second->UI_shaking(fTimeDelta);
+         }
     }
-
     return S_OK;
 }
 
-CUI_Manager* CUI_Manager::Create(_uint iNumLevels)
+CUI_Manager* CUI_Manager::Create()
 {
     CUI_Manager* pInstance = new CUI_Manager();
 
-    if (FAILED(pInstance->Initialize(iNumLevels)))
+    if (FAILED(pInstance->Initialize()))
     {
         MSG_BOX("Failed to Created : CUI_Manager");
         Safe_Release(pInstance);
@@ -179,11 +196,9 @@ void CUI_Manager::Free()
 {
     __super::Free();
 
-    for (_uint i = 0; i < m_iLevel; i++)
-    {
-        for (auto& vec : m_UIVec[i]) { Safe_Release(vec); }
-        m_UIVec[i].clear();
-        m_UIVec[i].shrink_to_fit();
+    for (size_t i = 0; i < UIOBJECT::UI_END; i++)
+    {  
+       for (auto& iter : m_UIObj[i]) { Safe_Release(iter.second); }
+       m_UIObj[i].clear();
     }
-    Safe_Delete_Array(m_UIVec);
 }

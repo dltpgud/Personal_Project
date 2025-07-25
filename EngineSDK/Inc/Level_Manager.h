@@ -20,12 +20,7 @@ public:
 	HRESULT Render();
 	
 
-	HRESULT Load_to_Next_Map_terrain(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& type ,const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_Monster(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& ProtoTag, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
-	HRESULT Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _uint& strLayerTag, CGameObject* ProtoObj, const _uint& ProtoTag, const _tchar* strProtoMapPath = nullptr, void* Arg = nullptr);
+	
 	_uint Get_iCurrentLevel();
 	_bool IsOpenStage() { return OpenLevel; }
 	void Set_Open_Bool(_bool NextStage);

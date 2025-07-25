@@ -16,7 +16,7 @@ HRESULT CVIBuffer_Rect::Initialize_Prototype()
     m_iNumIndexices = 6;
     m_iNumVertexBuffers = 1;
     m_eIndexFormat = DXGI_FORMAT_R16_UINT; // 4바이트로 할꺼면 DXGI_FORMAT_R32_UINT
-    m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    m_ePrimitiveTopology =D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 #pragma region VERTEX_BUFFER
     // D3D11_BUFFER_DESC : 생성할 버퍼를 서술하는 구조체 - m_BufferDesc

@@ -61,9 +61,6 @@
     <Filter Include="02.GameObjects\04.UI\PlayerUI">
       <UniqueIdentifier>{d347b102-99ba-45c5-a2ce-234a9a58e045}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\04.UI\Menu">
-      <UniqueIdentifier>{e0565434-56fa-4b7c-b7c6-c109cad6c642}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\04.UI\Cursor">
       <UniqueIdentifier>{c7717531-c94b-4f53-b4e1-c89c77310c34}</UniqueIdentifier>
     </Filter>
@@ -90,9 +87,6 @@
     </Filter>
     <Filter Include="01.Level\01.GamePlay\Stage1">
       <UniqueIdentifier>{97a7f06e-cfc2-47a0-b47d-3e1b418352de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Level\01.GamePlay\Stage2">
-      <UniqueIdentifier>{6896a576-0f2d-45c0-b777-3cfbefe69db8}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\01. Map\Sky">
       <UniqueIdentifier>{c21e8047-4c3e-4eb5-8461-1008f3a2dc61}</UniqueIdentifier>
@@ -198,6 +192,12 @@
     </Filter>
     <Filter Include="98.Default\99.Defines">
       <UniqueIdentifier>{1192db2f-af15-4b8f-bc2a-55009419a294}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\Menu">
+      <UniqueIdentifier>{e0565434-56fa-4b7c-b7c6-c109cad6c642}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Level\01.GamePlay\Stage2">
+      <UniqueIdentifier>{6896a576-0f2d-45c0-b777-3cfbefe69db8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -461,9 +461,6 @@
     <ClCompile Include="..\Private\Aim.cpp">
       <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\JetFly.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\JetFly</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Body_JetFly.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\JetFly\Body</Filter>
     </ClCompile>
@@ -545,6 +542,9 @@
     <ClCompile Include="..\Private\Pade.cpp">
       <Filter>02.GameObjects\04.UI\Pade</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\JetFly.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\JetFly</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -579,9 +579,6 @@
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticlePoint.hlsl">
-      <Filter>97.ShaderFiles</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxParticleRect.hlsl">
       <Filter>97.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">

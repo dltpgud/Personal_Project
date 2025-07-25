@@ -18,12 +18,11 @@ private:
 	virtual ~CLevel_Loading() = default;
 
 public:
-	virtual HRESULT Initialize(LEVELID eNextLevelID, LOADINGID eLodingType);
+        virtual HRESULT Initialize(LEVELID eNextLevelID, _bool Page );
 	virtual void	Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
  
-	HRESULT Initialize_GORGE(const _uint& pLayerTag);
-	HRESULT Initialize_STAGE(const _uint& pLayerTag);
+
 private:
 	HRESULT			Ready_Clone_Layer(const _uint& pLayerTag);
 
@@ -31,11 +30,11 @@ private:
 	/*서브 스레드 생성에 필요한 변수들*/
 	class CLoader*				m_pLoader	   = { nullptr };
 	LEVELID						m_eNextLevelID = { LEVEL_END };
-	LOADINGID					m_eLodingType  = { LOADINGID_END };
+	
 	_float						 m_fTimeSum{};
-	_float     m_fFinishSum{};
+	_float                     m_fFinishSum{};
 public:
-	static CLevel_Loading* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVELID eNextLevelID, LOADINGID eLodingType = LOADINGID_END);
+	static CLevel_Loading* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVELID eNextLevelID, _bool Page = false);
 	virtual void Free() override;
 };
 

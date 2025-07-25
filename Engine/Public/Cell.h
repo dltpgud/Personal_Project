@@ -7,14 +7,13 @@ BEGIN(Engine)
 class CCell final : public CBase
 {
 public:
-	enum POINT { POINT_A, POINT_B, POINT_C, POINT_END };
+	enum POINT  { POINT_A, POINT_B, POINT_C, POINT_END };
     enum LINE   { LINE_AB, LINE_BC, LINE_CA, LINE_END};
-	enum TYPE   {NOMAL,NOMOVE, FALL,SAFE,DEMAGE, TYPE_END};
+	enum TYPE   { NOMAL, NOMOVE, FALL,SAFE,DEMAGE, TYPE_END};
 private:
 	CCell(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CCell() = default;
 	
-
 public:
 	_vector Get_Point(POINT ePoint) const {
 		return XMLoadFloat3(&m_vPoints[ePoint]);
@@ -27,15 +26,24 @@ public:
 	void Set_Type(const _uint& type) {
 		m_Type = static_cast <TYPE>(type);
 	}
+   _bool Find_TargetCell(_vector WorldPos);
 
 	_uint Get_Type(){
 		return m_Type;
 	}
 
-public:
+    _vector GetCenter() const;
+
+    public:
 	HRESULT Initialize(const _float3* pPoints, _uint iIndex, const _uint& Type);
     _bool isIn(_fvector vAfterLocalPos, _fvector vBeforeLocalPos, _int* pNeighborIndex, _vector* Slide =nullptr);
 	_bool Compare_Points(_fvector vSour, _fvector vDest);
+    _int Get_Neighbors(_int i) const
+        {
+       return m_iNeighbors[i];
+    }
+
+
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render();

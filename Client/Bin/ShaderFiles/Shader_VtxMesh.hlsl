@@ -129,109 +129,19 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
 }
 
 
-
-PS_OUT PS_MAKATOON(PS_IN In)
-{
-    PS_OUT Out = (PS_OUT) 0;
-	
-	
-    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-
-    if (vMtrlDiffuse.a <= 0.3f)
-        discard;
-
-    Out.vDiffuse = vMtrlDiffuse;
-
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
-   // float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
-   // float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
-   // float4 vLook = In.vWorldPos - g_vCamPosition;
-   // float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
-   //
-   // float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-   //
-   // // 조명 계산
-   // float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir)*-1));
-   //
-   // // 카툰 효과를 위한 색상 임계값
-   // float3 finalColor;
-   // if (NdotL > 0.2)
-   // {
-   //     finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
-   // }
-   // else
-   // {
-   //     finalColor = vMtrlDiffuse.rgb * float3(0.95, 0.95, 0.95); // 음영 색상
-   // }
-   //
-   // Out.vColor = float4(finalColor * g_vLightDiffuse, vMtrlDiffuse.a) * saturate(vShade);
-   //// +(g_vLightSpecular * g_vMtrlSpecular) * fSpecular; // 최종 색상 반환
-    Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
-    return Out;
-}
-
-
 struct PS_OUT_LIGHTDEPTH
 {
     vector vLightDepth : SV_TARGET0;
 };
 
-PS_OUT PS_MAKATOON_ICON(PS_IN In)
-{
-    PS_OUT Out = (PS_OUT) 0;
-	
-    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
 
-    if (vMtrlDiffuse.a <= 0.3f)
-        discard;
-
-    Out.vDiffuse = vMtrlDiffuse;
-
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
-    
-    //float4 vShade = max(dot(normalize(g_vLightDir) * -1, normalize(In.vNormal)), 0.0f) + (g_vLightAmbient * g_vMtrlAmbient);
-    //float4 vReflect = reflect(normalize(g_vLightDir), normalize(In.vNormal));
-    //float4 vLook = In.vWorldPos - g_vCamPosition;
-    //float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
-	//
-    //float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-    //
-    //
-    //float4 rimColor = { 0.5f, 0.5f, 0.5f, 0.5f };
-    //float rim = { 0.f };
-	//
-    //    rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
-    //    rim = pow(1 - rim, 1000);
-    //// 조명 계산
-    //float NdotL = max(0, dot(normalize(In.vNormal), normalize(g_vLightDir) * -1));
-    //
-    //// 카툰 효과를 위한 색상 임계값
-    //float3 finalColor;
-    //if (NdotL > 0.2)
-    //{
-    //    finalColor = vMtrlDiffuse.rgb * float3(1.0, 1.0, 1.0); // 하이라이트 색상
-    //}
-    //else
-    //{
-    //    finalColor = vMtrlDiffuse.rgb * float3(0.95, 0.95, 0.95); // 음영 색상
-    //}
-    //
-    //Out.vColor = float4(finalColor * g_vLightDiffuse, vMtrlDiffuse.a) * saturate(vShade); //+(rim * rimColor); // 최종 색상 반환
-    Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
-    return Out;
-}
 
 PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
 	
     Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+   // Out.vLightDepth = vector(In.vProjPos.z / g_fCamFar,0.f, 0.f, 0.f);
 
     return Out;
 }
@@ -388,9 +298,6 @@ PS_OUT PS_LASER(PS_IN In)
 }
 
 
-
-
-
 technique11 DefaultTechnique
 {
     pass DefaultPass
@@ -487,4 +394,5 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LASER();
 
     }
+ 
 }

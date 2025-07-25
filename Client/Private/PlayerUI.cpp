@@ -17,27 +17,25 @@ HRESULT CPlayerUI::Initialize_Prototype()
 
 HRESULT CPlayerUI::Initialize(void* pArg)
 {
-    CUI_DESC Desc{};
+    CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
-    Desc.fX = 145.f;
-    Desc.fY = 640.f;
-    Desc.fSizeX = 450.f;
-    Desc.fSizeY = 150.f;
-    Desc.UID = CUI::UIID_PlayerHP;
+    pDesc->fX = 145.f;
+    pDesc->fY = 640.f;
+    pDesc->fSizeX = 450.f;
+    pDesc->fSizeY = 150.f;
+    pDesc->UID = CUI::UIID_PlayerHP;
+    pDesc->Update = true;
+       pDesc->fSpeedPerSec = 0.f;
+    pDesc->fRotationPerSec = 0.f;
 
-    Desc.Update = true;
-
-    Desc.fSpeedPerSec = 0.f;
-    Desc.fRotationPerSec = 0.f;
-
-    if (FAILED(__super::Initialize(&Desc)))
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
-    m_pTransformCom->Set_Scaling(Desc.fSizeX, Desc.fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::TRANSFORM_POSITION,
-                                   XMVectorSet(Desc.fX - g_iWinSizeX * 0.5f, -Desc.fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
+    m_pTransformCom->Set_Scaling(pDesc->fSizeX, pDesc->fSizeY, 1.f);
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
+                                   XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
-    m_fPrXPos = Desc.fX;
-    m_fPrYPos = Desc.fY;
+    m_fPrXPos = pDesc->fX;
+    m_fPrYPos = pDesc->fY;
     if (FAILED(Add_Components()))
         return E_FAIL;
 
@@ -46,10 +44,8 @@ HRESULT CPlayerUI::Initialize(void* pArg)
     return S_OK;
 }
 
-_int CPlayerUI::Priority_Update(_float fTimeDelta)
+void CPlayerUI::Priority_Update(_float fTimeDelta)
 {
-    if (m_bDead)
-        return OBJ_DEAD;
   if (m_IsShaking) {
       if (m_fShakingTime > 0.f)
       {
@@ -63,8 +59,6 @@ _int CPlayerUI::Priority_Update(_float fTimeDelta)
           m_fY = m_fPrYPos;
       }
   }
-
-    return OBJ_NOEVENT;
 }
 
 void CPlayerUI::Update(_float fTimeDelta)
@@ -94,9 +88,12 @@ HRESULT CPlayerUI::Render()
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Float("g_hp", m_fHP / m_fMaxHP)))
+    _float Cur = m_fHP / m_fMaxHP;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_hp", &Cur, sizeof(_float))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Float("g_hp_pluse", m_fHP_Pluse)))
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_hp_pluse", &m_fHP_Pluse, sizeof(_float))))
         return E_FAIL;
     
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))

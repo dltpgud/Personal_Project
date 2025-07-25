@@ -34,13 +34,9 @@ HRESULT CBody_Player::Initialize(void* pArg)
 	return S_OK;
 }
 
-_int CBody_Player::Priority_Update(_float fTimeDelta)
+void CBody_Player::Priority_Update(_float fTimeDelta)
 {
-	if (m_bDead)
-		return OBJ_DEAD;
 
-
-	return OBJ_NOEVENT;
 }
 
 void CBody_Player::Update(_float fTimeDelta)

@@ -25,6 +25,8 @@ public:
 
     HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 
+    	_bool isComputeHeight(_fvector vTargetPos, _float3* pOut);
+
     _vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
     _float  Compute_Random_Normal();
     _float  Compute_Random(_float fMin, _float fMax);

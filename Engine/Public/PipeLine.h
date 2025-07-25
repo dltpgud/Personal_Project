@@ -29,12 +29,10 @@ public:
         return XMLoadFloat4x4(&m_TransMatrixInverse[eState]);
     }
 
-
     _matrix Get_TransformMatrix(TRANSFORM_STATE eState)
     {
         return XMLoadFloat4x4(&m_TransMatrix[eState]); // 연산용
     }
-
 
     const _float4x4* Get_ShadowTransformFloat4x4(TRANSFORM_STATE eState)
     {
@@ -46,11 +44,15 @@ public:
         return XMLoadFloat4x4(&m_ShadowTransMatrix[eState]); // 연산용
     }
 
+    void Set_Camfar(_float fFar)
+    {
+        m_vCamfar = fFar;
+    }
+
     const _float* Get_Camfar()
     {
         return &m_vCamfar;
     }
-
 
     const _float4* Get_CamPosition()
     {
@@ -83,6 +85,8 @@ private:
     _float4 m_vCamLook;
     _float m_vCamfar;
     _float4x4 m_ShadowTransMatrix[D3DTS_END];
+
+
 public:
     static CPipeLine* Create();
     virtual void Free() override;
