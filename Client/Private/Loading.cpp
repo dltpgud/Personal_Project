@@ -13,8 +13,6 @@ CLoading::CLoading(const CLoading& Prototype)
 
 HRESULT CLoading::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
@@ -32,14 +30,12 @@ HRESULT CLoading::Initialize(void* pArg)
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 	m_fFirstX = m_fX;
+
 	if (FAILED(Add_Components()))
 		return E_FAIL;
 
-
-
 	if (FAILED(Set_LoadPos(Desc)))
 		return E_FAIL;
-
 
 	return S_OK;
 }
@@ -51,14 +47,12 @@ void CLoading::Priority_Update(_float fTimeDelta)
 void CLoading::Update(_float fTimeDelta)
 {
     m_pTransformCom->Go_Move(CTransform::LEFT, fTimeDelta);
-
 }
 
 void CLoading::Late_Update(_float fTimeDelta)
 {
 	_float3 vPos{};
 	XMStoreFloat3(&vPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
-
 
 	if (vPos.x < m_fFirstX *-2) {
 
@@ -72,11 +66,9 @@ void CLoading::Late_Update(_float fTimeDelta)
 
 HRESULT CLoading::Render()
 {
-
-
 	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
 		return E_FAIL;
-	;
+	
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
 		return E_FAIL;
 
@@ -96,8 +88,6 @@ HRESULT CLoading::Render()
 	return S_OK;
 }
 
-
-
 HRESULT CLoading::Set_LoadPos(CLoading_DESC* pArg)
 {
 	Desc.UID = pArg->UID;
@@ -106,25 +96,19 @@ HRESULT CLoading::Set_LoadPos(CLoading_DESC* pArg)
 	Desc.fZ = pArg->fZ;
 	Desc.fSizeX = pArg->fSizeX;
 	Desc.fSizeY = pArg->fSizeY;
-
 	Desc.Update = true;
-
 	Desc.fSpeedPerSec = pArg->fSpeedPerSec;
 	Desc.TexIndex = pArg->TexIndex;
 
 	return S_OK;
 }
 
-
-
 HRESULT CLoading::Add_Components()
 {
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
  	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBufferRoop"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;
@@ -134,10 +118,7 @@ HRESULT CLoading::Add_Components()
                                           reinterpret_cast<CComponent**>(&m_pTextureCom))))
        return E_FAIL;
 
-	
-	
 	return S_OK;
-
 }
 
 CLoading* CLoading::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

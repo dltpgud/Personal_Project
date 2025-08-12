@@ -13,8 +13,6 @@ CSpriteTexture::CSpriteTexture(const CSpriteTexture& Prototype)
 
 HRESULT CSpriteTexture::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
@@ -103,18 +101,14 @@ HRESULT CSpriteTexture::Add_Components()
 {
 	HRESULT hr = {};
 
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
  	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBufferRoop"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;
 
-
-	/* For.Com_Texture */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, m_wKey, TEXT("Com_Texture_Load_Canyon"),
                                                    reinterpret_cast<CComponent**>(&m_pTextureCom))))
                   return E_FAIL;

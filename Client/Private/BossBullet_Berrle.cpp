@@ -47,7 +47,7 @@ void CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
 
     __super::Priority_Update(fTimeDelta);
     
-    if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
+    if (m_pParentState == CBillyBoom::ST_DEAD)
         m_bDead = true;
 
     if (m_fScale == 6.f)

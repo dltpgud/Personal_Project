@@ -14,18 +14,13 @@ CMenu::CMenu(const CMenu& Prototype)
 
 HRESULT CMenu::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
 HRESULT CMenu::Initialize(void* pArg)
 {	
-	
  CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
-
       pDesc->Update = true;
-
 	  pDesc->UID = UIID_Menu;
 	if (FAILED(__super::Initialize(pDesc)))
 		 return E_FAIL;
@@ -76,10 +71,7 @@ void CMenu::Update(_float fTimeDelta)
 			{
 				Desc[i].Update = false;
 			}
-		
-	
 	}
-		
 }
 
 void CMenu::Late_Update(_float fTimeDelta)
@@ -94,8 +86,10 @@ HRESULT CMenu::Render()
 	
 	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
 		return E_FAIL;
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+        return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		return E_FAIL;
 
@@ -112,6 +106,7 @@ HRESULT CMenu::Render()
 
 		if (false == Desc[i].Update)
                 continue;
+		
 		Set_UI_Pos(&Desc[i]);
 
         if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
@@ -168,21 +163,14 @@ HRESULT CMenu::Set_MenuPos()
 
 HRESULT CMenu::Add_Components()
 {
-	/* 멤버변수로 직접 참조를 하게되면 */
-	/* 1. 내가 내 컴포넌트를 이용하고자할 때 굳이 검색이 필요없이 특정 멤버변수로 바로 기능을 이용하면 된다. */
-	/* 2. 다른 객체가 내 컴포넌트를 검색하고자 할때 스위치케이스가 겁나 늘어나는 상황. */
-
-	/* For.Com_Texture */
 	if (FAILED(__super::Add_Component(LEVEL_MENU, TEXT("Prototype_Component_Texture_Menu"),
-		TEXT("Com_Texture_Menu"), reinterpret_cast<CComponent**>(&m_pTextureCom))))  // 다이나믹 캐스팅도 스타틱 캐스팅도 할 수  없는 상황.
+		TEXT("Com_Texture_Menu"), reinterpret_cast<CComponent**>(&m_pTextureCom)))) 
 		return E_FAIL;
 
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;

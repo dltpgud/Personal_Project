@@ -1,3 +1,4 @@
+#include "Monster.h"
 #include "stdafx.h"
 #include "Monster.h"
 

@@ -2,6 +2,7 @@
 #include "Base.h"
 
 BEGIN(Engine)
+
 class CAnimation : public CBase
 {
 private:
@@ -15,6 +16,8 @@ public:
 	void init_Loop(const vector<class CBone*>& Bones);
     void Callback(_int Duration, function<void()> func);
     void Run_CallbackFunc(_int Duration);
+
+
 private:
 	_char					m_szName[MAX_PATH] = {};
     _float					m_fDuration = {0.f}; // 애니메이션의 총 클립길이
@@ -31,11 +34,11 @@ private:
 
 	vector<KEYFRAME>        m_vLastKeyFrame; // 마지막 키프레임 
 
-	unordered_map<_int, vector<function<void()>>> m_CallbackFunc;
      _float m_fCurrentPosition = {0.f};// 현재 애니메이션 진행 위치
-    
+     unordered_map < _int, vector < function<void()>>> m_CallbackFunc;
+     unordered_set<_int> m_CallbackCheck;
 
-public:
+ public:
 	static CAnimation* Create(HANDLE& hFile);
 	CAnimation* Clone();
 	virtual void Free() override;

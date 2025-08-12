@@ -1,11 +1,6 @@
 ﻿#pragma once
-
 #include "GameObject.h"
 #include "Layer.h"
-/* 1. 원형객체를 보관한다. */
-/* 2. 원형객체를 찾아서 복제하여 사본객체를 레이어별로 구분하여 보관한다. */
-/* 3. 보관하고 있는 사본 객체들의 반복적인 갱신 작업도 수행해준다. */
-
 
 BEGIN(Engine)
 class CObject_Manager final : public CBase
@@ -16,49 +11,40 @@ private:
 
 public:
 	HRESULT Initialize(_uint iNumLevels);
-	/*원본을 추가한다*/
 	HRESULT Add_Prototype(const _wstring& strPrototypeTag, class CGameObject* pPrototype);
-	void Priority_Update(_float fTimeDelta);
-	void Update(_float fTimeDelta);
-	void Late_Update(_float fTimeDelta);
-        void Delete();
-	/*씬 파괴를 위한 함수*/
-	void Clear(_uint iClearLevelID);
-
-	/*사본을 레이어에 추가 한다.*/
-        HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& strLayerTag, CGameObject* clone);
+	void    Priority_Update(_float fTimeDelta);
+	void    Update(_float fTimeDelta);
+	void    Late_Update(_float fTimeDelta);
+    void    Delete();
+	void    Clear(_uint iClearLevelID);
+    HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& strLayerTag, CGameObject* clone);
 	
-
-	/*원본을 탐색한다*/
-	class CGameObject* Find_Prototype(const _wstring& strPrototypeTag); 
-	class CGameObject* Find_CloneGameObject(_uint iLevelIndex, const _wstring& strLayerTag, const _uint& ProtoTag);
+	class CGameObject*                      Find_Prototype(const _wstring& strPrototypeTag); 
+	class CGameObject*                      Find_CloneGameObject(_uint iLevelIndex, const _wstring& strLayerTag, const _uint& ProtoTag);
 	map<const _wstring, class CGameObject*> Get_ProtoObject_map() { return  m_Prototypes; }
-	class CGameObject* Clone_Prototype(const _wstring& strPrototypeTag, void* pArg);
+	class CGameObject*                      Clone_Prototype(const _wstring& strPrototypeTag, void* pArg);
 
-	void Set_Player(const _wstring& ProtoTag, void* pArg);
-        CGameObject* Get_Player()
-        {
-            return m_pPlayer;
-        }
-
-    private:
-	/*레이어를 탐색한다*/
-	class CLayer* Find_Layer(_uint iLevelIndex, const _wstring& strLayerTag);
-	
-public: /*편집씬을 위한 함수*/
-        _bool IsGameObject(_uint iLevelIndex, const _wstring& strLayerTag);
-	CGameObject::PICKEDOBJ_DESC Pking_onMash(_vector RayPos, _vector RayDir);
-        CGameObject* Recent_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
-        list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
+	void                                    Set_Player(const _wstring& ProtoTag, void* pArg);
+    CGameObject*                            Get_Player(){return m_pPlayer;}
 
 private:
+	class CLayer*                           Find_Layer(_uint iLevelIndex, const _wstring& strLayerTag);
+	
+public: 
+    _bool                                   IsGameObject(_uint iLevelIndex, const _wstring& strLayerTag);
+	CGameObject::PICKEDOBJ_DESC             Pking_onMash(const _uint& Level, const _wstring& Layer, _vector RayPos, _vector RayDir);
+    CGameObject*                            Recent_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
+   list<class CGameObject*>                 Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
+
+private:
+
     USE_LOCK;
 	map<const _wstring, class CGameObject*>				m_Prototypes;
-    map<const _wstring, class CLayer*>* m_pLayers = {nullptr};
+    map<const _wstring, class CLayer*>*                 m_pLayers = {nullptr};
 	_uint												m_iNumLevels = { 0 };
-        CGameObject* m_pPlayer{};
+    CGameObject*                                        m_pPlayer ={nullptr};
 
-    public:
+public:
 	static CObject_Manager* Create(_uint iNumLevels);
 	virtual void			Free() override;
 };

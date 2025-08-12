@@ -82,29 +82,11 @@
     <Filter Include="01.Utility\06.Light\Manager">
       <UniqueIdentifier>{02a049ef-107e-46ca-9685-b958cbb65e81}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\04.Component\Model">
-      <UniqueIdentifier>{04a8714c-9747-4d38-9038-4e5f1a636461}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Model\Mesh">
-      <UniqueIdentifier>{dccaaa3e-1f77-425e-885a-65c8fcef6ece}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Model\Material">
-      <UniqueIdentifier>{fd633d72-bcc4-4d7d-8619-4ea035aa1f97}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Utility\07. Calculator">
       <UniqueIdentifier>{5158e39f-7ab4-44ae-9f73-fe7600877589}</UniqueIdentifier>
     </Filter>
     <Filter Include="01.Utility\02.GameObjects\Camera">
       <UniqueIdentifier>{da3b3cd7-3a5d-4833-86a3-5ab4fa4bb42a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Model\Bone">
-      <UniqueIdentifier>{f4f48f79-4540-48d8-84ce-df19ea23fa10}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Model\Animation">
-      <UniqueIdentifier>{c02d83d7-6527-4027-bd37-01cacc6f8b85}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Utility\04.Component\Model\Channel">
-      <UniqueIdentifier>{af517dd5-d5f0-431c-8b7f-a0adcfcba9cb}</UniqueIdentifier>
     </Filter>
     <Filter Include="01.Utility\04.Component\VIBuffer\Cell">
       <UniqueIdentifier>{3ad739b4-759a-40df-acbd-116449fa956f}</UniqueIdentifier>
@@ -192,6 +174,24 @@
     </Filter>
     <Filter Include="01.Utility\04.Component\Manager">
       <UniqueIdentifier>{f23ab11d-bdef-4a46-ba75-ec5b87d49916}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Model">
+      <UniqueIdentifier>{04a8714c-9747-4d38-9038-4e5f1a636461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Model\Mesh">
+      <UniqueIdentifier>{dccaaa3e-1f77-425e-885a-65c8fcef6ece}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Model\Material">
+      <UniqueIdentifier>{fd633d72-bcc4-4d7d-8619-4ea035aa1f97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Model\Bone">
+      <UniqueIdentifier>{f4f48f79-4540-48d8-84ce-df19ea23fa10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Model\Animation">
+      <UniqueIdentifier>{c02d83d7-6527-4027-bd37-01cacc6f8b85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Model\Channel">
+      <UniqueIdentifier>{af517dd5-d5f0-431c-8b7f-a0adcfcba9cb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -384,9 +384,6 @@
     <ClInclude Include="..\Public\QuadTree.h">
       <Filter>01.Utility\04.Component\VIBuffer\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\BlendObject.h">
-      <Filter>01.Utility\02.GameObjects</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\ThreadPool.h">
       <Filter>00.System\Thread</Filter>
     </ClInclude>
@@ -574,9 +571,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\QuadTree.cpp">
       <Filter>01.Utility\04.Component\VIBuffer\Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BlendObject.cpp">
-      <Filter>01.Utility\02.GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ThreadPool.cpp">
       <Filter>00.System\Thread</Filter>

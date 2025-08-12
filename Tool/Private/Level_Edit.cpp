@@ -1924,7 +1924,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             m_pGameInstance->Make_Ray( m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                                       m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
                                       
-            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(LEVEL_EDIT, TEXT("Layer_Map"), RayPos, RayDir);
 
             if (Desc.pPickedObj)
             {
@@ -2097,7 +2097,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         m_pGameInstance->Make_Ray( m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                                   m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
 
-        CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+        CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(LEVEL_EDIT, TEXT("Layer_Map"), RayPos, RayDir);
 
         if (Desc.pPickedObj)
         {
@@ -2160,7 +2160,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             m_pGameInstance->Make_Ray( m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                                       m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
 
-            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+            CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(LEVEL_EDIT, TEXT("Layer_Map"), RayPos, RayDir);
 
             if (Desc.pPickedObj)
             {
@@ -2280,7 +2280,7 @@ void CLevel_Edit::Picking_Cell(_uint i)
     _float fMashDis{0xffff};
     m_pGameInstance->Make_Ray( m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir);
-    CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(RayPos, RayDir);
+    CGameObject::PICKEDOBJ_DESC Desc = m_pGameInstance->Pking_onMash(LEVEL_EDIT, TEXT("Layer_Map"), RayPos, RayDir);
 
     _float fDist{};
 

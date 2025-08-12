@@ -20,12 +20,6 @@ float g_fCamFar;
 bool g_bDoorEmissive;
 texture2D g_maskTexture;
 
-
-//float Time; // 시간 값
-//float RingRadius; // 초기 반지름 R
-//float GrowthRate;
-//
-
 struct VS_INST
 {
     float3 vPosition : POSITION;
@@ -57,7 +51,7 @@ VS_OUTINST VSINST_MAIN(VS_INST In)
 {
     VS_OUTINST Out = (VS_OUTINST) 0;
     
-    float4x4 WorldMatrix = float4x4(In.vRight, In.vUp, In.vLook, In.vPos); //월드매트릭스 만들기
+    float4x4 WorldMatrix = float4x4(In.vRight, In.vUp, In.vLook, In.vPos); 
     
     vector vPosition = mul(float4(In.vPosition, 1.f), WorldMatrix);
     vPosition = mul(vPosition, g_ViewMatrix);
@@ -90,7 +84,6 @@ struct PS_IN
 
 struct PS_OUT
 {
-	/* 변수에 대한 시멘틱을 정의한다. */
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
@@ -111,7 +104,6 @@ PS_OUT PS_MAIN(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
@@ -132,7 +124,6 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
     
     Out.vDiffuse = vMtrlDiffuse;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);

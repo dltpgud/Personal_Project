@@ -73,23 +73,21 @@ void CTerrain::Late_Update(_float fTimeDelta)
 }
 
 HRESULT CTerrain::Render()
-{
-    
+{ 
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    if (FAILED(
-        m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-        m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
+
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
         return E_FAIL;
-
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_onEmissive", &m_bFire, sizeof(_int))))
             return E_FAIL;
@@ -112,10 +110,9 @@ void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 
 void CTerrain::Set_Buffer(_uint x, _uint y)
 {
-    m_pSize[0] = x;              // Terrain의 X개수
-    m_pSize[1] =  y; // Terrain의  Z개수
+    m_pSize[0] = x;             
+    m_pSize[1] =  y; 
 
-   // 쿼드 트리의 2의n승 + 1의 규칙은 경계 이음매 문제 때문에 이웃하는 LOD와 연결할 수 있는 정점 부족해지는 문제때문에 검사한번하자.
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
     {
         m_pVIBufferCom->DYNAMIC_Set_Buffer(m_pSize[0], m_pSize[1]);
@@ -130,15 +127,16 @@ HRESULT CTerrain::Render_Shadow()
 {
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
+
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",
-                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",
-                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
+
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
@@ -178,16 +176,13 @@ void CTerrain::Set_Scalra_float(_float scalra)
 
 HRESULT CTerrain::Add_Components()
 {
-
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxNorTex"), TEXT("Com_Shader"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxNorTex"), TEXT("Com_Shader"),
         reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Terrain"), TEXT("Com_Buffer"),
         reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
-
-    /* For.Com_Navigation */
 
     if (true == m_bMain)
     {

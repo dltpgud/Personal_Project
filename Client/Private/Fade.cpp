@@ -1,74 +1,82 @@
 ﻿#include "stdafx.h"
-#include "Pade.h"
+#include "Fade.h"
 #include "GameInstance.h"
 #include "Level_Loading.h"
 
-CPade::CPade(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{pDevice, pContext}
+CFade::CFade(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{pDevice, pContext}
 {
 }
 
-CPade::CPade(const CPade& Prototype)
+CFade::CFade(const CFade& Prototype)
 	: CUI{ Prototype }
 {
 }
 
-HRESULT CPade::Initialize_Prototype()
+HRESULT CFade::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
-HRESULT CPade::Initialize(void* pArg)
+HRESULT CFade::Initialize(void* pArg)
 {	
     CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
-	  pDesc->UID = UIID_Pade;
+	  pDesc->UID = UIID_Fade;
       pDesc->fX = g_iWinSizeX * 0.5f;
       pDesc->fY = g_iWinSizeY * 0.5f;
-      pDesc->fZ =0.f;
+      pDesc->fZ =0.01f;
       pDesc->fSizeX = g_iWinSizeX;
       pDesc->fSizeY = g_iWinSizeY;
-          if (FAILED(__super::Initialize(pDesc)))
-		 return E_FAIL;
 
+    if (FAILED(__super::Initialize(pDesc)))
+		 return E_FAIL;
+       
 	if (FAILED(Add_Components()))
 		return E_FAIL;
+
+	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
+        m_pTransformCom->Set_TRANSFORM(
+            CTransform::T_POSITION,
+            XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 	return S_OK;
 }
 
-void CPade::Priority_Update(_float fTimeDelta)
+void CFade::Priority_Update(_float fTimeDelta)
 {
-;
+
 }
 
-void CPade::Update(_float fTimeDelta)
+void CFade::Update(_float fTimeDelta)
 {
-if(true ==	m_bSetPade) 
-	m_fTimeSum += fTimeDelta*1.5f;
-else if (false == m_bSetPade)
-    m_fTimeSum -= fTimeDelta*1.5f;
-
-   if (m_fTimeSum >= 1.f)
-      m_fTimeSum = 1.f;
+    if(true ==	m_bSetPade) 
+    	m_fTimeSum += fTimeDelta * 1.5f;
+    else if (false == m_bSetPade)
+       m_fTimeSum -= fTimeDelta*1.5f;
+    
+    if(m_fTimeSum >= 1.f)
+       m_fTimeSum = 1.f;
 }
 
-void CPade::Late_Update(_float fTimeDelta)
+void CFade::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
 				return;
 }
 
-HRESULT CPade::Render()
+HRESULT CFade::Render()
 {
 	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
 		return E_FAIL;
+
 	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
 		return E_FAIL;
 
@@ -78,11 +86,10 @@ HRESULT CPade::Render()
 
 	m_pVIBufferCom->Render();
 
-
 	return S_OK;
 }
 
-_bool CPade::FinishPade()
+_bool CFade::FinishPade()
 {
 	if (m_fTimeSum == 0.f)
 		return true;
@@ -95,23 +102,16 @@ _bool CPade::FinishPade()
 
 
 
-HRESULT CPade::Add_Components()
+HRESULT CFade::Add_Components()
 {
-	/* 멤버변수로 직접 참조를 하게되면 */
-	/* 1. 내가 내 컴포넌트를 이용하고자할 때 굳이 검색이 필요없이 특정 멤버변수로 바로 기능을 이용하면 된다. */
-	/* 2. 다른 객체가 내 컴포넌트를 검색하고자 할때 스위치케이스가 겁나 늘어나는 상황. */
-
-	/* For.Com_Texture */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Pade"),
-		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))  // 다이나믹 캐스팅도 스타틱 캐스팅도 할 수  없는 상황.
+		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))  
 		return E_FAIL;
 
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;
@@ -119,9 +119,9 @@ HRESULT CPade::Add_Components()
 	return S_OK;
 }
 
-CPade* CPade::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CFade* CFade::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CPade* pInstance = new CPade(pDevice, pContext);
+	CFade* pInstance = new CFade(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
@@ -132,9 +132,9 @@ CPade* CPade::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	return pInstance;
 }
 
-CGameObject* CPade::Clone(void* pArg)
+CGameObject* CFade::Clone(void* pArg)
 {
-	CPade* pInstance = new CPade(*this);
+	CFade* pInstance = new CFade(*this);
 
 	if (FAILED(pInstance->Initialize(pArg)))
 	{
@@ -145,7 +145,7 @@ CGameObject* CPade::Clone(void* pArg)
 	return pInstance;
 }
 
-void CPade::Free()
+void CFade::Free()
 {
 	__super::Free();
 

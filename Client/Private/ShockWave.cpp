@@ -14,7 +14,7 @@ CShockWave::CShockWave(const CShockWave& Prototype)
 
 HRESULT CShockWave::Initialize_Prototype()
 {
-	/* 패킷, 파일입ㅇ출력을 통한 초기화. */
+
 
 	return S_OK;
 }
@@ -95,13 +95,11 @@ HRESULT CShockWave::Render()
 
 HRESULT CShockWave::Add_Components()
 {
-	/* For.Com_Model */
+	
 	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto_Component_ShockWave"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
 		return E_FAIL;
 
-
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
 		reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;

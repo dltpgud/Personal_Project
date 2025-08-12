@@ -89,7 +89,7 @@ HRESULT CVIBuffer::Create_Buffer(ID3D11Buffer** ppOut)
 void CVIBuffer::Free()
 {
     __super::Free();
-    //if (false == m_bClone)
+
         Safe_Delete_Array(m_pVertexPositions);
 
 

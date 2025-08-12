@@ -30,7 +30,7 @@ HRESULT CWeaPonIcon::Initialize(void* pArg)
         return E_FAIL;
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
-
+    Safe_AddRef(m_InteractiveUI);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 1.f, 0.f, 1.f));
 
     return S_OK;
@@ -57,12 +57,12 @@ void CWeaPonIcon::Update(_float fTimeDelta)
         case CWeapon::WeaPoneType::HeavyCrossbow: m_pWeaPonNumName = L"Heavy Crossbow ÀåÂø"; break;
         }
         m_InteractiveUI->Set_Text(m_pWeaPonNumName);
-        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_InteractiveUI, CUI::UIID_PlayerWeaPon_Aim);
+        m_pGameInstance->Set_OpenUI_Inverse(UIID_InteractiveUI, UIID_PlayerWeaPon_Aim);
     }
     else if (false == m_pColliderCom->IsColl() && true == m_bIsColl)
     {
         m_bIsColl = false;
-        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim, CUI::UIID_InteractiveUI);
+        m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
     }
 
     if (true == m_InteractiveUI->Get_Interactive() && true == m_pColliderCom->IsColl())
@@ -70,7 +70,7 @@ void CWeaPonIcon::Update(_float fTimeDelta)
         static_cast<CWeaponUI*>(m_pGameInstance->Find_Clone_UIObj(L"WeaponUI"))->Set_ScecondWeapon(m_weaPon);
         m_bDead = true;
         m_InteractiveUI->Set_Interactive(false);
-        m_pGameInstance->Set_OpenUI_Inverse(CUI::UIID_PlayerWeaPon_Aim,CUI::UIID_InteractiveUI);
+        m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim,UIID_InteractiveUI);
     }
 }
 
@@ -130,7 +130,7 @@ HRESULT CWeaPonIcon::Add_Components()
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
 
     _float3 Center{}, Extents{};
-    OBBDesc.vExtents = _float3(4.f, 1.f, 4.f);
+    OBBDesc.vExtents = _float3(6.f, 1.f, 6.f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = {0.f, 0.f, 0.f};
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
@@ -192,4 +192,5 @@ void CWeaPonIcon::Free()
 
     for (_uint i = 0; i < CWeapon::WeaPoneType_END; i++) { Safe_Release(m_pModelCom[i]); }
     Safe_Release(m_pShaderCom);
+    Safe_Release(m_InteractiveUI);
 }

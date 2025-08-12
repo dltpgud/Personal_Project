@@ -18,12 +18,10 @@ HRESULT CBody_HealthBot::Initialize_Prototype()
 
 HRESULT CBody_HealthBot::Initialize(void* pArg)
 {
-
     BODY_HEALTHBOT_DESC* pDesc = static_cast<BODY_HEALTHBOT_DESC*>(pArg);
-
     m_pParentState = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
-    /* 추가적으로 초기화가 필요하다면 수행해준다. */
+
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
@@ -41,7 +39,6 @@ void CBody_HealthBot::Priority_Update(_float fTimeDelta)
 void CBody_HealthBot::Update(_float fTimeDelta)
 {
     _bool bMotionChange = {false}, bLoop = {false};
-
 
     if (*m_pParentState == CHealthBot::ST_Dead && m_iCurMotion != CHealthBot::ST_Dead)
     {
@@ -64,7 +61,6 @@ void CBody_HealthBot::Update(_float fTimeDelta)
         bMotionChange = true;
         bLoop = false;
     }
-
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
@@ -137,7 +133,6 @@ HRESULT CBody_HealthBot::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_Model */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto Component HealthBot_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;

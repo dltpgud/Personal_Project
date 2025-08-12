@@ -1,6 +1,4 @@
 ﻿#pragma once
-
-/* 다음 레벨에 대한 자원을 준비한다. */
 #include "Client_Defines.h"
 #include "Base.h"
 
@@ -32,7 +30,7 @@ private:
 
 #ifdef _DEBUG
 public:
-	void Output_LoadingState();
+	void                        Output_LoadingState();
 #endif
 
 private:

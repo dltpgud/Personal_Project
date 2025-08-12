@@ -16,19 +16,6 @@ _float CTimer_Manager::Get_TimeDelta(const _wstring& pTimerTag)
 	return pInstance->Get_TimeDelta();
 }
 
-#ifndef _DEBUG
-void CTimer_Manager::Get_FPS(const _wstring& pTimerTag, HWND g_hWnd)
-{
-	CTimer* pInstance = Find_Timer(pTimerTag);
-
-	if (nullptr == pInstance)
-		return;
-
-	return pInstance->Get_FPS(g_hWnd);
-}
-#endif
-
-
 HRESULT CTimer_Manager::Add_Timer(const _wstring& strTimerTag)
 {
 	 if (nullptr != Find_Timer(strTimerTag))

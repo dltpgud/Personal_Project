@@ -77,7 +77,7 @@ HRESULT Collider_Manager::Check_Collider_PlayerCollison()
 
         if (true == Collider->Intersect(pPlayer->Get_Collider()))
         {
-            pPlayer->Set_bColl(true);
+            pPlayer->Check_Coll();
             pPlayer->Set_CurrentHP(m_ColliderDamage);
         }
         Safe_Release(Collider);
@@ -114,7 +114,6 @@ void Collider_Manager::All_Collison_check()
 {
     Check_Collider_PlayerCollison();
     Player_To_Monster_Bullet_Collison();
-    Player_To_Monster_Collison_Check();
     Check_Inetrect_Player();
     if (m_bIsColl)
     {
@@ -125,33 +124,14 @@ void Collider_Manager::All_Collison_check()
 
 }
 
-HRESULT Collider_Manager::Player_To_Monster_Collison_Check()
-{
-     CActor* pPlayer = m_pGameInstance->Get_Player();
-     if (false == pPlayer)
-		return E_FAIL;
-   
-        if (0 == m_MonsterList.size())
-            return S_OK;
-   
-        for (auto& Monster : m_MonsterList)
-        {
-            if (nullptr == Monster)
-                continue;
-   
-            if (true == Monster->Get_Collider()->Intersect(pPlayer->Get_Collider()))
-            {
-                pPlayer->Set_bColl(true);
-                pPlayer->Set_CurrentHP(1.f);
-            }
-        }  
 
-        
-   return S_OK;
-}
 
 HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
 {
+    CActor* pPlayer = m_pGameInstance->Get_Player();
+    if (false == pPlayer)
+        return E_FAIL;
+   
     _vector RayPos{}, RayDir{};
 
      m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ), m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
@@ -170,6 +150,13 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
          if (nullptr == Monster)
              continue;
           
+
+         if (true == Monster->Get_Collider()->Intersect(pPlayer->Get_Collider()))
+         {
+             pPlayer->Check_Coll();
+             pPlayer->Set_CurrentHP(1.f);
+         }
+
          if (true == Monster->Get_Collider()->RayIntersects(RayPos, RayDir, fDist)) {
 
              if (fDist < fNewDist)
@@ -188,7 +175,8 @@ HRESULT Collider_Manager::Player_To_Monster_Ray_Collison_Check()
     if (pPickedObj)
     {
         pPickedObj->Set_CurrentHP(m_pGameInstance->Get_Player()->Weapon_Damage());
-        pPickedObj->Set_bColl(true);
+        pPickedObj->Check_Coll();
+        m_vRayPos = vPos;
     }
    
     m_MonsterList.clear();
@@ -236,7 +224,7 @@ HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
                       pPlayer->Set_bStun(true);
 
 
-                  pPlayer->Set_bColl(true);
+                  pPlayer->Check_Coll();
                   pPlayer->Set_CurrentHP(pMonsterBullet->Get_Damage());
 
 

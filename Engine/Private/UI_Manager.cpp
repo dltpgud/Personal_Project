@@ -13,7 +13,6 @@ HRESULT CUI_Manager::Initialize()
 
 HRESULT CUI_Manager::Add_UI_To_Proto(const _wstring& strProtoTag, CGameObject* pUI)
 {
-
     CUI* UIObj = dynamic_cast<CUI*>(pUI);
 
     WRITE_LOCK;
@@ -28,7 +27,6 @@ HRESULT CUI_Manager::Add_UI_To_Proto(const _wstring& strProtoTag, CGameObject* p
 
 HRESULT CUI_Manager::Add_UI_To_CLone(const _wstring& strCloneTag, const _wstring& strProtoTag, void* pArg)
 {
-
     auto& ui = m_UIObj[UIOBJECT::UI_PROTO].find(strProtoTag);
 
     CUI* UIObj = dynamic_cast<CUI*>(ui->second->Clone(pArg));
@@ -40,7 +38,6 @@ HRESULT CUI_Manager::Add_UI_To_CLone(const _wstring& strCloneTag, const _wstring
 
 CUI* CUI_Manager::Find_Proto_UIObj(const _wstring& strProtoUITag)
 {
-
      auto iter = m_UIObj[UIOBJECT::UI_PROTO].find(strProtoUITag);
 
     if (iter == m_UIObj[UIOBJECT::UI_PROTO].end())
@@ -51,12 +48,12 @@ CUI* CUI_Manager::Find_Proto_UIObj(const _wstring& strProtoUITag)
 
 CUI* CUI_Manager::Find_Clone_UIObj(const _wstring& strCloneTag)
 {
-    auto iter = m_UIObj[UIOBJECT::UI_CLONE].find(strCloneTag);
+   auto iter = m_UIObj[UIOBJECT::UI_CLONE].find(strCloneTag);
 
-    if (iter == m_UIObj[UIOBJECT::UI_CLONE].end())
+   if (iter == m_UIObj[UIOBJECT::UI_CLONE].end())
         return nullptr;
-
-    return iter->second;
+ 
+   return iter->second;
 }
 
 
@@ -64,46 +61,44 @@ void CUI_Manager::Priority_Update(_float fTimeDelta)
 {
     for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
     {
-        if (true == iter.second->Check_Update() && true == iter.second->Check_Level(m_iCurLevel))
-            iter.second->Priority_Update(fTimeDelta);
+      if (true == iter.second->Check_Update())
+         iter.second->Priority_Update(fTimeDelta);
     }
+
+    ShakingEvent(fTimeDelta);
 }
 
 void CUI_Manager::Update(_float fTimeDelta)
 {
- 
-    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-    {
-        if (true == iter.second->Check_Update() && true == iter.second->Check_Level(m_iCurLevel))
+   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+   {
+        if (true == iter.second->Check_Update())
             iter.second->Update(fTimeDelta);
-    }
-   
+   }
 }
 
 void CUI_Manager::Late_Update(_float fTimeDelta)
 {
-    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-    {
-        if (true == iter.second->Check_Update()&& true == iter.second->Check_Level(m_iCurLevel))
-                iter.second->Late_Update(fTimeDelta);
-    }
+   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+   {
+       if (true == iter.second->Check_Update())
+           iter.second->Late_Update(fTimeDelta);
+   }
 }
 
 void CUI_Manager::Delete()
 {
-    for (auto& iter  = m_UIObj[UIOBJECT::UI_CLONE].begin(); iter != m_UIObj[UIOBJECT::UI_CLONE].end();)
-    {
-        if ((*iter).second && true == (*iter).second->Get_Dead())
-        {
-            Safe_Release((*iter).second);
-            iter = m_UIObj[UIOBJECT::UI_CLONE].erase(iter);
-        }
-        else
-            iter++;
-    }
+   for (auto& iter  = m_UIObj[UIOBJECT::UI_CLONE].begin(); iter != m_UIObj[UIOBJECT::UI_CLONE].end();)
+   {
+       if ((*iter).second && true == (*iter).second->Get_Dead())
+       {
+          Safe_Release((*iter).second);
+          iter = m_UIObj[UIOBJECT::UI_CLONE].erase(iter);
+       }
+       else
+           iter++;
+   }
 }
-
-
 
 void CUI_Manager::Clear(_uint iClearLevelID)
 {
@@ -119,51 +114,59 @@ void CUI_Manager::Clear(_uint iClearLevelID)
   //}
 }
 
+void CUI_Manager::ShakingEvent(_float fTimeDelta)
+{
+   for (auto& iter : m_UIEeventList[EVENT_SHAKING]) 
+   { 
+       iter->ShakingEvent(fTimeDelta);
+       Safe_Release(iter);
+   }
+   
+    m_UIEeventList[EVENT_SHAKING].clear();
+}
+
 HRESULT CUI_Manager::Set_OpenUI(const _uint& uid, _bool open)
 {
-     for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-     {
-         if (iter.second->Get_UIID() == uid)
-         {
-                 iter.second->Set_Open(open);
-         }
-     }
+   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+   {
+       if (iter.second->Get_UIID() == uid)
+       {
+               iter.second->Set_Open(open);
+       }
+   }
   
-    return S_OK;
+  return S_OK;
 }
 
 HRESULT CUI_Manager::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)
 {
-   
-    for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-    {
-        if (iter.second->Get_UIID() == Openuid)
-        {
-            iter.second->Set_Open(true);
-        }
+   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+   {
+       if (iter.second->Get_UIID() == Openuid)
+       {
+           iter.second->Set_Open(true);
+       }
 
-        if (iter.second->Get_UIID() == Cloaseduid)
-        {
-            iter.second->Set_Open(false);
-        }
-    }
+       if (iter.second->Get_UIID() == Cloaseduid)
+       {
+           iter.second->Set_Open(false);
+       }
+   }
     
-    return S_OK;
+   return S_OK;
 }
 
 
 
 HRESULT CUI_Manager::Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY)
 {
-  
-     for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-     {
-         if (iter.second->Get_UIID() == uID)
-         {
-             iter.second->Set_UI_shaking(fShakingTime, fPowerX, fPowerY);
-         }
-     }
-  
+   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
+   {
+       if (iter.second->Get_UIID() == uID)
+       {
+           iter.second->Set_UI_shaking(fShakingTime, fPowerX, fPowerY);
+       }
+   } 
     return S_OK;
 }
 
@@ -176,6 +179,14 @@ HRESULT CUI_Manager::UI_shaking(const _uint& uID, _float fTimeDelta)
             iter.second->UI_shaking(fTimeDelta);
          }
     }
+    return S_OK;
+}
+
+HRESULT CUI_Manager::ADD_UI_ShakingList(CUI* uiobj)
+{
+    m_UIEeventList[EVENT_SHAKING].push_back(uiobj);
+    Safe_AddRef(uiobj);
+
     return S_OK;
 }
 
@@ -200,5 +211,11 @@ void CUI_Manager::Free()
     {  
        for (auto& iter : m_UIObj[i]) { Safe_Release(iter.second); }
        m_UIObj[i].clear();
+    }
+
+    for (size_t i = 0; i < UIEVENT::EVENT_END; i++)
+    {
+        for (auto& iter : m_UIEeventList[i]) { Safe_Release(iter); }
+        m_UIEeventList[i].clear();
     }
 }

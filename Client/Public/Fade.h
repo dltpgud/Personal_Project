@@ -10,12 +10,12 @@ class CVIBuffer_Rect;
 END
 
 BEGIN(Client)
-class CPade :  public CUI
+class CFade :  public CUI
 {
 private:
-	CPade(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CPade(const CPade& Prototype);
-	virtual ~CPade() = default;
+	CFade(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CFade(const CFade& Prototype);
+	virtual ~CFade() = default;
 
 public:
 	virtual HRESULT Initialize_Prototype() override;
@@ -25,9 +25,9 @@ public:
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-	void Set_Pade(_bool fade) {
+	void Set_Fade(_bool fade) {
 		m_bSetPade = fade;
-		m_fTimeSum = fade ? 0.0f : 1.0f;
+         true == fade ? m_fTimeSum = 0.0f : m_fTimeSum= 1.0f;
 	}
 
 	_bool FinishPade();
@@ -37,13 +37,13 @@ private:
 	CShader*	    m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr }; 
 
-	_float m_fTimeSum = { 1.f };
+	_float m_fTimeSum = {1.f };
 	_bool m_bSetPade{ true };
 private:
 	HRESULT Add_Components();
 	
 public:
-	static CPade*	 Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CFade*	 Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void		 Free() override;
 };

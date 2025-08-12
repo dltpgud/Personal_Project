@@ -9,6 +9,7 @@ class CUI_Manager final : public CBase
 {
 public: 
     enum UIOBJECT{UI_PROTO, UI_CLONE, UI_END};
+    enum UIEVENT{EVENT_SHAKING, EVENT_END};
 
 private:
     CUI_Manager();
@@ -16,7 +17,6 @@ private:
 
 public:
     HRESULT Initialize();
-    /*원본을 추가한다*/
     HRESULT Add_UI_To_Proto(const _wstring& strProtoTag, class CGameObject* pUI);
     HRESULT Add_UI_To_CLone(const _wstring& strCloneTag,const _wstring& strProtoTag, void* pArg = nullptr);
     class CUI* Find_Proto_UIObj(const _wstring& strProtoUITag);
@@ -31,20 +31,20 @@ public:
     void Update(_float fTimeDelta);
     void Late_Update(_float fTimeDelta);
     void Delete();
-    /*씬 파괴를 위한 함수*/
     void Clear(_uint iClearLevelID);
+    void ShakingEvent(_float fTimeDelta);
 
-    /*UI랜더 상태를 설정한다.*/
     HRESULT Set_OpenUI(const _uint& uid, _bool open);
     HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
-
-
     HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY );
     HRESULT UI_shaking(const _uint& uID,_float fTimeDelta);
- 
+    HRESULT ADD_UI_ShakingList(class CUI* uiobj);
+
 private:
     map<const _wstring, class CUI*> m_UIObj[UI_END];
+    list<class CUI*> m_UIEeventList[EVENT_END];
      _uint m_iCurLevel{};
+   
     USE_LOCK;
 
 public:

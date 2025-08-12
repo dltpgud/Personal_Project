@@ -2,7 +2,7 @@
 #include "MainApp.h"
 #include "GameInstance.h"
 #include "Level_Loading.h"
-#include "Pade.h"
+#include "Fade.h"
 #include "Menu.h"
 #include "Loading.h"
 #include "Cursor.h"
@@ -18,8 +18,6 @@ CMainApp::CMainApp()
 
 HRESULT CMainApp::Initialize()
 {
-	/* 내 게임에 필요한 필수 기능들에 대한 초기화과정을 수행한다. */
-	
 	ENGINE_DESC			EngineDesc{};
 	EngineDesc.hInstance = g_hInst;
 	EngineDesc.hWnd       = g_hWnd;
@@ -28,25 +26,24 @@ HRESULT CMainApp::Initialize()
 	EngineDesc.iWinSizeY  = g_iWinSizeY;
 	EngineDesc.iNumLevels = LEVEL_END;
 
-	/*게임 인스턴스 생성*/
 	if (FAILED(m_pGameInstance->Initialize_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	/*최초 씬 설정*/
 	if(FAILED(Open_Level(LEVEL_MENU)))
 		return E_FAIL;
    
+	   if (FAILED(m_pGameInstance->Add_Font(TEXT("Robo"), TEXT("../Bin/Resources/Fonts/Cart.spritefont"))))
+            return E_FAIL;
 	return S_OK;
 }
 
 void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update(fTimeDelta);
-#ifndef _DEBUG
-   m_pGameInstance->Get_FPS(TEXT("Timer_60"), g_hWnd);
-    m_fTimeAcc += fTimeDelta;
-#endif
 
+#ifdef _DEBUG
+        m_fTimeAcc += fTimeDelta;
+#endif
 }
 
 void CMainApp::Render()
@@ -55,6 +52,19 @@ void CMainApp::Render()
 		 return;
 
     m_pGameInstance->Draw(); 
+
+#ifdef _DEBUG
+    ++m_iNumRender;
+
+    if (m_fTimeAcc >= 1.f)
+    {
+        wsprintf(m_szFPS, TEXT("FPS : %d"), m_iNumRender);
+        m_fTimeAcc = 0.f;
+        m_iNumRender = 0;
+    }
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(1150.f, 0.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.5f);
+
+#endif
 
 	if (FAILED(m_pGameInstance->Render_End()))
 		 return;

@@ -35,7 +35,7 @@ public:
 
 public:
         //상태 관련
-        void Set_bColl(_bool Coll) { m_bColl = Coll; }
+        void Check_Coll();
         void Set_bStun(_bool Coll) { m_bStun = Coll; }
         void Set_State(_uint st)
         {
@@ -44,21 +44,29 @@ public:
         _uint Get_State() { return m_iState; }
         virtual _bool Get_bJump() { return false; }
         virtual void HIt_Routine() {};
-        virtual void Dead_Routine(_float fTimeDelta) {};
+        virtual void Dead_Routine() {};
         virtual void Stun_Routine() {};
       
 
         //네비 관련
         void Set_NavigationType(_uint i);
+        _int Get_CurrentCell_Type();
         void Find_CurrentCell();
         _float Get_fY() { return m_fY; }
         void Height_On_Cell(_float3* fPos);
         void Set_onCell(_bool bonCell) { m_bOnCell = bonCell; }
         void Clear_CNavigation(_tchar* tFPath); // 플레이어 씬전환 후 새로운쎌 부여
-         
+        void Set_Taget(_vector Taget);
+        CNavigation* Get_Navi()
+        {
+            return m_pNavigationCom;
+        }
         void Is_onDemageCell(_float fTimeDelta);
         //체력관련
-        void Set_CurrentHP(_float CurrentHp) { m_fHP -= CurrentHp; }
+        virtual void Set_CurrentHP(_float CurrentHp)
+        {
+            m_fHP -= CurrentHp;
+        }
         void Set_HealthCurrentHP(_float Health);
         _bool IsFullHP() const { return m_fHP == m_fMAXHP; }
         virtual _float Weapon_Damage() { return 0.f; }
@@ -69,7 +77,6 @@ public:
          CNavigation* m_pNavigationCom = { nullptr };
         _float  m_fHP;
         _float  m_fMAXHP;
-        _bool   m_bColl = { false };
         _uint   m_iState = {};
         _float	m_fY{ 0.f };
         _float  m_FixY{ 0.f };

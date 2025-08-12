@@ -37,14 +37,14 @@ void CPartObject::Priority_Update(_float fTimeDelta)
 
 void CPartObject::Update(_float fTimeDelta)
 {
-	if (true == m_DyingTime)
+	if (true == m_bDeadState)
 	{
-		m_DyTimeSum += fTimeDelta;
+		m_fDeadTimeSum += fTimeDelta;
 
-		if (m_DyTimeSum >= m_DyTime) {
-			m_interver += fTimeDelta;
-			if (m_interver > 1.f) {
-				m_interver = 1.0f;  // 이미지가 완전히 나타나면 멈춤
+		if (m_fDeadTimeSum >= m_fDeadTime) {
+			m_fthreshold += fTimeDelta;
+			if (m_fthreshold > 1.f) {
+				m_fthreshold = 1.0f;  // 이미지가 완전히 나타나면 멈춤
 			}
 		}
 	}
@@ -70,9 +70,9 @@ const _float4x4* CPartObject::Get_SocketMatrix(const _char* pBoneName)
 	return m_pModelCom->Get_BoneMatrix(pBoneName);
 }
 
-void CPartObject::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatrix)
+void CPartObject::Set_BoneUpdateMatrix(const _uint& iIndex, _fmatrix NewMatrix)
 {
-	m_pModelCom->Set_BoneUpdateMatrix(pBoneName, NewMatrix);
+    m_pModelCom->Set_BoneUpdateMatrix(iIndex, NewMatrix);
 }
 
 void CPartObject::Rotation(CTransform* Transform)

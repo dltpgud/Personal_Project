@@ -6,7 +6,7 @@
 #include "Camera_Free.h"
 #include "Player.h"
 #include "Level_StageBoss.h"
-#include "Pade.h"
+#include "Fade.h"
 CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -14,12 +14,10 @@ CLevel_Stage2::CLevel_Stage2(ID3D11Device * pDevice, ID3D11DeviceContext * pCont
 
 HRESULT CLevel_Stage2::Initialize()
 {
-
-
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Player(TEXT("Layer_Player"))))
+	if (FAILED(Ready_Layer_Player()))
 		return E_FAIL;
 
 	if (FAILED(Ready_Layer_Monster(TEXT("Layer_Monster"))))
@@ -31,38 +29,28 @@ HRESULT CLevel_Stage2::Initialize()
 	if (FAILED(Ready_Layer_NPC(TEXT("Layer_NPC"))))
 		return E_FAIL;
 
-	
+	if (FAILED(Ready_UI()))
+        return E_FAIL;
 
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
-	m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_Special.ogg", 0.1f);
+
 	return S_OK;
 }
 
 void CLevel_Stage2::Update(_float fTimeDelta)
 {
-
-	if (m_bPade == false) {
-            static_cast<CPade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Pade(false);
-		m_pGameInstance->Set_OpenUI(CUI::UIID_Pade, true);
-		m_bPade = true;
-	}
-
-	if (m_pGameInstance->IsOpenStage())
+	if (m_pGameInstance->IsOpenStage() && m_pFade->FinishPade())
 	{
 		m_pGameInstance->Set_Open_Bool(false);
-
-//		m_pGameInstance->Open_Level(LEVEL_STAGE2, CLevel_Stage2::Create(m_pDevice, m_pContext));
 		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_BOSS));
-	//	m_pGameInstance->Open_Level(LEVEL_BOSS,CLevel_StageBoss::Create(m_pDevice,m_pContext));
-
 	}
+     
 	__super::Update(fTimeDelta);
 }
 
 HRESULT CLevel_Stage2::Render()
 {
-	
 	__super::Render();
 
 #ifdef _DEBUG
@@ -75,6 +63,7 @@ HRESULT CLevel_Stage2::Render()
 HRESULT CLevel_Stage2::Ready_Layer_Monster(const _wstring& pLayerTag)
 {
     CActor::Actor_DESC Desc{};
+
     if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_GunPawn",
                                         L"Proto Component GunPawn_Monster",
                                         L"../Bin/Data/Monster/Stage2_Monster.dat", &Desc)))
@@ -94,6 +83,7 @@ HRESULT CLevel_Stage2::Ready_Layer_Monster(const _wstring& pLayerTag)
                                         L"Proto Component MecanoBot_Monster", L"../Bin/Data/Monster/Stage2_Monster.dat",
                                         &Desc)))
         return E_FAIL;
+
 	return S_OK;
 }
 
@@ -128,6 +118,7 @@ HRESULT CLevel_Stage2::Ready_Layer_Map(const _wstring& pLayerTag)
 HRESULT CLevel_Stage2::Ready_Layer_NPC(const _wstring& pLayerTag)
 {
     CActor::Actor_DESC HealthBotDesc{};
+
     if (FAILED(Load_to_Next_Map_NPC(LEVEL_STAGE2, pLayerTag, L"Prototype_GameObject_HealthBot",
                                     L"../Bin/Data/NPC/Stage2_NPC.dat", &HealthBotDesc)))
         return E_FAIL;
@@ -138,6 +129,7 @@ HRESULT CLevel_Stage2::Ready_Layer_NPC(const _wstring& pLayerTag)
 HRESULT CLevel_Stage2::Ready_Find_cell()
 {
    m_pGameInstance->Find_Cell();
+
 	return S_OK;
 }
 
@@ -152,15 +144,29 @@ HRESULT CLevel_Stage2::Ready_Light()
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 	LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
 
-
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;
 
 	return S_OK;
 }
 
-HRESULT CLevel_Stage2::Ready_Layer_Player(const _wstring& pLayerTag)
+HRESULT CLevel_Stage2::Ready_UI()
 {
+    m_pFade = static_cast<CFade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"));
+    Safe_AddRef(m_pFade);
+
+    m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_Special.ogg", 0.1f);
+
+	m_pGameInstance->Set_OpenUI(UIID_PlayerHP, true);
+    m_pGameInstance->Set_OpenUI(UIID_PlayerState, true);
+    m_pGameInstance->Set_OpenUI(UIID_PlayerWeaPon_Aim, true);
+    m_pGameInstance->Set_OpenUI(UIID_PlayerWeaPon, true);
+    return S_OK;
+}
+
+HRESULT CLevel_Stage2::Ready_Layer_Player()
+{
+    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_bUpdate(true);
 
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(5.f, 0.f, 5.f, 1.f));
 
@@ -183,5 +189,5 @@ CLevel_Stage2* CLevel_Stage2::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
 void CLevel_Stage2::Free()
 {
 	__super::Free();
-
+    Safe_Release(m_pFade);
 }

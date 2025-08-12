@@ -5,8 +5,9 @@
 #include "PlayerUI.h"
 #include "Camera_Free.h"
 #include "SceneCamera.h"
-
-
+#include "Player.h"
+#include "Fade.h"
+#include "WeaponUI.h"
 CLevel_StageBoss::CLevel_StageBoss(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -17,7 +18,7 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Light()))
 		return E_FAIL;
 
-	if (FAILED(Ready_Layer_Player(TEXT("Layer_Player"))))
+	if (FAILED(Ready_Layer_Player()))
 		return E_FAIL;
 
 	if (FAILED(Ready_Layer_Monster(TEXT("Layer_Monster"))))
@@ -29,26 +30,17 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Layer_Map(TEXT("Layer_Map"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_UI()))
-		return E_FAIL;
-
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
-	m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_EnergyCenter.ogg", 0.1f);
+	if (FAILED(Ready_UI()))
+		return E_FAIL;
+
 	return S_OK;
 }
 
 void CLevel_StageBoss::Update(_float fTimeDelta)
 {
-	if (m_pGameInstance->IsOpenStage())
-	{
-		m_pGameInstance->Set_Open_Bool(false);
-	//	m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_RETURN_MENU, STAGE));
-
-	}
-
-
 	__super::Update(fTimeDelta);
 }
 
@@ -67,8 +59,7 @@ HRESULT CLevel_StageBoss::Ready_Layer_Monster(const _wstring& pLayerTag)
 {
     CActor::Actor_DESC Desc{};
     if (FAILED(Load_to_Next_Map_Monster(LEVEL_BOSS, pLayerTag, L"Prototype_GameObject_BillyBoom",
-                                        L"Proto Component Boss_Monster", L"../Bin/Data/Monster/BossStage_Monster.dat",
-                                              &Desc)))
+                                        L"Proto Component Boss_Monster", L"../Bin/Data/Monster/BossStage_Monster.dat",&Desc)))
         return E_FAIL;
 	return S_OK;
 }
@@ -103,21 +94,6 @@ HRESULT CLevel_StageBoss::Ready_Layer_Camera(const _wstring& pLayerTag)
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_UI()
-{
-	// 보스 인트로 떄문에 다꺼놔
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, false)))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, false)))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, false)))
-		return E_FAIL;
-	if (FAILED(m_pGameInstance->Set_OpenUI(CUI::UIID_Cursor, false)))
-		return S_OK;
-
-	return S_OK;
-}
-
 HRESULT CLevel_StageBoss::Ready_Layer_Map(const _wstring& pLayerTag)
 {
     CGameObject::GAMEOBJ_DESC Desc{};
@@ -141,7 +117,6 @@ HRESULT CLevel_StageBoss::Ready_Layer_Map(const _wstring& pLayerTag)
 	return S_OK;
 }
 
-
 HRESULT CLevel_StageBoss::Ready_Find_cell()
 {
 	  m_pGameInstance->Find_Cell();
@@ -164,8 +139,16 @@ HRESULT CLevel_StageBoss::Ready_Light()
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Layer_Player(const _wstring& pLayerTag)
+HRESULT CLevel_StageBoss::Ready_UI()
 {
+    m_pGameInstance->PlayBGM(CSound::SOUND_LEVEL, L"ST_Ambient_EnergyCenter.ogg", 0.1f);
+
+    return S_OK;
+}
+
+HRESULT CLevel_StageBoss::Ready_Layer_Player()
+{
+    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_bUpdate(true);
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(50.f, 0.f, 15.f, 1.f));
 	return S_OK;
 }

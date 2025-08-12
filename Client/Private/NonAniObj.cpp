@@ -41,6 +41,7 @@ void CNonAni::Late_Update(_float fTimeDelta)
   
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
         return;
 }
@@ -59,7 +60,6 @@ HRESULT CNonAni::Render_Shadow()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
     
-    
     _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
     
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -76,7 +76,6 @@ HRESULT CNonAni::Render_Shadow()
 
 HRESULT CNonAni::Render()
 {
-   
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -111,8 +110,11 @@ void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
     else
         m_iPass = 0;
 
-   // if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOWBG, this)))
-    //    return;
+    CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
+    m_pModelCom->Center_Ext(&AABBDesc.vCenter, &AABBDesc.vExtents);
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider_OBB"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
+        return ;
 }
 
 void CNonAni::Set_InstaceBuffer(const vector<_matrix>& worldmat)
@@ -130,8 +132,7 @@ HRESULT CNonAni::Bind_ShaderResources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))

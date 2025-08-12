@@ -21,10 +21,10 @@ HRESULT CWall::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
+    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
+
     if (FAILED(Add_Components()))
         return E_FAIL;
-    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
-     
    
     return S_OK;
 }
@@ -37,21 +37,21 @@ void CWall::Priority_Update(_float fTimeDelta)
 
 void CWall::Update(_float fTimeDelta)
 {
-     
 }
 
 void CWall::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
         return;
+    
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
-    if (false ==
-        m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 15.f))
-        return;
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+    
+    if (false ==m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 15.f))
         return;
 
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
 }
 HRESULT CWall::Render()
 {
@@ -65,26 +65,23 @@ HRESULT CWall::Render()
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
-
+        _bool bEmissive{false};
             if (m_pModelName == L"Proto Component DoorRock Model_Wall") {
           
                 if (i == 0) {
-                    m_bEmissive = true;
+                    bEmissive = true;
                     if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                         "g_EmissiveTexture")))
                         return E_FAIL;
                 }
                 else
-                    m_bEmissive = false;
+                    bEmissive = false;
 
                 if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorEmissiveColor", &m_fDoorEmissiveColor, sizeof(_float4))))
                     return E_FAIL;
-
             }
-            else
-                m_bEmissive = false;
-          
-            if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &m_bEmissive, sizeof(_bool))))
+  
+            if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &bEmissive, sizeof(_bool))))
                     return E_FAIL;
 
         if (FAILED(m_pShaderCom->Begin(6)))
@@ -108,12 +105,10 @@ HRESULT CWall::Render_Shadow()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
 
-
     _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-
         if (FAILED(m_pShaderCom->Begin(2)))
             return E_FAIL;
 
@@ -137,15 +132,11 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_fDoorEmissiveColor = { 1.f,0.f,0.f, 1.f };
 }
 
-
-
-
 HRESULT CWall::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
-
     return S_OK;
 }
 
@@ -154,15 +145,15 @@ HRESULT CWall::Bind_ShaderResources()
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 

@@ -27,46 +27,42 @@ HRESULT CSound::Initialize()
 
 void CSound::Play_Sound(_tchar* pSoundKey, CHANNELID eID, _float fVolume)
 {
-	//map<TCHAR*, Sound*>::iterator iter;
-	//
-	//// iter = find_if(m_mapSound.begin(), m_mapSound.end(), CTag_Finder(pSoundKey));
-	//iter = find_if(m_mapSound.begin(), m_mapSound.end(),
-	//	[&](auto& iter)->_bool
-	//	{
-	//		return !lstrcmp(pSoundKey, iter.first);
-	//	});
-	//
-	//if (iter == m_mapSound.end())
-	//	return;
-	//
-	//_bool* bPlay = FALSE;
-	//
-	////if (m_pChannelArr[eID]->isPlaying(bPlay))
-	////{
-	////	cout << "in" << endl;
-	//result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
-	////}
-	//
-	//m_pChannelArr[eID]->setVolume(fVolume);
-	//
-	//m_pSystem->update();
+//	map<TCHAR*, Sound*>::iterator iter;
+//	
+//	// iter = find_if(m_mapSound.begin(), m_mapSound.end(), CTag_Finder(pSoundKey));
+//	iter = find_if(m_mapSound.begin(), m_mapSound.end(),
+//		[&](auto& iter)->_bool
+//		{
+//			return !lstrcmp(pSoundKey, iter.first);
+//		});
+//	
+//	if (iter == m_mapSound.end())
+//		return;
+//	
+//	_bool* bPlay = FALSE;
+//	
+//	result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
+//	
+//	m_pChannelArr[eID]->setVolume(fVolume);
+//	
+//	m_pSystem->update();
 }
 
 void CSound::PlayBGM(CHANNELID eID, _tchar* pSoundKey, _float fVolume)
 {
-	//map<TCHAR*, Sound*>::iterator iter;
-	//
-	//iter = find_if(m_mapSound.begin(), m_mapSound.end(), [&](auto& iter)->_bool
-	//	{
-	//		return !lstrcmp(pSoundKey, iter.first);
-	//	});
-	//
-	//if (iter == m_mapSound.end())
-	//	return;
-	//
-	//result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
-	//m_pChannelArr[eID]->setMode(FMOD_LOOP_NORMAL);
-	//m_pChannelArr[eID]->setVolume(fVolume);
+   // map<TCHAR*, Sound*>::iterator iter;
+   // 
+   // iter = find_if(m_mapSound.begin(), m_mapSound.end(), [&](auto& iter)->_bool
+   // 	{
+   // 		return !lstrcmp(pSoundKey, iter.first);
+   // 	});
+   // 
+   // if (iter == m_mapSound.end())
+   // 	return;
+   // 
+   // result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
+   // m_pChannelArr[eID]->setMode(FMOD_LOOP_NORMAL);
+   // m_pChannelArr[eID]->setVolume(fVolume);
 }
 
 void CSound::StopSound(CHANNELID eID)
@@ -120,8 +116,6 @@ void CSound::LoadSoundFile(const _char* soundFile)
 
 	m_pSystem->update();
 }
-
-
 
 CSound* CSound::Create()
 {

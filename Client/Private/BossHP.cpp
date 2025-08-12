@@ -23,7 +23,7 @@ HRESULT CBossHPUI::Initialize(void* pArg)
     Desc->fZ = 0.1f;
     Desc->fSizeX = 650.f;
     Desc->fSizeY = 25.f;
-    Desc->UID = CUI::UIID_BossHP ;
+    Desc->UID = UIID_BossHP ;
     Desc->fSpeedPerSec = 0.f;
     Desc->fRotationPerSec = 0.f;
     m_fHP = Desc->fHP;
@@ -49,19 +49,6 @@ HRESULT CBossHPUI::Initialize(void* pArg)
 
 void CBossHPUI::Priority_Update(_float fTimeDelta)
 {
-  if (m_IsShaking) {
-      if (m_fShakingTime > 0.f)
-      {
-          m_fX += m_fShaking_X;
-          m_fY += m_fShaking_Y;
-  
-      }
-      if (m_fShakingTime <= 0.f)
-      {
-          m_fX = m_fPrXPos;
-          m_fY = m_fPrYPos;
-      }
-  }
 }
 
 void CBossHPUI::Update(_float fTimeDelta)
@@ -82,12 +69,12 @@ void CBossHPUI::Late_Update(_float fTimeDelta)
     m_CurRito = m_fHP / m_fMaxHP; 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this))) 
         return;
+    if (FAILED(m_pGameInstance->ADD_UI_ShakingList(this)))
+        return;
 }
 
 HRESULT CBossHPUI::Render()
 {
-    __super::Render();
-
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
@@ -109,27 +96,37 @@ HRESULT CBossHPUI::Render()
 
     m_pVIBufferCom->Render();
 
-
-
     return S_OK;
+}
+
+void CBossHPUI::ShakingEvent(_float fTimeDelta)
+{
+    if (m_fShakingTime > 0.f)
+    {
+        m_fX += m_fShaking_X;
+        m_fY += m_fShaking_Y;
+    }
+    if (m_fShakingTime <= 0.f)
+    {
+        m_fX = m_fPrXPos;
+        m_fY = m_fPrYPos;
+    }
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
+                                   XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 }
 
 
 HRESULT CBossHPUI::Add_Components()
 {
-
-    /* For.Com_Texture */
     if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Prototype_Component_Texture_BossHP"),
                                       TEXT("Com_Texture"),
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_VIBuffer */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"), TEXT("Com_VIBuffer"),
                                       reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
@@ -165,12 +162,9 @@ CGameObject* CBossHPUI::Clone(void* pArg)
 
 void CBossHPUI::Free()
 {
-
     __super::Free();
 
     Safe_Release(m_pVIBufferCom);
-
     Safe_Release(m_pTextureCom);
-
     Safe_Release(m_pShaderCom);
 }

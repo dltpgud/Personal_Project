@@ -92,12 +92,10 @@ HRESULT CShock::Render()
 
 HRESULT CShock::Add_Components()
 {
-	/* For.Com_Model */
 	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto_Component_Shock"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
 		return E_FAIL;
 
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
 		reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;

@@ -182,8 +182,8 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
 #ifdef _DEBUG
 HRESULT CNavigation::Render()
 {
-    //if (m_iCurrentCellIndex == -1)
-    //    return S_OK;
+    if (false == m_bRender)
+        return S_OK;
 
     if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
         return E_FAIL;
@@ -234,7 +234,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
     cameFrom[startIndex] = startIndex;
 
     const CCell* goalCell = m_Cells[goalIndex];
-    XMVECTOR goalCenter = goalCell->GetCenter();
+    _vector goalCenter = goalCell->GetCenter();
 
     while (!openList.empty())
     {
@@ -257,7 +257,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
         }
 
         const CCell* currCell = m_Cells[current.index];
-        XMVECTOR currCenter = currCell->GetCenter();
+        _vector currCenter = currCell->GetCenter();
 
         // 이웃 순회
         for (int i = 0; i < CCell::LINE_END; ++i)
@@ -267,7 +267,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
                 continue;
 
             const CCell* neighborCell = m_Cells[neighborIndex];
-            XMVECTOR neighborCenter = neighborCell->GetCenter();
+            _vector neighborCenter = neighborCell->GetCenter();
 
             // 현재 노드에서 이웃 노드까지 거리
             _float stepCost = XMVectorGetX(XMVector3Length(neighborCenter - currCenter));
@@ -298,7 +298,7 @@ _uint CNavigation::Get_CurrentCell_Type()
 
 _bool CNavigation::Snap(_fvector vP1, _fvector vP2, _vector distance)
 {
-    XMVECTOR difference = XMVectorAbs(XMVectorSubtract(vP1, vP2));
+    _vector difference = XMVectorAbs(XMVectorSubtract(vP1, vP2));
 
     return XMVector3LessOrEqual(difference, distance);
 }
@@ -459,6 +459,8 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
     CloseHandle(hFile);
 
     SetUp_Neighbor();
+    
+    m_bRender = true;
 
     return S_OK;
 }
@@ -477,7 +479,7 @@ HRESULT CNavigation::Delete_ALLCell()
     m_Cells.clear();
     m_Cells.shrink_to_fit();
     m_iCurrentCellIndex = -1;
-
+    m_bRender = false;
     m_vecNomoveType.clear();
     m_vecNomoveType.shrink_to_fit();
 
@@ -522,10 +524,9 @@ _bool CNavigation::ISFall()
 
 void CNavigation::Find_CurrentCell(_vector vWorldPos)
 {
-    _vector vAfterLocalPos =
-        XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
+    _vector vAfterLocalPos  = XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
     _vector vBeforeLocalPos = XMVectorZero();
-    _int iNeighborIndex = {-1};
+    _int iNeighborIndex     = {-1};
     _vector slide{};
 
     for (size_t i = 0; i < m_Cells.size(); i++)
@@ -553,10 +554,9 @@ _vector CNavigation::Get_TagetPos(_int index)
 
 _int CNavigation::Find_Cell_ByPosition(_vector vTargetPos)
 {
-    _vector vAfterLocalPos =
-     XMVector3TransformCoord(vTargetPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
+    _vector vAfterLocalPos  = XMVector3TransformCoord(vTargetPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
     _vector vBeforeLocalPos = XMVectorZero();
-    _int iNeighborIndex = {-1};
+    _int iNeighborIndex     = {-1};
     _vector slide{};
 
     for (size_t i = 0; i < m_Cells.size(); i++)

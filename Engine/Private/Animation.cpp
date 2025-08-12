@@ -1,12 +1,14 @@
 #include "Animation.h"
 #include "Channel.h"
+
+
 CAnimation::CAnimation()
 {
 }
 
 CAnimation::CAnimation(const CAnimation& Proto)
     : m_fDuration{ Proto.m_fDuration }, m_fTickPerSecond{ Proto.m_fTickPerSecond }, m_iNumChannels{ Proto.m_iNumChannels },
-    m_Channels{ Proto.m_Channels }, m_iChannelKeyFrameIndices{ Proto.m_iChannelKeyFrameIndices }
+      m_Channels{Proto.m_Channels}, m_iChannelKeyFrameIndices{Proto.m_iChannelKeyFrameIndices}, m_fCurrentPosition{Proto.m_fCurrentPosition}
 {
     strcpy_s(m_szName, Proto.m_szName);
 
@@ -46,32 +48,33 @@ HRESULT CAnimation::Initialize(HANDLE& hFile)
 
 _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones, _bool isLoop, _float fTimeDelta)
 {
-   // 콜백함수 실행
-     Run_CallbackFunc(m_fCurrentPosition);
+    // 콜백함수 실행
+    Run_CallbackFunc(round(m_fCurrentPosition));
 
-    //애니메이션 전환 중 이면 보션 전환 중 시간을 증가시키고
+    // 애니메이션 전환 중 이면 보션 전환 중 시간을 증가시키고
     if (m_fChangingTime < m_fMotionChangingTIme)
-        m_fChangingTime += m_fTickPerSecond * fTimeDelta;  
+        m_fChangingTime += m_fTickPerSecond * fTimeDelta;
     else // 전환 중이 아니라면 현재 위치를 증가 시킴
         m_fCurrentPosition += m_fTickPerSecond * fTimeDelta;
 
     // 애니메이션이 끝까지 재생되면
     if (m_fCurrentPosition >= m_fDuration)
     {
-        if (isLoop)// 반복하는 애니메이션이라면
+        if (isLoop) // 반복하는 애니메이션이라면
         {
             m_fCurrentPosition = 0.f;
-
+            m_CallbackCheck.clear();
         }
         else if (false == isLoop)
         {
+            m_CallbackCheck.clear();
             // 한 번만 재생하는 애니메이션이라면
-             return true;
+            return true;
         }
     }
 
     _float fChannelAnimTime{};
-    //실제 보간을 위한 시간을 애니메이션 전환 중인 여부 판단으로 넘김 
+    // 실제 보간을 위한 시간을 애니메이션 전환 중인 여부 판단으로 넘김
     if (m_fChangingTime < m_fMotionChangingTIme)
         fChannelAnimTime = m_fChangingTime;
     else
@@ -80,7 +83,8 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
     // 각 채널에 대해 변환 행렬을 업데이트
     for (_uint i = 0; i < m_iNumChannels; i++)
         m_Channels[i]->Update_TransformationMatrix(Bones, &m_iChannelKeyFrameIndices[i], fChannelAnimTime,
-            m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme, m_vLastKeyFrame[i]);
+                                                   m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme,
+                                                   m_vLastKeyFrame[i]);
     return false;
 }
 
@@ -96,21 +100,26 @@ void CAnimation::init_Loop(const vector<class CBone*>& Bones)
         m_vLastKeyFrame[i].fTrackPosition = m_fMotionChangingTIme;  
 
     }
+    m_CallbackCheck.clear();
 }
 
 void CAnimation::Callback(_int Duration, function<void()> func)
 {
+  
     m_CallbackFunc[Duration].emplace_back(func);
 }
 
 void CAnimation::Run_CallbackFunc(_int Duration)
 {
+    if (m_CallbackCheck.find(Duration) != m_CallbackCheck.end())
+        return;
     auto iter = m_CallbackFunc.find(Duration);
     if (iter == m_CallbackFunc.end())
         return;
 
     for (auto& callback : iter->second) { callback(); }
 
+    m_CallbackCheck.insert(Duration);
 }
 
 CAnimation* CAnimation::Create(HANDLE& hFile)

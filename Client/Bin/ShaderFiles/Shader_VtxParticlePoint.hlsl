@@ -1,9 +1,4 @@
 #include "Engine_Shader_Defines.hlsli"
-/* 0 1 2 0 2 3 */
-
-/* 전역변수들 : 컨스턴트 테이블 */
-/* 같은 파일 내에 존재하는 모든 함수에서 전역변수를 사용할 수 있다. 대입은 불가 */
-/* 외부프로젝트에서 쉐이더 전역으로 특정 데이터를 던지고 받기위한 메모리공간의 의미. */
 
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D		g_Texture;
@@ -32,13 +27,12 @@ struct VS_OUT
     row_major float4x4 TransformMatrix : WORLD;
 };
 
-VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
+VS_OUT VS_MAIN(  VS_IN In)
 {	
 	VS_OUT			Out = (VS_OUT)0;	
 
 	vector			vPosition = mul(float4(In.vPosition, 1.f), In.TransformMatrix);
 
-	/* 진짜 순수하게 곱하기만 수행한다. */
 	vPosition = mul(vPosition, g_WorldMatrix);
 
 	Out.vPosition = vPosition;
@@ -58,7 +52,7 @@ struct GS_IN
 
 struct GS_OUT
 {
-	float4 vPosition : SV_POSITION;	//시멘틱을 아웃풋으로 내보냄
+	float4 vPosition : SV_POSITION;	
 	float2 vTexcoord : TEXCOORD0;
 	float2 vLifeTime : TEXCOORD1;
 };
@@ -105,11 +99,6 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Triangles)
 	Triangles.RestartStrip();
 }
 
-
-/* 세개의 결과 정점의 위치벡터의 w값으로 xyzw를 모두 나눈다. 투영스페이스로의 변환. */
-/* 위치벡터를 뷰포트로 변환한다. (윈도우좌표로 변환) */
-/* 래스터라이즈 (결과로 나온 정점들의 정보를 선형보간하여 픽셀이 생성된다.) */
-
 struct PS_IN
 {
 	float4 vPosition : SV_POSITION;
@@ -120,15 +109,11 @@ struct PS_IN
 
 struct PS_OUT
 {
-	/* 변수에 대한 시멘틱을 정의한다. */
+	
 	vector vColor : SV_TARGET0;	
 
 };
 
-/* 픽셀 쉐이더 */
-/* 픽셀의 최종적인 렌더링 색상을 결정하낟. */
-/* 픽셀당 픽셀쉐이더를 하나씩 모두 수행한다. */
-// vector PS_MAIN(PS_IN In) : SV_TARGET0
 PS_OUT PS_MAIN(PS_IN In)
 {
 	PS_OUT			Out = (PS_OUT)0;
@@ -138,11 +123,10 @@ PS_OUT PS_MAIN(PS_IN In)
 	
     float2 frameUVSize = g_frameSize / g_textureSize;
 	
-    int frameX = g_currentFrame % g_framesPerRow; // 현재 프레임의 X 위치
-    int frameY = g_currentFrame / g_framesPerRow; // 현재 프레임의 Y 위치
+    int frameX = g_currentFrame % g_framesPerRow; 
+    int frameY = g_currentFrame / g_framesPerRow; 
     float2 frameStartUV = float2(frameX, frameY) * frameUVSize;
 
-    // 최종 UV 좌표 계산
     float2 finalUV = frameStartUV + In.vTexcoord * frameUVSize;
 
     Out.vColor = g_Texture.Sample(PointSampler, finalUV);;
@@ -152,8 +136,6 @@ PS_OUT PS_MAIN(PS_IN In)
 
 	return Out;
 }
-
-/* 지정해준 색을 지정한 렌더타겟에 그려준다. */
 
 technique11 DefaultTechnique
 {

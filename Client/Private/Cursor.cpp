@@ -30,8 +30,7 @@ HRESULT CCursor::Initialize(void* pArg)
         return E_FAIL;
 
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
-                                   XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -41,7 +40,6 @@ HRESULT CCursor::Initialize(void* pArg)
 
 void CCursor::Priority_Update(_float fTimeDelta)
 {
-
 }
 
 void CCursor::Update(_float fTimeDelta)
@@ -50,9 +48,7 @@ void CCursor::Update(_float fTimeDelta)
     GetCursorPos(&ptCursor);
     ScreenToClient(g_hWnd, &ptCursor);
 
-    m_pTransformCom->Set_TRANSFORM(
-        CTransform::T_POSITION,
-        XMVectorSet((_float)ptCursor.x - g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f - (_float)ptCursor.y, 0.f, 1.f));
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((_float)ptCursor.x - g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f - (_float)ptCursor.y, 0.f, 1.f));
 }
 
 void CCursor::Late_Update(_float fTimeDelta)
@@ -91,12 +87,10 @@ HRESULT CCursor::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_VIBuffer */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"), TEXT("Com_VIBuffer"),
                                       reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
@@ -115,7 +109,6 @@ CCursor* CCursor::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     }
 
     return pInstance;
-    ;
 }
 
 CGameObject* CCursor::Clone(void* pArg)

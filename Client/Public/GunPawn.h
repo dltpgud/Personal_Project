@@ -1,50 +1,22 @@
 #pragma once
 #include "Client_Defines.h"
-#include "Actor.h"
-BEGIN(Engine)
-
-END
+#include "Monster.h"
 
 BEGIN(Client)
-class CMonsterHP;
-class CGunPawn final : public CActor
+
+class CGunPawn final : public CMonster
 {
    
 public:
-    enum PARTOBJID
+    enum STATE : _ubyte
     {
-        PART_BODY,
-        PART_WEAPON,
-        PART_EFFECT,
-        PART_HP,
-        PART_END
-    };
-    enum STATE
-    {
-        ST_GRENADE_PRESHOOT,
-        ST_GRENADE_SHOOT,   
-        ST_JETPACK,         
-        ST_PRESHOOT,        
-        ST_IDLE,            
-        ST_SHOOT01,         
-        ST_SHOOT03,         
-        ST_STURN_LOOP,      
-        ST_RUN_BACK,        
-        ST_RUN_BACK_LEFT,  
-        ST_RUN_BACK_RIGHT,  
-        ST_RUN_BACK_FRONT,  
-        ST_RUN_LEFT,        
-        ST_RUN_RIGHT,       
-        ST_STAGGER_BACK,    
-        ST_STAGGER_FRONT, 
-        ST_STAGGER_LEFT,    
-        ST_STAGGER_RIGHT, 
-        ST_STUN_START, 
-        ST_HIT_BACK,   
-        ST_HIT_FRONT,
-        ST_HIT_LEFT,  
-        ST_HIT_RIGHT 
-    };                   
+        ST_IDLE,
+        ST_SHOOT,
+        ST_HIT,
+        ST_DEAD,
+        ST_MOVE,
+        ST_END
+    };                  
 
 private:
     CGunPawn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -52,29 +24,18 @@ private:
     virtual ~CGunPawn() = default;
 
 public:
-    /* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
     virtual HRESULT Initialize_Prototype() override;
-
-    /* 패킷이나 파일 입출력을 통해서 받아오지 못하는 정보들도 분명히 존재한다. */
-    /* 원형에게 존재하는 않는 추가적인 초기화가 필요한 경우 호출한ㄴ다. */
     virtual HRESULT Initialize(void* pArg) override;
     virtual void Priority_Update(_float fTimeDelta) override;
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
     virtual void HIt_Routine()override;
-    virtual void Dead_Routine(_float fTimeDelta) override;
-
-
-    void NON_intersect(_float fTimedelta);
+    virtual void Dead_Routine() override;
 
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
-    HRESULT Bind_ShaderResources();
-    CMonsterHP* m_pPartHP = { nullptr };
-    _float m_FireTime{ 0.f };
-
 
 public:
     static CGunPawn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -82,3 +43,31 @@ public:
     virtual void Free() override;
 };
 END
+
+///////////////////////////////////MONSTER_ANIM_DATA/////////////////////////////////////////
+// enum STATE
+//{
+//     ST_GRENADE_PRESHOOT, 0
+//     ST_GRENADE_SHOOT,   1
+//     ST_JETPACK,         2
+//     ST_PRESHOOT,        3 //망가짐
+//     ST_IDLE,            4
+//     ST_SHOOT01,         5  //망가짐
+//     ST_SHOOT03,         6 //망가짐
+//     ST_STURN_LOOP,      7
+//     ST_RUN_BACK,        8
+//     ST_RUN_BACK_LEFT,  9
+//     ST_RUN_BACK_RIGHT,  10
+//     ST_RUN_BACK_FRONT,  11
+//     ST_RUN_LEFT,        12
+//     ST_RUN_RIGHT,       13
+//     ST_STAGGER_BACK,    14
+//     ST_STAGGER_FRONT,   15
+//     ST_STAGGER_LEFT,    16
+//     ST_STAGGER_RIGHT, 17
+//     ST_STUN_START, 18
+//     ST_HIT_BACK,   19 망가진 애님
+//     ST_HIT_FRONT,  20
+//     ST_HIT_LEFT,  21
+//     ST_HIT_RIGHT  22
+// };

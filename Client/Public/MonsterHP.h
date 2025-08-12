@@ -39,13 +39,7 @@ public:
 	void Set_HitStart(_bool start) {
 	 	m_bStart = start;
 	}
-	void Set_Hit(_bool bHit) {
-	 	m_bHit = bHit;
-	}
-	void Set_bLateUpdaet(_bool bLateUpdate)
-	{
-		m_bLateUpdaet = bLateUpdate;
-	}
+	
 private:
 	CTexture*	    m_pTextureCom = {};
 	CShader*		m_pShaderCom = { nullptr };
@@ -53,12 +47,11 @@ private:
 	_float m_fHP{};
 	_float m_fMaxHP{};
 	_float m_fHP_Pluse = { 0.f };
-	_bool m_bStart = {false};
+	_bool  m_bStart = {false};
 	_float m_fRatio = { 0.f };
-	_bool m_bLateUpdaet = { false };
-	_bool m_bHit = { false };
-        _float2 m_fPsize{1.2f, 0.1f};
-
+    _float m_fCurRatio = {0.f};
+    _float2 m_fPsize{1.2f, 0.1f};
+ 
     private:
 	HRESULT Add_Components();
 	

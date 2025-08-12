@@ -5,15 +5,20 @@ Engine::CInput_Device::CInput_Device(void)
 
 }
 
-void CInput_Device::Mouse_Fix()
+_bool CInput_Device::Mouse_Fix(_bool Fix)
 {
+    if (true == Fix)
+        m_bturn = true;
 
-	if (!m_bturn)
-	{
-		m_bturn = true;
-	}
-	else
-		m_bturn = false;
+    if (Get_DIKeyDown(DIK_TAB))
+    {
+        if (!m_bturn)
+        {
+            m_bturn = true;
+        }
+        else
+            m_bturn = false;
+    }
 
 	if (m_bturn == true) 
 	{
@@ -22,6 +27,9 @@ void CInput_Device::Mouse_Fix()
 		ClientToScreen(g_Hwnd, &ptMouse);
 		SetCursorPos(ptMouse.x, ptMouse.y);
 	}
+
+
+	return m_bturn;
 }
 
 HRESULT Engine::CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY)
@@ -72,7 +80,7 @@ HRESULT Engine::CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd, _uint iWin
 void CInput_Device::Update_InputDev(void)
 {	
 	memcpy(m_PreKeyState, m_byKeyState, sizeof(m_PreKeyState));
-	memcpy(m_PreMouseState, m_tMouseState.rgbButtons, sizeof(_byte) * 4);
+	memcpy(m_PreMouseState, m_tMouseState.rgbButtons, sizeof(_byte) * 3);
 
 	m_pKeyBoard->GetDeviceState(256, m_byKeyState);
 	m_pMouse->GetDeviceState(sizeof(m_tMouseState), &m_tMouseState);

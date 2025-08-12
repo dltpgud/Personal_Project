@@ -104,7 +104,8 @@ public:
 
   virtual _float check_BoxDist(_vector RayPos, _vector RayDir) { return _float(0xffff); }
   virtual CCollider* Get_Collider() { return m_pColliderCom; };
-protected:
+ 
+  protected:
     class CGameInstance* m_pGameInstance = {nullptr};
     ID3D11Device* m_pDevice = {nullptr};
     ID3D11DeviceContext* m_pContext = {nullptr};

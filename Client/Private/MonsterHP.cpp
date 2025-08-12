@@ -13,8 +13,6 @@ CMonsterHP::CMonsterHP(const CMonsterHP& Prototype)
 
 HRESULT CMonsterHP::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
@@ -39,38 +37,41 @@ HRESULT CMonsterHP::Initialize(void* pArg)
 
 void CMonsterHP::Priority_Update(_float fTimeDelta)
 {
-    XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * XMLoadFloat4x4(m_pParentMatrix)); 
+    XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * XMLoadFloat4x4(m_pParentMatrix));
 }
 
 void CMonsterHP::Update(_float fTimeDelta)
 {
+   if (false == m_bStart)
+        return;
 
-	if (true == m_bStart) {
-		if (m_fHP_Pluse != m_fHP / m_fMaxHP)
-		{
-			m_fHP_Pluse -= m_fRatio;
-	
-			if (m_fHP_Pluse <= m_fHP / m_fMaxHP)
-			{
-				m_fHP_Pluse = (m_fHP / m_fMaxHP);
-			}
-		}
-	}
-
-	
+   if (m_fHP_Pluse != m_fHP / m_fMaxHP)
+   {
+   	 m_fHP_Pluse -= m_fRatio;
+   
+   	if (m_fHP_Pluse <= m_fHP / m_fMaxHP)
+   	{
+   		m_fHP_Pluse = (m_fHP / m_fMaxHP);
+   	}
+ 
+   	m_fCurRatio = m_fHP / m_fMaxHP;
+   }
 }
 
 void CMonsterHP::Late_Update(_float fTimeDelta)
 {
-	if (false == m_bLateUpdaet)
-		return;
-
+    if (false == m_bStart)
+        return;
+    
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
 		return;
 }
 
 HRESULT CMonsterHP::Render()
 {
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof _float4)))
+        return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
 	    return E_FAIL;
 
@@ -84,7 +85,7 @@ HRESULT CMonsterHP::Render()
 		return E_FAIL;
 
 #pragma region HP_Bar_BackGround
-        if (FAILED(m_pShaderCom->Bind_RawValue("g_Hit", &m_bHit, sizeof(_bool))))
+        if (FAILED(m_pShaderCom->Bind_RawValue("g_Hit", &m_bStart, sizeof(_bool))))
 		return E_FAIL;
 
 	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
@@ -97,9 +98,7 @@ HRESULT CMonsterHP::Render()
 	m_pVIBufferCom->Render();
 
 #pragma endregion
-
-	_float Cur = m_fHP / m_fMaxHP;
-	if (FAILED(m_pShaderCom->Bind_RawValue("g_hp", &Cur, sizeof(_float))))
+     if (FAILED(m_pShaderCom->Bind_RawValue("g_hp", &m_fCurRatio, sizeof(_float))))
 	 	return E_FAIL;
 
      if (FAILED(m_pShaderCom->Bind_RawValue("g_hp_pluse", &m_fHP_Pluse, sizeof(_float))))
@@ -116,18 +115,15 @@ HRESULT CMonsterHP::Render()
 	 
 	 m_pVIBufferCom->Render();
 	
-
 	return S_OK;
 }
 
 HRESULT CMonsterHP::Add_Components()
 {
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
  	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferPoint"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;

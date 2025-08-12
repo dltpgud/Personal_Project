@@ -42,12 +42,9 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
 
 void CInteractiveUI::Priority_Update(_float fTimeDelta)
 {
-
     if (m_pGameInstance->Get_DIKeyDown(DIK_F))
     {
-        
         m_bColor = true;
-     
     }
 }
 
@@ -66,12 +63,10 @@ void CInteractiveUI::Update(_float fTimeDelta)
     }
     else
         m_vColor = { 1.f,1.f,1.f,1.f };
-    
 }
 
 void CInteractiveUI::Late_Update(_float fTimeDelta)
 {
-
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
         return;
 }
@@ -120,12 +115,10 @@ HRESULT CInteractiveUI::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_VIBuffer */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"), TEXT("Com_VIBuffer"),
                                       reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
@@ -144,7 +137,6 @@ CInteractiveUI* CInteractiveUI::Create(ID3D11Device* pDevice, ID3D11DeviceContex
     }
 
     return pInstance;
-    ;
 }
 
 CGameObject* CInteractiveUI::Clone(void* pArg)

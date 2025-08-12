@@ -20,7 +20,7 @@ HRESULT CSky::Initialize_Prototype()
 
 HRESULT CSky::Initialize(void * pArg)
 {
-	if (FAILED(__super::Initialize(nullptr)))
+    if (FAILED(__super::Initialize(pArg)))
 		return E_FAIL;
 
 	if (FAILED(Add_Components()))
@@ -31,7 +31,7 @@ HRESULT CSky::Initialize(void * pArg)
 
 void CSky::Priority_Update(_float fTimeDelta)
 {
-
+ 
 }
 
 void CSky::Update(_float fTimeDelta)

@@ -85,13 +85,11 @@ void CPlayerBullet::Late_Update(_float fTimeDelta)
 
 void CPlayerBullet::Dead_Rutine(_float fTimeDelta)
 {
-
     m_DeadSum += fTimeDelta;
     m_iTexNum = 1;
 
    if (m_DeadSum > 0.4f)
         m_bDead = true;
-
 }
 
 HRESULT CPlayerBullet::Render()
@@ -165,17 +163,15 @@ HRESULT CPlayerBullet::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
         TEXT("Com_Collider_Sphere"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
         return E_FAIL;
-    /* For.Com_Texture */
+
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_PlayerBullet"),
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom[0]))))
         return E_FAIL;
 
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_VIBuffer */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferPoint"),
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
