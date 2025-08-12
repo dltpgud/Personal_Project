@@ -134,11 +134,9 @@ HRESULT CMesh::Set_InstanceBuffer(const vector<_matrix>& vecObjMat)
     m_Inst_BufferDesc.MiscFlags = 0;
     m_Inst_BufferDesc.StructureByteStride = m_iInstVertexStride;
 
-
-    // m_pInst_BufferData :: 인스턴싱할 월드 메트릭스 정보를 담은 VTXMATRIX_INSTANCE 구조체 변수
     m_pInst_BufferData = new VTXMATRIX_INSTANCE[m_iNumInstance];
     for (size_t i = 0; i < m_iNumInstance; ++i)  
-    {  // 인스터싱할 월드 메트리스 개수 만큼 반복하여 월드 메트릭스 정보를 채워준다.
+    {  
         _matrix WorldMat = vecObjMat[i];
         XMStoreFloat4(&m_pInst_BufferData[i].vRight, WorldMat.r[0]);
         XMStoreFloat4(&m_pInst_BufferData[i].vUp, WorldMat.r[1]);

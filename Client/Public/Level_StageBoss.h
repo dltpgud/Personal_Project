@@ -17,15 +17,15 @@ public:
 	virtual HRESULT Render() override;
 
 private: 
-	HRESULT Ready_Layer_Player (const _wstring& pLayerTag);
+	HRESULT Ready_Layer_Player ();
 	HRESULT Ready_Layer_Monster(const _wstring& pLayerTag);
 	HRESULT Ready_Layer_Camera (const _wstring& pLayerTag);
-	HRESULT Ready_UI     ();
 	HRESULT Ready_Layer_Map    (const _wstring& pLayerTag);
 	HRESULT Ready_Find_cell();
 	HRESULT Ready_Light();
-	
-private :
+    HRESULT Ready_UI();
+
+    private :
 	class CSceneCamera* m_pSceneCam = { nullptr};
 	_bool m_bstart = false;
 public:

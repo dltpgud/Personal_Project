@@ -45,7 +45,7 @@ public: /* For.Input_Device */
 	_byte	Get_DIMouseDown(MOUSEKEYSTATE eMouse);
 	_byte   Get_DIKeyDown(_ubyte byKeyID);
 	_byte   Get_DIAnyKey();
-	void	MouseFix();
+    _bool   MouseFix(_bool Fix= false);
 #pragma endregion
 
 #pragma region Timer_Manager
@@ -53,9 +53,6 @@ public: /* for.Timer_Manager */
 	_float  Get_TimeDelta(const _wstring& strTimerTag);
 	HRESULT	Add_Timer(const _wstring& strTimerTag);
 	void    Update_TimeDelta(const _wstring& strTimerTag);
-  #ifndef _DEBUG
-	void    Get_FPS(const _wstring& pTimerTag, HWND g_hWnd);
-   #endif
 #pragma endregion
 
 #pragma region Level_Manager
@@ -81,7 +78,8 @@ public: /* For.Object_Manager*/
 	map<const _wstring, class CGameObject*>		 Get_ProtoObject_map();
     _bool IsGameObject(_uint iLevelIndex, const _wstring& strLayerTag );
 	void ObjClear(_uint iLevelIndex);
-	CGameObject::PICKEDOBJ_DESC Pking_onMash(_vector RayPos, _vector RayDir);
+    CGameObject::PICKEDOBJ_DESC Pking_onMash(const _uint& iLevelIndex, const _wstring& strLayerTag, _vector RayPos,
+                                             _vector RayDir);
     CGameObject* Recent_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
     list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
 #pragma endregion
@@ -95,6 +93,7 @@ public: /* For.Object_Manager*/
 	HRESULT Player_To_Monster_Ray_Collison_Check();
 	HRESULT Find_Cell();
     HRESULT changeCellType(_int type);
+        _vector Get_RayPos();
 #pragma endregion
 
 #pragma region UI_Manager
@@ -102,6 +101,7 @@ public: /* For.UI_Manager*/
 	HRESULT Set_OpenUI(const _uint& uID, _bool UIopen);
     HRESULT UI_shaking(const _uint& uID, _float fTimeDelta);    
 	HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY);
+    HRESULT ADD_UI_ShakingList(class CUI* UIOBJ);
 	HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
     CGameObject* Find_Clone_UIObj(const _wstring& strCloneTag);
     HRESULT Add_UI_To_Proto(const _wstring& strProtoTag, class CGameObject* pUI);

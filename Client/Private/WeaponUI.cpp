@@ -22,11 +22,11 @@ HRESULT CWeaponUI::Initialize(void* pArg)
 
     pDesc->fX = 1170.f;
     pDesc->fY = 640.f;
+    pDesc->fZ = 0.2f;
     pDesc->fSizeX = 500.f;
     pDesc->fSizeY = 100.f;
-    pDesc->UID = CUI::UIID_PlayerWeaPon;
-      pDesc->Update = true;
-       pDesc->fSpeedPerSec = 0.f;
+    pDesc->UID = UIID_PlayerWeaPon;
+    pDesc->fSpeedPerSec = 0.f;
     pDesc->fRotationPerSec = 0.f;
     m_fXPos = 1150.f;
 
@@ -35,7 +35,7 @@ HRESULT CWeaponUI::Initialize(void* pArg)
 
     m_pTransformCom->Set_Scaling(pDesc->fSizeX, pDesc->fSizeY, 1.f);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
-        XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
+        XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.5f, 1.f));
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -51,40 +51,9 @@ HRESULT CWeaponUI::Initialize(void* pArg)
 
 void CWeaponUI::Priority_Update(_float fTimeDelta)
 {
-    if (m_IsShaking)
-    {
-        if (m_fShakingTime > 0.f)
-        {
-            for (_int i = 0; i < 6; i++)
-            {
-                m_Desc[i].fX += m_fShaking_X;
-                m_Desc[i].fY += m_fShaking_Y;
-            }
-
-            for (_int i = 0; i < 5; i++)
-            {
-                m_ScecondDesc[i].fX += m_fShaking_X;
-                m_ScecondDesc[i].fY += m_fShaking_Y;
-            }
-        }
-        else if (m_fShakingTime <= 0.f)
-        {
-
-            for (_int i = 0; i < 6; i++)
-            {
-                m_Desc[i].fX = m_fPrXPos[i];
-                m_Desc[i].fY = m_fPrYPos[i];
-            }
-
-            for (_int i = 0; i < 5; i++)
-            {
-                m_ScecondDesc[i].fX = m_fPrXPos2[i];
-                m_ScecondDesc[i].fY = m_fPrYPos2[i];
-            }
-        }
-    }
+  
 }
-
+        
 void CWeaponUI::Update(_float fTimeDelta)
 {
      if (nullptr == m_pGameInstance->Get_Player())
@@ -92,17 +61,16 @@ void CWeaponUI::Update(_float fTimeDelta)
      
      m_iPreBullet = m_iCurrentBullet;
 
-      m_iCurrentBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Bullet();
+     m_iCurrentBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Bullet();
      swprintf_s(m_wCurrentBullte,50, L"%u",m_iCurrentBullet);
 
      if (m_iPreBullet != m_iCurrentBullet)
          m_vColar = { 1.f, 0.f, 0.f,1.f };
      else 
          m_vColar = { 1.f, 1.f, 1.f,1.f };
-      m_iMaxBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_MaxBullte();
+
+     m_iMaxBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_MaxBullet();
      swprintf_s(m_wMaxBullte, 50, L"%u", m_iMaxBullet);
- 
-     
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F1))
     {
@@ -169,7 +137,6 @@ void CWeaponUI::Update(_float fTimeDelta)
             break;
         default: break;
         }
-
         m_bChooseWeaPon = false;
     }
 }
@@ -178,25 +145,18 @@ void CWeaponUI::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
         return;
+
+    if (FAILED(m_pGameInstance->ADD_UI_ShakingList(this)))
+        return;
 }
 
 HRESULT CWeaponUI::Render()
 {
-   // if (m_bPrUpdate)
-        Set_UI_Pos(&m_Desc[4]);
-    if (false == m_IsShaking)
-    {
-        m_pTransformCom->Set_Scaling(m_Desc[4].fSizeX, m_Desc[4].fSizeY, 1.f);
-        m_pTransformCom->Set_TRANSFORM(
-            CTransform::T_POSITION,
-            XMVectorSet(m_Desc[4].fX - ViewportDesc.Width * 0.5f, -m_Desc[4].fY + ViewportDesc.Height * 0.5f, 0.5f, 1.f));
-
-
-    }
+    Set_UI_Pos(&m_Desc[4]);
 
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
-    ;
+    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
         return E_FAIL;
 
@@ -212,21 +172,11 @@ HRESULT CWeaponUI::Render()
 
     m_pVIBufferCom->Render();
 
-  //  if (m_bPrUpdate)
-        Set_UI_Pos(&m_ScecondDesc[4]);
-    if (false == m_IsShaking)
-    {
-        m_pTransformCom->Set_Scaling(m_ScecondDesc[4].fSizeX, m_ScecondDesc[4].fSizeY, 1.f);
-        m_pTransformCom->Set_TRANSFORM(
-            CTransform::T_POSITION,
-            XMVectorSet(m_ScecondDesc[4].fX - ViewportDesc.Width * 0.5f, -m_ScecondDesc[4].fY + ViewportDesc.Height * 0.5f, 0.5f, 1.f));
-   
-   
-    }
-   
+    Set_UI_Pos(&m_ScecondDesc[4]);
+
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
-    ;
+    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
         return E_FAIL;
    
@@ -243,7 +193,7 @@ HRESULT CWeaponUI::Render()
     m_pVIBufferCom->Render();
 
     for (_uint i = 0; i < 4; i++)
-    {//if(m_bPrUpdate)
+    {
         Set_UI_Pos(&m_Desc[i]);
 
         if (m_WeaPonUI != i)
@@ -251,7 +201,7 @@ HRESULT CWeaponUI::Render()
 
         if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
             return E_FAIL;
-        ;
+        
         if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
             return E_FAIL;
 
@@ -270,12 +220,11 @@ HRESULT CWeaponUI::Render()
 
     for (_uint i = 4; i < 6; i++)
     {
-        //if (m_bPrUpdate)
         Set_UI_Pos(&m_Desc[i]);
 
         if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
             return E_FAIL;
-        ;
+        
         if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
             return E_FAIL;
 
@@ -296,16 +245,14 @@ HRESULT CWeaponUI::Render()
     {
         for (_uint i = 0; i < 4; i++)
         {
-           // if (m_bPrUpdate)
             Set_UI_Pos(&m_ScecondDesc[i]);
 
             if (m_ScecondWeaPonUI != i)
                 continue;
 
-
             if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
                 return E_FAIL;
-            ;
+          
             if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
                 return E_FAIL;
 
@@ -323,9 +270,6 @@ HRESULT CWeaponUI::Render()
         }
     }
 
-
-    //최대 탄창
-
     if(m_iMaxBullet>10)
     m_pGameInstance->Render_Text(TEXT("Robo"), m_wMaxBullte, _float2(m_Desc[5].fX - 3.f, m_Desc[5].fY - 13.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.4f);
     else
@@ -333,13 +277,51 @@ HRESULT CWeaponUI::Render()
 
     m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("/"), _float2(m_Desc[5].fX-13.f, m_Desc[5].fY-23.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.4f);
 
-    //현재 탄
-
     if(m_iCurrentBullet >=10)
     m_pGameInstance->Render_Text(TEXT("Robo"), m_wCurrentBullte, _float2(m_Desc[5].fX - 58.f, m_Desc[5].fY - 48.f), m_vColar, 0.6f);
     else 
         m_pGameInstance->Render_Text(TEXT("Robo"), m_wCurrentBullte, _float2(m_Desc[5].fX - 38.f, m_Desc[5].fY - 48.f), m_vColar, 0.6f);
     return S_OK;
+}
+
+void CWeaponUI::ShakingEvent(_float fTimeDelta)
+{
+    if (m_fShakingTime > 0.f)
+    {
+        for (_int i = 0; i < 6; i++)
+        {
+            m_Desc[i].fX += m_fShaking_X;
+            m_Desc[i].fY += m_fShaking_Y;
+        }
+
+        for (_int i = 0; i < 5; i++)
+        {
+            m_ScecondDesc[i].fX += m_fShaking_X;
+            m_ScecondDesc[i].fY += m_fShaking_Y;
+        }
+    }
+    else if (m_fShakingTime <= 0.f)
+    {
+        for (_int i = 0; i < 6; i++)
+        {
+            m_Desc[i].fX = m_fPrXPos[i];
+            m_Desc[i].fY = m_fPrYPos[i];
+        }
+
+        for (_int i = 0; i < 5; i++)
+        {
+            m_ScecondDesc[i].fX = m_fPrXPos2[i];
+            m_ScecondDesc[i].fY = m_fPrYPos2[i];
+        }
+    }
+}
+
+void CWeaponUI::Set_ScecondWeapon(const _uint& type)
+{
+    m_ScecondWeaPonUI = m_WeaPonUI;
+    m_WeaPonUI = type;
+    m_bRander = true;
+    m_bChooseWeaPon = true;
 }
 
 HRESULT CWeaponUI::Set_WeaponUI_Pos()
@@ -351,8 +333,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[0].fZ = 0.4f;
     m_Desc[0].fSizeX = 220.f;
     m_Desc[0].fSizeY = 75.f;
-    m_Desc[0].Update = true;
-
     m_Desc[0].fSpeedPerSec = 0.f;
 
     /*AssaultRifle*/
@@ -362,9 +342,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[1].fZ = 0.4f;
     m_Desc[1].fSizeX = 200.f;
     m_Desc[1].fSizeY = 75.f;
-
-    m_Desc[1].Update = true;
-
     m_Desc[1].fSpeedPerSec = 0.f;
 
     /*MissileGatling*/
@@ -374,9 +351,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[2].fZ = 0.4f;
     m_Desc[2].fSizeX = 200.f;
     m_Desc[2].fSizeY = 70.f;
-
-    m_Desc[2].Update = true;
-
     m_Desc[2].fSpeedPerSec = 0.f;
 
     /*HeavyCrossbow*/
@@ -386,9 +360,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[3].fZ = 0.4f;
     m_Desc[3].fSizeX = 200.f;
     m_Desc[3].fSizeY = 70.f;
-
-    m_Desc[3].Update = true;
-
     m_Desc[3].fSpeedPerSec = 0.f;
 
     /*Fream*/
@@ -398,9 +369,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[4].fZ = 0.5f;
     m_Desc[4].fSizeX = 200.f;
     m_Desc[4].fSizeY = 95.f;
-
-    m_Desc[4].Update = true;
-
     m_Desc[4].fSpeedPerSec = 0.f;
 
     /*Tan*/
@@ -410,7 +378,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[5].fZ = 0.5f;
     m_Desc[5].fSizeX = 70.f;
     m_Desc[5].fSizeY = 55.f;
-    m_Desc[5].Update = true;
     m_Desc[5].fSpeedPerSec = 0.f;
 
     for (_int i = 0; i < 6; i++)
@@ -431,9 +398,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[0].fZ = 0.4f;
     m_ScecondDesc[0].fSizeX = 110.f;
     m_ScecondDesc[0].fSizeY = 35.f;
-
-    m_ScecondDesc[0].Update = true;
-
     m_ScecondDesc[0].fSpeedPerSec = 0.f;
 
     /*AssaultRifle*/
@@ -443,9 +407,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[1].fZ = 0.4f;
     m_ScecondDesc[1].fSizeX = 110.f;
     m_ScecondDesc[1].fSizeY = 35.f;
-
-    m_ScecondDesc[1].Update = true;
-
     m_ScecondDesc[1].fSpeedPerSec = 0.f;
 
     /*MissileGatling*/
@@ -455,7 +416,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[2].fZ = 0.4f;
     m_ScecondDesc[2].fSizeX = 110.f;
     m_ScecondDesc[2].fSizeY = 35.f;
-    m_ScecondDesc[2].Update = true;
     m_ScecondDesc[2].fSpeedPerSec = 0.f;
 
     /*HeavyCrossbow*/
@@ -465,7 +425,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[3].fZ = 0.4f;
     m_ScecondDesc[3].fSizeX = 120.f;
     m_ScecondDesc[3].fSizeY = 45.f;
-    m_ScecondDesc[3].Update = true;
     m_ScecondDesc[3].fSpeedPerSec = 0.f;
 
     /*Fream*/
@@ -475,7 +434,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[4].fZ = 0.5f;
     m_ScecondDesc[4].fSizeX = 120.f;
     m_ScecondDesc[4].fSizeY = 45.f;
-    m_ScecondDesc[4].Update = true;
     m_ScecondDesc[4].fSpeedPerSec = 0.f;
 
     for (_int i = 0; i < 5; i++)
@@ -489,18 +447,14 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 
 HRESULT CWeaponUI::Add_Components()
 {
-    /* For.Com_Texture */
-
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Player_WeaPonTEX"),
                                       TEXT("Com_Texture_WeaPonTEX"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_VIBuffer */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"), TEXT("Com_VIBuffer"),
                                       reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
@@ -536,7 +490,6 @@ CGameObject* CWeaponUI::Clone(void* pArg)
 
 void CWeaponUI::Free()
 {
-
     __super::Free();
 
     Safe_Release(m_pVIBufferCom);

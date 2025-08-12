@@ -63,55 +63,49 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
     Set_TRANSFORM(T_POSITION, vPosition);
 }
 
-void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck,  CNavigation* pNavigation)
+void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _int* isFall, CNavigation* pNavigation)
 {
-    m_fTimeSum += fTimeDelta * 2.8f;
- 
-    _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vUp = Get_TRANSFORM(CTransform::T_UP);
-
-    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower - m_fTimeSum) * fTimeDelta * m_fSpeedPerSec;
-
-    _vector slide{}; 
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &slide))
-    {
-       vAfterPos += slide;
-    }
-          
-     Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
-
-    _float3 Position;
-    XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::T_POSITION));
-    if (Position.y <= YPos)
-    {
-        Position.y = YPos;
-       Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
-        m_fTimeSum = 0.f;
-        m_fTimeSumDouble = 0.f;
-        *Jumpcheck = false;
-    }
-}
-
-void CTransform::Go_Doublejump(_float fTimeDelta, CNavigation* pNavigation)
-{
-    
-    m_fTimeSumDouble += fTimeDelta * 2.8f;
+    m_fJumpVelocity -= m_fGravity * fTimeDelta;
 
     _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
-
     _vector vUp = Get_TRANSFORM(CTransform::T_UP);
 
-    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * (m_JumpPower*1.5f - m_fTimeSumDouble) * fTimeDelta * m_fSpeedPerSec;
+    // 이동
+    _vector vAfterPos = vPosition + XMVector3Normalize(vUp) * m_fJumpVelocity * fTimeDelta;
 
     _vector slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &slide))
-    {
+    if (pNavigation && !pNavigation->isMove(vAfterPos, vPosition, &slide))
         vAfterPos += slide;
-    }
 
     Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
-
+    *isFall = m_fJumpVelocity;
+    // 착지 판정
+    _float3 Position;
+    XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::T_POSITION));
+    if (Position.y <= YPos && m_fJumpVelocity <= 0.f)
+    {
+        Position.y = YPos;
+        Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(Position.x, Position.y, Position.z, 1.f));
+        
+        // 부드러운 착지를 위한 감속 처리
+        if (!m_bIsLanding)
+        {
+            m_bIsLanding = true;
+            m_fJumpVelocity = 0.f;
+        }
+        else
+        {
+            // 착지 완료
+            m_fJumpVelocity = 0.f;
+            *Jumpcheck = false;
+            m_bCanDoubleJump = true; // 착지하면 더블 점프 가능 복구
+            m_bIsLanding = false;
+        }
+    }
+    else if (Position.y > YPos)
+    {
+        m_bIsLanding = false;
+    }
 }
 
 void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigation, _bool* bStop )
@@ -125,14 +119,12 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
     {
         vPosition += XMVectorZero();
 
-        if(bStop != nullptr)
-        *bStop = true;
+        if (bStop != nullptr)
+            *bStop = true;
     }
     else
-        vPosition = vAfterPos;
 
-
-    Set_TRANSFORM(T_POSITION, vPosition);
+    Set_TRANSFORM(T_POSITION, vAfterPos);
 }
 
 void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavigation* pNavigation, _bool* bStop )
@@ -145,14 +137,14 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
     _vector vAfterPos = vPosition + Dir * fTimeDelta * m_fSpeedPerSec*2.f - vUp;
 
     _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
-    {
-        vPosition += XMVectorZero();
-
-        if (bStop != nullptr)
-            *bStop = false;
-    }
-    else
+     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
+     {
+         vPosition += XMVectorZero();
+    
+         if (bStop != nullptr)
+             *bStop = false;
+     }
+     else
         vPosition = vAfterPos;
 
      Set_TRANSFORM(CTransform::T_POSITION, vPosition);
@@ -214,39 +206,53 @@ void CTransform::Set_Rotation_to_Player()
     Set_TRANSFORM(CTransform::T_LOOK, XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
 }
 
-void CTransform::Move_TagetAstar(CNavigation* pNavigation, _float fTimedelta)
+_bool CTransform::FollowPath(CNavigation* pNavigation, _float fTimedelta)
 {
     vector<_uint> vec = pNavigation->Get_PathPoints();
     if (vec.empty())
-        return;
+        return false; // 경로 없음
 
     if (m_CurrentPathIndex >= vec.size())
     {
-        m_CurrentPathIndex = 0; // 경로 완료
-        return;
+        // 모든 경로 완료
+        m_CurrentPathIndex = 0;
+        return true; // 도착 완료
     }
 
     const _uint targetCellIndex = vec[m_CurrentPathIndex];
     const _vector currentPos = Get_TRANSFORM(CTransform::T_POSITION);
     const _vector targetPos = pNavigation->Get_TagetPos(targetCellIndex);
+    
+    // targetPos가 유효한지 확인
+    if (XMVectorGetX(XMVector3Length(targetPos)) < 0.001f)
+        return false;
 
     const _vector dir = targetPos - currentPos;
     _vector dirXZ = XMVectorSetY(dir, 0.f);
     const _float distSq = XMVectorGetX(XMVector3LengthSq(dirXZ));
 
     constexpr _float thresholdSq = 1.f * 1.f;
+
     if (distSq < thresholdSq)
     {
         ++m_CurrentPathIndex;
-        return;
+        if (m_CurrentPathIndex >= vec.size())
+            return true;
+        return false;
     }
 
     _vector vLook = XMVector3Normalize(XMVectorSetY(Get_TRANSFORM(CTransform::T_LOOK), 0.f));
     _vector moveDir = XMVectorSetY(dir, 0.f);
+    
+    // moveDir이 0벡터인지 확인 (나누기 0 방지)
+    const _float moveDirLength = XMVectorGetX(XMVector3Length(moveDir));
+    if (moveDirLength < 0.001f)
+        return false;
+    
     moveDir = XMVector3Normalize(moveDir);
 
     const _float angleBetween = XMVectorGetX(XMVector3AngleBetweenNormals(vLook, moveDir));
-    const _float maxAngle = m_fRotationPerSec * fTimedelta;
+    const _float maxAngle = m_fRotationPerSec * fTimedelta * m_fSpeedPerSec;
 
     const _vector cross = XMVector3Cross(vLook, moveDir);
     const _float sign = (XMVectorGetY(cross) >= 0.f) ? 1.f : -1.f;
@@ -263,8 +269,10 @@ void CTransform::Move_TagetAstar(CNavigation* pNavigation, _float fTimedelta)
     _vector vSlide{};
     if (pNavigation && !pNavigation->isMove(vAfterPos, currentPos, &vSlide))
         Set_TRANSFORM(T_POSITION, currentPos + vSlide);
-    else 
+    else
         Set_TRANSFORM(T_POSITION, vAfterPos);
+
+    return false;
 }
 
 void CTransform::Turn(_fvector vAxis, _float fTimeDelta)

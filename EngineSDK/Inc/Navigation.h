@@ -24,7 +24,7 @@ class ENGINE_DLL CNavigation final : public CComponent
 public:
 	typedef struct NAVIGATION_DESC
 	{
-		_int			iCurrentCellIndex = { -1 };
+		_int	iCurrentCellIndex = { -1 };
 	}NAVIGATION_DESC;
 
 private:
@@ -36,46 +36,50 @@ public:
 	virtual HRESULT Initialize_Prototype();
 	virtual HRESULT Initialize(void* pArg) override;
 
-	void Update(const _float4x4* pWorldMatrix) {m_WorldMatrix = pWorldMatrix;}
+	void            Update(const _float4x4* pWorldMatrix) {m_WorldMatrix = pWorldMatrix;}
 #ifdef _DEBUG
 	virtual HRESULT Render();
 #endif
 
 public:
-    void SetUp_Neighbor();
-    _bool Snap(_fvector vP1, _fvector vP2, _vector distance);
-    void Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type = 0);
+    void           SetUp_Neighbor();
+    _bool          Snap(_fvector vP1, _fvector vP2, _vector distance);
+    void           Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type = 0);
 
-    _bool isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr, _bool Demage = false);
-    _float Compute_HeightOnCell(_float3* fPos);
-	void Set_Taget(_vector Taget);
-	vector<_uint> FindPath(_uint startIndex, _uint goalIndex);
-    _vector Get_TagetPos(_int index);
-     vector<_uint> Get_PathPoints(){return m_PathPoints;}
+    _bool          isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr, _bool Demage = false);
+    _float         Compute_HeightOnCell(_float3* fPos);
+	void           Set_Taget(_vector Taget);
+	vector<_uint>  FindPath(_uint startIndex, _uint goalIndex);
+    _vector        Get_TagetPos(_int index);
+    vector<_uint>  Get_PathPoints(){return m_PathPoints;}
 
-	_uint Get_CurrentCell_Type();
-    _bool ISFall();
-     void Set_Type(_uint Type);
-    void Find_CurrentCell(_vector vWorldPos);
-    _vector Get_SafePos();
-
-	HRESULT Save(const _tchar* tFPath);
-	HRESULT Load(const _tchar* tFPath);
-
-	HRESULT Delete_ALLCell();
-	void Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
+	_uint          Get_CurrentCell_Type();
+    _bool          ISFall();
+    void           Set_Type(_uint Type);
+    void           Find_CurrentCell(_vector vWorldPos);
+    _vector        Get_SafePos();
+                  
+	HRESULT        Save(const _tchar* tFPath);
+	HRESULT        Load(const _tchar* tFPath);
+                   
+	HRESULT        Delete_ALLCell();
+	void           Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
      
  private:
-	 int Find_Cell_ByPosition(_vector vTargetPos);
+	 int           Find_Cell_ByPosition(_vector vTargetPos);
+
  private:
 
      USE_LOCK;
+  
      vector<_uint>              m_PathPoints;
 	 _int					    m_iCurrentCellIndex = { -1 };
 	 vector<class CCell*>	    m_Cells;
      vector<_uint>              m_vecNomoveType;
 	 static	const _float4x4*	m_WorldMatrix ;  
-	_vector					    m_vSafePos{};
+	 _vector			        m_vSafePos{};
+     _bool                      m_bRender{true};
+
 #ifdef _DEBUG
 private:
 	class CShader*				m_pShader = { nullptr };

@@ -81,9 +81,9 @@ public:
 private:
     _float4x4 m_TransMatrix[D3DTS_END];
     _float4x4 m_TransMatrixInverse[D3DTS_END];
-    _float4 m_vCamPosition;
-    _float4 m_vCamLook;
-    _float m_vCamfar;
+    _float4 m_vCamPosition{};
+    _float4 m_vCamLook{};
+    _float m_vCamfar{};
     _float4x4 m_ShadowTransMatrix[D3DTS_END];
 
 

@@ -12,12 +12,10 @@ BEGIN(Client)
 
 class CPlayerEffectUI: public CUI
 {
-
 		enum TYPE{ IDlE,SPRINT, HIT, HEALTH, TYPE_END};
 public:
 		typedef struct CPlayerEffectUI_DESC : public CUI::CUI_DESC
 		{
-
 			const _uint* State{};
 		}CPlayerEffectUI_DESC;
 
@@ -29,11 +27,13 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-        virtual void Priority_Update(_float fTimeDelta) override;
+    virtual void    Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
-	void Set_scale(_int i);
+    virtual void    ShakingEvent(_float fTimeDelta) override;
+    void            Set_scale(_int i);
+
 public:
 	const _uint* m_iPlayerState = nullptr;
 	TYPE m_iType{};
@@ -45,15 +45,14 @@ public:
 	_float m_ScaleY{ 0.f };
 	_float m_alpha[3];
 	_int m_idiscardNum{};
-	class CActor* m_pPlayer = { nullptr };
+
 private:
-	CTexture* m_pTextureCom[CPlayer::STATE_END] = {nullptr};
+	CTexture* m_pTextureCom[5] = {nullptr};
 	CShader* m_pShaderCom= {nullptr};
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
+
 private:
 	HRESULT Add_Components();
-	
-
 
 public:	
 	static CPlayerEffectUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -7,6 +7,7 @@
 #include "BillyBoom.h"
 #include"Player.h"
 #include "BossHP.h"
+#include "Fade.h"
 CBossIntroBG::CBossIntroBG(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{ pDevice, pContext }
 {
 }
@@ -18,15 +19,13 @@ CBossIntroBG::CBossIntroBG(const CBossIntroBG& Prototype)
 
 HRESULT CBossIntroBG::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
 HRESULT CBossIntroBG::Initialize(void* pArg)
 {
 	CBossIntroBG_DESC* Desc = static_cast <CBossIntroBG_DESC*>(pArg) ;
-
+    Desc->Update = true;
 	if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
 
@@ -35,49 +34,27 @@ HRESULT CBossIntroBG::Initialize(void* pArg)
 
 	if(FAILED(Set_Pos()))
 	 return E_FAIL;
+
 		return S_OK;
 }
 
 void CBossIntroBG::Priority_Update(_float fTimeDelta)
 {
-
 	m_pTransformCom->LookAt(XMLoadFloat4(m_pGameInstance->Get_CamPosition()));
-
 }
 
 void CBossIntroBG::Update(_float fTimeDelta)
 {
 	m_interver += fTimeDelta;
 	if (m_interver > 1.0f) {
-		m_interver = 1.0f;  // 이미지가 완전히 나타나면 멈춤
-
+		m_interver = 1.0f;  
+	
 		m_TimeSum += fTimeDelta;
 	}
-
+	
 	if (m_TimeSum >= 2.5f)
 	{
-		m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerHP, true);
-
-		m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon, true);
-
-		m_pGameInstance->Set_OpenUI(CUI::UIID_PlayerWeaPon_Aim, true);
-
-				dynamic_cast<CBossHPUI*>(m_pGameInstance->Find_Clone_UIObj(L"BossHP"))->Set_Open(true);
-
-		dynamic_cast<CBillyBoom*>(
-                    m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Monster"), CGameObject::ACTOR))
-                    ->Set_State(CBillyBoom::ST_Idle);
-	
-		dynamic_cast<CCamera_Free*>(
-                    m_pGameInstance->Find_CloneGameObject(LEVEL_STATIC, TEXT("Layer_Camera"), CGameObject::CAMERA))
-                    ->Set_Update(true);
-	
-		dynamic_cast<CSceneCamera*>(
-                    m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Camera"), CGameObject::CAMERA))
-                    ->Set_Dead(true);
-                static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_Key(true);
-
-		m_bDead = true;
+	   m_bDead = true;
 	}
 }
 
@@ -122,13 +99,11 @@ HRESULT CBossIntroBG::Render()
 
 HRESULT CBossIntroBG::Set_Pos()
 {
-
 	IntroDesc[0].fSizeX = 35.f;
 	IntroDesc[0].fSizeY = 18.f;
 	IntroDesc[0].fX = m_fX;
 	IntroDesc[0].fY = m_fY ;
 	IntroDesc[0].fZ = m_fZ+4.f;
-
 
 	IntroDesc[2].fSizeX = 7.f;
 	IntroDesc[2].fSizeY = 3.f;
@@ -156,27 +131,18 @@ void CBossIntroBG::Set_IntroPos(void* pArg)
 	m_fSizeY = pDesc->fSizeY;
 
 	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-	m_pTransformCom->Set_TRANSFORM(
-		CTransform::T_POSITION,
-		XMVectorSet(m_fX, m_fY + m_fSizeY * 0.4f, m_fZ, 1.f));
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(m_fX, m_fY + m_fSizeY * 0.4f, m_fZ, 1.f));
 }
-
-
 
 HRESULT CBossIntroBG::Add_Components()
 {
-	HRESULT hr = {};
-
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex_Inverse"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
  	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBufferRoop"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;
-
 
 	if (FAILED(__super::Add_Component(LEVEL_STATIC,TEXT("Prototype_Component_Texture_Mask"),
 		TEXT("Com_Texture_Mask"), reinterpret_cast<CComponent**>(&m_pTextureCom[TYPE_Mask]))))
@@ -186,8 +152,7 @@ HRESULT CBossIntroBG::Add_Components()
 		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom[TYPE_Tex]))))
 		return E_FAIL;
 
-	return hr;
-
+	return S_OK;
 }
 
 CBossIntroBG* CBossIntroBG::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -222,6 +187,7 @@ void CBossIntroBG::Free()
 	for (size_t i = 0; i < TYPE_END; i++) {
 		Safe_Release(m_pTextureCom[i]);
 	}
+
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pVIBufferCom);
 }

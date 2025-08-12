@@ -1,8 +1,8 @@
 #pragma once
 #include "Client_Defines.h"
 #include "PartObject.h"
+
 BEGIN(Engine)
-class CShader;
 class CModel;
 END
 
@@ -10,80 +10,69 @@ BEGIN(Client)
 
 class CWeapon final : public CPartObject
 {
-
 public:
 	enum WeaPoneType {
 		HendGun, AssaultRifle, MissileGatling , HeavyCrossbow, WeaPoneType_END
 	};
-	enum WeaPoneState { Reload, Idle, Shoot };
+	enum WeaPoneState { WS_RELOAD, WS_IDLE, WS_SHOOT };
 
-	
 public:
 	typedef struct WEAPON_DESC : CPartObject::PARTOBJECT_DESC
 	{
-		const _uint* pParentState = { nullptr };
 		const _float4x4* pSocketMatrix = { nullptr };
-		const _uint* pType = { nullptr };
 	}WEAPON_DESC;
+
+	struct WEAPON_NODE_DESC
+    {
+       CModel*           pModelCom{nullptr};    
+       _uint             iBodyType{};
+       _float3           iBulletOffset{};
+       const _float4x4*  pBoneMatrix = {nullptr};
+       _int              iMaxBullet{};
+       _int              iCurBullet{};
+       _float            fEmissvePower{};
+       _float            fPreEmissvePower{};
+    };
+
 private:
 	CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CWeapon(const CWeapon& Prototype);
 	virtual ~CWeapon() = default;
 
 public:
-	/* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
 	virtual HRESULT Initialize_Prototype() override;
-
-	/* 패킷이나 파일 입출력을 통해서 받아오지 못하는 정보들도 분명히 존재한다. */
-	/* 원형에게 존재하는 않는 추가적인 초기화가 필요한 경우 호출한ㄴ다. */
 	virtual HRESULT Initialize(void* pArg) override;
-        virtual void Priority_Update(_float fTimeDelta) override;
+    virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-	void Type0_Update(_float fTimeDelta);
-	void Type2_Update(_float fTimeDelta);
-	_float Damage() { return m_fDamage; }
+	_float  Damage() { return m_fDamage; }
 
-	void Choose_Weapon(const _uint& WeaponNum);
-	_uint  Get_Bullte() {
-		return m_iMaxBullet[m_iBullet];
-	}
+public:
+	void    Choose_Weapon(const _uint& WeaponNum);
+    _uint*  Get_Weapon(){return &m_iWeapon;}
+	_uint   Get_Bullet() {return m_vecWeaPone[m_iWeapon].iCurBullet;}
+	_uint   Get_MaxBullet() {return m_vecWeaPone[m_iWeapon].iMaxBullet;}
+    void    Weapon_CallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
+    HRESULT Set_Animation(_int Index, _bool IsLoop);
+    _bool   Play_Animation(_float fTimeDelta);
+    _int    Get_Weapon_Body_Type();
 
-	_uint  Get_MaxBullte() {
-		return m_iFirstBullet[m_pWeapon];
-	}
-	HRESULT Make_Bullet(_float3 Offset);
-	
 private:
-
-	CModel* m_pModelCom[WeaPoneType_END] = {nullptr};
-	const _float4x4* m_pSocketMatrix = { nullptr };
-
-	const _uint* m_pType = { nullptr };
-	_float	m_fEmissivePower{ 0.f };
-	_uint m_pWeapon{};
-	_uint m_iMaxBullet[WeaPoneType_END]{0};
-	_uint m_iFirstBullet[WeaPoneType_END]{ 0 };
-	WeaPoneType	m_iBullet{};
-	_float m_fDamage{};
-	_bool m_istate{};
-	_bool m_bEmissive = false;
-	const _float4x4* m_pWeapon_SocketMatrix[WeaPoneType_END] = { nullptr };
-	_float3 m_fWeaPonOffset{};
-	class CShootingUI* m_ShootingUI = { nullptr};
-
-
-
-	/*Sound*/
-	_bool m_bSound = false;
-
+	const _float4x4*         m_pSocketMatrix = { nullptr };
+	_uint                    m_iWeapon{};
+	_float                   m_fDamage{};
+	vector<WEAPON_NODE_DESC> m_vecWeaPone;
 
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-
+    void    ResetEmissive(){m_vecWeaPone[m_iWeapon].fEmissvePower = m_vecWeaPone[m_iWeapon].fPreEmissvePower;}
+    void    ResetBullet()  {m_vecWeaPone[m_iWeapon].iCurBullet = m_vecWeaPone[m_iWeapon].iMaxBullet;}
+    HRESULT Make_Bullet();
+    HRESULT Init_Weapon();
+    HRESULT Init_CallBack();
 
 public:
 	static CWeapon* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

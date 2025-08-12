@@ -193,12 +193,11 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
    //     return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom_444"), 350.f, 200.f, 150.f, 150.f)))
    //     return E_FAIL;    
-   //
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom"), 500.f, 50.f, 150.f, 150.f)))
    //     return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 650.f, 50.f, 150.f, 150.f)))
    //     return E_FAIL;
-   //
+   
 
 
 #endif
@@ -262,7 +261,7 @@ HRESULT CRenderer::Draw()
 {
     if (FAILED(Render_Priority()))
         return E_FAIL;
-      if (FAILED(Render_Shadow()))
+    if (FAILED(Render_Shadow()))
         return E_FAIL;
     if (FAILED(Render_NonBlend()))
         return E_FAIL; 
@@ -358,28 +357,28 @@ HRESULT CRenderer::Render_Priority()
 
 HRESULT CRenderer::Render_Shadow()
 {
-    m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-
-
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
-
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
-        return E_FAIL;
-  
-    for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
-    {
-        if (nullptr != pRenderGameObject)
-            pRenderGameObject->Render_Shadow();
-  
-        Safe_Release(pRenderGameObject);
-    }
-  
-    m_RenderGameObjects[RG_SHADOW].clear();
-  
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
-        return E_FAIL;
-
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
+  //  m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+  //
+  //
+  //  m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
+  //
+  //  if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
+  //      return E_FAIL;
+  //
+  //  for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
+  //  {
+  //      if (nullptr != pRenderGameObject)
+  //          pRenderGameObject->Render_Shadow();
+  //
+  //      Safe_Release(pRenderGameObject);
+  //  }
+  //
+  //  m_RenderGameObjects[RG_SHADOW].clear();
+  //
+  //  if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
+  //      return E_FAIL;
+  //
+  //  m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
 
     return S_OK;
 }
@@ -475,9 +474,6 @@ HRESULT CRenderer::Render_Bloom()
 
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_444")))) 
         return E_FAIL;
-
-
-
     // 64배 텍스쳐에 대한 블러와 업스케일링, 44 텍스쳐에 대한 add 연산
     if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_444], sizeof(_float))))  // 64배 뷰포트에 텍스쳐 쿠드 좌표를 쉐이더로 던져라
         return E_FAIL;
@@ -634,9 +630,6 @@ HRESULT CRenderer::Render_Lights()
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
         return E_FAIL;
 
-    /* 빛매니져에 접근해서 빛들을 그려라라고 하자. */
-    /* 빛갯수만큼 빛 매니져가 렌더를 호출한다. */
-    /* 빛객체 렌더안에서 사각형 버퍼를 그리자. */
     m_pGameInstance->Render_Lights(m_pShader, m_pVIBuffer);
 
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_LightAcc"))))
@@ -654,8 +647,6 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         return E_FAIL;
-
-    
     if (FAILED(m_pShader->Bind_Matrix("g_LightViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
@@ -676,8 +667,7 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_LightDepthTexture", TEXT("Target_LightDepth"))))
         return E_FAIL;
-
-        if (FAILED(m_pShader->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+    if (FAILED(m_pShader->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_OutLineTexture", TEXT("Target_OutLine"))))
         return E_FAIL;
@@ -736,10 +726,8 @@ HRESULT CRenderer::Render_UI()
         [](CGameObject* pSour, CGameObject* pDest) -> _bool
         {
             return static_cast<CUI*>(pSour)->Get_fz() > static_cast<CUI*>(pDest)->Get_fz();
-        }); /// 알파 소팅
-
+        }); 
     
-
     for (auto& pRenderGameObject : m_RenderGameObjects[RG_UI])
     {
         if (nullptr != pRenderGameObject)

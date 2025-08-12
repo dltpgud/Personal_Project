@@ -44,7 +44,7 @@ public:
 		return *(((_long*)&m_tMouseState) + eMouseState);	
 	}
 	
-	void Mouse_Fix();
+	_bool Mouse_Fix(_bool Fix);
 public:
 	HRESULT Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
 	void	Update_InputDev(void);

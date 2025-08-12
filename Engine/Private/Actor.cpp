@@ -59,21 +59,7 @@ void CActor::Late_Update(_float fTimeDelta)
 
     if (m_pNavigationCom)
 	m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
-#endif // _DEBUG
-
-	if (m_bColl)
-	{	
-		if (m_fHP > 0.f)
-		{
-	       HIt_Routine();
-		}
-	
-        m_bColl = false;
-	}
-	if (m_fHP <= 0.f)
-	{
-		Dead_Routine(fTimeDelta);
-	}
+#endif 
 
 	__super::Late_Update(fTimeDelta);
 }
@@ -83,9 +69,26 @@ HRESULT CActor::Render()
 	return S_OK;
 }
 
+void CActor::Check_Coll()
+{
+    if (m_fHP > 0.f)
+    {
+        HIt_Routine();
+    }
+    if (m_fHP <= 0.f)
+    {
+        Dead_Routine();
+    }
+}
+
 void CActor::Set_NavigationType(_uint i)
 {
 	m_pNavigationCom->Set_Type(i);
+}
+
+_int CActor::Get_CurrentCell_Type()
+{
+    return m_pNavigationCom->Get_CurrentCell_Type();
 }
 
 void CActor::Find_CurrentCell()
@@ -107,6 +110,11 @@ void CActor::Clear_CNavigation(_tchar* tFPath)
 	m_pNavigationCom->Load(tFPath);
 }
 
+void CActor::Set_Taget(_vector Taget)
+{
+    m_pNavigationCom->Set_Taget(Taget);
+}
+
 void CActor::Is_onDemageCell(_float fTimeDelta)
 {
 	if (nullptr == m_pNavigationCom)
@@ -122,12 +130,11 @@ void CActor::Is_onDemageCell(_float fTimeDelta)
 
 		if (m_fHP <= 0.f)
 		{
-			Dead_Routine(fTimeDelta);
+			Dead_Routine();
 		}
 	}
-
-
 }
+
 void CActor::Set_HealthCurrentHP(_float Health) {
 	if (IsFullHP())
 		return;
@@ -139,9 +146,6 @@ void CActor::Set_HealthCurrentHP(_float Health) {
 	m_fHP += Health;
 
 }
-	
-
-
 
 void CActor::Free()
 {

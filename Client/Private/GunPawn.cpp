@@ -4,11 +4,11 @@
 #include "Body_GunPawn.h"
 #include "Weapon.h"
 #include "MonsterHP.h"
-CGunPawn::CGunPawn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
+CGunPawn::CGunPawn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CMonster{pDevice, pContext}
 {
 }
 
-CGunPawn::CGunPawn(const CGunPawn& Prototype) : CActor{Prototype}
+CGunPawn::CGunPawn(const CGunPawn& Prototype) : CMonster{Prototype}
 {
 }
 
@@ -19,53 +19,37 @@ HRESULT CGunPawn::Initialize_Prototype()
 
 HRESULT CGunPawn::Initialize(void* pArg)
 {
-
     CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
-    Desc->iNumPartObjects = PART_END;
-    Desc->fSpeedPerSec = 3.f;
+    Desc->fSpeedPerSec = 10.f;
     Desc->fRotationPerSec = XMConvertToRadians(90.f);
     Desc->JumpPower = 3.f;
-    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::ACTOR;
-    /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(Desc)))
-        return E_FAIL;
-
-    if (FAILED(Add_Components()))
         return E_FAIL;
 
     m_fMAXHP = 100.f;
     m_fHP = m_fMAXHP;
     m_bOnCell = true;
 
+    if (FAILED(Add_Components()))
+        return E_FAIL;
+
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-    m_iState = ST_IDLE;
+    m_iState = ST_MOVE;
 
-    m_pPartHP = static_cast<CMonsterHP*>(m_PartObjects[PART_HP]);
-    m_pPartHP->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
+    static_cast<CMonsterHP*>(m_PartObjects[PART_HP])
+    ->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
 
-
-      if (FAILED(m_pGameInstance->Add_Monster(this)))
-        return E_FAIL;
     return S_OK;
 }
 
 void CGunPawn::Priority_Update(_float fTimeDelta)
 {
-    if (1.f == static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_interver())
-        m_bDead = true;
+    Compute_Length();
 
-    if (m_iState != ST_STUN_START)
+    if (m_iState != ST_HIT)
         m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-
-    if (m_pPartHP != nullptr)
-    {
-        m_pPartHP->Set_Monster_HP(m_fHP);
-    }
-
-    if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
-        m_pTransformCom->Rotation_to_Player(fTimeDelta);
 
     __super::Priority_Update(fTimeDelta);
     return ;
@@ -73,26 +57,11 @@ void CGunPawn::Priority_Update(_float fTimeDelta)
 
 void CGunPawn::Update(_float fTimeDelta)
 {
-        if (m_PartObjects[PART_BODY]->Get_Finish())
-    {
-        if (m_pPartHP != nullptr)
-            m_pPartHP->Set_Hit(false);
-
-        m_iState = ST_IDLE;
-    }
-
-    if (m_iState != ST_PRESHOOT && m_iState != ST_STUN_START)
-        NON_intersect(fTimeDelta);
-
     __super::Update(fTimeDelta);
 }
 
 void CGunPawn::Late_Update(_float fTimeDelta)
 {
-
-
-    if (FAILED(m_pGameInstance->Add_Monster(this)))
-        return;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -104,85 +73,22 @@ HRESULT CGunPawn::Render()
 
 void CGunPawn::HIt_Routine()
 {
-
-    m_iState = ST_STUN_START;
-
+    Compute_Angle();
+    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_HIT);
     m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-    m_pPartHP->Set_HitStart(true);
-    m_pPartHP->Set_Hit(true);
-    m_pPartHP->Set_bLateUpdaet(true);
+    static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_fHP);
+    static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_HitStart(true);
 }
 
-void CGunPawn::Dead_Routine(_float fTimeDelta)
+void CGunPawn::Dead_Routine()
 {
-    m_iState = ST_PRESHOOT;
-
-    if (m_pPartHP != nullptr)
-    {
-        Erase_PartObj(PART_HP);
-        m_pPartHP = nullptr;
-    }
-}
-
-void CGunPawn::NON_intersect(_float fTimedelta)
-{
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vDir = vPlayerPos - vPos;
-
-    _float fLength = XMVectorGetX(XMVector3Length(vDir));
-
-
-    if (30.f > fLength)
-    {
-        if (20.f < fLength)
-        {
-            m_iState = ST_RUN_LEFT;
-        }
-
-        if (m_iState == ST_RUN_BACK_FRONT)
-        {
-            m_pTransformCom->Go_Move(CTransform::GO, fTimedelta, m_pNavigationCom);
-        }
-
-        if (m_iState == ST_RUN_BACK)
-        {
-            m_pTransformCom->Go_Move(CTransform::BACK, fTimedelta, m_pNavigationCom);
-        }
-        if (m_iState == ST_RUN_LEFT)
-        {
-            m_pTransformCom->Go_Move(CTransform::LEFT, fTimedelta, m_pNavigationCom);
-        }
-
-        if (m_iState == ST_RUN_RIGHT)
-        {
-            m_pTransformCom->Go_Move(CTransform::RIGHT, fTimedelta, m_pNavigationCom);
-        }
-
-        if (15.f > fLength)
-        {
-
-           if (m_iState != ST_RUN_RIGHT)
-                m_iState = ST_GRENADE_PRESHOOT;
-            if (true == static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->Get_bRun())
-            {
-                m_iState = ST_RUN_RIGHT;
-            }
-
-            if (7.f > fLength)
-            {
-                m_iState = ST_RUN_BACK;
-            }
-        }
-    }
-    else
-        m_iState = ST_IDLE;
+    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_DEAD);
+ 
+    Erase_PartObj(PART_HP);
 }
 
 HRESULT CGunPawn::Add_Components()
-{ /* For.Com_Collider_AABB */
+{
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
 
     _float3 Center{}, Extents{};
@@ -204,13 +110,13 @@ HRESULT CGunPawn::Add_Components()
 
 HRESULT CGunPawn::Add_PartObjects()
 {
-    /* For.Body */
     CBody_GunPawn::BODY_GUNPAWN_DESC BodyDesc{};
     BodyDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
     BodyDesc.fSpeedPerSec = 0.f;
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
     BodyDesc.pRimState = &m_iRim;
+    BodyDesc.pParentObj = this;
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_GunPawn"), PART_BODY, &BodyDesc)))
         return E_FAIL;
 
@@ -221,11 +127,6 @@ HRESULT CGunPawn::Add_PartObjects()
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
         return E_FAIL;
 
-    return S_OK;
-}
-
-HRESULT CGunPawn::Bind_ShaderResources()
-{
     return S_OK;
 }
 

@@ -11,8 +11,8 @@ class CBody_BoomBot : public CPartObject
 {
 public: 
 	typedef struct CBody_BoomBot_Desc : CPartObject::PARTOBJECT_DESC
-	{
-
+    {
+        class CActor* pParentObj;
      } CBody_BoomBot_Desc;
 
 private:
@@ -24,21 +24,23 @@ public:
 
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-        virtual void Priority_Update(_float fTimeDelta) override;
+    virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 	virtual HRESULT Render_Shadow() override;
 
-	void Make_Bullet();
+    void ChangeState(_int nextState);
 
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-private:
-	
-	_float m_fAttackTime{ 0.f };
-	_float m_pDamage = { 5.f };
+    HRESULT Set_StateMachine();
+
+
+ private:
+    class CActor* m_pParentObj;
+    vector<class CStateMachine*> m_pStateMachine;
 
 public:
         static CBody_BoomBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

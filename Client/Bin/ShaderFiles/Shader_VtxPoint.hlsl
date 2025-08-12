@@ -24,12 +24,12 @@ struct VS_IN
 
 struct VS_OUT   
 {
-  	float4 vPosition : POSITION;/*SV는 시스템 값 시멘틱,,*/
+  	float4 vPosition : POSITION;
   
 };
 
 
-VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/VS_IN In)
+VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
 
@@ -98,8 +98,6 @@ struct PS_IN
 
 struct PS_OUT
 {
-    
-    // 림라이트와 아웃라인이 텍스쳐 불투명도가 없음에도 뚫려서 보이는 증상을 방지하기 위해..시맨틱들 정의..
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;

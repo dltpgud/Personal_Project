@@ -61,7 +61,7 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
 void CBossBullet_Laser::Priority_Update(_float fTimeDelta)
 {
    
-    if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
+    if (m_pParentState == CBillyBoom::ST_DEAD)
     {
         m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", CSound::SOUND_EFFECT, 1.f);
 

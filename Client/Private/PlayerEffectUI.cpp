@@ -17,24 +17,20 @@ HRESULT CPlayerEffectUI::Initialize_Prototype()
 
 HRESULT CPlayerEffectUI::Initialize(void* pArg)
 {
-
     CPlayerEffectUI_DESC* pDesc = static_cast<CPlayerEffectUI_DESC*>(pArg);
     pDesc->fX = g_iWinSizeX*0.5f;
     pDesc->fY = g_iWinSizeY*0.5f;
     pDesc->fSizeX = g_iWinSizeX;
     pDesc->fSizeY = g_iWinSizeY;
-    pDesc->UID = CUI::UIID_PlayerState;
-
-    pDesc->Update = true;
-
+    pDesc->UID = UIID_PlayerState;
+    pDesc->Update = false;
     pDesc->fSpeedPerSec = 0.f;
     pDesc->fRotationPerSec = 0.f;
     m_iPlayerState = pDesc->State;
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
     m_pTransformCom->Set_Scaling(pDesc->fSizeX, pDesc->fSizeY, 1.f);
-    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
-                                   XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -48,42 +44,11 @@ HRESULT CPlayerEffectUI::Initialize(void* pArg)
 }
 
 void CPlayerEffectUI::Priority_Update(_float fTimeDelta)
-{
-   
+{ 
 }
 
 void CPlayerEffectUI::Update(_float fTimeDelta)
 {
-    if (true == m_bDisCard)
-    {
-
-        if (m_fShakingTime > 0.f)
-        {
-
-            m_fShakingTime -= fTimeDelta;
-            m_fShaking_X = 10.f * 0.5f * 0.1f;
-            m_fShaking_Y = 10.f * 0.5f * 0.1f;
-            m_ScaleX += m_fShaking_X * 100.f;
-            m_ScaleY += m_fShaking_Y * 100.f;
-
-            m_alpha[0] -= fTimeDelta;
-            m_alpha[1] -= fTimeDelta;
-            m_alpha[2] -= fTimeDelta;
-        }
-
-        if (m_fShakingTime <= 0.f)
-        {
-            m_fShakingTime = 0.45f;
-            m_fShaking_X = 0.f;
-            m_fShaking_Y = 0.f;
-            m_ScaleX = 0.f;
-            m_ScaleY = 0.f;
-
-            m_alpha[0] = 0.1f;
-            m_alpha[1] = 0.2f;
-            m_alpha[2] = 0.3f;
-        }
-    }
    
 }
 
@@ -111,7 +76,11 @@ void CPlayerEffectUI::Late_Update(_float fTimeDelta)
         m_iPass = 4;
         m_pTransformCom->Set_Scaling(g_iWinSizeX, g_iWinSizeY, 0.f);
     }
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
+        return;
+
+    if (FAILED(m_pGameInstance->ADD_UI_ShakingList(this)))
         return;
 }
 
@@ -173,57 +142,73 @@ HRESULT CPlayerEffectUI::Render()
     return S_OK;
 }
 
+void CPlayerEffectUI::ShakingEvent(_float fTimeDelta)
+{
+    if (false == m_bDisCard)
+        return;
+
+    if (m_fShakingTime > 0.f)
+    {
+        m_fShakingTime -= fTimeDelta;
+        m_fShaking_X = 10.f * 0.5f * 0.1f;
+        m_fShaking_Y = 10.f * 0.5f * 0.1f;
+        m_ScaleX += m_fShaking_X * 100.f;
+        m_ScaleY += m_fShaking_Y * 100.f;
+   
+        m_alpha[0] -= fTimeDelta;
+        m_alpha[1] -= fTimeDelta;
+        m_alpha[2] -= fTimeDelta;
+    }
+   
+    if (m_fShakingTime <= 0.f)
+    {
+        m_fShakingTime = 0.45f;
+        m_fShaking_X = 0.f;
+        m_fShaking_Y = 0.f;
+        m_ScaleX = 0.f;
+        m_ScaleY = 0.f;
+   
+        m_alpha[0] = 0.1f;
+        m_alpha[1] = 0.2f;
+        m_alpha[2] = 0.3f;
+    }
+}
+
 void CPlayerEffectUI::Set_scale(_int i)
 {
     if(i == 0)
     {
         m_pTransformCom->Set_Scaling(g_iWinSizeX+100.f +m_ScaleX, g_iWinSizeY+50.f+ m_ScaleY, 0.f);
-     
     }
     if (i == 1)
     {
         m_pTransformCom->Set_Scaling(g_iWinSizeX + 100.f + m_ScaleX + m_ScaleX*0.8f, g_iWinSizeY + 50.f + m_ScaleY, 0.f);
-
     }
     if (i == 2)
     {
         m_pTransformCom->Set_Scaling(g_iWinSizeX + 100.f + m_ScaleX + m_ScaleX * 0.5f, g_iWinSizeY + 50.f + m_ScaleY, 0.f);
-
-    }
-
+    }           
 }
 
 
 HRESULT CPlayerEffectUI::Add_Components()
 {
-
-    /* For.Com_Texture */
-
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Sprint"),
-            TEXT("Com_Texture_Sprint"),
-            reinterpret_cast<CComponent**>(&m_pTextureCom[SPRINT]))))
-            return E_FAIL;
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Sprint"), TEXT("Com_Texture_Sprint"),
+        reinterpret_cast<CComponent**>(&m_pTextureCom[SPRINT]))))
+        return E_FAIL;
+   
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_UIEffect"),TEXT("Com_Texture_HIT"),
+        reinterpret_cast<CComponent**>(&m_pTextureCom[HIT]))))
+        return E_FAIL;
     
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_UIEffect"), TEXT("Com_Texture_HEALTH"),
+        reinterpret_cast<CComponent**>(&m_pTextureCom[HEALTH]))))
+        return E_FAIL;
 
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_UIEffect"),
-            TEXT("Com_Texture_HIT"),
-            reinterpret_cast<CComponent**>(&m_pTextureCom[HIT]))))
-            return E_FAIL;
-        
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_UIEffect"),
-            TEXT("Com_Texture_HEALTH"),
-            reinterpret_cast<CComponent**>(&m_pTextureCom[HEALTH]))))
-            return E_FAIL;
-
-
-        
-
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_VIBuffer */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"), TEXT("Com_VIBuffer"),
                                       reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
@@ -265,7 +250,6 @@ void CPlayerEffectUI::Free()
     for (_int i = 0; i < TYPE_END; i++) {
         Safe_Release(m_pTextureCom[i]);
     }
-
 
     Safe_Release(m_pShaderCom);
 }

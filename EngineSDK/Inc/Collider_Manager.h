@@ -18,7 +18,6 @@ public:
     HRESULT Check_Collider_PlayerCollison();
     HRESULT Check_Inetrect_Player();
     void All_Collison_check();
-    HRESULT Player_To_Monster_Collison_Check();
     HRESULT Player_To_Monster_Ray_Collison_Check();
  
     HRESULT Player_To_Monster_Bullet_Collison();
@@ -30,7 +29,10 @@ public:
         return S_OK;
     }
 
-
+    _vector Get_RayPos()
+    {
+        return m_vRayPos;
+    }
 
 private:
     class CGameInstance* m_pGameInstance = { nullptr };
@@ -42,7 +44,7 @@ private:
     _float m_ColliderDamage{ 0.f };
     _uint   m_iLevel;
     _bool m_bIsColl = { false };
-
+    _vector m_vRayPos{};
 
 public:
     static Collider_Manager* Create();

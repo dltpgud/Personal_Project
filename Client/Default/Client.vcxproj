@@ -173,6 +173,15 @@
   <ItemGroup>
     <ClInclude Include="..\Public\Aim.h" />
     <ClInclude Include="..\Public\BillyBoom.h" />
+    <ClInclude Include="..\Public\BillyBoom_Barre.h" />
+    <ClInclude Include="..\Public\BillyBoom_Bash.h" />
+    <ClInclude Include="..\Public\BillyBoom_Dead.h" />
+    <ClInclude Include="..\Public\BillyBoom_Hit.h" />
+    <ClInclude Include="..\Public\BillyBoom_Idle.h" />
+    <ClInclude Include="..\Public\BillyBoom_Intro.h" />
+    <ClInclude Include="..\Public\BillyBoom_Laser.h" />
+    <ClInclude Include="..\Public\BillyBoom_Move.h" />
+    <ClInclude Include="..\Public\BillyBoom_ShockWave.h" />
     <ClInclude Include="..\Public\Body_BillyBoom.h" />
     <ClInclude Include="..\Public\Body_BoomBot.h" />
     <ClInclude Include="..\Public\Body_GunPawn.h" />
@@ -180,7 +189,12 @@
     <ClInclude Include="..\Public\Body_JetFly.h" />
     <ClInclude Include="..\Public\Body_MecanoBot.h" />
     <ClInclude Include="..\Public\Body_Player.h" />
+    <ClInclude Include="..\Public\BoomBot_Attack.h" />
     <ClInclude Include="..\Public\BoomBot.h" />
+    <ClInclude Include="..\Public\BoomBot_Dead.h" />
+    <ClInclude Include="..\Public\BoomBot_Hit.h" />
+    <ClInclude Include="..\Public\BoomBot_Idle.h" />
+    <ClInclude Include="..\Public\BoomBot_Move.h" />
     <ClInclude Include="..\Public\BossBullet_Berrle.h" />
     <ClInclude Include="..\Public\BossBullet_Laser.h" />
     <ClInclude Include="..\Public\BossHP.h" />
@@ -193,12 +207,27 @@
     <ClInclude Include="..\Public\Camera_Free.h" />
     <ClInclude Include="..\Public\Cursor.h" />
     <ClInclude Include="..\Public\GunPawn.h" />
+    <ClInclude Include="..\Public\GunPawn_Attack.h" />
+    <ClInclude Include="..\Public\GunPawn_Dead.h" />
+    <ClInclude Include="..\Public\GunPawn_Hit.h" />
+    <ClInclude Include="..\Public\GunPawn_Idle.h" />
+    <ClInclude Include="..\Public\GunPawn_Move.h" />
     <ClInclude Include="..\Public\HealthBot.h" />
     <ClInclude Include="..\Public\InteractiveUI.h" />
     <ClInclude Include="..\Public\JetFly.h" />
+    <ClInclude Include="..\Public\JetFly_Attack.h" />
+    <ClInclude Include="..\Public\JetFly_Dead.h" />
+    <ClInclude Include="..\Public\JetFly_Hit.h" />
+    <ClInclude Include="..\Public\JetFly_Idle.h" />
+    <ClInclude Include="..\Public\JetFly_Move.h" />
     <ClInclude Include="..\Public\Level_Stage2.h" />
     <ClInclude Include="..\Public\Level_StageBoss.h" />
     <ClInclude Include="..\Public\MecanoBot.h" />
+    <ClInclude Include="..\Public\MecanoBot_Attack.h" />
+    <ClInclude Include="..\Public\MecanoBot_Dead.h" />
+    <ClInclude Include="..\Public\MecanoBot_Hit.h" />
+    <ClInclude Include="..\Public\MecanoBot_Idle.h" />
+    <ClInclude Include="..\Public\MecanoBot_Move.h" />
     <ClInclude Include="..\Public\Menu.h" />
     <ClInclude Include="..\Public\Client_Defines.h" />
     <ClInclude Include="..\Public\Level_Stage1.h">
@@ -211,9 +240,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\MainApp.h" />
+    <ClInclude Include="..\Public\Monster.h" />
     <ClInclude Include="..\Public\MonsterHP.h" />
     <ClInclude Include="..\Public\NonAniObj.h" />
-    <ClInclude Include="..\Public\Pade.h" />
+    <ClInclude Include="..\Public\Fade.h" />
     <ClInclude Include="..\Public\Particle_Explosion.h" />
     <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\PlayerBullet.h" />
@@ -221,6 +251,16 @@
     <ClInclude Include="..\Public\PlayerUI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\Player_Hit.h" />
+    <ClInclude Include="..\Public\Player_Idle.h" />
+    <ClInclude Include="..\Public\Player_Jump.h" />
+    <ClInclude Include="..\Public\Player_Reload.h" />
+    <ClInclude Include="..\Public\Player_Run.h" />
+    <ClInclude Include="..\Public\Player_Shoot.h" />
+    <ClInclude Include="..\Public\Player_Sprint.h" />
+    <ClInclude Include="..\Public\Player_StateMachine.h" />
+    <ClInclude Include="..\Public\Player_StateNode.h" />
+    <ClInclude Include="..\Public\Player_Swich.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\Shock.h" />
     <ClInclude Include="..\Public\ShockWave.h" />
@@ -228,6 +268,8 @@
     <ClInclude Include="..\Public\ShootingUI.h" />
     <ClInclude Include="..\Public\Sky.h" />
     <ClInclude Include="..\Public\SpriteTexture.h" />
+    <ClInclude Include="..\Public\StateMachine.h" />
+    <ClInclude Include="..\Public\StateNode.h" />
     <ClInclude Include="..\Public\Terrain.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -246,6 +288,15 @@
   <ItemGroup>
     <ClCompile Include="..\Private\Aim.cpp" />
     <ClCompile Include="..\Private\BillyBoom.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Barre.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Bash.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Dead.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Hit.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Idle.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Intro.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Laser.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_Move.cpp" />
+    <ClCompile Include="..\Private\BillyBoom_ShockWave.cpp" />
     <ClCompile Include="..\Private\Body_BillyBoom.cpp" />
     <ClCompile Include="..\Private\Body_BoomBot.cpp" />
     <ClCompile Include="..\Private\Body_GunPawn.cpp" />
@@ -253,7 +304,12 @@
     <ClCompile Include="..\Private\Body_JetFly.cpp" />
     <ClCompile Include="..\Private\Body_MecanoBot.cpp" />
     <ClCompile Include="..\Private\Body_Player.cpp" />
+    <ClCompile Include="..\Private\BoomBot_Attack.cpp" />
     <ClCompile Include="..\Private\BoomBot.cpp" />
+    <ClCompile Include="..\Private\BoomBot_Dead.cpp" />
+    <ClCompile Include="..\Private\BoomBot_Hit.cpp" />
+    <ClCompile Include="..\Private\BoomBot_Idle.cpp" />
+    <ClCompile Include="..\Private\BoomBot_Move.cpp" />
     <ClCompile Include="..\Private\BossBullet_Berrle.cpp" />
     <ClCompile Include="..\Private\BossBullet_Laser.cpp" />
     <ClCompile Include="..\Private\BossHP.cpp" />
@@ -264,12 +320,27 @@
     <ClCompile Include="..\Private\Camera_Free.cpp" />
     <ClCompile Include="..\Private\Cursor.cpp" />
     <ClCompile Include="..\Private\GunPawn.cpp" />
+    <ClCompile Include="..\Private\GunPawn_Attack.cpp" />
+    <ClCompile Include="..\Private\GunPawn_Dead.cpp" />
+    <ClCompile Include="..\Private\GunPawn_Hit.cpp" />
+    <ClCompile Include="..\Private\GunPawn_Idle.cpp" />
+    <ClCompile Include="..\Private\GunPawn_Move.cpp" />
     <ClCompile Include="..\Private\HealthBot.cpp" />
     <ClCompile Include="..\Private\InteractiveUI.cpp" />
     <ClCompile Include="..\Private\JetFly.cpp" />
+    <ClCompile Include="..\Private\JetFly_Attack.cpp" />
+    <ClCompile Include="..\Private\JetFly_Dead.cpp" />
+    <ClCompile Include="..\Private\JetFly_Hit.cpp" />
+    <ClCompile Include="..\Private\JetFly_Idle.cpp" />
+    <ClCompile Include="..\Private\JetFly_Move.cpp" />
     <ClCompile Include="..\Private\Level_Stage2.cpp" />
     <ClCompile Include="..\Private\Level_StageBoss.cpp" />
     <ClCompile Include="..\Private\MecanoBot.cpp" />
+    <ClCompile Include="..\Private\MecanoBot_Attack.cpp" />
+    <ClCompile Include="..\Private\MecanoBot_Dead.cpp" />
+    <ClCompile Include="..\Private\MecanoBot_Hit.cpp" />
+    <ClCompile Include="..\Private\MecanoBot_Idle.cpp" />
+    <ClCompile Include="..\Private\MecanoBot_Move.cpp" />
     <ClCompile Include="..\Private\Menu.cpp" />
     <ClCompile Include="..\Private\Level_Stage1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -281,9 +352,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\MainApp.cpp" />
+    <ClCompile Include="..\Private\Monster.cpp" />
     <ClCompile Include="..\Private\MonsterHP.cpp" />
     <ClCompile Include="..\Private\NonAniObj.cpp" />
-    <ClCompile Include="..\Private\Pade.cpp" />
+    <ClCompile Include="..\Private\Fade.cpp" />
     <ClCompile Include="..\Private\Particle_Explosion.cpp" />
     <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\PlayerBullet.cpp" />
@@ -291,6 +363,16 @@
     <ClCompile Include="..\Private\PlayerUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\Player_Hit.cpp" />
+    <ClCompile Include="..\Private\Player_Idle.cpp" />
+    <ClCompile Include="..\Private\Player_Jump.cpp" />
+    <ClCompile Include="..\Private\Player_Reload.cpp" />
+    <ClCompile Include="..\Private\Player_Run.cpp" />
+    <ClCompile Include="..\Private\Player_Shoot.cpp" />
+    <ClCompile Include="..\Private\Player_Sprint.cpp" />
+    <ClCompile Include="..\Private\Player_StateMachine.cpp" />
+    <ClCompile Include="..\Private\Player_StateNode.cpp" />
+    <ClCompile Include="..\Private\Player_Swich.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\Private\Shock.cpp" />
     <ClCompile Include="..\Private\ShockWave.cpp" />
@@ -298,6 +380,8 @@
     <ClCompile Include="..\Private\ShootingUI.cpp" />
     <ClCompile Include="..\Private\Sky.cpp" />
     <ClCompile Include="..\Private\SpriteTexture.cpp" />
+    <ClCompile Include="..\Private\StateMachine.cpp" />
+    <ClCompile Include="..\Private\StateNode.cpp" />
     <ClCompile Include="..\Private\Terrain.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>

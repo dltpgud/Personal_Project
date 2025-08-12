@@ -236,7 +236,7 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
     {
         OutLine = 0.f;
     }
-    else if (depthMid*10.f  < abs(depthUp - depthDown))
+    else if (depthMid*9.f  < abs(depthUp - depthDown))
     {
         OutLine = 0.f;
     }

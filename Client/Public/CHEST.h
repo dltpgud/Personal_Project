@@ -14,6 +14,12 @@ class CCHEST final : public CGameObject
 {
 public : 
 	enum State { IDLE, HOVDER, OPEN};
+    enum FLAG : _ubyte
+    {
+        HOVER = 1 << 0, // 00000001
+        ICON = 1 << 1   // 00000010
+    };
+
 private:
 	CCHEST(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CCHEST(const CCHEST& Prototype);
@@ -33,16 +39,15 @@ public:
 private:
 	CShader*					m_pShaderCom = {nullptr};
 	CModel*						m_pModelCom = {nullptr};
-	_bool						m_bIcon = { false };
-	_bool						m_bHover = { false };
+    _ubyte                      m_flags = 0; 
 	_uint						m_pWeaPonType{};
-
+    _uint                       m_iBoneIndex;
 	CInteractiveUI* m_InteractiveUI{};
 
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-
+    HRESULT Init_CallBakc();
 public:
 	static CCHEST* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

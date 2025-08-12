@@ -48,7 +48,7 @@
 #include "Shock.h"
 #include "BossBullet_Laser.h"
 #include "Particle_Explosion.h"
-#include "Pade.h"
+#include "Fade.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -85,7 +85,6 @@ HRESULT CLoader::Initialize(LEVELID eNextLevelID)
 
 	InitializeCriticalSection(&m_CriticalSection);
 
-	/*서브 스레드 생성*/
 	m_hThread = (HANDLE)_beginthreadex(nullptr, 0, LoadingMain, this, 0, nullptr);
 	if (0 == m_hThread)
 		return E_FAIL;
@@ -103,7 +102,7 @@ HRESULT CLoader::Loading()
 
 	switch (m_eNextLevelID)
 	{
-        case LEVEL_MENU:
+    case LEVEL_MENU:
 		hr = Loading_For_MenuLevel();
 		break;
 	case LEVEL_STAGE1:	
@@ -116,10 +115,6 @@ HRESULT CLoader::Loading()
 		hr = Loading_For_BossLevel();
 		break;
 
-	//case LEVEL_RETURN_MENU : 
-	//	m_bFinished = true;
-	//	hr = S_OK;
-	//	break;
 	}
 
 	LeaveCriticalSection(&m_CriticalSection);
@@ -254,10 +249,7 @@ HRESULT CLoader::Loading_For_ProtoObject()
 #pragma endregion
 
 #pragma region UI
-   if (FAILED(m_pGameInstance->Add_Font(TEXT("Robo"), TEXT("../Bin/Resources/Fonts/Cart.spritefont"))))
-       return E_FAIL;
-
-   if (FAILED(m_pGameInstance->Add_UI_To_Proto(L"Prototype_Gameobject_Pade", CPade::Create(m_pDevice, m_pContext))))
+   if (FAILED(m_pGameInstance->Add_UI_To_Proto(L"Prototype_Gameobject_Pade", CFade::Create(m_pDevice, m_pContext))))
        return E_FAIL;
 
    if (FAILED(m_pGameInstance->Add_UI_To_Proto(TEXT("Prototype_GameObject_Menu"),CMenu::Create(m_pDevice, m_pContext))))
@@ -281,7 +273,7 @@ HRESULT CLoader::Loading_For_ProtoObject()
    if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_MonsterHP"),CMonsterHP::Create(m_pDevice, m_pContext))))
        return E_FAIL;
 
-   if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Boss_InstroUI"),CBossIntroBG::Create(m_pDevice, m_pContext))))
+   if (FAILED(m_pGameInstance->Add_UI_To_Proto(TEXT("Prototype_GameObject_Boss_InstroUI"),CBossIntroBG::Create(m_pDevice, m_pContext))))
        return E_FAIL;
 
    if (FAILED(m_pGameInstance->Add_UI_To_Proto(TEXT("Prototype GameObject_ShootingUI"),CShootingUI::Create(m_pDevice, m_pContext))))
@@ -314,7 +306,7 @@ HRESULT CLoader::Loading_For_Sound()
     m_pGameInstance->Add_Job([this]() { return m_pGameInstance->LoadSoundFile("ST_Button_Hover_In.ogg"); });
     m_pGameInstance->Add_Job([this]() { return m_pGameInstance->LoadSoundFile("ST_Button_Click.ogg"); });
     /*LODING*/
-    m_pGameInstance->Add_Job([this]() { return m_pGameInstance->LoadSoundFile("ST_Music_Credits.ogg"); });
+    m_pGameInstance->Add_Job([this]() { return m_pGameInstance->LoadSoundFile("ST_Music_Credits.wav"); });
     /*interect*/
     m_pGameInstance->Add_Job([this]() { return m_pGameInstance->LoadSoundFile("ST_Door_Act1_Open.ogg"); });
     m_pGameInstance->Add_Job([this]() { return m_pGameInstance->LoadSoundFile("ST_Door_Act1_Close.ogg"); });
@@ -428,7 +420,6 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
     m_pGameInstance->Add_Job([this](){return m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_Player"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
                      TEXT("../Bin/Data/Ani/Player.dat"),XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY((XMConvertToRadians(180.f)))));});
 
-    /*Prototype_Component_Model_Weapon */
     m_pGameInstance->Add_Job([this](){return m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Model_HendGun"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
                      TEXT("../Bin/Data/Ani/HendGun.dat"),XMMatrixIdentity()));});
 
@@ -443,7 +434,6 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
 #pragma endregion 
 
 #pragma region Weapon
-    /*Prototype_Component_WeaponIcon*/ 
     m_pGameInstance->Add_Job([this](){return m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component ChestWeapon Model_AssaultRifle_NonAni"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM,
                      TEXT("../Bin/Data/NonAni/AssaultRifle_NonAni.dat"),XMMatrixRotationY((XMConvertToRadians(45.f))) * XMMatrixRotationZ((XMConvertToRadians(25.f)))));});
 
@@ -455,7 +445,6 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
 #pragma endregion 
 
 #pragma region Monster
-   //*Prototype_Component_Monster*//
     m_pGameInstance->Add_Job([this](){return m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto_Component_GunPawn_Model"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
                      TEXT("../Bin/Data/Ani/GunPawn.dat"),XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f))));});
    
@@ -906,16 +895,12 @@ m_strLoadingText = TEXT("모델 로딩중입니다.");
               TEXT("../Bin/Data/NonAni/DoorRock.dat"),PreTransformMatrix))))
         return E_FAIL;
 
-
-    	/*Prototype_Component_ChestWeapon*/
     PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
 
     if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE2, TEXT("Proto Component ChestWeapon Model_aniObj"), CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
               TEXT("../Bin/Data/Ani/ChestWeapon.dat"), PreTransformMatrix))))
         return E_FAIL;
 
-
-    	///*Prototype_Component_Door*/
     PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
     if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE2, TEXT("Proto Component StageDoor Model_aniObj"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
               TEXT("../Bin/Data/Ani/StageDoor.dat"), PreTransformMatrix))))
@@ -1041,9 +1026,6 @@ m_strLoadingText = TEXT("모델 로딩중입니다.");
 	m_bFinished = true;
 	return S_OK;
 }
-
-
-
 
 CLoader * CLoader::Create(ID3D11Device * pDevice, ID3D11DeviceContext * pContext, LEVELID eNextLevelID)
 {

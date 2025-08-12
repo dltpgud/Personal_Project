@@ -13,9 +13,7 @@ private:
 
 public:
 	_float					Get_TimeDelta(const _wstring& pTimerTag);
-#ifndef _DEBUG
-	void					Get_FPS(const _wstring& pTimerTag, HWND g_hWnd);
-#endif
+
 public:
 	HRESULT					Add_Timer(const _wstring& strTimerTag);
 	void					Update_TimeDelta(const _wstring& strTimerTag);

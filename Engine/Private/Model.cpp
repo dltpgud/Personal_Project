@@ -29,12 +29,8 @@ HRESULT CModel::Initialize_Proto(TYPE eModelType, const TCHAR* pModelFilePath, _
     m_eModelType = eModelType;
 
     XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
-
-
-
+    
     Ready_AniModel(pModelFilePath);
-
-
     return S_OK;
 }
 
@@ -65,10 +61,10 @@ const _float4x4* CModel::Get_BoneMatrix(const _char* pBoneName) const
     return m_Bones[Get_BoneIndex(pBoneName)]->Get_CombinedTransformationFloat4x4Ptr();
 }
 
-const void CModel::Set_BoneUpdateMatrix(const _char* pBoneName, _fmatrix NewMatrix) const
+const void CModel::Set_BoneUpdateMatrix(const _uint iIndex, _fmatrix NewMatrix) const
 {
     vector<_int> vecParentNum{};
-    _int FindBone = Get_BoneIndex(pBoneName);
+    _int FindBone = iIndex;
     vecParentNum.reserve(m_Bones.size());
     vecParentNum.push_back(FindBone);
 
@@ -129,7 +125,7 @@ _bool CModel::Play_Animation(_float fTimeDelta)
 
     for (auto& pBone : m_Bones)
     {
-      pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
+         pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
     }
 
     return isFinished;
@@ -137,7 +133,6 @@ _bool CModel::Play_Animation(_float fTimeDelta)
 
 void CModel::Set_Animation(_uint index, _bool IsLoop)
 {
-
     m_iCurrentAnimIndex = index;
     m_IsLoop = IsLoop;
 

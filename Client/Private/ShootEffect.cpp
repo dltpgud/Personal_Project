@@ -14,14 +14,12 @@ CShootEffect::CShootEffect(const CShootEffect& Prototype)
 
 HRESULT CShootEffect::Initialize_Prototype()
 {
-	/* 패킷, 파일입ㅇ출력을 통한 초기화. */
 
 	return S_OK;
 }
 
 HRESULT CShootEffect::Initialize(void * pArg)
 {
-	/* 추가적으로 초기화가 필요하다면 수행해준다. */
 	CShootEffect_DESC* pDesc = static_cast<CShootEffect_DESC*>(pArg);
 
 	pDesc->fSpeedPerSec = 5.f;
@@ -162,18 +160,14 @@ HRESULT CShootEffect::Render()
 
 HRESULT CShootEffect::Add_Components()
 {
-
-	/* For.Com_Texture */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_spackEffect"),
 		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
 		return E_FAIL;
 
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;

@@ -105,7 +105,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
-        /* TimeDelta : 메세지루프를 한번 도는데 걸리는 시간. */
         pGameInstance->Update_TimeDelta(TEXT("Timer_Default"));
 
         fTimeAcc += pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
@@ -114,13 +113,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             pGameInstance->Update_TimeDelta(TEXT("Timer_60"));
 
-            /* TimeDelta : 1.f / 60.0 */
-
-        #ifdef _DEBUG
-            pMainApp->Update(1.0f / 60.0f);
-        #else 
             pMainApp->Update(pGameInstance->Get_TimeDelta(TEXT("Timer_60")));
-        #endif
             pMainApp->Render();
             pMainApp->Delete();
             fTimeAcc = 0.f;
@@ -135,13 +128,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
-//
-//  함수: MyRegisterClass()
-//
-//  목적: 창 클래스를 등록합니다.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -164,19 +150,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   함수: InitInstance(HINSTANCE, int)
-//
-//   목적: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
-//
-//   설명:
-//
-//        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
-//        주 프로그램 창을 만든 다음 표시합니다.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    g_hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+    g_hInst = hInstance; 
 
     RECT		rcViewport = { 0, 0, g_iWinSizeX, g_iWinSizeY };
 
@@ -195,17 +171,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    g_hWnd = hWnd;
    return TRUE;
 }
-
-//
-//  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  목적:  주 창의 메시지를 처리합니다.
-//
-//  WM_COMMAND  - 응용 프로그램 메뉴를 처리합니다.
-//  WM_PAINT    - 주 창을 그립니다.
-//  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
-//
-//
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -235,7 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다.
+    
             EndPaint(hWnd, &ps);
         }
         break;
@@ -250,7 +215,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// 정보 대화 상자의 메시지 처리기입니다.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);

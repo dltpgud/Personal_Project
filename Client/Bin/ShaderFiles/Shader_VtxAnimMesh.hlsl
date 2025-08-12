@@ -8,7 +8,7 @@ float4			g_vLightAmbient;
 float4			g_vLightSpecular;
 texture2D       g_NormalTexture;
 float4			g_RimColor;
-float			g_RimPow;
+float			g_RimPow =1.f;
 
 
 texture2D		g_DiffuseTexture;
@@ -20,7 +20,7 @@ float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 float4			g_vCamPosition;
 float           g_fCamFar;
 
-float4x4		g_BoneMatrices[512];   /*뼈 메트릭스 개수*/
+float4x4		g_BoneMatrices[512];   
 bool g_TagetBool;
 bool g_DoorBool;
 bool g_TagetDeadBool;
@@ -42,7 +42,6 @@ struct VS_IN
 	float3 vNormal : NORMAL;
 	float2 vTexcoord : TEXCOORD0;	
 	float3 vTangent : TANGENT;
-	/* 이 메시에 영향을 주는 뼈들의 인덱스 */
 	uint4  vBlendIndex : BLENDINDEX;
 	float4 vBlendWeight : BLENDWEIGHT;
 };
@@ -159,10 +158,9 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     {
         rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
        
-        rim = pow(1 - rim, 1.f);
-       // g_RimPow);
+        rim = pow(1 - rim, g_RimPow);
     }    
-    Out.vRim = (rim * g_RimColor); 
+    Out.vRim = rim * g_RimColor; 
     
     if (true == g_bNomal)
     {
@@ -171,7 +169,7 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
         vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
         float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
         vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
-        Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
+       Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
     }
     else 
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
@@ -237,6 +235,7 @@ PS_OUT PS_WEAPON(PS_IN In)
 
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
+    
     vector vMtrlEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
 
     Out.vDiffuse = vMtrlDiffuse ;

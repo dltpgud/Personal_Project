@@ -5,12 +5,12 @@
 #include "BossIntroBG.h"
 #include "BossHP.h"
 #include "Particle_Explosion.h"
-#include"Pade.h"
-CBillyBoom::CBillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
+#include "Fade.h"
+CBillyBoom::CBillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CMonster{pDevice, pContext}
 {
 }
 
-CBillyBoom::CBillyBoom(const CBillyBoom& Prototype) : CActor{Prototype}
+CBillyBoom::CBillyBoom(const CBillyBoom& Prototype) : CMonster{Prototype}
 {
 }
 
@@ -21,22 +21,19 @@ HRESULT CBillyBoom::Initialize_Prototype()
 
 HRESULT CBillyBoom::Initialize(void* pArg)
 {
-
- CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
-    Desc->iNumPartObjects = PART_END;
+    CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
     Desc->fSpeedPerSec =  7.f;
     Desc->fRotationPerSec = XMConvertToRadians(120.f);
-    Desc->JumpPower = 3.f;
-    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::ACTOR;
-    /* 추가적으로 초기화가 필요하다면 수행해준다. */
+    Desc->JumpPower = 0.f;
+
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-    m_iState = ST_Idle;
-   m_fMAXHP = 1000.f;
-   m_fHP = m_fMAXHP;
-   m_bOnCell = true;
-   m_FixY = 0.5f;
+    m_iState = ST_IDLE;
+    m_fMAXHP = 1000.f;
+    m_fHP = m_fMAXHP;
+    m_bOnCell = true;
+    m_FixY = 0.5f;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -44,89 +41,30 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-      if (FAILED(m_pGameInstance->Add_Monster(this)))
-        return E_FAIL;
     return S_OK;
 }
 
 void CBillyBoom::Priority_Update(_float fTimeDelta)
 {
-    if(m_iState != ST_Comp_Idle)
-    Set_State_From_Body();
+    Compute_Length();
 
-     if(true == m_bIntro)
-    m_pTransformCom->Set_Rotation_to_Player();
+   if (m_bFinishIntro)
+       Change_Pattern(); 
 
-    if (true == m_bStart) {
-
-        m_pTransformCom->Rotation_to_Player(fTimeDelta);
-        m_bStart = false;
-    }
-
-    if (nullptr != m_pHP) {
-        m_pHP->Set_BossHP(m_fHP);
-    }
- 
-    if (true == m_bHit)
-    {
-        m_fHitTimeSum += fTimeDelta;
-
-        if(m_iState == ST_Idle)
-            m_iState = ST_Comp_Poke_Front;
-
-        if (m_fHitTimeSum > 0.5f)
-        {
-            m_bHit = false;
-            m_fHitTimeSum = 0.f;
-        }
-    }
-
-    if(m_iState == ST_Idle)
-        m_bStart = true;
-
-    if (false == m_bHit)
+    if (m_iState != ST_HIT)
         m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-
-    if (m_PartObjects[PART_BODY]->Get_Finish())
-    {
-        m_iState = ST_Idle;
-            m_bSkill = false;
-            m_bHit = false;
-    }   
-
+  
     __super::Priority_Update(fTimeDelta);
     return ;
 }
 
 void CBillyBoom::Update(_float fTimeDelta)
 {
-         
- if (m_iState != ST_Intro && m_bIntro == false) {
-  
-     if (m_bSkill != true) {
-        NON_intersect(fTimeDelta); 
-        Change_State(fTimeDelta); 
-     }
- }
-
     __super::Update(fTimeDelta);
-
 }
 
 void CBillyBoom::Late_Update(_float fTimeDelta)
 {
-    if (m_iSkillTime >= 3) {
-        m_iState = ST_Idle;
-        m_iSkillTime = 0;
-        for (_int i = 0; i < 3; i++) {
-            m_iPrAttack[i] = -1;
-        }
-    }
-
-
-
-    if (FAILED(m_pGameInstance->Add_Monster(this)))
-        return;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -138,247 +76,79 @@ HRESULT CBillyBoom::Render()
 
 void CBillyBoom::HIt_Routine()
 {
-    m_bHit = true;
     m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-  
+    if (m_bSkill)
+        return;
+    Compute_Angle();
+    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->ChangeState(CBillyBoom::ST_HIT);
+    m_pHP->Set_BossHP(m_fHP);
 }
 
-void CBillyBoom::Dead_Routine(_float fTimeDelta)
+void CBillyBoom::Dead_Routine()
 {
-    m_bSkill = true;
-    m_bHit = true;
-    m_iState = ST_Comp_Idle;
+    m_pHP->Set_BossHP(m_fHP);
+    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->ChangeState(CBillyBoom::ST_DEAD);
     m_bOnCell = false;
-
-    m_DeadTimeSum += fTimeDelta;
-
-    if (false == m_bDeadSound) {
-        m_pGameInstance->Play_Sound(L"ST_BillyBoom_Outro.ogg", CSound::SOUND_EFFECT, 1.f);
-        m_bDeadSound = true;
-    }
-
-    if (m_DeadTimeSum > 2.f)
-    {    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-        if (false == m_bBoom)
-        {
-
-            CParticle_Explosion::CParticle_Explosion_Desc Desc{};
-            Desc.pParentMatrix = m_pTransformCom->Get_WorldMatrix();
-
-            m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, TEXT("Layer_Skill"),
-                                                     L"Prototype_GameObject_Particle_Explosion", &Desc);
-            m_bBoom = true;
-        }   
-        m_pTransformCom->Set_MoveSpeed(2.f);
-        m_pTransformCom->Go_Move(CTransform::DOWN ,fTimeDelta);
-    }
-
-    if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)) < -20.f)
-        m_bDead = true;
 }
 
-void CBillyBoom::Stun_Routine()
+void CBillyBoom::Set_CurrentHP(_float CurrentHp)
 {
-    m_iState = ST_Stun_Start;
+    if (m_bSkill)
+        return;
+    m_fHP -= CurrentHp;
 }
 
-void CBillyBoom::NON_intersect(_float fTimedelta)
+void CBillyBoom::Change_State(_int state)
 {
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vDir = vPlayerPos - vPos;
-
-    _float fLength = XMVectorGetX(XMVector3Length(vDir));
+    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->ChangeState(state);
+}
 
 
+void CBillyBoom::Change_Pattern()
+{
+    if (m_iState != ST_IDLE )
+        return;
 
-    if (fLength < 40.f)
+    _int RandomAttack{};
+    while (true)
     {
+        _bool isSame = false;
+        RandomAttack = m_Dist(m_Rng);
 
-        if ( true == m_bHit)
-            m_iState = ST_Comp_Poke_Front;
-        else
+        for (_int i = 0; i < m_iSkillTime; i++)
         {
-            m_iState = ST_Run_Front;
-            m_pTransformCom->Go_Move(CTransform::GO,fTimedelta, m_pNavigationCom, true);
-            m_bStart = true;
+            if (m_iPrAttack[i] == RandomAttack)
+            {
+                isSame = true;
+                break;
+            }
         }
 
-         if (fLength < 30.f)
-         {
-             m_bSkill = false;
-         }
-         if (fLength < 25.f)
-         {
-             m_iState = ST_Idle;
-         }
-
-
+        if (!isSame)
+        {
+            m_iPrAttack[m_iSkillTime] = RandomAttack;
+            m_iSkillTime++;
+            if (m_iSkillTime >= 4)
+                m_iSkillTime = 0;
+            break;
+        }
     }
-    else {
-        m_bSkill = false;
 
-    }
-}
-
-void CBillyBoom::Intro_Routine(_float fTimedelta)
-{
-
-    if (true == m_bIntro)
-    {
-        m_iState = ST_Intro;
-
-     
-        
-        CBossHPUI::CBossHPUI_DESC  Desc{};
-        Desc.fMaxHP = m_fMAXHP;
-        Desc.fHP = m_fHP;
-        Desc.Update = false;
-        Desc.iMaxLevel = LEVEL_END;
-        Desc.pEnable_Level = new _bool[LEVEL_END]{false, false, false, false, false, true};
-        if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"BossHP",L"Prototype_GameObject_Boss_HP",&Desc)))
-            return;
-            
-       m_pHP = static_cast<CBossHPUI*>(m_pGameInstance->Find_Clone_UIObj(L"BossHP"));
-        m_pHP->Set_BossMaxHP(m_fMAXHP);
-
-       _vector vWorldPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-        CBossIntroBG::CBossIntroBG_DESC IntroDesc{};
-        IntroDesc.fX = XMVectorGetX(vWorldPos);
-        IntroDesc.fY = XMVectorGetY(vWorldPos);
-        IntroDesc.fZ = XMVectorGetZ(vWorldPos);
-        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, TEXT("Layer_Map"),
-                                                            L"Prototype_GameObject_Boss_InstroUI",
-             &IntroDesc)))
-            return;
-
-        m_bIntro = false;
-    }
-}
-
-void CBillyBoom::Change_State(_float fTimedelta)
-{
-    if (m_iState != ST_Idle)
-        return;
-    _int RandomAttack{};
-
-   while (true)
-   {
-       _bool isSame = false;
-       RandomAttack = rand() % 4;
-  
-       for (_int i = 0; i < 4; i++)
-       {
-           if (m_iPrAttack[i] == RandomAttack)
-           isSame = true;
-       }
-  
-       if (!isSame)
-       {
-           m_iPrAttack[m_iSkillTime] = RandomAttack;
-  
-           m_iSkillTime++;
-           break;
-       }
-   }
-  
-     switch (RandomAttack)
-     {
-     case 0:
-         Set_Barre_Shoot(fTimedelta);
-         break;
-   
-     case 1:
-         Set_Laser(fTimedelta);
-         break;
-   
-     case 2:
-         Set_ShockWave(fTimedelta);
-         break;
-
-     case 3:
-         Set_Bash(fTimedelta);
-         break;
-     }
-
-}
-
-void CBillyBoom::Set_Barre_Shoot(_float fTimedelta)
-{
-    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->SetDir();
-    m_iState = ST_Barre_In;
-    m_bSkill = true;
-    m_bStart = true;
-}
-
-void CBillyBoom::Set_Laser(_float fTimedelta)
-{
-    m_iState = ST_Laser_In;
-    m_bSkill = true;
-}
-
-void CBillyBoom::Set_ShockWave(_float fTimedelta)
-{
-    static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->SetDir();
-    m_iState = ST_ShockWave_In;
-    m_bSkill = true;
-}
-
-void CBillyBoom::Set_Bash(_float fTimedelta)
-{
-    m_iState = ST_Bash_PreShoot;
-    m_bSkill = true;
-}
-
-void CBillyBoom::Set_State_From_Body()
-{
-    switch (static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->Get_BodyState())
-    {
-    case ST_Bash_Shoot:
-        m_iState = ST_Bash_Shoot;
-        break;
-
-    case ST_ShockWave_PreShoot:
-        m_iState = ST_ShockWave_PreShoot;
-        break;
-
-    case ST_ShockWave_Shoot:
-        m_iState = ST_ShockWave_Shoot;
-        break;
-
-    case ST_Laser_PreShoot:
-        m_iState = ST_Laser_PreShoot;
-        break;
-
-
-    case ST_Laser_ShootLoop:
-        m_iState = ST_Laser_ShootLoop;
-        break;
-
-    case ST_Barre_PreShoot:
-        m_iState = ST_Barre_PreShoot;
-        break;
-
-    case ST_Barre_Shoot:
-        m_iState = ST_Barre_Shoot;
-        break;
-    }  
+    m_iNextSkill = static_cast<STATE>(RandomAttack); // Move 끝나면 쓸 스킬 저장
+    m_iState = ST_MOVE;
 }
 
 HRESULT CBillyBoom::Add_Components()
 {    
-    /* For.Com_Collider_AABB */
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
 
     OBBDesc.vExtents = _float3(3.f, 3.3f, 3.f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = { 0.f, 0.f, 0.f };
+
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
         reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
-
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
         TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom))))
@@ -389,15 +159,26 @@ HRESULT CBillyBoom::Add_Components()
 
 HRESULT CBillyBoom::Add_PartObjects()
 {
-    /* For.Body */
     CBody_BillyBoom::CBody_BillyBoom_Desc BodyDesc{};
     BodyDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
     BodyDesc.fSpeedPerSec = 0.f;
     BodyDesc.fRotationPerSec = 0.f;
     BodyDesc.pParentState = &m_iState;
     BodyDesc.pRimState = &m_iRim;
+    BodyDesc.pParentObj = this;
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Body_BillyBoom"), PART_BODY, &BodyDesc)))
         return E_FAIL;
+
+    CBossHPUI::CBossHPUI_DESC Desc{};
+    Desc.fMaxHP = m_fMAXHP;
+    Desc.fHP = m_fHP;
+    Desc.Update = false;
+    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"BossHP", L"Prototype_GameObject_Boss_HP", &Desc)))
+        return E_FAIL;
+
+    m_pHP = static_cast<CBossHPUI*>(m_pGameInstance->Find_Clone_UIObj(L"BossHP"));
+    Safe_AddRef(m_pHP);
+    m_pHP->Set_BossMaxHP(m_fMAXHP);
 
     return S_OK;
 }
@@ -431,4 +212,43 @@ CGameObject* CBillyBoom::Clone(void* pArg)
 void CBillyBoom::Free()
 {
     __super::Free();
+    Safe_Release(m_pHP);
 }
+///////////////////////////////////////MODEL_ANIM_DATA//////////////////////////////////////////////////
+/* enum MODEL_ANIM
+{
+   ST_AIM_Left,
+   ST_Idle,
+   ST_AIM_Left45,
+   ST_AIM_Middle,
+   ST_AIM_Right,
+   ST_AIM_Right45,
+   ST_AIM_Antenne_In,
+   ST_AIM_Antenne_Out,
+   ST_Barre_In,
+   ST_Barre_PreShoot,
+   ST_Barre_Shoot,
+   ST_Bash_PreShoot,
+   ST_Bash_Shoot,
+   ST_HIT_Front,
+   ST_Intro,
+   ST_Laser_In,
+   ST_Laser_PreShoot,
+   ST_Laser_ShootLoop,
+   ST_Lever_Activate,
+   ST_Lever_In,
+   ST_Lever_Out,
+   ST_Run_Front,
+   ST_ShockWave_In,
+   ST_ShockWave_Out,
+   ST_ShockWave_PreShoot,
+   ST_ShockWave_Shoot,
+   ST_Stun_Pose,
+   ST_Stun_Recover,
+   ST_Stun_Start,
+   ST_Comp_Idle,
+   ST_Comp_Poke_Back,
+   ST_Comp_Poke_Front,
+   ST_Comp_Poke_Left,
+   ST_Comp_Poke_Right
+ };*/

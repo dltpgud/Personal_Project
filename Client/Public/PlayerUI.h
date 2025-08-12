@@ -5,7 +5,7 @@ BEGIN(Engine)
 	class CShader;
 	class CTexture;
 	class CVIBuffer_Rect;
-	END
+END
 
 BEGIN(Client)
 
@@ -25,17 +25,22 @@ private:
 public:
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-        virtual void Priority_Update(_float fTimeDelta) override;
+    virtual void    Priority_Update(_float fTimeDelta) override;
 	virtual void	Update(_float fTimeDelta) override;
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
+    virtual void    ShakingEvent(_float fTimeDelta) override;
 
 public:
-	void Set_PlayerMaxHP(_float fMaxHP) { m_fMaxHP = fMaxHP;
-	swprintf_s(m_tfMaxHp, 50, L"%.f\n", m_fMaxHP);
+	void Set_PlayerMaxHP(_float fMaxHP) 
+	{
+	 m_fMaxHP = fMaxHP;
+	 swprintf_s(m_tfMaxHp, 50, L"%.f\n", m_fMaxHP);
 	}
-	void Set_PlayerHP(_float fHP) { m_fHP = fHP;
-	swprintf_s(m_tfHP, 50, L"%.f\n", m_fHP);
+	void Set_PlayerHP(_float fHP) 
+	{ 
+	 m_fHP = fHP;
+	 swprintf_s(m_tfHP, 50, L"%.f\n", m_fHP);
 	}
 
 	void Set_HPGage(_int GageCount) {
@@ -48,25 +53,24 @@ public:
 		m_iGageCount = GageCount;
 	};
 
-
-
 private:
-	CTexture* m_pTextureCom_HpBar = {nullptr};
-	CShader* m_pShaderCom = { nullptr };
-	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
+    HRESULT Add_Components();
+	
 private:
-	HRESULT Add_Components();
+    CTexture* m_pTextureCom_HpBar = {nullptr};
+    CShader* m_pShaderCom = {nullptr};
+    CVIBuffer_Rect* m_pVIBufferCom = {nullptr};
+
 	_float m_fHP{};
 	_float m_fMaxHP{};
 	_float m_fHP_Pluse = { 0.f };
 	_float m_fPrXPos{}, m_fPrYPos{};
 	_int   m_iGageCount = {-1};
 	_float m_fHealthHP{};
+    _float m_fRatio{};
+	_tchar m_tfHP[50];
+	_tchar m_tfMaxHp[50];
 
-
-	_tchar	m_tfHP[50];
-
-	_tchar	m_tfMaxHp[50];
 public:	
 	static CPlayerUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

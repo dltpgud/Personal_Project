@@ -52,7 +52,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pObject_Manager)
 		return E_FAIL;
 
-	m_pUI_Manager		 = CUI_Manager::Create();
+	m_pUI_Manager        = CUI_Manager::Create();
 	if (nullptr == m_pUI_Manager)
 		return E_FAIL;
 
@@ -201,9 +201,9 @@ _byte CGameInstance::Get_DIAnyKey()
 	return m_pInput_Device->Get_DIAnyKey();
 }
 
-void CGameInstance::MouseFix()
+_bool CGameInstance::MouseFix(_bool Fix)
 {
-	m_pInput_Device->Mouse_Fix();
+    return m_pInput_Device->Mouse_Fix(Fix);
 }
 
 #pragma endregion
@@ -232,15 +232,7 @@ void CGameInstance::Update_TimeDelta(const _wstring& strTimerTag)
 
 	return m_pTimer_Manager->Update_TimeDelta(strTimerTag);
 }
-#ifndef _DEBUG
-void CGameInstance::Get_FPS(const _wstring& pTimerTag, HWND g_hWnd)
-{
-	if (nullptr == m_pTimer_Manager)
-		return ;
 
-	return m_pTimer_Manager->Get_FPS(pTimerTag, g_hWnd);
-}
-#endif 
 #pragma endregion
 
 #pragma region Level_Manager 
@@ -322,14 +314,16 @@ void CGameInstance::ObjClear(_uint iLevelIndex)
 	m_pObject_Manager->Clear(iLevelIndex);
 }
 
-CGameObject::PICKEDOBJ_DESC CGameInstance::Pking_onMash(_vector RayPos, _vector RayDir)
+CGameObject::PICKEDOBJ_DESC CGameInstance::Pking_onMash(const _uint& iLevelIndex, const _wstring& strLayerTag,
+                                                        _vector RayPos,
+                                                        _vector RayDir)
 {
 	if (nullptr == m_pObject_Manager)
 	{
 		MSG_BOX("Nullptr ObjMgr");
 	}
 
-	return m_pObject_Manager->Pking_onMash(RayPos, RayDir);
+	return m_pObject_Manager->Pking_onMash(iLevelIndex, strLayerTag, RayPos, RayDir);
 }
 
 CGameObject* CGameInstance::Recent_GameObject(_uint iLevelIndex, const _wstring& strLayerTag)
@@ -460,6 +454,14 @@ HRESULT CGameInstance::changeCellType(_int type)
     return m_pCollider_Manager->changeCellType( type);
 }
 
+_vector CGameInstance::Get_RayPos()
+{
+    if (nullptr == m_pCollider_Manager)
+        return {};
+
+    return m_pCollider_Manager->Get_RayPos();
+}
+
 #pragma endregion
 
 
@@ -487,6 +489,13 @@ HRESULT CGameInstance::Set_UI_shaking(const _uint& uID, _float fShakingTime, _fl
         return E_FAIL;
 
     return m_pUI_Manager->Set_UI_shaking(uID, fShakingTime, fPowerX, fPowerY);
+}
+
+HRESULT CGameInstance::ADD_UI_ShakingList(CUI* UIOBJ)
+{
+    if (nullptr == m_pUI_Manager)
+        return E_FAIL;
+    return m_pUI_Manager->ADD_UI_ShakingList(UIOBJ);
 }
 
 HRESULT CGameInstance::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)

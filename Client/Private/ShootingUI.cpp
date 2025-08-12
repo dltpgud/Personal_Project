@@ -13,8 +13,6 @@ CShootingUI::CShootingUI(const CShootingUI& Prototype)
 
 HRESULT CShootingUI::Initialize_Prototype()
 {
-	/* 패킷, 파일 입출력을 통한 초기화. */
-
 	return  S_OK;
 }
 
@@ -23,6 +21,7 @@ HRESULT CShootingUI::Initialize(void* pArg)
 	CShootingUI_DESC* Desc = static_cast <CShootingUI_DESC*>(pArg) ;
 	m_iWeaPonState = Desc->iWeaPonState;
 	m_iWeaPonTYPE = Desc->iWeaPonTYPE;
+
 	if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
 
@@ -30,7 +29,6 @@ HRESULT CShootingUI::Initialize(void* pArg)
 	m_pTransformCom->Set_TRANSFORM(
 		CTransform::T_POSITION,
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
 
 	if (FAILED(Add_Components()))
 		return E_FAIL;
@@ -40,12 +38,11 @@ HRESULT CShootingUI::Initialize(void* pArg)
 
 void CShootingUI::Priority_Update(_float fTimeDelta)
 {
-	
 }
 
 void CShootingUI::Update(_float fTimeDelta)
 {
-	if (*m_iWeaPonState == CWeapon::Shoot && *m_iWeaPonTYPE == CWeapon::HendGun)
+	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::HendGun)
 	{
 		m_iTex = Prrr;
 		m_RGB.x  = 0.0f;
@@ -56,16 +53,12 @@ void CShootingUI::Update(_float fTimeDelta)
 		if (m_bWeaponUP)	
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY + rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY + rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponUP = false;
 		}
 	}
 
-
-	if (*m_iWeaPonState == CWeapon::Reload && *m_iWeaPonTYPE == CWeapon::HendGun)
+	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::HendGun)
 	{
 		m_iTex = CLack;
 		m_RGB.x= 0.5f;
@@ -76,16 +69,12 @@ void CShootingUI::Update(_float fTimeDelta)
 		if (m_bWeaponDown)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX -50.f) - ViewportDesc.Width * 0.5f, -(m_fY+250.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX -50.f) - ViewportDesc.Width * 0.5f, -(m_fY+250.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponDown = false;
 		}
 	}
 
-
-	if (*m_iWeaPonState == CWeapon::Shoot && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
+	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
 	{
 		m_iTex = Tra;
 		m_RGB.x= 0.0f;
@@ -95,18 +84,12 @@ void CShootingUI::Update(_float fTimeDelta)
 		if (m_bWeaponUP)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX+220.f + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY+30.f +rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX+220.f + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY+30.f +rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponUP = false;
 		}
-
-	
-
 	}
 
-	if (*m_iWeaPonState == CWeapon::Reload && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
+	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
 	{
 		m_iTex = CLack;
 		m_RGB.x = 0.f;
@@ -125,52 +108,40 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-
-	if (*m_iWeaPonState == CWeapon::Shoot && *m_iWeaPonTYPE == CWeapon::MissileGatling)
+	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::MissileGatling)
 	{
 		m_iTex = TaKa;
-		
 		m_RGB.x = 1.f;
 		m_RGB.y = 1.f;
 		m_RGB.z = 0.f;
 		m_RGB.w = 0.9f;
 
-
 		if (m_bWeaponUP)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX*2.f, m_fSizeY*2.f, 1.f);
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX+60.f + rand()%100)  - ViewportDesc.Width * 0.5f, -(m_fY - 70.f )+ ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX+60.f + rand()%100)  - ViewportDesc.Width * 0.5f, -(m_fY - 70.f )+ ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponUP = false;
 		}
 	}
 
-	if (*m_iWeaPonState == CWeapon::Reload && *m_iWeaPonTYPE == CWeapon::MissileGatling)
+	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::MissileGatling)
 	{
 		m_iTex = CLack2;
-
 		m_RGB.x = 1.f;
 		m_RGB.y = 0.f;
 		m_RGB.z = 0.f;
 		m_RGB.w = 0.9f;
-	
 
 		if (m_bWeaponDown)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX * 2.f, m_fSizeY * 2.f, 1.f);
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX - 75.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX - 75.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponDown = false;
 		}
 	}
 
-	if (*m_iWeaPonState == CWeapon::Shoot && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
+	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
 	{
-	
 		m_iTex = Flink;
 		m_RGB.x = 0.0f;
 		m_RGB.y = 0.9f;
@@ -180,30 +151,21 @@ void CShootingUI::Update(_float fTimeDelta)
 		if (m_bWeaponUP)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX * 1.5f, m_fSizeY * 1.5f, 1.f);
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX + rand() % 100) - ViewportDesc.Width * 0.5f, -(m_fY +10) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX + rand() % 100) - ViewportDesc.Width * 0.5f, -(m_fY +10) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponUP = false;
 		}
 	}
 
-	if (*m_iWeaPonState == CWeapon::Reload && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
+	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
 	{
-	
 		m_iTex = CLack;
 		m_RGB.x = 0.5f;
 		m_RGB.y = 0.5f;
 		m_RGB.z = 0.5f;
 		m_RGB.w = 0.9f;
-
 		if (m_bWeaponDown)
 		{
-
-			m_pTransformCom->Set_TRANSFORM(
-				CTransform::T_POSITION,
-				XMVectorSet((m_fX +200.f) - ViewportDesc.Width * 0.5f, -(m_fY + 80.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
-
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX +200.f) - ViewportDesc.Width * 0.5f, -(m_fY + 80.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponDown = false;
 		}
 	}
@@ -229,7 +191,6 @@ HRESULT CShootingUI::Render()
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		return E_FAIL;
 
-
 	if (FAILED(m_pTextureCom[m_iTex]->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
 		return E_FAIL;
 	
@@ -238,7 +199,6 @@ HRESULT CShootingUI::Render()
 	m_pVIBufferCom->Bind_Buffers();
 
 	m_pVIBufferCom->Render();
-
 
 	return S_OK;
 }
@@ -252,23 +212,19 @@ void CShootingUI::Set_RandomPos(_bool WeaponUP, _bool WeaponDown, _bool WeaponSi
 
 void CShootingUI::Set_PosClack(_float X, _float Y)
 {
-	m_pTransformCom->Set_TRANSFORM(
-		CTransform::T_POSITION,
-		XMVectorSet((m_fX - X) - ViewportDesc.Width * 0.5f, -(m_fY + Y) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
+	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX - X) - ViewportDesc.Width * 0.5f, -(m_fY + Y) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 }
 
 HRESULT CShootingUI::Add_Components()
 {
-
-	/* For.Com_Shader */
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
 
-	/* For.Com_VIBuffer */
  	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBufferRoop"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
 		return E_FAIL;
+
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_PrrrEffect"),
 		TEXT("Com_TexPrrr"), reinterpret_cast<CComponent**>(&m_pTextureCom[Prrr]))))
 		return E_FAIL;
@@ -298,7 +254,6 @@ HRESULT CShootingUI::Add_Components()
 		return E_FAIL;
 
 	return S_OK;
-
 }
 
 CShootingUI* CShootingUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

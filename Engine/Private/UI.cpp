@@ -19,7 +19,6 @@ HRESULT CUI::Initialize(void* pArg)
     {
         CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
-
         m_fX = pDesc->fX;
         m_fY = pDesc->fY;
         m_fZ = pDesc->fZ;
@@ -27,26 +26,17 @@ HRESULT CUI::Initialize(void* pArg)
         m_fSizeY = pDesc->fSizeY;
         m_UIID = pDesc->UID;
         m_iDeleteLevel = pDesc->iDeleteLevel;
-
         m_bUpdate = pDesc->Update; 
-        m_pEnable_Level = new _bool[pDesc->iMaxLevel];
-        for (_uint i = 0; i < pDesc->iMaxLevel; i++) 
-            m_pEnable_Level[i] = pDesc->pEnable_Level[i];
-
         if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
-
     }
     else if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
-
-    // 컨텍스트 디바이스는 원본 이니셜에서 설정해 주지 못함, 원본이 Loader(서브 스레드)에서 만들어 지면서 호출되기 때문
     m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
 
     XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());
 
-    /* 뷰스페이스 상의 화면에 보여줄 영역(뷰볼륨)을 설정한다. */
     XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(ViewportDesc.Width, ViewportDesc.Height, 0.0f, 1.f));
 
     return S_OK;
@@ -54,7 +44,6 @@ HRESULT CUI::Initialize(void* pArg)
 
 void CUI::Priority_Update(_float fTimeDelta)
 {
-    return ;
 }
 
 void CUI::Update(_float fTimeDelta)
@@ -67,13 +56,7 @@ void CUI::Late_Update(_float fTimeDelta)
 
 HRESULT CUI::Render()
 {
-
-    m_pTransformCom->Set_TRANSFORM(
-        CTransform::T_POSITION,
-        XMVectorSet(m_fX + -ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, 0.f, 1.f));
-
-
-     return S_OK;
+    return S_OK;
 }
 
 void CUI::Set_UI_Pos(void* pArg)
@@ -87,12 +70,7 @@ void CUI::Set_UI_Pos(void* pArg)
         m_fZ = pDesc->fZ;
         m_fSizeX = pDesc->fSizeX;
         m_fSizeY = pDesc->fSizeY;
-        m_UIID = pDesc->UID;
-        
-     m_bUpdate = pDesc->Update; 
     }
-
-    // 컨텍스트 디바이스는 원본 이니셜에서 설정해 주지 못함, 원본이 Loader(서브 스레드)에서 만들어 지면서 호출되기 때문
 
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
     m_pTransformCom->Set_TRANSFORM(
@@ -102,11 +80,9 @@ void CUI::Set_UI_Pos(void* pArg)
 
 void CUI::Set_UI_shaking(_float fShakingTime, _float fPowerX, _float fPowerY)
 {
-
     m_fShakingTime = fShakingTime;
     m_fShakingPower_X = fPowerX;
     m_fShakingPower_Y = fPowerY;
-    m_IsShaking = true;
 }
 
 _bool CUI::Check_Deleate(_uint Level)
@@ -117,10 +93,8 @@ _bool CUI::Check_Deleate(_uint Level)
 
 void CUI::UI_shaking(_float fTimeDelta)
 {
-
     if (m_fShakingTime > 0.f)
     {
-
         m_fShakingTime -= fTimeDelta;
         m_fShaking_X = (_float)((rand() % 21)) * m_fShakingPower_X * 0.1f;
         m_fShaking_Y = (_float)((rand() % 21)) * m_fShakingPower_Y * 0.1f;
@@ -132,11 +106,9 @@ void CUI::UI_shaking(_float fTimeDelta)
             m_fShaking_Y = 0.f;
         }
     }
-
 }
 
 void CUI::Free()
 {
     __super::Free();
-    Safe_Delete_Array(m_pEnable_Level);
 }

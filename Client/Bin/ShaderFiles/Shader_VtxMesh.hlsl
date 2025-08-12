@@ -21,11 +21,6 @@ bool g_bDoorEmissive;
 texture2D g_maskTexture;
 
 
-//float Time; // 시간 값
-//float RingRadius; // 초기 반지름 R
-//float GrowthRate;
-//
-
 struct VS_IN
 {
 	float3 vPosition : POSITION;	
@@ -45,7 +40,7 @@ struct VS_OUT
 
 };
 
-VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
+VS_OUT VS_MAIN(VS_IN In)
 {	
 	VS_OUT			Out = (VS_OUT)0;	
 	
@@ -58,8 +53,6 @@ VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
 	Out.vTexcoord = In.vTexcoord;	
 	Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = vPosition;
-
-    
 
 	return Out;
 }
@@ -78,7 +71,6 @@ struct PS_IN
 
 struct PS_OUT
 {
-	/* 변수에 대한 시멘틱을 정의한다. */
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
@@ -99,7 +91,6 @@ PS_OUT PS_MAIN(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = In.vNormal;
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
@@ -120,7 +111,6 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
     
     Out.vDiffuse = vMtrlDiffuse;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
@@ -141,7 +131,6 @@ PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
 	
     Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-   // Out.vLightDepth = vector(In.vProjPos.z / g_fCamFar,0.f, 0.f, 0.f);
 
     return Out;
 }
@@ -152,12 +141,11 @@ PS_OUT PS_FIRE(PS_IN In)
     
     float2 uvOffset = g_TimeSum;
     
-   float2 movedTexCoord = In.vTexcoord + uvOffset;
+    float2 movedTexCoord = In.vTexcoord + uvOffset;
     
     float vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord).r;
     float4 vDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord);
 
- 
     float4 color = lerp(g_RGB, g_RGBEnd, vDiffuse);
 
     float rim{};
@@ -195,8 +183,7 @@ PS_OUT PS_ShockWaveFire(PS_IN In)
     if (Out.vDiffuse.a <= 0.01f)
         discard;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
-        Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
@@ -208,8 +195,6 @@ PS_OUT PS_Shock(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-
-
     float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler,In.vTexcoord);
 
     vMtrlDiffuse.a = vMtrlDiffuse.r;
@@ -223,7 +208,6 @@ PS_OUT PS_Shock(PS_IN In)
     if (Out.vDiffuse.a <= 0.01f)
         discard;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
@@ -255,11 +239,8 @@ PS_OUT PS_WALL(PS_IN In)
         vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     }
     
-
-
     Out.vDiffuse = vDiffuse;
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
@@ -273,7 +254,6 @@ PS_OUT PS_LASER(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-  
     float4 vDiffuse = g_maskTexture.Sample(LinearSampler, float2(In.vTexcoord)*g_TimeSum);
 
     float4 color = lerp(float4(1.f

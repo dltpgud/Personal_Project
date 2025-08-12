@@ -16,7 +16,15 @@ class CDOOR final : public CGameObject
     enum DoorType{ STAGE, ITEM, BOSS };
 	enum State {OPEN, ClOSE};
 	enum State2 { OPEN2, IDLE,ClOSE2};
-private:
+
+	enum DoorFlags : _ubyte
+    {
+       DOOR_INTERACT = 1 << 0, // 00000001
+       DOOR_OPEN = 1 << 1,     // 00000010
+       DOOR_SOUND = 1 << 2     // 00000100
+    };
+
+    private:
 	CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CDOOR(const CDOOR& Prototype);
 	virtual ~CDOOR() = default;
@@ -42,17 +50,15 @@ private:
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-
+    HRESULT Init_CallBakc();
+private:
 	DoorType m_iDoorType{};
 	CInteractiveUI* m_InteractiveUI = { nullptr };
-	_bool m_bOpen = { false };
-    _bool m_bSoud = {false};
-	_uint m_iState = { 0 }; // 현재 문 상태 체크
-	_bool m_bInterect = false;
 
+	_uint  m_iState = { 0 }; // 현재 문 상태 체크
+    _ubyte m_flags = 0;
 	_uint m_ChangeLevelDoor{};
 	_float4 m_RimColor{};
-	_bool m_bEmissive{ false };
 	_float4 m_fDoorEmissiveColor{};
 
 

@@ -2,11 +2,16 @@
 #include "BillyBoom.h"
 #include "GameInstance.h"
 #include "Body_BillyBoom.h"
-#include "BossBullet_Berrle.h"
-#include "BossBullet_Laser.h"
-#include "Bullet.h"
-
-
+#include "StateMachine.h"
+#include "BillyBoom_Idle.h"
+#include "BillyBoom_Hit.h"
+#include "BillyBoom_Dead.h"
+#include "BillyBoom_Barre.h"
+#include "BillyBoom_Bash.h"
+#include "BillyBoom_ShockWave.h"
+#include "BillyBoom_Laser.h"
+#include "BillyBoom_Intro.h"
+#include "BillyBoom_Move.h"
 CBody_BillyBoom::CBody_BillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -22,28 +27,24 @@ HRESULT CBody_BillyBoom::Initialize_Prototype()
 
 HRESULT CBody_BillyBoom::Initialize(void* pArg)
 {
-
     CBody_BillyBoom_Desc* pDesc = static_cast<CBody_BillyBoom_Desc*>(pArg);
 
-    m_pParentState   = pDesc->pParentState;
+    m_pParentObj = pDesc->pParentObj;
+    m_pParentState = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
-   
-  //  m_pParent        = pDesc->pObj;
- //   Safe_Release(m_pParent);
-    /* 추가적으로 초기화가 필요하다면 수행해준다. */
+
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-   m_fPlayAniTime = 0.5f;
-   m_iEmissiveMashNum = 1;
- // m_pFindBonMatrix = Get_SocketMatrix("R_Canon_02");
-   m_pFindAttBonMatrix[0] = Get_SocketMatrix("L_TopArm_04"); // 왼쪽 위 팔
-   m_pFindAttBonMatrix[1] = Get_SocketMatrix("R_TopArm_04"); // 오른 쪽 위 팔
-   m_pFindAttBonMatrix[2] = Get_SocketMatrix("R_TopArm_04"); // 위팔 모아 쏴
-   m_pFindAttBonMatrix[3] = Get_SocketMatrix("R_Arm_04"); // 태양날리기
 
+    m_pFindAttBonMatrix[BM_LEFT_TOP] = Get_SocketMatrix("L_TopArm_04"); // 왼쪽 위 팔
+    m_pFindAttBonMatrix[BM_RIGHT_TOP] = Get_SocketMatrix("R_TopArm_04"); // 오른 쪽 위 팔
+    m_pFindAttBonMatrix[BM_HAND] = Get_SocketMatrix("R_Arm_04");     // 태양날리기
+
+    if (FAILED(Set_StateMachine()))
+       return E_FAIL;
  
     return S_OK;
 }
@@ -55,410 +56,87 @@ void CBody_BillyBoom::Priority_Update(_float fTimeDelta)
 
 void CBody_BillyBoom::Update(_float fTimeDelta)
 {
- 
-    _matrix LaserMatrix =  XMMatrixRotationZ(XMConvertToRadians(m_BeamZ))* XMMatrixRotationY(XMConvertToRadians(-m_BeamY));
 
-    if (m_bTurnBeam = true)
+    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta))
     {
-      
-
-            m_BeamZ += fTimeDelta*-8.f ;
-            m_BeamY += fTimeDelta * 55.f;
-            
-        
-    }
-
-
-
-    _bool bMotionChange = {false}, bLoop = {false};
-    if (*m_pParentState == CBillyBoom::ST_Idle && m_iCurMotion != CBillyBoom::ST_Idle)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Idle;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    if (*m_pParentState == CBillyBoom::ST_Intro && m_iCurMotion != CBillyBoom::ST_Intro)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Intro;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-       
-    if (m_iCurMotion == CBillyBoom::ST_Intro)
-    {
-        m_iEmissiveMashNum = 1;
-        m_fEmissivePower = 5;
-        m_fEmissiveColor = { 1.f, 0.5f, 0.0 }; // 노랑
-        m_fTimeSum += fTimeDelta;
-
-        if (m_fTimeSum > 1.f)
-        {
-            m_bEmissiveStart = true;
-            m_fTimeSum = 0.f;
-        }
-    }
-    else {
-        m_bEmissiveStart = false;
-    }
-
-    if (*m_pParentState == CBillyBoom::ST_Comp_Poke_Front && m_iCurMotion != CBillyBoom::ST_Comp_Poke_Front)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Comp_Poke_Front;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    if (*m_pParentState == CBillyBoom::ST_Comp_Idle && m_iCurMotion != CBillyBoom::ST_Comp_Idle)
-    {
-     
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Comp_Idle;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-
-    if (*m_pParentState == CBillyBoom::ST_Run_Front && m_iCurMotion != CBillyBoom::ST_Run_Front)
-    {
-        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_BillyBoom_FootStep.ogg", 0.5f);
-
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Run_Front;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-
-    if (*m_pParentState != CBillyBoom::ST_Run_Front) {
-        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-    }
-
-    if (m_iCurMotion == CBillyBoom::ST_Barre_Shoot) {
-        m_fPlayAniTime = 1.f;
-        m_bTurnBeam = false;
-      
-    }
-
-    if (true == m_bBerrle) {
-        m_fTimeSum += fTimeDelta;
-
-        if (m_fTimeSum > 0.8f)
-        {
-            Make_Barre();
-            m_fTimeSum = 0.f;
-            m_bBerrle = false;
-        }
-    }
-
-    if (*m_pParentState == CBillyBoom::ST_Barre_In && m_iCurMotion != CBillyBoom::ST_Barre_In)
-    {
-        m_pGameInstance->Play_Sound(L"ST_BillyBoom_Cast_Hand_Blast.ogg", CSound::SOUND_EFFECT, 0.5f);
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Barre_In;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
-    {
-        m_bTurnBeam = false;
-        m_bBerrle = true;
-        m_fPlayAniTime = 1.f;
-    }
-
-    if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
-    {  
-        m_fPlayAniTime = 0.25f;
-
-    }
-
-    if ( m_iCurMotion == CBillyBoom::ST_Laser_PreShoot)
-    {
- 
-        m_fPlayAniTime = 1.f;
-
-    }
-
-    if (*m_pParentState == CBillyBoom::ST_Laser_In && m_iCurMotion != CBillyBoom::ST_Laser_In)
-    {
-        m_BeamZ = 35.f;
-        m_BeamY = -120.f;
-
-        m_iCurMotion = CBillyBoom::ST_Laser_In;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-
-    if (*m_pParentState == CBillyBoom::ST_Comp_Idle)
-    {
-        m_DeadTimeSum += fTimeDelta;
-
-        if(m_DeadTimeSum >2.f)
-            m_bEmissiveStart = true;
-    }
-
-
-    if (*m_pParentState == CBillyBoom::ST_ShockWave_In && m_iCurMotion != CBillyBoom::ST_ShockWave_In)
-    {
-
-        
-         m_pGameInstance->Play_Sound(L"ST_BillyBoom_From_Two_Blaster_To_One.ogg", CSound::SOUND_EFFECT, 0.5f);
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_ShockWave_In;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-
-
-    if ( m_iCurMotion == CBillyBoom::ST_ShockWave_PreShoot)
-    {
-        m_bTurnBeam = false;
-        m_fPlayAniTime = 1.f;
-
-    }
-
-    if ( m_iCurMotion == CBillyBoom::ST_ShockWave_Shoot)
-    {
-        m_bTurnBeam = false;
-     
-        m_fPlayAniTime = 1.f;
-
-    }
-
-    if ( m_iCurMotion == CBillyBoom::ST_ShockWave_Out)
-    {
-        m_bTurnBeam = false;
-
-        m_fPlayAniTime = 1.f;
-
-    }
-
-    if (*m_pParentState == CBillyBoom::ST_Bash_PreShoot && m_iCurMotion != CBillyBoom::ST_Bash_PreShoot)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Bash_PreShoot;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    if ( m_iCurMotion == CBillyBoom::ST_Bash_Shoot)
-    {
-        m_bTurnBeam = false;
-  
-        m_fPlayAniTime = 1.f;
-
-    }
-
-
-    if (*m_pParentState == CBillyBoom::ST_Stun_Start && m_iCurMotion != CBillyBoom::ST_Stun_Start)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Stun_Start;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-
-
-    if (*m_pParentState == CBillyBoom::ST_Stun_Pose && m_iCurMotion != CBillyBoom::ST_Stun_Pose)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Stun_Pose;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    
-    if (*m_pParentState == CBillyBoom::ST_Stun_Recover && m_iCurMotion != CBillyBoom::ST_Stun_Recover)
-    {
-        m_bTurnBeam = false;
-        m_iCurMotion = CBillyBoom::ST_Stun_Recover;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
+        if (m_pStateMachine[*m_pParentState]->Get_NextMachineIndex() != -1)
+            ChangeState(m_pStateMachine[*m_pParentState]->Get_NextMachineIndex());
+        else
+            ChangeState(CBillyBoom::ST_IDLE);
     }
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
-        m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
-        m_RimDesc.iPower = 1;
-    }
-
-
-    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
-        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
-        m_RimDesc.iPower = 1;
-    }
-    
-    if (bMotionChange)
-        m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
-
-    
-
-  
-    if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
-    {
-
-        if (m_iCurMotion == CBillyBoom::ST_Bash_Shoot)
-            m_bFinishAni = true;
-        else
-        if (m_iCurMotion == CBillyBoom::ST_ShockWave_Shoot)
-                m_bFinishAni = true;
-        else
-        if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
-                        m_bFinishAni = true;
-        else
-            if (m_iCurMotion == CBillyBoom::ST_Barre_Shoot)
-                m_bFinishAni = true;
-        else
-        if (m_iCurMotion == CBillyBoom::ST_Bash_PreShoot)
-        {
-          m_iParentSt = CBillyBoom:: ST_Bash_Shoot;
-            m_iCurMotion = CBillyBoom::ST_Bash_Shoot;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if (m_iCurMotion == CBillyBoom::ST_ShockWave_In)
-        {
-            m_iParentSt = CBillyBoom::ST_ShockWave_PreShoot;
-            m_iCurMotion = CBillyBoom::ST_ShockWave_PreShoot;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if (m_iCurMotion == CBillyBoom::ST_ShockWave_PreShoot)
-        {
-            Make_ShockWave();
-            m_iParentSt = CBillyBoom::ST_ShockWave_Shoot;
-            m_iCurMotion = CBillyBoom::ST_ShockWave_Shoot;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if (m_iCurMotion == CBillyBoom::ST_Laser_In)
-        {
-            m_bTurnBeam = false;
-            m_iParentSt = CBillyBoom::ST_Laser_PreShoot;
-            m_iCurMotion = CBillyBoom::ST_Laser_PreShoot;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if (m_iCurMotion == CBillyBoom::ST_Laser_PreShoot)
-        {
-      
-            Make_Laser();
-            m_iParentSt = CBillyBoom::ST_Laser_ShootLoop;
-            m_iCurMotion = CBillyBoom::ST_Laser_ShootLoop;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if(m_iCurMotion == CBillyBoom::ST_Barre_In)
-        {
-            m_pDamage = 20.f;
-            m_iParentSt = CBillyBoom::ST_Barre_PreShoot;
-           m_iCurMotion = CBillyBoom::ST_Barre_PreShoot;
-           m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if (m_iCurMotion == CBillyBoom::ST_Barre_PreShoot)
-        {
-            m_iParentSt = CBillyBoom::ST_Barre_Shoot;
-            m_iCurMotion = CBillyBoom::ST_Barre_Shoot;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
-        else
-        if (m_iCurMotion != CBillyBoom::ST_Intro) {
-            m_bFinishAni = true;
-            m_iCurMotion = CBillyBoom::ST_Idle;
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
-        }
+        m_RimDesc.fcolor = {1.f, 1.f, 1.f, 1.f};
+        m_RimDesc.iPower = 0.5;
     }
     else
     {
-        m_bFinishAni = false;
-       if(m_iCurMotion == CBillyBoom::ST_Comp_Idle)
-        m_pModelCom->Set_Animation(m_iCurMotion, false);
+        m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
     }
-
-
-
-    if (m_iCurMotion == CBillyBoom::ST_Laser_ShootLoop)
-    {
-        Set_BoneUpdateMatrix("R_TopArm_04", LaserMatrix);
-        Set_BoneUpdateMatrix("L_TopArm_04", LaserMatrix);
-    }
-
-
-
-
-
-
+ 
     m_pHeanColl->Update(XMLoadFloat4x4(&m_HeandWorldMatrix));
+    __super::Update(fTimeDelta);
 }
 
 void CBody_BillyBoom::Late_Update(_float fTimeDelta)
 {
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
+  if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+  return;
 
-   
+  _matrix SocketMatrix = XMLoadFloat4x4(m_pFindAttBonMatrix[2]);
 
-        _matrix SocketMatrix = XMLoadFloat4x4(m_pFindAttBonMatrix[3]);
+  for (size_t i = 0; i < 3; i++)
+      SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]); 
 
-        for (size_t i = 0; i < 3; i++)
-            SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]); // 항등으로 만들어서 넣겠다..
+  XMStoreFloat4x4(&m_HeandWorldMatrix,
+      SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
 
-        XMStoreFloat4x4(&m_HeandWorldMatrix,
-            SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
+  _float m_pDamage(4.0);
+  if (FAILED(m_pGameInstance->Add_Collider(m_pHeanColl, m_pDamage)))
+      return;
 
+  m_pGameInstance->Add_DebugComponents(m_pHeanColl);
 
-        if (FAILED(m_pGameInstance->Add_Collider(m_pHeanColl, m_pDamage)))
-            return;
+  __super::Late_Update(fTimeDelta);
+}
 
-        m_pGameInstance->Add_DebugComponents(m_pHeanColl);
-    __super::Late_Update(fTimeDelta);
+void CBody_BillyBoom::ChangeState(_int nextState)
+{
+    if (m_pStateMachine[*m_pParentState])
+        m_pStateMachine[*m_pParentState]->Reset_StateMachine();
+
+    *m_pParentState = nextState;
+
+    if (m_pStateMachine[*m_pParentState])
+        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f);
 }
 
 HRESULT CBody_BillyBoom::Render()
 {
-
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
-
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+    _bool bEmissive{false};
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-     
-        if (true == m_bEmissiveStart) {
-
-            if (m_iCurMotion != CBillyBoom::ST_Comp_Idle) {
-                if (i == m_iEmissiveMashNum)
-                    m_bEmissive = true;
-                else
-                    m_bEmissive = false;
-            }
-            else  m_bEmissive = true;
-
-            if(4 == m_iEmissiveMashNum)
-                m_bEmissive = true;
-
-
-            if (FAILED(m_pShaderCom->Bind_RawValue("g_bEmissive", &m_bEmissive, sizeof(_bool))))
-                return E_FAIL;
+        if (i == m_iEmissiveMashNum || -1 == m_iEmissiveMashNum)
+        {
+            bEmissive = true;
         }
+        else
+            bEmissive = false;
 
+        if (FAILED(m_pShaderCom->Bind_RawValue("g_bEmissive", &bEmissive, sizeof(_bool))))
+            return E_FAIL;
+           
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -471,109 +149,11 @@ HRESULT CBody_BillyBoom::Render()
     return S_OK;
 }
 
-
-
-HRESULT CBody_BillyBoom::Make_Barre()
-{
-    _vector BHend_Local_Pos = { m_pFindAttBonMatrix[3]->_41, m_pFindAttBonMatrix[3]->_42,  m_pFindAttBonMatrix[3]->_43,  m_pFindAttBonMatrix[3]->_44 };
-   _vector vHPos = XMVector3TransformCoord(BHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
-
-   m_pGameInstance->Play_Sound(L"ST_BillyBoom_Hand_Blast_Shoot.ogg", CSound::SOUND_EFFECT,0.5f);
-
-   CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc{};
-   Desc.fSpeedPerSec = 20.f;
-   Desc.pTagetPos = m_AttackDir;
-   Desc.vPos = vHPos;
-   Desc.state = &m_iCurMotion;
-   Desc.iSkillType = CSkill::SKill::STYPE_BERRLE;
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                            L"Prototype GameObject_BossBullet_Berrle", &Desc);
-
-
-   CBullet::CBULLET_DESC BDesc{};
-   BDesc.fSpeedPerSec = 20.f;
-   BDesc.pTagetPos = m_AttackDir;
-   BDesc.vPos = vHPos;
-   BDesc.state = &m_iCurMotion;
-   BDesc.fDamage = &m_pDamage;
-   BDesc.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
-
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                            L"Prototype GameObject_Bullet", &BDesc);
-
-   return S_OK;
-}
-
-HRESULT CBody_BillyBoom::Make_ShockWave()
-{
-    m_pGameInstance->Play_Sound(L"ST_BillyBoom_Shockwave_Shoot.ogg", CSound::SOUND_EFFECT, 0.5f);
-    _vector SHend_Local_Pos = { m_pFindAttBonMatrix[2]->_41 , m_pFindAttBonMatrix[2]->_42 + 1.f,  m_pFindAttBonMatrix[2]->_43,  m_pFindAttBonMatrix[2]->_44 };
-    _vector vHPos = XMVector3TransformCoord(SHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
-
-    m_pDamage = 10.f;
-    CBullet::CBULLET_DESC Desc{};
-    Desc.fSpeedPerSec = 20.f;
-    Desc.pTagetPos = m_AttackDir;
-    Desc.vPos = vHPos;
-    Desc.state = &m_iCurMotion;
-    Desc.fDamage = &m_pDamage;
-    Desc.iSkillType = CSkill::SKill:: STYPE_SHOCKWAVE;
-
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                             L"Prototype GameObject_Bullet", &Desc);
-
-    return S_OK;
-}
-
-HRESULT CBody_BillyBoom::Make_Laser()
-{
-    m_pDamage = 10.f; 
-    m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Start.ogg", CSound::SOUND_EFFECT, 0.5f);
-    m_pGameInstance->PlayBGM(CSound::SOUND_EFFECT_LASER, L"ST_Enemy_Laser_Loop.ogg", 0.5f);
-
-    _vector RHend_Local_Pos = { m_pFindAttBonMatrix[1]->_41, m_pFindAttBonMatrix[1]->_42+0.5f,  m_pFindAttBonMatrix[1]->_43 +3.f,  m_pFindAttBonMatrix[1]->_44 };
-    _vector LHend_Local_Pos = { m_pFindAttBonMatrix[0]->_41, m_pFindAttBonMatrix[0]->_42+0.5f,  m_pFindAttBonMatrix[0]->_43+3.f,  m_pFindAttBonMatrix[0]->_44 };
-
-    _vector RHPos = XMVector3TransformCoord(RHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
-    _vector LHPos = XMVector3TransformCoord(LHend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
-
-
-   CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc{};
-   Desc.fSpeedPerSec = 20.f;;
-   Desc.fDamage = &m_pDamage;
-   Desc.vPos = RHPos;
-   Desc.state = &m_iCurMotion;
-   Desc.LaserRightLeft = true;
-   Desc.LaserpParentMatrix = &m_WorldMatrix;
-   Desc.LaserpSocketMatrix = m_pFindAttBonMatrix[1];
-   Desc.iSkillType = CSkill::STYPE_LASER;
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                            L"Prototype GameObject_BossBullet_Berrle", &Desc);
-  
-   CBossBullet_Berrle::CBossBullet_Berrle_DESC Desc2{};
-    Desc2.fSpeedPerSec = 20.f;
-    Desc2.fDamage = &m_pDamage;
-    Desc2.vPos = LHPos;
-    Desc2.state = &m_iCurMotion;
-    Desc2.LaserRightLeft = false;
-    Desc2.LaserpParentMatrix = &m_WorldMatrix;
-    Desc2.LaserpSocketMatrix = m_pFindAttBonMatrix[0];
-    Desc2.iSkillType = CSkill::STYPE_LASER;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(),TEXT("Layer_Skill"),
-                                             L"Prototype GameObject_BossBullet_Berrle", &Desc2);
-   
-    m_bTurnBeam = true;
-
-    return S_OK;
-}
-
 void CBody_BillyBoom::SetDir()
 {  
   m_AttackDir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)
-        - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
+       - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 }
-
-
 
 HRESULT CBody_BillyBoom::Add_Components()
 {
@@ -581,20 +161,19 @@ HRESULT CBody_BillyBoom::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_Model */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_BillyBoom"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
-
      CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
 
-     OBBDesc.vExtents = _float3(1.f, 0.5f, 1.f);
-     OBBDesc.vCenter = _float3(0.f, 0.f, 0.f);
+     OBBDesc.vExtents  = {1.f, 0.5f, 1.f};
+     OBBDesc.vCenter   = {0.f, 0.f, 0.f};
      OBBDesc.vRotation = { 0.f, 0.f, 0.f };
+
      if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
-         reinterpret_cast<CComponent**>(&m_pHeanColl), &OBBDesc)))
-         return E_FAIL;
+                                       reinterpret_cast<CComponent**>(&m_pHeanColl), &OBBDesc)))
+        return E_FAIL;
     
     return S_OK;
 }
@@ -604,15 +183,15 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
         return E_FAIL;
 
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
        return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
@@ -621,13 +200,8 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_int))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
-        return E_FAIL;
-    _bool stun{false};
-     if (m_iCurMotion == CBillyBoom::ST_Stun_Start)
-        stun= true;
 
-     if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &stun, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_EmissivePower", &m_fEmissivePower, sizeof(_float))))
@@ -636,9 +210,103 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_EmissiveColor", &m_fEmissiveColor, sizeof(_float3))))
         return E_FAIL;
 
-    if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, 1, aiTextureType_EMISSIVE, 0,
-        "g_EmissiveTexture")))
+    if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, 1, aiTextureType_EMISSIVE, 0,"g_EmissiveTexture")))
         return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CBody_BillyBoom::Set_StateMachine()
+{
+    m_pStateMachine.resize(CBillyBoom::ST_END);
+
+#pragma region IDLE
+    CBillyBoom_Idle::STATEMACHINE_DESC pMachineDesc{};
+    pMachineDesc.pParentModel = m_pModelCom;
+    pMachineDesc.pParentObject = m_pParentObj;
+    pMachineDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    m_pStateMachine[CBillyBoom::ST_IDLE] = CBillyBoom_Idle::Create(&pMachineDesc);
+#pragma endregion
+
+#pragma region Barre
+    CBillyBoom_Barre::ATTACK_DESC pBarreDesc{};
+    pBarreDesc.pParentModel = m_pModelCom;
+    pBarreDesc.pPerantPartBonMatrix = m_pFindAttBonMatrix[BM_HAND];
+    pBarreDesc.pPerantWorldMat = &m_WorldMatrix;
+    pBarreDesc.pParentPartObject = this;
+    pBarreDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    m_pStateMachine[CBillyBoom::ST_BARRE] = CBillyBoom_Barre::Create(&pBarreDesc);
+#pragma endregion
+
+#pragma region ShockWave
+    CBillyBoom_ShockWave::ATTACK_DESC pShockWaveDesc{};
+    pShockWaveDesc.pParentModel = m_pModelCom;
+    pShockWaveDesc.pPerantPartBonMatrix = m_pFindAttBonMatrix[BM_RIGHT_TOP];
+    pShockWaveDesc.pPerantWorldMat = &m_WorldMatrix;
+    pShockWaveDesc.pParentPartObject = this;
+    pShockWaveDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    m_pStateMachine[CBillyBoom::ST_SHOCKWAVE] = CBillyBoom_ShockWave::Create(&pShockWaveDesc);
+#pragma endregion
+
+#pragma region LASER
+    CBillyBoom_Laser::ATTACK_DESC pLaserDesc{};
+    pLaserDesc.pParentModel = m_pModelCom;
+    pLaserDesc.pPerantPartBonMatrix[CBillyBoom_Laser::LEFT_BONE] = m_pFindAttBonMatrix[BONE_MAT::BM_LEFT_TOP];
+    pLaserDesc.pPerantPartBonMatrix[CBillyBoom_Laser::RIGHT_BONE] = m_pFindAttBonMatrix[BONE_MAT::BM_RIGHT_TOP];
+    pLaserDesc.pPerantWorldMat = &m_WorldMatrix;
+    pLaserDesc.pParentPartObject = this;
+    pLaserDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    m_pStateMachine[CBillyBoom::ST_LASER] = CBillyBoom_Laser::Create(&pLaserDesc);
+#pragma endregion
+
+#pragma region Bash
+    CBillyBoom_Bash::ATTACK_DESC pBashDesc{};
+    pBashDesc.pParentModel = m_pModelCom;
+    pBashDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    m_pStateMachine[CBillyBoom::ST_BASH] = CBillyBoom_Bash::Create(&pBashDesc);
+#pragma endregion
+
+#pragma region Intro
+    CBillyBoom_Intro::ATTACK_DESC pIntroDesc{};
+    pIntroDesc.pParentModel = m_pModelCom;
+    pIntroDesc.pParentPartObject = this;
+    pIntroDesc.pParentObject = m_pParentObj;
+    pIntroDesc.fEmissiveColor = &m_fEmissiveColor;
+    pIntroDesc.fEmissivePower = &m_fEmissivePower;
+    pIntroDesc.iEmissiveMashNum = &m_iEmissiveMashNum;
+    pIntroDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    m_pStateMachine[CBillyBoom::ST_INTRO] = CBillyBoom_Intro::Create(&pIntroDesc);
+#pragma endregion
+
+#pragma region Move
+    CBillyBoom_Move::MOVE_DESC pMoveDesc{};
+    pMoveDesc.pParentModel = m_pModelCom;
+    pMoveDesc.pParentObject = m_pParentObj;
+    pMoveDesc.pParentPartObject = this;
+    pMoveDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+    pMoveDesc.fLength = static_cast<CBillyBoom*>(m_pParentObj)->Get_fLength();
+    m_pStateMachine[CBillyBoom::ST_MOVE] = CBillyBoom_Move::Create(&pMoveDesc);
+#pragma endregion
+
+#pragma region Dead
+    CBillyBoom_Dead::DEAD_DESC pDeadDesc{};
+    pDeadDesc.pParentModel = m_pModelCom;
+    pDeadDesc.pParentObject = m_pParentObj;
+    pDeadDesc.fEmissiveColor = &m_fEmissiveColor;
+    pDeadDesc.fEmissivePower = &m_fEmissivePower;
+    pDeadDesc.iEmissiveMashNum = &m_iEmissiveMashNum;
+    pDeadDesc.pParentPartObject = this;
+    pDeadDesc.iNextMachineIdx = CBillyBoom::ST_DEAD;
+    m_pStateMachine[CBillyBoom::ST_DEAD] = CBillyBoom_Dead::Create(&pDeadDesc);
+#pragma endregion
+
+#pragma region Hit
+    CBillyBoom_Hit::HIT_DESC pHitDesc{};
+    pHitDesc.pParentModel = m_pModelCom;
+    pHitDesc.iNextMachineIdx = CBillyBoom::ST_MOVE;
+    pHitDesc.HitType = static_cast<CBillyBoom*>(m_pParentObj)->Get_AttackAngle();
+    m_pStateMachine[CBillyBoom::ST_HIT] = CBillyBoom_Hit::Create(&pHitDesc);
+#pragma endregion
 
     return S_OK;
 }
@@ -673,4 +341,8 @@ void CBody_BillyBoom::Free()
 {
     __super::Free();
     Safe_Release(m_pHeanColl);
+
+    for (auto& Machine : m_pStateMachine) Safe_Release(Machine);
+    m_pStateMachine.clear();
+    m_pStateMachine.shrink_to_fit();
 }

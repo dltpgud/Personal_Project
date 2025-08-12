@@ -5,8 +5,6 @@ matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 texture2D g_DiffuseTexture;
 
-//texture2D g_DiffuseTexture[2];
-//texture2D g_MaskTexture;
 float4 g_vMtrlAmbient = float4(0.4f, 0.4f, 0.4f, 1.f);
 float4 g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
@@ -31,7 +29,7 @@ struct VS_OUT
     float4 vProjPos : TEXCOORD2;
 };
 
-VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
+VS_OUT VS_MAIN(  VS_IN In)
 {	
 	VS_OUT			Out = (VS_OUT)0;	
 	
@@ -42,7 +40,7 @@ VS_OUT VS_MAIN( /* 내가 그릴려고 했던 정점을 받아오는거다*/ VS_IN In)
 	Out.vPosition = vPosition;	
     Out.vNormal = mul(float4(In.vNormal, 0.f), g_WorldMatrix);
 	Out.vTexcoord = In.vTexcoord;	
-    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);  /*픽셀의 월드 좌표 구하기*/
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);  
     Out.vProjPos = Out.vPosition;
     
 	return Out;
@@ -60,7 +58,6 @@ struct PS_IN
 
 struct PS_OUT
 {
-	/* 변수에 대한 시멘틱을 정의한다. */
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
@@ -78,16 +75,15 @@ PS_OUT PS_MAIN(PS_IN In)
  
     Out.vDiffuse = vector(vMtrlDiffuse.rgb, 1.f);
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
+
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
 
-	/* 0 ~ 1 */
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
 
     Out.vOutLine = vector(0.f, 0.f, 1.f, 0.f);
     
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
-/*최종 픽셀 색은 디퓨즈에 법선을 이용한 환경광을 곱하고 스펙큘러들을 곱해서 최종 픽셀 색을 정한다-*/
+
 	
 	return Out;
 }
@@ -103,9 +99,8 @@ PS_OUT PS_Fire(PS_IN In)
     
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord);
  
-	
-    float3 colorStart = float3(1.f, 0.f, 0.f); // 빨강
-    float3 colorEnd = float3(1.f,0.80, 0.0); // 노랑
+    float3 colorStart = float3(1.f, 0.f, 0.f); 
+    float3 colorEnd = float3(1.f,0.80, 0.0); 
 	
     float3 color = lerp(colorStart, colorEnd, vMtrlDiffuse.rgb);
 
@@ -114,10 +109,8 @@ PS_OUT PS_Fire(PS_IN In)
     
     Out.vDiffuse = vector(vMtrlDiffuse.rgb, 0.8f);
 
-	/* -1.f ~ 1.f -> 0.f ~ 1.f */
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
 
-	/* 0 ~ 1 */
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     return Out;

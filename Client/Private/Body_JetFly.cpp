@@ -3,6 +3,12 @@
 #include "GameInstance.h"
 #include "Body_JetFly.h"
 #include "Bullet.h"
+#include "StateMachine.h"
+#include "JetFly_Idle.h"
+#include "JetFly_Hit.h"
+#include "JetFly_Dead.h"
+#include "JetFly_Attack.h"
+#include "JetFly_Move.h"
 CBody_JetFly::CBody_JetFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CPartObject{pDevice, pContext}
 {
 }
@@ -18,20 +24,24 @@ HRESULT CBody_JetFly::Initialize_Prototype()
 
 HRESULT CBody_JetFly::Initialize(void* pArg)
 {
-
     CBody_JetFly_Desc* pDesc = static_cast<CBody_JetFly_Desc*>(pArg);
-
+    m_pParentObj = pDesc->pParentObj;
     m_pParentState = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
-    /* 추가적으로 초기화가 필요하다면 수행해준다. */
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
+
     m_fPlayAniTime = 0.5f;
-    m_DyTime = 2.5f;
+    m_fDeadTime = 2.5f;
     m_pFindBonMatrix = Get_SocketMatrix("Canon_Scale");
+
+    if (FAILED(Set_StateMachine()))
+        return E_FAIL;
+
+  
     return S_OK;
 }
 
@@ -42,88 +52,23 @@ void CBody_JetFly::Priority_Update(_float fTimeDelta)
 
 void CBody_JetFly::Update(_float fTimeDelta)
 {
-    _bool bMotionChange = {false}, bLoop = {false};
 
-    if (*m_pParentState == CJetFly::ST_Idle && m_iCurMotion != CJetFly::ST_Idle)
+    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta))
     {
-        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_FLY);
-        m_iCurMotion = CJetFly::ST_Idle;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-
-    if (*m_pParentState == CJetFly::ST_Hit_Front && m_iCurMotion != CJetFly::ST_Hit_Front)
-    {
-        m_DyingTime = true;
-        m_iCurMotion = CJetFly::ST_Hit_Front;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-
-    if (*m_pParentState == CJetFly::ST_Shoot && m_iCurMotion != CJetFly::ST_Shoot)
-    {
-        m_pGameInstance->StopSound(CSound::SOUND_MONSTER_FLY);
-        Make_Bullet();
-        m_iCurMotion = CJetFly::ST_Shoot;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-    if (*m_pParentState == CJetFly::ST_Sragger && m_iCurMotion != CJetFly::ST_Sragger)
-    {
-        m_iCurMotion = CJetFly::ST_Sragger;
-        m_fPlayAniTime = 1.f;
-        bMotionChange = true;
-        bLoop = false;
-    }
-  
-
-    if (*m_pParentState == CJetFly::ST_Walk_Back && m_iCurMotion != CJetFly::ST_Walk_Back)
-    {
-
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.2f);
-        m_iCurMotion = CJetFly::ST_Walk_Back;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
-    }
-    if (*m_pParentState == CJetFly::ST_Walk_Front && m_iCurMotion != CJetFly::ST_Walk_Front)
-    {
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.2f);
-        m_iCurMotion = CJetFly::ST_Walk_Front;
-        m_fPlayAniTime = 0.5f;
-        bMotionChange = true;
-        bLoop = true;
+        if (m_pStateMachine[*m_pParentState]->Get_NextMachineIndex() != -1)
+            ChangeState(m_pStateMachine[*m_pParentState]->Get_NextMachineIndex());
+        else
+            ChangeState(CJetFly::ST_IDLE);
     }
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
-        m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
+        m_RimDesc.fcolor = {1.f, 1.f, 1.f, 1.f};
         m_RimDesc.iPower = 1;
-    }   
-    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
-        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
-        m_RimDesc.iPower = 1;
-    }
-
-
-    if (bMotionChange)
-        m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
-
-    if (true == m_pModelCom->Play_Animation(fTimeDelta* m_fPlayAniTime))
-    {
-
-        m_bFinishAni = true;
-        m_iCurMotion = CJetFly::ST_Idle;
-        m_pModelCom->Set_Animation(m_iCurMotion, true);
     }
     else
     {
-        m_bFinishAni = false;
-        if (m_iCurMotion == CJetFly::ST_Hit_Front)
-            m_pModelCom->Set_Animation(m_iCurMotion, false);
+        m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
     }
 
     __super::Update(fTimeDelta);
@@ -131,20 +76,17 @@ void CBody_JetFly::Update(_float fTimeDelta)
 
 void CBody_JetFly::Late_Update(_float fTimeDelta)
 {
-
     __super::Late_Update(fTimeDelta);
+ 
     if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
     {
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
-    
-    }    //if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-          //  return;
+    } 
 }
 
 HRESULT CBody_JetFly::Render()
 {
-
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -152,7 +94,6 @@ HRESULT CBody_JetFly::Render()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
@@ -174,12 +115,11 @@ HRESULT CBody_JetFly::Render_Shadow()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
         return E_FAIL;
 
-
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
-
 
     _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
 
@@ -193,27 +133,19 @@ HRESULT CBody_JetFly::Render_Shadow()
 
         m_pModelCom->Render(i);
     }
+
     return S_OK;
 }
 
-void CBody_JetFly::Make_Bullet()
+void CBody_JetFly::ChangeState(_int nextState)
 {
-    m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", CSound::SOUND_EFFECT, 0.3f);
-    _vector Hend_Local_Pos = { m_pFindBonMatrix->_41, m_pFindBonMatrix->_42,  m_pFindBonMatrix->_43,  m_pFindBonMatrix->_44 };
+    if (m_pStateMachine[*m_pParentState])
+        m_pStateMachine[*m_pParentState]->Reset_StateMachine();
 
-    _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+    *m_pParentState = nextState;
 
-    _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)
-        - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-
-    CBullet::CBULLET_DESC Desc{};
-    Desc.fSpeedPerSec = 20.f;
-    Desc.pTagetPos = Dir;
-    Desc.vPos = vHPos;
-    Desc.fDamage = &m_pDamage;
-    Desc.iActorType = CSkill::MONSTER:: TYPE_JETFLY;
-    CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
-    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"), pGameObject);
+    if (m_pStateMachine[*m_pParentState])
+        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f);
 }
 
 HRESULT CBody_JetFly::Add_Components()
@@ -222,13 +154,10 @@ HRESULT CBody_JetFly::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    /* For.Com_Model */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_JetFly_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
-
-    /* For.Com_Tex */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
         TEXT("Com_Texture_Mask"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
@@ -241,38 +170,85 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
         return E_FAIL;
 
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(
-            m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_int))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_int))))
         return E_FAIL;
+
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-
-    _bool bshoot{};
-    if (m_iCurMotion == CJetFly::ST_Sragger)
-        bshoot = true;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &bshoot, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
         return E_FAIL;
-
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_interver, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_fthreshold, sizeof(_float))))
         return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CBody_JetFly::Set_StateMachine()
+{
+    m_pStateMachine.resize(CJetFly::ST_END);
+
+#pragma region IDLE
+    CJetFly_Idle::STATEMACHINE_DESC pMachineDesc{};
+    pMachineDesc.pParentModel = m_pModelCom;
+    pMachineDesc.iNextMachineIdx = CJetFly::ST_IDLE;
+    m_pStateMachine[CJetFly::ST_IDLE] = CJetFly_Idle::Create(&pMachineDesc);
+#pragma endregion
+
+#pragma region Attack
+    CJetFly_Attack::ATTACK_DESC pAttackDesc{};
+    pAttackDesc.pParentModel = m_pModelCom;
+    pAttackDesc.pParentPartObject = this;
+    pAttackDesc.pParentObject = m_pParentObj;
+    pAttackDesc.pPerantPartBonMatrix = m_pFindBonMatrix;
+    pAttackDesc.pPerantWorldMat = &m_WorldMatrix;
+    pAttackDesc.iNextMachineIdx = CJetFly::ST_MOVE;
+    pAttackDesc.fLength = static_cast<CJetFly*>(m_pParentObj)->Get_fLength();
+    m_pStateMachine[CJetFly::ST_SHOOT] = CJetFly_Attack::Create(&pAttackDesc);
+#pragma endregion
+
+#pragma region Move
+    CJetFly_Move::MOVE_DESC pMoveDesc{};
+    pMoveDesc.pParentModel = m_pModelCom;
+    pMoveDesc.pParentObject = m_pParentObj;
+    pMoveDesc.iNextMachineIdx = CJetFly::ST_SHOOT;
+    pMoveDesc.fLength = static_cast<CJetFly*>(m_pParentObj)->Get_fLength();
+    m_pStateMachine[CJetFly::ST_MOVE] = CJetFly_Move::Create(&pMoveDesc);
+#pragma endregion
+
+#pragma region Dead
+    CJetFly_Dead::DEAD_DESC pDeadDesc{};
+    pDeadDesc.pParentModel = m_pModelCom;
+    pDeadDesc.pParentObject = m_pParentObj;
+    pDeadDesc.pParentPartObject = this;
+    m_pStateMachine[CJetFly::ST_DEAD] = CJetFly_Dead::Create(&pDeadDesc);
+#pragma endregion
+
+#pragma region Hit
+    CJetFly_Hit::HIT_DESC pHitDesc{};
+    pHitDesc.pParentModel = m_pModelCom;
+    pHitDesc.iNextMachineIdx = CJetFly::ST_SHOOT;
+    m_pStateMachine[CJetFly::ST_HIT] = CJetFly_Hit::Create(&pHitDesc);
+#pragma endregion
 
     return S_OK;
 }
@@ -306,4 +282,7 @@ CGameObject* CBody_JetFly::Clone(void* pArg)
 void CBody_JetFly::Free()
 {
     __super::Free();
+    for (auto& Machine : m_pStateMachine) Safe_Release(Machine);
+    m_pStateMachine.clear();
+    m_pStateMachine.shrink_to_fit();
 }

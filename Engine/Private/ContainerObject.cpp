@@ -72,10 +72,11 @@ HRESULT CContainerObject::Render()
 
 void CContainerObject::Erase_PartObj(_uint Part)
 {
-	if (m_PartObjects[Part] != 0) {
-		Safe_Release(*(m_PartObjects.begin() + Part));
-		m_PartObjects.erase(m_PartObjects.begin() + Part);
-	}
+    if (Part < m_PartObjects.size() && m_PartObjects[Part] != nullptr)
+    {
+        Safe_Release(m_PartObjects[Part]);
+        m_PartObjects.erase(m_PartObjects.begin() + Part);
+    }
 }
 
 
