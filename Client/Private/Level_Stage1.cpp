@@ -68,25 +68,25 @@ HRESULT CLevel_Stage1::Ready_Layer_Monster(const _wstring& pLayerTag)
 {
     CActor::Actor_DESC Desc{};
 
-  if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_GunPawn",
-                                        L"Proto Component GunPawn_Monster",
-                                        L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
-  	  return E_FAIL;
- 
-  if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
-                                        L"Proto Component JetFly_Monster",
-                                        L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
-      return E_FAIL;
+  //if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_GunPawn",
+  //                                      L"Proto Component GunPawn_Monster",
+  //                                      L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+  //	  return E_FAIL;
+  //
+  //if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
+  //                                      L"Proto Component JetFly_Monster",
+  //                                      L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+  //    return E_FAIL;
 
   if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_BoomBot",
                                       L"Proto Component BoomBot_Monster",
                                       L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
       return E_FAIL;
 
-  if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_MecanoBot",
-                                      L"Proto Component MecanoBot_Monster", L"../Bin/Data/Monster/Stage1_Monster.dat",
-                                      &Desc)))
-      return E_FAIL;
+ // if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_MecanoBot",
+ //                                     L"Proto Component MecanoBot_Monster", L"../Bin/Data/Monster/Stage1_Monster.dat",
+ //                                     &Desc)))
+ //     return E_FAIL;
 
 	return S_OK;
 }

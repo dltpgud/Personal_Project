@@ -28,7 +28,6 @@ HRESULT CPlayer_Reload::Initialize(void* pDesc)
     m_pShootingUI = static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"));
     Safe_AddRef(m_pShootingUI);
 
-
     if (FAILED(UI_CallBack()))
         return E_FAIL;
 
@@ -39,9 +38,11 @@ void CPlayer_Reload::State_Enter(_uint* pState)
 {
     static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"))->Set_Open(false);
     static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"))->Set_Open(false);
-    // hit 플래그가 켜져 있으면 끄기
+
     *pState &= ~MOV_HIT;
+
     _int CurMotion{};
+
     switch (*m_pCurWeapon)
     {
     case CWeapon::HendGun: 
@@ -76,9 +77,7 @@ _bool CPlayer_Reload::State_Processing(_float fTimedelta, _uint* pState)
 
 _bool CPlayer_Reload::State_Exit(_uint* pState)
 {
-    SetActive(false, pState);
     m_pShootingUI->Set_Open(false); 
-   //  *Next = CPlayer_StateMachine::NODE_IDLE;
    return true;
 }
 
@@ -109,23 +108,12 @@ void CPlayer_Reload::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Reload::CanEnter(_uint* pState) 
 {   
- 
-
-    // 점프 상태가 활성화되면 Reload 상태로 진입하지 않음
-    if ((*pState & MOV_JUMP) != 0)
-        return false;
-        
-    // 이미 장전 중이면 진입 불가
-    if ((*pState & BEH_RELOAD) != 0)
-        return false;
-
-    // 쏘는 중이면 진입 불가
-    if ((*pState & BEH_SHOOT) != 0)
-        return false;
+     if (*pState & (BEH_SHOOT | MOV_JUMP | BEH_RELOAD | MOV_STURN))
+         return false;
 
     _bool bkey = m_pGameInstance->Get_DIKeyDown(DIK_R);
-    _int CurBullet = m_pParentObject->Get_Bullet();
-    _bool IsBullet = 0 >= CurBullet;
+  
+    _bool IsBullet = 0 >= m_pParentObject->Get_Weapon_Info().iCurBullet;
      
     return bkey || IsBullet;
 }

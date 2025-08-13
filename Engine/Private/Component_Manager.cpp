@@ -33,12 +33,10 @@ CComponent* CComponent_Manager::Clone_Component(_uint iLevelIndex, const _wstrin
     if (iLevelIndex >= m_iNumLevels)
         return nullptr;
 
-    /*원형을 찾는다*/
     CComponent* pPrototype = Find_Prototype(iLevelIndex, strPrototypeTag);
     if (nullptr == pPrototype)
         return nullptr;
 
-    /* 사본을 만든다*/
     CComponent* pComponent = pPrototype->Clone(pArg);
     if (nullptr == pComponent)
         return nullptr;

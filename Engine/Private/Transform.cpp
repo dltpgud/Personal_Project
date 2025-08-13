@@ -33,7 +33,7 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
 {
     TRANSFORM Move{};
     _int Dir{};
-
+ 
     switch (MoveType)
     {
     case Engine::CTransform::GO: Move = T_LOOK; break;
@@ -49,9 +49,17 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
 
     _vector vPosition = Get_TRANSFORM(T_POSITION);
 
-    Dir == 1 ? vTrans *= -1 : vTrans;
+    if (Dir == 1)
+        vTrans *= -1;
 
     _vector vAfterPos = vPosition + XMVector3Normalize(vTrans) * m_fSpeedPerSec * fTimeDelta;
+    
+    // DOWN 이동일 때만 중력 가속도 적용
+    if (MoveType == DOWN)
+    {
+        _vector vGravity = XMVectorSet(0.f, -m_fGravity * fTimeDelta, 0.f, 0.f);
+        vAfterPos += vGravity;
+    }
 
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage)) {
@@ -78,8 +86,9 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _int*
         vAfterPos += slide;
 
     Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
+
     *isFall = m_fJumpVelocity;
-    // 착지 판정
+   
     _float3 Position;
     XMStoreFloat3(&Position, Get_TRANSFORM(CTransform::T_POSITION));
     if (Position.y <= YPos && m_fJumpVelocity <= 0.f)
@@ -95,12 +104,12 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _int*
         }
         else
         {
-            // 착지 완료
             m_fJumpVelocity = 0.f;
             *Jumpcheck = false;
             m_bCanDoubleJump = true; // 착지하면 더블 점프 가능 복구
             m_bIsLanding = false;
         }
+
     }
     else if (Position.y > YPos)
     {

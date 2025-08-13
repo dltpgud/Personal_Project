@@ -37,6 +37,7 @@ public:
         //상태 관련
         void Check_Coll();
         void Set_bStun(_bool Coll) { m_bStun = Coll; }
+        _bool Get_bStun() {return  m_bStun; }
         void Set_State(_uint st)
         {
             m_iState = st;
@@ -55,6 +56,7 @@ public:
         _float Get_fY() { return m_fY; }
         void Height_On_Cell(_float3* fPos);
         void Set_onCell(_bool bonCell) { m_bOnCell = bonCell; }
+        _bool Get_onCell(){ return m_bOnCell;}
         void Clear_CNavigation(_tchar* tFPath); // 플레이어 씬전환 후 새로운쎌 부여
         void Set_Taget(_vector Taget);
         CNavigation* Get_Navi()

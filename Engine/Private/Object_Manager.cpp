@@ -171,7 +171,7 @@ _bool CObject_Manager::IsGameObject(_uint iLevelIndex, const _wstring& strLayerT
 
 	if (nullptr == pLayer)
 	{
-		return nullptr;
+		return false;
 	} 
 
 	return pLayer->IsGameObject();
@@ -238,13 +238,15 @@ void CObject_Manager::Free()
 
     Safe_Release(m_pPlayer);
 
-	for (size_t i = 0; i < m_iNumLevels; i++)
-	{
-		for (auto& Pair : m_pLayers[i])
-                Safe_Release(Pair.second);
-		m_pLayers[i].clear();
-	}
-	Safe_Delete_Array(m_pLayers);
+	
+		for (size_t i = 0; i < m_iNumLevels; i++)
+		{
+			for (auto& Pair : m_pLayers[i])
+					Safe_Release(Pair.second);
+			m_pLayers[i].clear();
+		}
+		Safe_Delete_Array(m_pLayers);
+	
 
 	for (auto& Pair : m_Prototypes)
 		Safe_Release(Pair.second);

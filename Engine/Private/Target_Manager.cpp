@@ -70,7 +70,7 @@ HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencil
 	ID3D11ShaderResourceView* pSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {
 nullptr
 	};
-	//¼ÎÀÌ´õ ¸®¼Ò½º ¹è¿­À» ÇÈ¼¿ ¼ÎÀÌ´õ ´Ü°è¿¡ ¹ÙÀÎµù.
+	//ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½Ò½ï¿½ ï¿½è¿­ï¿½ï¿½ ï¿½È¼ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½Ü°è¿¡ ï¿½ï¿½ï¿½Îµï¿½.
 	m_pContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
 
 
@@ -83,7 +83,8 @@ nullptr
 		RTVs[i] = (*pMRTs)[i]->Get_RTV();
 	}
 
-	//ÇÈ¼¿ÀÌ ÃÖÁ¾ÀûÀ¸·Î Ãâ·ÂµÉ ´ë»ó(·»´õ Å¸°Ù)À» ÁöÁ¤ÇÑ´Ù.
+	//ï¿½È¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Âµï¿½ ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+	//È¼ Âµ ( Å¸) Ñ´.
 	m_pContext->OMSetRenderTargets(static_cast<_uint>(iNumRenderTargets), RTVs, nullptr != pDSView ? pDSView : m_pDSV);
 
 	return S_OK;

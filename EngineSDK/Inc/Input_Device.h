@@ -8,66 +8,94 @@ BEGIN(Engine)
 class CInput_Device : public CBase
 {
 private:
-	CInput_Device(void);
-	virtual ~CInput_Device(void) = default;
-	
+    CInput_Device();
+    virtual ~CInput_Device() = default;
+
 public:
-	_byte	Get_DIKeyState(_ubyte byKeyID)		
-	{ 
-		return m_byKeyState[byKeyID]; 
-	}
+    // 현재 키 상태
+    _byte Get_DIKeyState(_ubyte byKeyID) const
+    {
+        return m_byKeyState[byKeyID];
+    }
 
-	_byte	Get_DIMouseState(MOUSEKEYSTATE eMouse) 
-	{ 	
-		return m_tMouseState.rgbButtons[eMouse]; 	
-	}
+    // 현재 마우스 버튼 상태
+    _byte Get_DIMouseState(MOUSEKEYSTATE eMouse) const
+    {
+        return m_tMouseState.rgbButtons[eMouse];
+    }
 
-	_byte	Get_DIMouseDown(MOUSEKEYSTATE eMouse) {
-	
-		return m_tMouseState.rgbButtons[eMouse] && !m_PreMouseState[eMouse];
-	}
+    // 이번 프레임에 처음 눌린 마우스 버튼
+    _bool Get_DIMouseDown(MOUSEKEYSTATE eMouse) const
+    {
+        return (m_tMouseState.rgbButtons[eMouse] & 0x80) && !(m_PreMouseState[eMouse] & 0x80);
+    }
 
-	_byte  Get_DIKeyDown(_ubyte byKeyID)
-	{
-		return !m_PreKeyState[byKeyID] && m_byKeyState[byKeyID];
-	}
+    // 이번 프레임에 처음 눌린 키
+    _bool Get_DIKeyDown(_ubyte byKeyID) const
+    {
+        return !(m_PreKeyState[byKeyID] & 0x80) && (m_byKeyState[byKeyID] & 0x80);
+    }
 
-	_byte	Get_DIAnyKey() {
-		for (_uint i = 0; i < 256; ++i) {
-			if (!m_PreKeyState[i] && m_byKeyState[i]) { return !m_PreKeyState[i] && m_byKeyState[i]; }
-		}
-		return false;
-	}
+    _byte Get_DIMouseUp(MOUSEKEYSTATE eMouse)
+    {
+        return !m_tMouseState.rgbButtons[eMouse] && m_PreMouseState[eMouse];
+    }
 
-	_long	Get_DIMouseMove(MOUSEMOVESTATE eMouseState)	
-	{	
-		return *(((_long*)&m_tMouseState) + eMouseState);	
-	}
-	
-	_bool Mouse_Fix(_bool Fix);
+
+    // 이번 프레임에 아무 키나 눌렸는지
+    _bool Get_DIAnyKey() const
+    {
+        for (_uint i = 0; i < 256; ++i)
+        {
+            if (!(m_PreKeyState[i] & 0x80) && (m_byKeyState[i] & 0x80))
+                return true;
+        }
+        return false;
+    }
+
+    // 마우스 이동 값 (X, Y, Z)
+    _long Get_DIMouseMove(MOUSEMOVESTATE eMouseState) const
+    {
+        switch (eMouseState)
+        {
+        case MOUSEMOVESTATE::DIMS_X: return m_tMouseState.lX;
+        case MOUSEMOVESTATE::DIMS_Y: return m_tMouseState.lY;
+        case MOUSEMOVESTATE::DIMS_Z: return m_tMouseState.lZ;
+        default: return 0;
+        }
+    }
+
+    // 마우스 고정
+    _bool Mouse_Fix(_bool Fix);
+
 public:
-	HRESULT Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
-	void	Update_InputDev(void);
-private:
-	LPDIRECTINPUT8			m_pInputSDK = { nullptr };
+    HRESULT Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
+    void Update_InputDev();
 
-private:
-	LPDIRECTINPUTDEVICE8	m_pKeyBoard = { nullptr };
-	LPDIRECTINPUTDEVICE8	m_pMouse = { nullptr };
-
-private:
-	_byte					m_byKeyState[256] = {};		// 키보드에 있는 모든 키값을 저장하기 위한 변수
-	_byte					m_PreMouseState[3]{};
-	_byte					m_PreKeyState[256]{};
-	DIMOUSESTATE			m_tMouseState = {};
-	HWND                    g_Hwnd = {};
-	_uint					g_iWinSizeX{};
-	_uint					g_iWinSizeY{};
-	_bool					m_bturn = { false };
 public:
-	static CInput_Device* Create(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
-	virtual void	Free(void);
+    static CInput_Device* Create(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
+    virtual void Free(void);
 
+private:
+    // DirectInput
+    LPDIRECTINPUT8 m_pInputSDK = nullptr;
+    LPDIRECTINPUTDEVICE8 m_pKeyBoard = nullptr;
+    LPDIRECTINPUTDEVICE8 m_pMouse = nullptr;
+
+    // 상태 저장
+    _byte m_byKeyState[256] = {};
+    _byte m_PreKeyState[256] = {};
+    _byte m_PreMouseState[3] = {};
+    DIMOUSESTATE m_tMouseState = {};
+
+    // 윈도우 정보
+    HWND m_hWnd = {};
+    _uint m_iWinSizeX = 0;
+    _uint m_iWinSizeY = 0;
+
+    // 마우스 고정 여부
+    _bool m_bMouseFixed = false;
 };
+
 END
 #endif // InputDev_h__

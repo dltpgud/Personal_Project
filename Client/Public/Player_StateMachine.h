@@ -1,5 +1,4 @@
-#pragma once
-
+﻿#pragma once
 #include "Client_Defines.h"
 #include "Base.h"
 #include "Player_StateNode.h"
@@ -13,13 +12,6 @@ public:
     {
     };
 
-    enum class Result
-    {
-        Running,
-        Finished,
-        None
-    };
-
     enum STATE_NODE
     {
         NODE_IDLE,
@@ -31,6 +23,7 @@ public:
         NODE_JUMP,
         NODE_RELOAD,
         NODE_SHOOT,
+        NODE_FALL,
         NODE_END
     };
 
@@ -41,20 +34,16 @@ protected:
 public:
     virtual HRESULT Initialize(void* pArg);
 
-    Result StateMachine_Playing(_float fTimeDelta);
-    void   Set_ADD_Flage(_uint Flags);
-
+    void StateMachine_Playing(_float fTimeDelta);
 private:
-   void progress_Move(_float fTimeDelta, _uint stateFlags) const;
-  
+   void progress_Move(_float fTimeDelta, _uint* pState) ;
 
 protected:
     CPlayer* m_pParentObject = {};
-    class CGameInstance* m_pGameInstance = {nullptr};
-    vector<CPlayer_StateNode*> m_StateNodes;
+    class CGameInstance* m_pGameInstance = {};
 
-    
-    _bool m_ChangeNode{};
+private:
+    vector<CPlayer_StateNode*> m_StateNodes;
     _uint m_iState{};
 
 public:

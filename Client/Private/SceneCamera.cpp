@@ -30,7 +30,6 @@ HRESULT CSceneCamera::Initialize(void* pArg)
     _float fLength = XMVectorGetX(XMVector3Length(vDir));
      m_fRunTime = fLength / pDesc->fSpeedPerSec;
 
-     static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_Key(false);
      static_cast<CFade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Fade(false);
      return S_OK;
 }

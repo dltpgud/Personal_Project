@@ -30,11 +30,8 @@ HRESULT CVIBuffer::Render()
 {
     if (nullptr == m_pContext)
         return E_FAIL;
-    /*인덱스 버퍼를이용해서 기본도형을그릴 때에는 쓰는 매서드*/
-    /*인덱스 버퍼를 이용하지 않는 다면 Draw함수를 이용*/
+
     m_pContext->DrawIndexed(m_iNumIndexices, 0, 0);
-    /*DrawIndexed (사용할 인덱스 개수, 사용할 인덱스 첫위치,정점들을 가져오기 전에，이 그리기 호출에서 사용할 인덱스들에
-     * 더해지는 정수 값. )*/
     return S_OK;
 }
 

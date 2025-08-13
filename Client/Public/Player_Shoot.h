@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Player_StateNode.h"
 
@@ -23,6 +23,10 @@ public:
 
 private:
     HRESULT UI_CallBack();
+
+private:
+    _bool m_bAutoFire{};
+    _float m_fLastFireTime{ 0.f }; 
 
 private:
 	class CShootingUI* m_pShootingUI{};

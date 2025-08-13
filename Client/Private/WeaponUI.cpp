@@ -61,7 +61,7 @@ void CWeaponUI::Update(_float fTimeDelta)
      
      m_iPreBullet = m_iCurrentBullet;
 
-     m_iCurrentBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Bullet();
+     m_iCurrentBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Weapon_Info().iCurBullet;
      swprintf_s(m_wCurrentBullte,50, L"%u",m_iCurrentBullet);
 
      if (m_iPreBullet != m_iCurrentBullet)
@@ -69,7 +69,7 @@ void CWeaponUI::Update(_float fTimeDelta)
      else 
          m_vColar = { 1.f, 1.f, 1.f,1.f };
 
-     m_iMaxBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_MaxBullet();
+     m_iMaxBullet = static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Weapon_Info().iMaxBullet;
      swprintf_s(m_wMaxBullte, 50, L"%u", m_iMaxBullet);
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_F1))

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Player_StateNode.h"
 #include "GameInstance.h"
 #include "Weapon.h"
@@ -48,6 +48,11 @@ void CPlayer_StateNode::Init_CallBack_Func()
 
 _bool CPlayer_StateNode::Move_KeyFlage(_uint* pState)
 {
+    if (m_pParentObject->Get_bStun() == true)
+    {
+        *pState &= ~(DIR_FORWARD | DIR_BACK | DIR_LEFT | DIR_RIGHT);
+        return false;
+    }
     _bool bMove{};
 
     if (m_pGameInstance->Get_DIKeyDown(DIK_A) || m_pGameInstance->Get_DIKeyState(DIK_A)) 

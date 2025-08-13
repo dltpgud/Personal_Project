@@ -21,8 +21,10 @@ void CPlayer_Hit::State_Enter(_uint* pState)
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_STUN;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
     m_StateDesc.bLoop = false;
+
     static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"))->Set_Open(false);
     static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"))->Set_Open(false);
+
     __super::State_Enter(pState);
 }
 
@@ -35,7 +37,6 @@ _bool CPlayer_Hit::State_Processing(_float fTimedelta, _uint* pState)
 _bool CPlayer_Hit::State_Exit(_uint* pState)
 {
     m_pParentObject->Set_hit();
-    SetActive(false, pState);
     return true;
 }
 
@@ -59,12 +60,9 @@ void CPlayer_Hit::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Hit::CanEnter(_uint* pState)
 {
-    if (*pState & BEH_SHOOT)
+    if (*pState & (BEH_SHOOT | MOV_HIT | MOV_STURN))
         return false;
 
-    if (*pState & MOV_HIT)
-        return false;
-        
     return m_pParentObject->get_hit();
 }
 

@@ -72,18 +72,26 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta)
     }
     if (*m_fLength > 20.f)
     {
-        m_pGameInstance->Add_Job(
-            [this]()
-            {
-                dynamic_cast<CJetFly*>(m_pParentObject)
-                    ->Set_Taget(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-            });
-        if( m_pParentObject->Get_Transform()->FollowPath(dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi(), fTimeDelta))
+        if (m_pGameInstance->Get_Player()->Get_onCell())
         {
-         
-            Reset_StateMachine();
-            return Result::Finished;
+            m_pGameInstance->Add_Job(
+                [this]()
+                {
+                    dynamic_cast<CJetFly*>(m_pParentObject)
+                        ->Set_Taget(
+                            m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                });
+            if (m_pParentObject->Get_Transform()->FollowPath(dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi(),
+                                                             fTimeDelta))
+            {
+
+                Reset_StateMachine();
+                return Result::Finished;
+            }
         }
+        else
+            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,
+                                                      dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi());
     }
     else if (*m_fLength <= 20.f && *m_fLength >= 15.f)
     {

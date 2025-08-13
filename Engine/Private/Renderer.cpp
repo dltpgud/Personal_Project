@@ -432,7 +432,7 @@ HRESULT CRenderer::Render_Bloom()
 
     // 4배 다운 샘플링
     m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_4]); // 이 4배 다운 샘플링 뷰포트에 적용
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4"))))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4"), nullptr)))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom")))) return E_FAIL;
 
@@ -446,7 +446,7 @@ HRESULT CRenderer::Render_Bloom()
 
     // 16배 다운 샘플링
     m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_44]); //16배 다운 샘플링 뷰포트
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44")))) 
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44"), nullptr))) 
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_4")))) 
@@ -462,7 +462,7 @@ HRESULT CRenderer::Render_Bloom()
 
     // 64배 다운 샘플링
     m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_444]);//64배 다운 샘플링 뷰포트
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_444"))))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_444"), nullptr)))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_44")))) 
         return E_FAIL; // 16배 다운 샘플링한 결과를 가져온다.
@@ -481,7 +481,7 @@ HRESULT CRenderer::Render_Bloom()
         return E_FAIL;
 
     // X 블러
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_444_Temp")))) 
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_444_Temp"), nullptr))) 
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_444"))))
@@ -513,7 +513,7 @@ HRESULT CRenderer::Render_Bloom()
        return E_FAIL;
 
     // X 블러
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44_Temp")))) 
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44_Temp"), nullptr))) 
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_44")))) 
         return E_FAIL;// 16배 다운 샘플링한 이미지를  던져라
@@ -545,7 +545,7 @@ HRESULT CRenderer::Render_Bloom()
        return E_FAIL;
 
     // X 블러링
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4_Temp"))))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4_Temp"), nullptr)))
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_4")))) 

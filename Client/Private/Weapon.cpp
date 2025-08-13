@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Weapon.h"
 #include "GameInstance.h"
 #include "Player.h"
@@ -65,9 +65,7 @@ void CWeapon::Late_Update(_float fTimeDelta)
     for (size_t i = 0; i < 3; i++)
         SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]); 
   
-    XMStoreFloat4x4(&m_WorldMatrix,
-         m_pTransformCom->Get_WorldMatrix() * SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
- 
+    XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
@@ -181,7 +179,7 @@ HRESULT CWeapon::Make_Bullet()
     Desc.pTagetPos = At;
     Desc.vPos = vHPos;
     Desc.iSkillType = m_iWeapon;
-    Desc.fDamage = &m_fDamage;
+    Desc.fDamage = &m_vecWeaPone[m_iWeapon].Damage;
     Desc.Local = Hend_Local_Pos;
     Desc.WorldPtr = &m_WorldMatrix;
     Desc.iWeaponType = m_iWeapon;
@@ -201,6 +199,8 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.fEmissvePower = 1.f;
     pWDesc.iBulletOffset = {1.7f, 2.0f, 3.0f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
+    pWDesc.fFireRate = 0.7f;
+    pWDesc.Damage = 3.f;
     m_vecWeaPone[CWeapon::HendGun] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -209,6 +209,8 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.fEmissvePower = 1.f;
     pWDesc.iBulletOffset = {1.1f, 0.8f, 1.2f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
+    pWDesc.fFireRate = 0.2f;
+    pWDesc.Damage = 10.f;
     m_vecWeaPone[CWeapon::AssaultRifle] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -217,6 +219,8 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.fEmissvePower = 1.f;
     pWDesc.iBulletOffset = {1.f, 1.f, 1.5f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
+    pWDesc.fFireRate = 0.1f;
+    pWDesc.Damage = 15.f;
     m_vecWeaPone[CWeapon::MissileGatling] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -225,6 +229,8 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.fEmissvePower = 1.f;
     pWDesc.iBulletOffset = {1.f, 1.f, 1.5f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
+    pWDesc.fFireRate = 0.5f;
+    pWDesc.Damage = 30.f;
     m_vecWeaPone[CWeapon::HeavyCrossbow] = pWDesc;
 
     return S_OK;
@@ -259,11 +265,6 @@ HRESULT CWeapon::Set_Animation( _int Index, _bool IsLoop)
 _bool CWeapon::Play_Animation(_float fTimeDelta)
 {
     return m_vecWeaPone[m_iWeapon].pModelCom->Play_Animation(fTimeDelta);
-}
-
-_int CWeapon::Get_Weapon_Body_Type()
-{
-    return m_vecWeaPone[m_iWeapon].iBodyType;
 }
 
 HRESULT CWeapon::Add_Components()

@@ -18,7 +18,7 @@ HRESULT CPlayer_Swich::Initialize(void* pDesc)
 void CPlayer_Swich::State_Enter(_uint* pState)
 {
     // hit 플래그가 켜져 있으면 끄기
-    *pState &= ~MOV_HIT;
+   // *pState &= ~MOV_HIT;
     
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_SWICH;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
@@ -34,8 +34,6 @@ _bool CPlayer_Swich::State_Processing(_float fTimedelta, _uint* pState)
 
 _bool CPlayer_Swich::State_Exit(_uint* pState)
 {
-    SetActive(false, pState);
-   // *Next = CPlayer_StateMachine::NODE_IDLE;
     m_pParentObject->Set_Change();
    return true;
 }
@@ -63,26 +61,16 @@ void CPlayer_Swich::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Swich::CanEnter(_uint* pState)
 {
-    // 점프 상태가 활성화되면 Switch 상태로 진입하지 않음
-    if ((*pState & MOV_JUMP) != 0)
-        return false;
-        
-    if (!m_pParentObject->Get_Change())
+    if ((*pState & (MOV_JUMP | BEH_SWICH)) != 0)
         return false;
 
-    // 이미 무기 교체 중이면 중복 실행 방지
-    if ((*pState & BEH_SWICH) != 0)
-        return false;
-
-    return true;
+    return m_pParentObject->Get_Change();
 }
 
 _bool CPlayer_Swich::CheckInputCondition(_uint stateFlags)
 {
     return true;
 }
-
-
 
 CPlayer_Swich* CPlayer_Swich::Create(void* pArg)
 {

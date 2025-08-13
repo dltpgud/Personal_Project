@@ -17,31 +17,27 @@ HRESULT CPlayer_Idle::Initialize(void* pDesc)
 
 void CPlayer_Idle::State_Enter(_uint* pState)
 {
-    // hit 플래그가 켜져 있으면 끄기
-    *pState &= ~MOV_HIT;
-    
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_IDLE;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
     m_StateDesc.bLoop = true;
-    m_StateDesc.fPlayTime = 1.f; // 애니메이션 속도 설정
+
+    //*pState &= ~MOV_HIT;
+    
     __super::State_Enter(pState);
 }
 
 _bool CPlayer_Idle::State_Processing(_float fTimedelta, _uint* pState)
 {
-    // hit 상태일 때도 Idle 애니메이션 재생
     return __super::State_Processing(fTimedelta, pState);
 }
 
 _bool CPlayer_Idle::State_Exit(_uint* iState)
 {
-
     return true;
 }
 
 void CPlayer_Idle::Init_CallBack_Func()
 {
-
 }
 
 _bool CPlayer_Idle::IsActive(_uint stateFlags) const
@@ -59,11 +55,7 @@ void CPlayer_Idle::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Idle::CanEnter(_uint* pState)
 {
-    // 점프 상태가 활성화되면 Idle 상태로 진입하지 않음
-    if ((*pState & MOV_JUMP) != 0)
-        return false;
-    
-    _bool stateinput = !(*pState & ( MOV_RUN | MOV_SPRINT | BEH_RELOAD | BEH_SWICH));
+    _bool stateinput = !(*pState & (MOV_RUN | MOV_FALL | MOV_JUMP | MOV_SPRINT | BEH_RELOAD | BEH_SWICH));
     _bool KeyInput = !Move_KeyFlage(pState);
     
     return KeyInput && stateinput;
@@ -71,7 +63,6 @@ _bool CPlayer_Idle::CanEnter(_uint* pState)
 
 _bool CPlayer_Idle::CheckInputCondition(_uint stateFlags) 
 {
-    // hit 상태가 활성화되어도 이동 상태 유지
     return !(stateFlags & ( MOV_RUN | MOV_SPRINT | MOV_JUMP |
                            BEH_RELOAD | BEH_SWICH));
 }

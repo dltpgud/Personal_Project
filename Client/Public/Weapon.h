@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Defines.h"
 #include "PartObject.h"
 
@@ -32,6 +32,8 @@ public:
        _int              iCurBullet{};
        _float            fEmissvePower{};
        _float            fPreEmissvePower{};
+       _float            fFireRate{};
+       _float            Damage{};
     };
 
 private:
@@ -47,22 +49,18 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-	_float  Damage() { return m_fDamage; }
-
 public:
 	void    Choose_Weapon(const _uint& WeaponNum);
     _uint*  Get_Weapon(){return &m_iWeapon;}
-	_uint   Get_Bullet() {return m_vecWeaPone[m_iWeapon].iCurBullet;}
-	_uint   Get_MaxBullet() {return m_vecWeaPone[m_iWeapon].iMaxBullet;}
+	WEAPON_NODE_DESC Get_Weapon_Info() const {return m_vecWeaPone[m_iWeapon];}
+
     void    Weapon_CallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
     HRESULT Set_Animation(_int Index, _bool IsLoop);
     _bool   Play_Animation(_float fTimeDelta);
-    _int    Get_Weapon_Body_Type();
 
 private:
 	const _float4x4*         m_pSocketMatrix = { nullptr };
 	_uint                    m_iWeapon{};
-	_float                   m_fDamage{};
 	vector<WEAPON_NODE_DESC> m_vecWeaPone;
 
 private:
