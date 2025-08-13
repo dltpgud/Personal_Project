@@ -38,7 +38,9 @@ void CPlayer_Shoot::State_Enter(_uint* pState)
 {
     static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"))->Set_Open(false);
     static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"))->Set_Open(false);
+
     _int CurMotion{};
+
     switch (*m_pCurWeapon)
     {
     case CWeapon::HendGun: 
@@ -55,37 +57,86 @@ void CPlayer_Shoot::State_Enter(_uint* pState)
         break;
     default: break;
     }
-    // hit 플래그가 켜져 있으면 끄기
-    *pState &= ~MOV_HIT;
+    
+    //*pState &= ~MOV_HIT;
+
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_SHOOT;
+    m_StateDesc.bLoop = m_bAutoFire;
 
     __super::State_Enter(pState);
 }
 
 _bool CPlayer_Shoot::State_Processing(_float fTimedelta, _uint* pState)
 {
-    // 애니메이션 재생
-    if (__super::State_Processing(fTimedelta, pState))
-    {
-        // 애니메이션이 끝나면 발사 종료
+    if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0)
         return true;
+
+    if (false == m_bAutoFire) // 단발
+    {
+        // 단발 모드에서는 애니메이션이 끝나면 발사 종료
+        if (__super::State_Processing(fTimedelta, pState))
+        {
+            return true;
+        }
+        return false;
     }
 
-    // 탄약이 없으면 발사 종료
-    if (m_pParentObject->Get_Bullet() <= 0)
-        return true;
+    if (m_bAutoFire) // 연사
+    {
+        // 마우스를 떼면 연사 종료
+        if (m_pGameInstance->Get_DIMouseUp(MOUSEKEYSTATE::DIM_LB))
+        {
+            return true;
+        }
+        else
+        {
+            m_fLastFireTime += fTimedelta;
+      
+            // 발사 속도에 따라 새로운 발사
+            if (m_fLastFireTime >= m_pParentObject->Get_Weapon_Info().fFireRate)
+            {
+                m_fLastFireTime = 0.f;
+                // 새로운 발사 애니메이션 시작
+                __super::State_Enter(pState);
+            }
 
-    // 애니메이션 재생 중
+            // 애니메이션 재생
+            __super::State_Processing(fTimedelta, pState);
+        }
+    }
+
     return false;
 }
 
 _bool CPlayer_Shoot::State_Exit(_uint* pState)
 {
     m_pShootingUI->Set_Open(false);
-    SetActive(false, pState);
 
-   return true;
+    m_bAutoFire = false;
+    m_fLastFireTime = 0.f;
+   
+ 
+    if ((*pState & MOV_SPRINT) != 0)
+    {
+        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_SPRINT, true);
+    }
+    else if ((*pState & MOV_RUN) != 0)
+    {
+        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_RUN, true);
+    }
+    else if ((*pState & MOV_JUMP) != 0)
+    {
+        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_JUMP_RUN_LOOP, true);
+    }
+    else
+    {
+        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_IDLE, true);
+    }
+    
+    m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_WEAPON, CWeapon::WS_IDLE, true);
+    
+    return true;
 }
 
 void CPlayer_Shoot::Init_CallBack_Func()
@@ -115,7 +166,7 @@ _bool CPlayer_Shoot::IsActive(_uint stateFlags) const
 
 void CPlayer_Shoot::SetActive(_bool active, _uint* pState)
 {
-    if (active) 
+    if (active)
         *pState |= BEH_SHOOT;
     else
         *pState &= ~BEH_SHOOT; 
@@ -123,20 +174,26 @@ void CPlayer_Shoot::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Shoot::CanEnter(_uint* pState) 
 {
-    // 이미 발사 중이면 진입 불가
-    if ((*pState & BEH_SHOOT) != 0)
+    if ((*pState & (BEH_SHOOT | BEH_RELOAD | MOV_STURN)) != 0)
         return false;
 
-    // 장전 중이면 발사 불가
-    if ((*pState & BEH_RELOAD) != 0)
+    // 탄약이 없으면 발사 불가
+    if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0)
         return false;
 
-        if ((*pState & MOV_JUMP) != 0)
-        return false;
 
-    // 마우스 좌클릭을 한 번 누르면 바로 발사 상태로 진입
+    // 마우스 좌클릭 입력 처리
     if (m_pGameInstance->Get_DIMouseDown(MOUSEKEYSTATE::DIM_LB))
     {
+        // 단발 
+        m_bAutoFire = false;
+        return true;
+    }
+    
+    if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::DIM_LB))
+    {
+        // 연사 
+        m_bAutoFire = true;
         return true;
     }
     
@@ -150,7 +207,7 @@ _bool CPlayer_Shoot::CheckInputCondition(_uint stateFlags)
 
 HRESULT CPlayer_Shoot::UI_CallBack()
 {   
-    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 2,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 4,[this]()
                                     {  
                                       m_pShootingUI->Set_RandomPos(true, false, false);
                                       m_pShootingUI->Set_Open(true);
@@ -159,7 +216,7 @@ HRESULT CPlayer_Shoot::UI_CallBack()
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon_Aim, 0.2f, 0.2f,-0.2f);
                                       m_pGameInstance->Set_UI_shaking(UIID_BossHP, 0.2f, 0.2f,-0.2f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 10,[this](){m_pShootingUI->Set_Open(false);});
+    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 15,[this](){m_pShootingUI->Set_Open(false);});
 
     m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_SHOOT, 4,[this]()
                                     {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Player_StateNode.h"
 
@@ -20,9 +20,6 @@ public:
     virtual void SetActive(_bool active, _uint* pState) override;
     virtual _bool CanEnter(_uint* pState) override;
     virtual _bool CheckInputCondition(_uint stateFlags) override;
-
-private:
-    
 
 public:
     static CPlayer_Swich* Create(void* pArg);

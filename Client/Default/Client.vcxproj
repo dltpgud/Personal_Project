@@ -251,6 +251,7 @@
     <ClInclude Include="..\Public\PlayerUI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\Player_Fall.h" />
     <ClInclude Include="..\Public\Player_Hit.h" />
     <ClInclude Include="..\Public\Player_Idle.h" />
     <ClInclude Include="..\Public\Player_Jump.h" />
@@ -260,6 +261,7 @@
     <ClInclude Include="..\Public\Player_Sprint.h" />
     <ClInclude Include="..\Public\Player_StateMachine.h" />
     <ClInclude Include="..\Public\Player_StateNode.h" />
+    <ClInclude Include="..\Public\Player_Sturn.h" />
     <ClInclude Include="..\Public\Player_Swich.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\Shock.h" />
@@ -363,6 +365,7 @@
     <ClCompile Include="..\Private\PlayerUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\Player_Fall.cpp" />
     <ClCompile Include="..\Private\Player_Hit.cpp" />
     <ClCompile Include="..\Private\Player_Idle.cpp" />
     <ClCompile Include="..\Private\Player_Jump.cpp" />
@@ -372,6 +375,7 @@
     <ClCompile Include="..\Private\Player_Sprint.cpp" />
     <ClCompile Include="..\Private\Player_StateMachine.cpp" />
     <ClCompile Include="..\Private\Player_StateNode.cpp" />
+    <ClCompile Include="..\Private\Player_Sturn.cpp" />
     <ClCompile Include="..\Private\Player_Swich.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\Private\Shock.cpp" />

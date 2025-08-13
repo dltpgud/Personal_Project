@@ -537,6 +537,12 @@
     <ClInclude Include="..\Public\Player_Hit.h">
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Player_Fall.h">
+      <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player_Sturn.h">
+      <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -828,6 +834,12 @@
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player_Hit.cpp">
+      <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player_Fall.cpp">
+      <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player_Sturn.cpp">
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
     </ClCompile>
   </ItemGroup>

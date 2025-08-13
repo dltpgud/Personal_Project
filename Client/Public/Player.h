@@ -1,12 +1,14 @@
 #pragma once
 #include "Client_Defines.h"
 #include "Actor.h"
+#include "Weapon.h"
 BEGIN(Engine)
 class CCollider;
 END
 
 BEGIN(Client)
 class CPlayerUI;
+class CWeapon;
 class CPlayer final : public CActor
 {
 public:
@@ -38,58 +40,33 @@ public:
     void BodyCallBack(_int Body, _uint AnimIdx, _int Duration, function<void()> func);
 
 
-	void Set_Key(_bool key) { m_bKeyinPut = key; }
-
 	void Choose_Weapon(const _uint& WeaponNum);
-	_uint Get_Bullet();
-	_uint Get_MaxBullet();
+    CWeapon::WEAPON_NODE_DESC Get_Weapon_Info() const;
 
-       virtual _bool Get_bJump() { return m_bJump; }
-    void Set_bJump(_bool bJump) { m_bJump = bJump; }
     void Set_onCell(_bool bOnCell) { m_bOnCell = bOnCell; }
-    _float Get_fY() { return m_fY; }
-	void Set_HitLock(_bool Lock);
-	void Set_UIState(_uint state) {
-		m_eUIState = state;
-	}
-	void Set_bUpdate(_bool SetUpdate)
-	{
-		m_bUpdate = SetUpdate;
-	}
-        void Set_Change() {m_bchange =false;};
-        _bool Get_Change() {return m_bchange;};
-     	void Set_PartObj_Set_Anim(_int Part, _int Index, _bool IsLoop);
-     _bool Set_PartObj_Play_Anim(_int Part, _float fTimeDelta, _float fPlayAniTime = 1.f);
-        _bool get_hit()
-     {
-         return m_bHit;
-        }
-     void Set_hit()
-        {
-            m_bHit = false;
-     }
-    private:
-	_bool					m_bchange = { false };
-	_bool					m_bJump = { false };
+    _float Get_fY() { return m_fY; } const
+	void Set_UIState(_uint state) {m_eUIState = state;}
+	void Set_bUpdate(_bool SetUpdate) {m_bUpdate = SetUpdate;}
+    void Set_Change() {m_bchange =false;};
+    _bool Get_Change() {return m_bchange;};
+    void Set_PartObj_Set_Anim(_int Part, _int Index, _bool IsLoop);
+    _bool Set_PartObj_Play_Anim(_int Part, _float fTimeDelta, _float fPlayAniTime = 1.f);
+    _bool get_hit(){return m_bHit;}
+    void Set_hit() {m_bHit = false;}
+private:
+	_uint				   m_eUIState{};
+    _bool                  m_bchange = {false};
+	_bool				   m_bHit = { false };
+	_bool                  m_bUpdate{ true };
 
-	_bool					m_bHitLock = { false };
-	_bool					m_bFallLock = { false };
-	_float					m_DemageCellTime = { 0.f};
-	CPlayerUI*				m_pPlayerUI = { nullptr };
-	const _float4x4*		m_pCameraBone = { nullptr };
-	_uint					m_iJumpCount = 0;
-	 _uint					m_eUIState{};
-	 _bool					m_bHit = { false };
-	 _float					m_fHitTime{ 0.f };
-	 _bool  m_bKeyinPut = true;
-	 _bool m_bBurnSound{ false };
-	 _bool m_bUpdate{ true };
 private:
 	HRESULT Add_Components();
 	HRESULT Add_PartObjects();
 
 private:
     class CPlayer_StateMachine* m_pStateMachine{};
+    CPlayerUI*                  m_pPlayerUI = {nullptr};
+    const _float4x4*            m_pCameraBone = {nullptr};
 
 public:
 	static CPlayer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

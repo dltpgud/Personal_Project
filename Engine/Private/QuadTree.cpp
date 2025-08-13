@@ -8,24 +8,24 @@ CQuadTree::CQuadTree()
 
 HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
 {
-    m_iCorners[CORNER_LT] = iLT; // ÁÂ»ó´Ü
-    m_iCorners[CORNER_RT] = iRT; // ¿ì»ó´Ü
-    m_iCorners[CORNER_RB] = iRB; // ¿ìÇÏ´Ü
-    m_iCorners[CORNER_LB] = iLB; // ÁÂÇÏ´Ü
+    m_iCorners[CORNER_LT] = iLT; // ì™¼ìª½ ìœ„
+    m_iCorners[CORNER_RT] = iRT; // ì˜¤ë¥¸ìª½ ìœ„
+    m_iCorners[CORNER_RB] = iRB; // ì˜¤ë¥¸ìª½ ì•„ëž˜
+    m_iCorners[CORNER_LB] = iLB; // ì™¼ìª½ ì•„ëž˜
 
-    if (1 == m_iCorners[CORNER_RT] - m_iCorners[CORNER_LT]) // Ä­ÀÇ °£°ÝÀÌ 1ÀÌ¸é ÇÔ¼ö Á¾·á
+    if (1 == m_iCorners[CORNER_RT] - m_iCorners[CORNER_LT]) // ì¹¸ì˜ ê°œìˆ˜ê°€ 1ì´ë©´ ë” ì´ìƒ ë¶„í•  ì•ˆí•¨
         return S_OK;
 
-    m_iCenter = (m_iCorners[CORNER_LT] + m_iCorners[CORNER_RB]) >> 1; // Áß¾Ó Á¤Á¡
+    m_iCenter = (m_iCorners[CORNER_LT] + m_iCorners[CORNER_RB]) >> 1; // ì¤‘ì•™ ì¸ë±ìŠ¤
 
     _uint iLC, iTC, iRC, iBC;
-    // »ç°¢ÇüÀ» ºÐÇÒ   
+    // ì‚¬ê°í˜•ì˜ ì¤‘ì    
     iLC = (m_iCorners[CORNER_LT] + m_iCorners[CORNER_LB]) >> 1;
     iTC = (m_iCorners[CORNER_LT] + m_iCorners[CORNER_RT]) >> 1;
     iRC = (m_iCorners[CORNER_RT] + m_iCorners[CORNER_RB]) >> 1;
     iBC = (m_iCorners[CORNER_LB] + m_iCorners[CORNER_RB]) >> 1;
 
-    // ºÐÇÒÇÑ »ç°¢ÇüÀ» ÀÚ½ÄÀ¸·Î »ý¼º
+    // ìžì‹ ì‚¬ê°í˜•ë“¤ì„ ìƒì„±
     m_Children[CORNER_LT] = CQuadTree::Create(m_iCorners[CORNER_LT], iTC, m_iCenter, iLC);
     m_Children[CORNER_RT] = CQuadTree::Create(iTC, m_iCorners[CORNER_RT], iRC, m_iCenter);
     m_Children[CORNER_RB] = CQuadTree::Create(m_iCenter, iRC, m_iCorners[CORNER_RB], iBC);
@@ -36,8 +36,7 @@ HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
 
 void CQuadTree::Culling(CGameInstance* pGameInstance, const _float3* pVerticesPos, _uint* pIndices, _uint* pNumIndices, _fmatrix WorldMatrixInv)
 {
-
-    //  isDraw() ÇÔ¼ö¸¦ ÅëÇØ Ä«¸Þ¶ó¿ÍÀÇ °Å¸®¸¦ ºñ±³ÇØ ºÐÇÒ ¿©ºÎ¸¦ °áÁ¤
+    //  isDraw() í•¨ìˆ˜ë¡œ ì¹´ë©”ë¼ì™€ì˜ ê±°ë¦¬ë¥¼ ê³„ì‚°í•´ì„œ LODë¥¼ ê²°ì •
     if (nullptr == m_Children[CORNER_LT] || true == isDraw(pGameInstance, pVerticesPos, WorldMatrixInv))
     {
         _uint iIndices[4] = {
@@ -47,38 +46,43 @@ void CQuadTree::Culling(CGameInstance* pGameInstance, const _float3* pVerticesPo
             m_iCorners[CORNER_LB],
         };
 
+        // ì•ˆì „ ë§ˆì§„ì„ ìœ„í•œ íƒ€ì¼ í¬ê¸° ê³„ì‚°
+        _float fTileSize = XMVector3Length(XMLoadFloat3(&pVerticesPos[iIndices[1]]) - XMLoadFloat3(&pVerticesPos[iIndices[0]])).m128_f32[0];
+        _float fSafetyMargin = fTileSize * 0.2f; // 20% ì•ˆì „ ë§ˆì§„
+
         _bool isIn[4] = {
-            // °¢ ²ÀÁöÁ¡ÀÌ ·ÎÄÃ »óÀÇ ÀýµÎÃ¼ ¾È¿¡ ÀÖ´ÂÁö È®ÀÎ
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[0]]), 1.f)),
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[1]]), 1.f)),
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[2]]), 1.f)),
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[3]]), 1.f)),
+            // ê° ì½”ë„ˆë“¤ì´ ì¹´ë©”ë¼ í”„ëŸ¬ìŠ¤í…€ ì•ˆì— ìžˆëŠ”ì§€ í™•ì¸ (ì•ˆì „ ë§ˆì§„ ì ìš©)
+            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[0]]), 1.f), fSafetyMargin),
+            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[1]]), 1.f), fSafetyMargin),
+            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[2]]), 1.f), fSafetyMargin),
+            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[3]]), 1.f), fSafetyMargin),
         };
 
-        // °¢ »ï°¢Çü ¾È¿¡ ÀÖÀ¸¸é ÀÎµ¦½º¸¦ ¿Ã·ÁÁØ´Ù.
-        if (true == isIn[0] || true == isIn[1] || true == isIn[2])
+        // í”„ëŸ¬ìŠ¤í…€ ì»¬ë§ ì¡°ê±´ì„ ì™„í™”í•˜ì—¬ êµ¬ë© ë°©ì§€
+        // 4ê°œ ì½”ë„ˆ ì¤‘ í•˜ë‚˜ë¼ë„ í”„ëŸ¬ìŠ¤í…€ ì•ˆì— ìžˆìœ¼ë©´ ë‘ ì‚¼ê°í˜• ëª¨ë‘ ë Œë”ë§
+        if (true == isIn[0] || true == isIn[1] || true == isIn[2] || true == isIn[3])
         {
             pIndices[(*pNumIndices)++] = iIndices[0];
             pIndices[(*pNumIndices)++] = iIndices[1];
             pIndices[(*pNumIndices)++] = iIndices[2];
         }
 
-        if (true == isIn[0] || true == isIn[2] || true == isIn[3])
+        if (true == isIn[0] || true == isIn[1] || true == isIn[2] || true == isIn[3])
         {
             pIndices[(*pNumIndices)++] = iIndices[0];
             pIndices[(*pNumIndices)++] = iIndices[2];
             pIndices[(*pNumIndices)++] = iIndices[3];
         }
 
-        return;  // Àç±Í Á¾·á
+        return;  // ì—¬ê¸°ì„œ ë
     }
 
-    // Áß¾Ó Á¤Á¡°ú »ç°¢ÇüÀÇ ÁÂ»ó´Ü Á¤Á¡°úÀÇ °Å¸®, ´Ù½Ã ¸»ÇØ »ç°¢ÇüÀÇ ¹ÝÁö¸§À» ±¸ÇÑ´Ù.
+    // ì¤‘ì•™ ì ì—ì„œ ì‚¬ê°í˜•ì˜ ëŒ€ê°ì„  ê±°ë¦¬, ë‹¤ì‹œ ìžì‹ ì‚¬ê°í˜•ë“¤ì„ ìž¬ê·€ í˜¸ì¶œ
     _float fRadius = 
         XMVector3Length(XMLoadFloat3(&pVerticesPos[m_iCorners[CORNER_LT]]) - XMLoadFloat3(&pVerticesPos[m_iCenter]))
             .m128_f32[0];
 
-    // fRadius º¸´Ù ·ÎÄÃ »óÀÇ Frustum ¾È¿¡ ÀÖ´Â terrain »ç°¢ÇüÀÌ ´õ ÀÛ´Ù¸é Àç±Í·Î µé¾î°£´Ù.
+    // fRadius ë°˜ì§€ë¦„ ì•ˆì— ìžˆëŠ” Frustum ì•ˆì— ìžˆëŠ” terrain ì‚¬ê°í˜•ì´ ìžˆë‹¤ë©´ ìžì‹ë“¤ì„ í˜¸ì¶œí•œë‹¤.
     if (true == pGameInstance->isIn_Frustum_LocalSpace(XMLoadFloat3(&pVerticesPos[m_iCenter]), fRadius))
     {
         for (auto& pChild : m_Children)
@@ -99,7 +103,7 @@ _bool CQuadTree::isDraw(CGameInstance * pGameInstance, const _float3 * pVertices
 
 	_float		fWidth = static_cast <_uint>(m_iCorners[CORNER_RT] - m_iCorners[CORNER_LT]);
 
-	if (fCamDistance * 0.1f > fWidth)
+	if (fCamDistance * 0.1f > fWidth) 
 		return true;
 
 	return false;

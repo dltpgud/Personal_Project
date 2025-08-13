@@ -1,0 +1,33 @@
+﻿#pragma once
+
+#include "Player_StateNode.h"
+
+BEGIN(Client)
+
+class CPlayer_Sturn : public CPlayer_StateNode
+{
+private:
+    CPlayer_Sturn();
+    virtual ~CPlayer_Sturn() = default;
+
+public:
+    virtual HRESULT Initialize(void* pDesc) override;
+    virtual void State_Enter(_uint* pState) override;
+    virtual _bool State_Processing(_float fTimeDelta, _uint* pState) override;
+    virtual _bool State_Exit(_uint* pState) override;
+    virtual void Init_CallBack_Func() override;
+    virtual _bool IsActive(_uint stateFlags) const override;
+    virtual void SetActive(_bool active, _uint* pState) override;
+    virtual _bool CanEnter(_uint* pState) override;
+    virtual _bool CheckInputCondition(_uint stateFlags) override;
+
+private:
+    _float m_fSturnTimeSum{};
+    _float m_fSturnTime{};
+
+public:
+    static CPlayer_Sturn* Create(void* pArg);
+	virtual void Free();
+};
+
+END

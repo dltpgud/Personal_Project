@@ -43,6 +43,7 @@ public: /* For.Input_Device */
 	_byte	Get_DIMouseState(MOUSEKEYSTATE eMouse);
 	_long	Get_DIMouseMove(MOUSEMOVESTATE eMouseState);
 	_byte	Get_DIMouseDown(MOUSEKEYSTATE eMouse);
+    _byte   Get_DIMouseUp(MOUSEKEYSTATE eMouse);
 	_byte   Get_DIKeyDown(_ubyte byKeyID);
 	_byte   Get_DIAnyKey();
     _bool   MouseFix(_bool Fix= false);

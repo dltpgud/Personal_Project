@@ -62,7 +62,7 @@ public:
     {
         if (m_bCanDoubleJump)
         {
-            m_fJumpVelocity = m_JumpPower * 0.8f; // 더블 점프는 약간 약하게
+            m_fJumpVelocity = m_JumpPower * 0.9f;
             m_bCanDoubleJump = false;
             m_bIsLanding = false; // 더블 점프 시작 시 착지 상태 초기화
         }
@@ -136,7 +136,6 @@ public:
         return m_JumpPower;
     }
 
-
 public:
     HRESULT Bind_ShaderResource(class CShader* pShader, const _char* pConstantName);
 
@@ -144,17 +143,16 @@ public:
     virtual HRESULT Initialize_Prototype(void* pTransformDesc);
 
 private:
-    _float m_fJumpVelocity = 0.f;
     _float m_fGravity = 9.8f;
     _float4x4 m_WorldMatrix = {};
     _float m_fSpeedPerSec = {};
     _float m_fRotationPerSec = {};
+
     _bool m_bCanDoubleJump{true};
     _float m_JumpPower{};
-    _float m_fTimeSum{};
-    _float m_fLandingDamping = 0.8f; // 착지 시 감속 계수
+    _float m_fJumpVelocity = 0.f;
     _bool m_bIsLanding = false; // 착지 중인지 확인
-    _float m_fLandingTimer = 0.f; // 착지 타이머
+  
     _int m_CurrentPathIndex{0}; // 경로 인덱스 초기화
  public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);

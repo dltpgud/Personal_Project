@@ -39,13 +39,6 @@ CStateMachine::Result CBoomBot_Move::StateMachine_Playing(_float fTimeDelta)
     if (m_StateNodes.empty())
         return Result::None;
 
-    // nullptr 체크 추가
-    if (m_pParentObject == nullptr || m_fLength == nullptr)
-    {
-        Reset_StateMachine();
-        return Result::Finished;
-    }
-
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
         Reset_StateMachine();
@@ -68,15 +61,9 @@ CStateMachine::Result CBoomBot_Move::StateMachine_Playing(_float fTimeDelta)
         m_StateNodes[m_iCurIndex]->State_Enter();
     }
     
-    // 추가 nullptr 체크
     CBoomBot* pBoomBot = dynamic_cast<CBoomBot*>(m_pParentObject);
-    if (pBoomBot == nullptr || pBoomBot->Get_Navi() == nullptr)
-    {
-        Reset_StateMachine();
-        return Result::Finished;
-    }
-    
-    _bool isFall = pBoomBot->Get_Navi()->ISFall();
+
+    _bool isFall = dynamic_cast<CBoomBot*>(m_pParentObject)->Get_Navi()->ISFall();
 
     if (true == isFall)
     {
@@ -86,26 +73,29 @@ CStateMachine::Result CBoomBot_Move::StateMachine_Playing(_float fTimeDelta)
     if (*m_fLength > 20.f && false == isFall)
     {
         m_iCurIndex = GO;
-        m_pGameInstance->Add_Job(
-            [this]()
-            {
-                // Job 내부에서도 nullptr 체크
-                if (m_pParentObject != nullptr)
-                {
-                    CBoomBot* pBoomBot = dynamic_cast<CBoomBot*>(m_pParentObject);
-                    if (pBoomBot != nullptr && m_pGameInstance->Get_Player() != nullptr)
-                    {
-                        pBoomBot->Set_Taget(
-                            m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-                    }
-                }
-            });
-        if (m_pParentObject->Get_Transform()->FollowPath(pBoomBot->Get_Navi(), fTimeDelta))
+
+        if (m_pGameInstance->Get_Player()->Get_onCell())
         {
-            Reset_StateMachine();
-            return Result::Finished;
-          
+            m_pGameInstance->Add_Job(
+                [this]()
+                {
+                    // Job 내부에서도 nullptr 체크
+                    if (m_pParentObject != nullptr)
+                    {
+                        dynamic_cast<CBoomBot*>(m_pParentObject)
+                        ->Set_Taget(
+                                m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                    }
+                });
+            if (m_pParentObject->Get_Transform()->FollowPath(pBoomBot->Get_Navi(), fTimeDelta))
+            {
+                Reset_StateMachine();
+                return Result::Finished;
+            }
         }
+        else
+            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,
+                                                      dynamic_cast<CBoomBot*>(m_pParentObject)->Get_Navi());
     }
     else if (*m_fLength <= 20.f && *m_fLength >= 15.f)
     {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Defines.h"
 #include "Base.h"
 #include "Player.h"
@@ -28,13 +28,15 @@ public:
         MOV_SPRINT  = 1 << 6,
         MOV_JUMP    = 1 << 7,
         MOV_HIT     = 1 << 8,
+        MOV_FALL    = 1 << 9,
+        MOV_STURN   = 1 << 10
     };
 
     enum BEHAVIOR : _uint
     {
-        BEH_RELOAD  = 1 << 9,
-        BEH_SHOOT   = 1 << 10,
-        BEH_SWICH   = 1 << 11,
+        BEH_RELOAD  = 1 << 11,
+        BEH_SHOOT   = 1 << 12,
+        BEH_SWICH   = 1 << 13,
     };
 
 public:
@@ -67,8 +69,7 @@ public:
     virtual _bool CheckInputCondition(_uint stateFlags) {return true;};
 
 protected:
-    _bool Move_KeyFlage(_uint* pState);
-
+    _bool Move_KeyFlage(_uint* pState); 
 
 protected:
 	class CGameInstance* m_pGameInstance = { nullptr };

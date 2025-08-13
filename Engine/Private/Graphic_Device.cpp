@@ -153,8 +153,6 @@ HRESULT CGraphic_Device::Ready_SwapChain(HWND hWnd, _bool isWindowed, _uint iWin
 	if (FAILED(pFactory->CreateSwapChain(m_pDevice, &SwapChain, &m_pSwapChain)))
 		return E_FAIL;
 
-	
-
 	Safe_Release(pFactory);
 	Safe_Release(pAdapter);
 	Safe_Release(pDevice);
@@ -167,8 +165,6 @@ HRESULT CGraphic_Device::Ready_BackBufferRenderTargetView()
 {
 	if (nullptr == m_pDevice)
 		return E_FAIL;
-
-	
 
 	/* 내가 앞으로 사용하기위한 용도의 텍스쳐를 생성하기위한 베이스 데이터를 가지고 있는 객체이다. */
 	/* 내가 앞으로 사용하기위한 용도의 텍스쳐 : ID3D11RenderTargetView, ID3D11ShaderResoureView, ID3D11DepthStencilView */

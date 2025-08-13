@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Body_Player.h"
 #include "GameInstance.h"
 #include "Player.h"
@@ -88,6 +88,7 @@ void CBody_Player::BodyCallBack(_int Body, _uint AnimIdx, _int Duration, functio
 _int CBody_Player::BodyMotion(_int Body, _int Motion)
 {
   _int iCurMotion{};
+
   switch (Motion)
   {
   case BODY_STATE::BODY_IDLE: 

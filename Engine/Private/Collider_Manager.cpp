@@ -222,16 +222,16 @@ HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
               {
                   if (pMonsterBullet->Get_SkillType() == CSkill::STYPE_STURN)
                       pPlayer->Set_bStun(true);
-
-
+                  else
                   pPlayer->Check_Coll();
+
                   pPlayer->Set_CurrentHP(pMonsterBullet->Get_Damage());
 
 
                   if (false == CSkill::STYPE_SHOCKWAVE == pMonsterBullet->Get_SkillType())
                       pMonsterBullet->Set_DeadSkill(true);
 
-                 // pMonsterBullet->Set_Dead(true);
+                  pMonsterBullet->Set_Dead(true);
               }
           }
       }

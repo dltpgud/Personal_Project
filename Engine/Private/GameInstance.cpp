@@ -191,6 +191,11 @@ _byte CGameInstance::Get_DIMouseDown(MOUSEKEYSTATE eMouse)
 	return m_pInput_Device->Get_DIMouseDown(eMouse);
 }
 
+_byte CGameInstance::Get_DIMouseUp(MOUSEKEYSTATE eMouse)
+{
+    return m_pInput_Device->Get_DIMouseUp(eMouse);
+}
+
 _byte CGameInstance::Get_DIKeyDown(_ubyte byKeyID)
 {
 	return m_pInput_Device->Get_DIKeyDown(byKeyID);
