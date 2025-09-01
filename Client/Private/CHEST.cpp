@@ -47,33 +47,13 @@ void CCHEST::Priority_Update(_float fTimeDelta)
 
 void CCHEST::Update(_float fTimeDelta)
 {
-    // Hover 상태 들어가기
-    if (m_pColliderCom->IsColl() && !(m_flags & HOVER) && !(m_flags & ICON))
-    {
-        m_InteractiveUI->Set_Text(L"상자 열기");
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_InteractiveUI, UIID_PlayerWeaPon_Aim);
-        m_pModelCom->Set_Animation(State::HOVDER, true);
-        m_flags |= HOVER;
-    }
-    // Hover 상태 해제
-    else if (!m_pColliderCom->IsColl() && (m_flags & HOVER) && !(m_flags & ICON))
-    {
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-        m_pModelCom->Set_Animation(State::IDLE, true);
-        m_flags &= ~HOVER;
-    }
-
-    // 상호작용 발생
-    if (m_InteractiveUI->Get_Interactive() && (m_flags & HOVER))
+    if (m_InteractiveUI->Get_Interactive(this) && (m_flags & HOVER))
     {
         m_pModelCom->Set_Animation(State::OPEN, false);
-        m_InteractiveUI->Set_Interactive(false);
     }
-
 
     m_pModelCom->Play_Animation(fTimeDelta * 0.9f);
 
-    // 아이콘이 생성된 후, 모델 일부를 안 보이게 처리
     if (m_flags & ICON)
     {
         XMMATRIX matrix = XMMatrixIdentity();
@@ -102,11 +82,10 @@ HRESULT CCHEST::Render_Shadow()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", m_pTransformCom->Get_WorldMatrixPtr())))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",
-                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",
-                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
@@ -172,7 +151,7 @@ HRESULT CCHEST::Add_Components()
     AABBDesc.vExtents = _float3(6.f, 1.f, 6.f);
     AABBDesc.vCenter = _float3(0.f, 1.f, 0.f);
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
-                                      TEXT("Com_Collider_AABB"), reinterpret_cast<CComponent**>(&m_pColliderCom),
+                                      TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom),
                                       &AABBDesc)))
         return E_FAIL;
 
@@ -206,18 +185,46 @@ HRESULT CCHEST::Init_CallBakc()
                             CWeaPonIcon::CWeaPonIcon_DESC Desc;
                             Desc.WeaPonIndex = m_pWeaPonType;
                             Desc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
-                            m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Map"),
-                                                                     L"Prototype GameObject_WeaPonIcon", &Desc);
-                            m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-
+                            m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Map"), L"Prototype GameObject_WeaPonIcon", &Desc);
+                            m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+                            m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
                             m_flags &= ~HOVER;
                             m_flags |= ICON;
                           });
 
     m_pModelCom->Callback(OPEN, 0,[this](){
-                              m_pGameInstance->Set_OpenUI_Inverse(UIID_InteractiveUI, UIID_PlayerWeaPon_Aim);
-                              m_pGameInstance->Play_Sound(L"ST_Chest_Open.ogg", CSound::SOUND_BGM, 1.f);
+                              m_InteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+                              m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
+                              m_pGameInstance->Play_Sound(L"ST_Chest_Open.ogg", nullptr, 1.f);
                           });
+
+
+    m_pColliderCom->SetTriggerCallback(
+        [this](CActor* other, _bool bColliding, _bool bPlayer)
+        {
+            if (bColliding && bPlayer)
+            {
+                if (!(m_flags & HOVER) && !(m_flags & ICON))
+                {
+                   m_InteractiveUI->Set_Text(L"상자 열기");
+                   m_InteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+                   m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
+                   m_pModelCom->Set_Animation(State::HOVDER, true);
+                   m_flags |= HOVER;
+                }
+            }
+            else if (bPlayer)
+            {
+                if ((m_flags & HOVER) && !(m_flags & ICON))
+                {
+                    m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+                    m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
+                   m_pModelCom->Set_Animation(State::IDLE, true);
+                   m_flags &= ~HOVER;
+                };
+            }
+        });
+
     return S_OK;
 }
 

@@ -48,7 +48,12 @@ _bool CBounding_AABB::Intersect(CCollider::TYPE eType, CBounding* pTargetBoundin
 	
 	return isColl;
 }
-
+void CBounding_AABB::Set_Info(BOUND_DESC* pBoundDesc)
+{
+    BOUND_AABB_DESC* pDesc = static_cast< BOUND_AABB_DESC*>(pBoundDesc);
+    m_pBoundDesc_Original->Center = pDesc->vCenter;
+    m_pBoundDesc_Original->Extents = pDesc->vExtents;
+}
 _bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
 {
 	_bool		isColl = { false };
@@ -59,7 +64,10 @@ _bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
 
 	return isColl;
 }
-
+_bool CBounding_AABB::IsInside(const _float3& pos)
+{
+    return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
+}
 
 #ifdef _DEBUG
 

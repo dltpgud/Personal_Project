@@ -1,9 +1,8 @@
 #include"stdafx.h"
 #include "JetFly_Move.h"
-#include "JetFly.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-#include "Body_JetFly.h"
+
 
 CJetFly_Move::CJetFly_Move()
 {
@@ -43,7 +42,7 @@ HRESULT CJetFly_Move::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (HasFlag(PAUSED))
         return Result::None;
@@ -53,49 +52,46 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta)
 
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
     if (*m_fLength < 15.f)
     {
-
         m_iNextIndex = BACK;
-        m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta,
-                                                  dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi());
+        m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, m_pParentObject->Get_Navigation());
     }
 
     if (m_iCurIndex != m_iNextIndex)
     {
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", CSound::SOUND_MONSTER_FLY, 0.2f);
+       m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", &m_pChannel, 1.f, true);
        m_iCurIndex = m_iNextIndex;
        m_StateNodes[m_iCurIndex]->State_Enter();
     }
+
+     m_pGameInstance->SetChannelVolume( &m_pChannel, 80.f,
+      m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+
     if (*m_fLength > 20.f)
     {
         if (m_pGameInstance->Get_Player()->Get_onCell())
         {
             m_pGameInstance->Add_Job(
-                [this]()
+                [&]()
                 {
-                    dynamic_cast<CJetFly*>(m_pParentObject)
-                        ->Set_Taget(
-                            m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                   m_pParentObject->Get_Navigation()->Set_Taget(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
                 });
-            if (m_pParentObject->Get_Transform()->FollowPath(dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi(),
-                                                             fTimeDelta))
+            if (m_pParentObject->Get_Transform()->FollowPath(m_pParentObject->Get_Navigation(),fTimeDelta))
             {
-
-                Reset_StateMachine();
+                Reset_StateMachine(pRim);
                 return Result::Finished;
             }
         }
         else
-            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,
-                                                      dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi());
+           m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,m_pParentObject->Get_Navigation());
     }
     else if (*m_fLength <= 20.f && *m_fLength >= 15.f)
     {
-       Reset_StateMachine();
+        Reset_StateMachine(pRim);
        return Result::Finished;
     }
   
@@ -109,7 +105,7 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta)
           }
           else
           {
-              Reset_StateMachine();
+              Reset_StateMachine(pRim);
               SetFlag(FINISHED);
               return Result::Finished;
           }
@@ -117,10 +113,10 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta)
     return Result::Running;
 }
 
-void CJetFly_Move::Reset_StateMachine()
+void CJetFly_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
-   __super::Reset_StateMachine();
+    m_pGameInstance->StopSound(&m_pChannel);
+    __super::Reset_StateMachine(pRim);
 }
 
 CJetFly_Move* CJetFly_Move::Create(void* pArg)

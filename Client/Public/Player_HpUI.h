@@ -9,7 +9,7 @@ END
 
 BEGIN(Client)
 
-class CPlayerUI: public CUI
+class CPlayer_HpUI: public CUI
 {
 public:
 		typedef struct CPlayerUI_DESC : public CUI::CUI_DESC
@@ -18,9 +18,9 @@ public:
 		}CPlayerUI_DESC;
 
 private:
-	CPlayerUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CPlayerUI(const CPlayerUI& Prototype);
-	virtual ~CPlayerUI() = default;
+	CPlayer_HpUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CPlayer_HpUI(const CPlayer_HpUI& Prototype);
+	virtual ~CPlayer_HpUI() = default;
 
 public:
 	virtual HRESULT Initialize_Prototype() override;
@@ -32,22 +32,22 @@ public:
     virtual void    ShakingEvent(_float fTimeDelta) override;
 
 public:
-	void Set_PlayerMaxHP(_float fMaxHP) 
+	void Set_PlayerMaxHP(_int iMaxHP) 
 	{
-	 m_fMaxHP = fMaxHP;
-	 swprintf_s(m_tfMaxHp, 50, L"%.f\n", m_fMaxHP);
+	 m_iMaxHP = iMaxHP;
+	 swprintf_s(m_tfMaxHp, 50, L"%d\n", m_iMaxHP);
 	}
-	void Set_PlayerHP(_float fHP) 
+	void Set_PlayerHP(_int iHP) 
 	{ 
-	 m_fHP = fHP;
-	 swprintf_s(m_tfHP, 50, L"%.f\n", m_fHP);
+	 m_iHP = iHP;
+	 swprintf_s(m_tfHP, 50, L"%d\n", m_iHP);
 	}
 
 	void Set_HPGage(_int GageCount) {
 		if (GageCount < -1)
 			return;
 		
-		if(m_fMaxHP == m_fHP)
+		if(m_iMaxHP == m_iHP)
 			return;
 
 		m_iGageCount = GageCount;
@@ -61,18 +61,18 @@ private:
     CShader* m_pShaderCom = {nullptr};
     CVIBuffer_Rect* m_pVIBufferCom = {nullptr};
 
-	_float m_fHP{};
-	_float m_fMaxHP{};
+	_int m_iHP{};
+	_int m_iMaxHP{};
 	_float m_fHP_Pluse = { 0.f };
 	_float m_fPrXPos{}, m_fPrYPos{};
 	_int   m_iGageCount = {-1};
-	_float m_fHealthHP{};
+	_int m_iHealthHP{};
     _float m_fRatio{};
 	_tchar m_tfHP[50];
 	_tchar m_tfMaxHp[50];
 
 public:	
-	static CPlayerUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CPlayer_HpUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void		 Free() override;
 

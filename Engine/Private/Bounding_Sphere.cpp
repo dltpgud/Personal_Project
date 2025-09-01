@@ -45,6 +45,11 @@ _bool CBounding_Sphere::Intersect(CCollider::TYPE eType, CBounding* pTargetBound
 	return isColl;
 }
 
+_bool CBounding_Sphere::IsInside(const _float3& pos)
+{
+    return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
+}
+
 _bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
 {
 	_bool		isColl = { false };
@@ -65,7 +70,12 @@ _float3 CBounding_Sphere::Get_iCurCenter()
 	return m_iCurCenter;
 }
 
-
+ void CBounding_Sphere::Set_Info(BOUND_DESC* pBoundDesc)
+{
+     BOUND_SPHERE_DESC* pDesc = static_cast<BOUND_SPHERE_DESC*>(pBoundDesc);
+     m_pBoundDesc_Original->Center = pDesc->vCenter;
+     m_pBoundDesc_Original->Radius = pDesc->fRadius;
+}
 
 #ifdef _DEBUG
 

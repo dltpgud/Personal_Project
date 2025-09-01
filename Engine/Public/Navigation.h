@@ -46,15 +46,15 @@ public:
     _bool          Snap(_fvector vP1, _fvector vP2, _vector distance);
     void           Create_Poly(_float3 p1, _float3 p2, _float3 p3, _uint Type = 0);
 
-    _bool          isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr, _bool Demage = false);
+    _bool          isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr);
     _float         Compute_HeightOnCell(_float3* fPos);
 	void           Set_Taget(_vector Taget);
 	vector<_uint>  FindPath(_uint startIndex, _uint goalIndex);
     _vector        Get_TagetPos(_int index);
-    vector<_uint>  Get_PathPoints(){return m_PathPoints;}
+    vector<_uint>  Get_PathPoints(){return m_PathPoints;};
 
-	_uint          Get_CurrentCell_Type();
-    _bool          ISFall();
+    _bool          Get_bFalling();
+    _bool          Get_bDemage(_int& HP);
     void           Set_Type(_uint Type);
     void           Find_CurrentCell(_vector vWorldPos);
     _vector        Get_SafePos();
@@ -78,7 +78,7 @@ public:
      vector<_uint>              m_vecNomoveType;
 	 static	const _float4x4*	m_WorldMatrix ;  
 	 _vector			        m_vSafePos{};
-     _bool                      m_bRender{true};
+   
 
 #ifdef _DEBUG
 private:

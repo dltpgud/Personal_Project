@@ -2,10 +2,7 @@
 
 CTimer_Manager::CTimer_Manager(void)
 {
-
 }
-
-
 _float CTimer_Manager::Get_TimeDelta(const _wstring& pTimerTag)
 {
 	CTimer*		pInstance = Find_Timer(pTimerTag);
@@ -48,8 +45,6 @@ CTimer_Manager* CTimer_Manager::Create()
 void CTimer_Manager::Free(void)
 {
 	__super::Free();
-
-	//for_each(m_mapTimer.begin(), m_mapTimer.end(), CDeleteMap());
 
 	for (auto& pTimemgr : m_mapTimer)
 		Safe_Release(pTimemgr.second);

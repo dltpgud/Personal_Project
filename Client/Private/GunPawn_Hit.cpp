@@ -1,8 +1,6 @@
 #include"stdafx.h"
 #include "GunPawn_Hit.h"
-#include "Body_GunPawn.h"
 #include "GameInstance.h"
-#include "GunPawn.h"
 CGunPawn_Hit::CGunPawn_Hit()
 {
 }
@@ -40,7 +38,7 @@ HRESULT CGunPawn_Hit::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CGunPawn_Hit::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CGunPawn_Hit::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     switch (*m_HitType)
     {
@@ -55,11 +53,14 @@ CStateMachine::Result CGunPawn_Hit::StateMachine_Playing(_float fTimeDelta)
     default: break;
     }
     
-    return __super::StateMachine_Playing(fTimeDelta);
+    *pRim->eState = RIM_LIGHT_DESC::STATE_RIM;
+    pRim->fcolor = {1.f, 1.f, 1.f, 1.f};
+    pRim->iPower = 0.5f;
+    return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      
-void CGunPawn_Hit::Reset_StateMachine()
+void CGunPawn_Hit::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CGunPawn_Hit* CGunPawn_Hit::Create(void* pArg)

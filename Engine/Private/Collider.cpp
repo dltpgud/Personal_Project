@@ -81,11 +81,8 @@ HRESULT CCollider::Initialize(void* pArg)
 	return S_OK;
 }
 
-
-
 _bool CCollider::Intersect(CCollider* pTargetCollider)
 {
-
 	return m_isColl = m_pBounding->Intersect(pTargetCollider->m_eColliderType, pTargetCollider->m_pBounding);
 }
 
@@ -98,17 +95,33 @@ _float CCollider::Get_iCurRadius()
 {
 	return m_pBounding->Get_iCurRadius();
 }
-
+_bool CCollider::IsInside(const _float3& pos)
+{
+    return m_pBounding->IsInside(pos);
+}
 _float3 CCollider::Get_iCurCenter()
 {
 	return m_pBounding->Get_iCurCenter();
 }
 
+void CCollider::Set_Info(void* pArg)
+{
+     CBounding::BOUND_DESC* pDesc = static_cast< CBounding::BOUND_DESC*>(pArg);
+	
+       m_pBounding->Set_Info(pDesc);
+		
+}
 
+void CCollider::CollUpdate(CActor* target)
+{
+    _bool intersecting = Intersect(target->Get_Collider());
 
+	_bool bPlayer = target->Get_Type() == CActor::TYPE_PLAYER;
+    if (m_Callback)
+            m_Callback(target, intersecting, bPlayer);
+}
 
 #ifdef _DEBUG
-
 HRESULT CCollider::Render()
 {
 	if (nullptr == m_pBounding ||

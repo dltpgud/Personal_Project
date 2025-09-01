@@ -23,7 +23,7 @@ HRESULT CFade::Initialize(void* pArg)
 	  pDesc->UID = UIID_Fade;
       pDesc->fX = g_iWinSizeX * 0.5f;
       pDesc->fY = g_iWinSizeY * 0.5f;
-      pDesc->fZ =0.01f;
+      pDesc->fZ =0.0f;
       pDesc->fSizeX = g_iWinSizeX;
       pDesc->fSizeY = g_iWinSizeY;
 
@@ -48,13 +48,27 @@ void CFade::Priority_Update(_float fTimeDelta)
 
 void CFade::Update(_float fTimeDelta)
 {
-    if(true ==	m_bSetPade) 
-    	m_fTimeSum += fTimeDelta * 1.5f;
-    else if (false == m_bSetPade)
-       m_fTimeSum -= fTimeDelta*1.5f;
+    if (true == m_bSetFade)
+        m_fTimeSum += fTimeDelta ;
     
-    if(m_fTimeSum >= 1.f)
-       m_fTimeSum = 1.f;
+	if (false == m_bSetFade)
+        m_fTimeSum -= fTimeDelta ;
+
+    if (true == m_bSetFade && m_fTimeSum > 1.f)
+    {
+        if (false == m_bSetLoadingFade)
+            m_bUpdate = false;
+
+        m_fTimeSum = 1.f;
+    }
+
+	if (false == m_bSetFade && m_fTimeSum < 0.f)
+    {
+        if (false == m_bSetLoadingFade)
+            m_bUpdate = false;
+       
+		m_fTimeSum = 0.f;
+    }
 }
 
 void CFade::Late_Update(_float fTimeDelta)
@@ -77,9 +91,6 @@ HRESULT CFade::Render()
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
 		return E_FAIL;
 
-	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
-		return E_FAIL;
-
 	m_pShaderCom->Begin(7);
 
 	m_pVIBufferCom->Bind_Buffers();
@@ -100,14 +111,22 @@ _bool CFade::FinishPade()
 	return false;
 }
 
+void CFade::Set_Fade(_bool fade, _bool LoadingFade)
+{
+   m_bUpdate = true;
+   m_bSetFade = fade;
+   m_bSetLoadingFade = LoadingFade;
 
+   if (true == fade)
+       m_fTimeSum = 0.0f;
+   
+   if (false == fade)
+       m_fTimeSum = 1.0f;
+	
+} 
 
 HRESULT CFade::Add_Components()
 {
-	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Pade"),
-		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))  
-		return E_FAIL;
-
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
 		return E_FAIL;
@@ -150,6 +169,5 @@ void CFade::Free()
 	__super::Free();
 
 	Safe_Release(m_pVIBufferCom);
-	Safe_Release(m_pTextureCom);
 	Safe_Release(m_pShaderCom);
 }

@@ -13,31 +13,34 @@ BEGIN(Tool)
 
 class CChest final : public CGameObject
 {
+public:
+    struct CChest_DESC : CGameObject::GAMEOBJ_DESC
+    {
+      
+    };
+
+
 private:
 	CChest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CChest(const CChest& Prototype);
 	virtual ~CChest() = default;
 
 public:
-	/* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
-	virtual HRESULT Initialize_Prototype() override;
 
-	/* 패킷이나 파일 입출력을 통해서 받아오지 못하는 정보들도 분명히 존재한다. */
-	/* 원형에게 존재하는 않는 추가적인 초기화가 필요한 경우 호출한ㄴ다. */
+	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-        virtual void Priority_Update(_float fTimeDelta) override;
+    virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
 
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-	virtual CModel* Get_Model() override { return m_pModelCom; }
-	virtual _wstring Get_ComPonentName() override { return m_wModel; }
-	virtual _tchar* Get_ProtoName() override;
-	virtual void Set_Buffer(_uint x, _uint y) override { m_WeaPon = y; };
+	_wstring Get_ComPonentName(){ return m_wModel; }
+	_tchar* Get_ProtoName() ;
+    void Set_WeaPon(_uint Weapon) { m_WeaPon = Weapon;};
 
-	virtual _uint  Get_Scalra()override {return  m_WeaPon;}
-	virtual _float check_BoxDist(_vector RayPos, _vector RayDir)override ;
+	_uint  Get_Weapon() {return  m_WeaPon;}
+
 private:
 
 	CShader*					m_pShaderCom = { nullptr };

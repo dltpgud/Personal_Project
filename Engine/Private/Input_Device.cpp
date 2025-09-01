@@ -12,7 +12,7 @@ _bool CInput_Device::Mouse_Fix(_bool Fix)
         m_bMouseFixed = true;
 
     if (Get_DIKeyDown(DIK_TAB))
-        m_bMouseFixed = !m_bMouseFixed; // 토글
+        m_bMouseFixed = !m_bMouseFixed; 
 
     if (m_bMouseFixed)
     {

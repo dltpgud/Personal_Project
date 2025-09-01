@@ -9,7 +9,6 @@ namespace Engine
 		_uint			iWinSizeX, iWinSizeY;
 		_bool			isWindowed;
 		_uint			iNumLevels;
-
 	}ENGINE_DESC;
 
 	typedef struct LIGHT_DESC
@@ -30,12 +29,11 @@ namespace Engine
 
 	typedef struct RIM_LIGHT_DESC
 	{
-            // RimLight 상태.
-		enum STATE { STATE_NORIM, STATE_RIM };
+		enum STATE { STATE_NORIM, STATE_RIM }; // RimLight 상태.
 
-		const _uint* eState;     //현재 RimLight 상태
-            XMFLOAT4 fcolor;     // RimLight 색상
-              _float iPower;     // RimLight 세기
+	    unsigned int* eState{}; // 현재 RimLight 상태
+        XMFLOAT4 fcolor;     // RimLight 색상
+        float iPower;      // RimLight 세기
 	}RIM_LIGHT_DESC;
 
 

@@ -30,12 +30,12 @@ private:
 	HRESULT Open_Level(LEVELID eLevelID);
 
 
-#ifdef _DEBUG
+
 private:
 	_tchar					m_szFPS[MAX_PATH] = TEXT("");
 	_uint					m_iNumRender = { 0 };
 	_float					m_fTimeAcc = { 0.f };
-#endif
+
 
 public:
 	static CMainApp*	 Create();

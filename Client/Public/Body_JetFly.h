@@ -3,7 +3,7 @@
 #include "PartObject.h"
 
 BEGIN(Engine)
-class ACtor;
+
 END
 
 BEGIN(Client)
@@ -12,7 +12,7 @@ class CBody_JetFly : public CPartObject
 public: 
 	typedef struct CBody_JetFly_Desc : CPartObject::PARTOBJECT_DESC
     {
-        class CActor* pParentObj;
+        class CMonster* pParentObj;
 	}CBody_JetFly_Desc;
 
 private:
@@ -38,7 +38,7 @@ private:
 
 private:
     vector<class CStateMachine*> m_pStateMachine;
-    class CActor* m_pParentObj;
+    class CMonster* m_pParentObj;
 
 public:
 	static CBody_JetFly* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

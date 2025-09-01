@@ -57,22 +57,12 @@ void CBody_BillyBoom::Priority_Update(_float fTimeDelta)
 void CBody_BillyBoom::Update(_float fTimeDelta)
 {
 
-    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta))
+    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta,&m_RimDesc))
     {
         if (m_pStateMachine[*m_pParentState]->Get_NextMachineIndex() != -1)
             ChangeState(m_pStateMachine[*m_pParentState]->Get_NextMachineIndex());
         else
             ChangeState(CBillyBoom::ST_IDLE);
-    }
-
-    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
-    {
-        m_RimDesc.fcolor = {1.f, 1.f, 1.f, 1.f};
-        m_RimDesc.iPower = 0.5;
-    }
-    else
-    {
-        m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
     }
  
     m_pHeanColl->Update(XMLoadFloat4x4(&m_HeandWorldMatrix));
@@ -92,8 +82,7 @@ void CBody_BillyBoom::Late_Update(_float fTimeDelta)
   XMStoreFloat4x4(&m_HeandWorldMatrix,
       SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
 
-  _float m_pDamage(4.0);
-  if (FAILED(m_pGameInstance->Add_Collider(m_pHeanColl, m_pDamage)))
+  if (FAILED(m_pGameInstance->Add_Collider(m_pHeanColl, 4)))
       return;
 
   m_pGameInstance->Add_DebugComponents(m_pHeanColl);
@@ -104,12 +93,12 @@ void CBody_BillyBoom::Late_Update(_float fTimeDelta)
 void CBody_BillyBoom::ChangeState(_int nextState)
 {
     if (m_pStateMachine[*m_pParentState])
-        m_pStateMachine[*m_pParentState]->Reset_StateMachine();
+        m_pStateMachine[*m_pParentState]->Reset_StateMachine(&m_RimDesc);
 
     *m_pParentState = nextState;
 
     if (m_pStateMachine[*m_pParentState])
-        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f);
+        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f, &m_RimDesc);
 }
 
 HRESULT CBody_BillyBoom::Render()
@@ -147,12 +136,6 @@ HRESULT CBody_BillyBoom::Render()
     }
 
     return S_OK;
-}
-
-void CBody_BillyBoom::SetDir()
-{  
-  m_AttackDir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)
-       - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
 }
 
 HRESULT CBody_BillyBoom::Add_Components()
@@ -195,9 +178,6 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_bool))))
-        return E_FAIL;
-
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_int))))
         return E_FAIL;
 
@@ -225,6 +205,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pMachineDesc.pParentModel = m_pModelCom;
     pMachineDesc.pParentObject = m_pParentObj;
     pMachineDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+
     m_pStateMachine[CBillyBoom::ST_IDLE] = CBillyBoom_Idle::Create(&pMachineDesc);
 #pragma endregion
 
@@ -234,7 +215,9 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pBarreDesc.pPerantPartBonMatrix = m_pFindAttBonMatrix[BM_HAND];
     pBarreDesc.pPerantWorldMat = &m_WorldMatrix;
     pBarreDesc.pParentPartObject = this;
+    pBarreDesc.pParentObject = m_pParentObj;
     pBarreDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+
     m_pStateMachine[CBillyBoom::ST_BARRE] = CBillyBoom_Barre::Create(&pBarreDesc);
 #pragma endregion
 
@@ -245,6 +228,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pShockWaveDesc.pPerantWorldMat = &m_WorldMatrix;
     pShockWaveDesc.pParentPartObject = this;
     pShockWaveDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+
     m_pStateMachine[CBillyBoom::ST_SHOCKWAVE] = CBillyBoom_ShockWave::Create(&pShockWaveDesc);
 #pragma endregion
 
@@ -256,6 +240,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pLaserDesc.pPerantWorldMat = &m_WorldMatrix;
     pLaserDesc.pParentPartObject = this;
     pLaserDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+
     m_pStateMachine[CBillyBoom::ST_LASER] = CBillyBoom_Laser::Create(&pLaserDesc);
 #pragma endregion
 
@@ -263,6 +248,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     CBillyBoom_Bash::ATTACK_DESC pBashDesc{};
     pBashDesc.pParentModel = m_pModelCom;
     pBashDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+
     m_pStateMachine[CBillyBoom::ST_BASH] = CBillyBoom_Bash::Create(&pBashDesc);
 #pragma endregion
 
@@ -275,6 +261,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pIntroDesc.fEmissivePower = &m_fEmissivePower;
     pIntroDesc.iEmissiveMashNum = &m_iEmissiveMashNum;
     pIntroDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
+
     m_pStateMachine[CBillyBoom::ST_INTRO] = CBillyBoom_Intro::Create(&pIntroDesc);
 #pragma endregion
 
@@ -284,7 +271,8 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pMoveDesc.pParentObject = m_pParentObj;
     pMoveDesc.pParentPartObject = this;
     pMoveDesc.iNextMachineIdx = CBillyBoom::ST_IDLE;
-    pMoveDesc.fLength = static_cast<CBillyBoom*>(m_pParentObj)->Get_fLength();
+    pMoveDesc.fLength = static_cast<CBillyBoom*>(m_pParentObj)->Get_fAttackLength();
+
     m_pStateMachine[CBillyBoom::ST_MOVE] = CBillyBoom_Move::Create(&pMoveDesc);
 #pragma endregion
 
@@ -297,6 +285,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
     pDeadDesc.iEmissiveMashNum = &m_iEmissiveMashNum;
     pDeadDesc.pParentPartObject = this;
     pDeadDesc.iNextMachineIdx = CBillyBoom::ST_DEAD;
+
     m_pStateMachine[CBillyBoom::ST_DEAD] = CBillyBoom_Dead::Create(&pDeadDesc);
 #pragma endregion
 

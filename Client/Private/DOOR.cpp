@@ -47,61 +47,44 @@ void CDOOR::Priority_Update(_float fTimeDelta)
 
 void CDOOR::Update(_float fTimeDelta)
 {
-    if (m_pColliderCom->IsColl() && !(m_flags & DOOR_INTERACT) && !(m_flags & DOOR_OPEN))
-    {
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_InteractiveUI, UIID_PlayerWeaPon_Aim);
-        m_InteractiveUI->Set_Text(L"문 열기");
-        m_flags |= DOOR_INTERACT;
-    }
-    else if (!m_pColliderCom->IsColl() && (m_flags & DOOR_INTERACT))
-    {
-        m_flags &= ~DOOR_INTERACT;
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-    }
-    else if (!m_pColliderCom->IsColl() && (m_flags & DOOR_OPEN))
-    {
-        m_flags &= ~DOOR_OPEN;
-        m_iDoorType == DoorType::ITEM ? m_iState = State2::ClOSE2 : m_iState = State::ClOSE;
-        m_pModelCom->Set_Animation(m_iState, false);
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-    }
-
-    if (m_InteractiveUI->Get_Interactive() && (m_flags & DOOR_INTERACT))
+    if (m_InteractiveUI->Get_Interactive(this) && (m_flags & DOOR_INTERACT))
     {
         switch (m_iDoorType)
         {
         case DoorType::STAGE:
-            m_pGameInstance->Play_Sound(L"ST_Door_Act1_Open.ogg", CSound::SOUND_BGM, 1.f);
+            m_pGameInstance->Play_Sound(L"ST_Door_Act1_Open.ogg", &m_pChannel, 1.f);
             m_iState = State::OPEN;
             break;
         case DoorType::ITEM:
-            m_pGameInstance->Play_Sound(L"ST_Door_Special_Airlock_Open.ogg", CSound::SOUND_BGM, 1.f);
+            m_pGameInstance->Play_Sound(L"ST_Door_Special_Airlock_Open.ogg", &m_pChannel, 1.f);
             m_iState = State2::OPEN2;
             break;
         case DoorType::BOSS:
-            m_pGameInstance->Play_Sound(L"ST_Door_Boss_Act1_Open.ogg", CSound::SOUND_BGM, 1.f);
+            m_pGameInstance->Play_Sound(L"ST_Door_Boss_Act1_Open.ogg", &m_pChannel, 1.f);
             m_iState = State::OPEN;
             break;
         }
-
         m_iState == State::OPEN ? m_OpenTime = 0.3f : m_OpenTime = 0.6f;
         m_pModelCom->Set_Animation(m_iState, false);
 
-        m_flags |= DOOR_OPEN;      // 열림
-        m_flags &= ~DOOR_INTERACT; // 상호작용 종료
-        m_flags &= ~DOOR_SOUND;    // 사운드 초기화
-
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-        m_InteractiveUI->Set_Interactive(false);
+        m_flags |= DOOR_OPEN;      
+        m_flags &= ~DOOR_INTERACT; 
+        m_flags &= ~DOOR_SOUND;  
+      
+        m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+        m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
     }
+
+       m_pGameInstance->SetChannelVolume(&m_pChannel, 60.f,
+      m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+
 
     if (m_pModelCom->Play_Animation(fTimeDelta * m_OpenTime))
     {
         if (m_ChangeLevelDoor == 2 && m_iState == State::OPEN && !(m_flags & DOOR_INTERACT))
         {
-            static_cast<CFade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Fade(true);
-            m_pGameInstance->Set_OpenUI(UIID_Fade, true);
-            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_bUpdate(false);
+            static_cast<CFade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Fade(true,true);
+            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_UPDATE, false);
             m_pGameInstance->Set_Open_Bool(true);
             m_flags |= DOOR_INTERACT;
         }
@@ -135,8 +118,7 @@ HRESULT CDOOR::Render()
     {
         if (i != 0 && m_iDoorType != DoorType::ITEM)
         {
-            bool interact = (m_flags & DOOR_INTERACT) != 0;
-            if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorBool", &interact, sizeof(_bool))))
+            if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorRimColor", &m_RimColor, sizeof(_float4))))
                 return E_FAIL;
         }
         _bool bEmissive{false};
@@ -176,13 +158,14 @@ HRESULT CDOOR::Render_Shadow()
 {
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
+
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",
-                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",
-                                         m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
@@ -215,7 +198,6 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_iDoorType = DoorType::BOSS;
 
     m_iDoorType == DoorType::ITEM ? m_iState = State2::ClOSE2 : m_iState = State::ClOSE;
-    m_RimColor = {0.f, 1.f, 0.f, 1.f};
 
     m_pModelCom->Set_Animation(m_iState, false);
 
@@ -352,10 +334,10 @@ HRESULT CDOOR::Add_Components()
         return E_FAIL;
 
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = _float3(3.f, 1.f, 5.f);
+    OBBDesc.vExtents = _float3(5.f, 1.f, 5.f);
     OBBDesc.vCenter = _float3(0.f, 1.f, 0.f);
     OBBDesc.vRotation = _float3(0.f, 0.f, 0.f);
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
                                       reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
 
@@ -379,9 +361,6 @@ HRESULT CDOOR::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimColor, sizeof(_float4))))
-        return E_FAIL;
-
     if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorEmissiveColor", &m_fDoorEmissiveColor, sizeof(_float4))))
         return E_FAIL;
 
@@ -395,18 +374,54 @@ HRESULT CDOOR::Init_CallBakc()
         m_pModelCom->Callback(State::ClOSE, 6,
                               [this]()
                               {
-                                      m_pGameInstance->Play_Sound(L"ST_Door_Act1_Close.ogg", CSound::SOUND_BGM, 0.5f);
-                                      m_flags |= DOOR_SOUND;
-                                  
+                                  m_RimColor = {0.f, 0.f, 0.f, 1.f};
+                                  m_pGameInstance->Play_Sound(L"ST_Door_Act1_Close.ogg", &m_pChannel, 0.5f);
+                                  m_flags |= DOOR_SOUND;
                               });
-        m_pModelCom->Callback(State::ClOSE, 10, [this]() { m_pGameInstance->changeCellType(1); });
-        m_pModelCom->Callback(State::OPEN, 6, [this]() { m_pGameInstance->changeCellType(0); });
+        m_pModelCom->Callback(State::ClOSE, 10, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(1); });
+        m_pModelCom->Callback(State::OPEN, 6, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(0); });
     }
     else
     {
-        m_pModelCom->Callback(State2::ClOSE2, 10, [this]() { m_pGameInstance->changeCellType(1); });
-        m_pModelCom->Callback(State2::OPEN2, 6, [this]() { m_pGameInstance->changeCellType(0); });
+        m_pModelCom->Callback(State2::ClOSE2, 10, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(1); });
+        m_pModelCom->Callback(State2::OPEN2, 6, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(0); });
     }
+
+    m_pColliderCom->SetTriggerCallback(
+        [this](CActor* other, _bool bColliding,_bool bPlayer)
+        {
+            if (bColliding && bPlayer)
+            {
+                if(!(m_flags & DOOR_INTERACT) && !(m_flags & DOOR_OPEN))
+                {
+                    m_RimColor = {0.f, 1.f, 0.f, 1.f};
+                    m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
+                    m_InteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+                    m_InteractiveUI->Set_Text(L"문 열기");
+                    m_flags |= DOOR_INTERACT;
+                }
+            }
+            else if (bPlayer)
+            {
+                m_RimColor = {0.f, 0.f, 0.f, 1.f};
+                if (m_flags & DOOR_INTERACT)
+                {
+                    m_flags &= ~DOOR_INTERACT;
+                    m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+                    m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
+                }
+                else 
+                if(m_flags & DOOR_OPEN)
+                {
+                    m_flags &= ~DOOR_OPEN;
+                    m_iDoorType == DoorType::ITEM ? m_iState = State2::ClOSE2 : m_iState = State::ClOSE;
+                    m_pModelCom->Set_Animation(m_iState, false);
+                    m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+                    m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
+                }
+            }
+        });
+
     return S_OK;
 }
 

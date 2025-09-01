@@ -71,26 +71,24 @@ void CSpriteTexture::Late_Update(_float fTimeDelta)
 
 HRESULT CSpriteTexture::Render()
 {
-
-		if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-			return E_FAIL;
-		
-		if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-			return E_FAIL;
-
-		if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-			return E_FAIL;
-
-
-		if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", m_index)))
-			return E_FAIL;
+	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+		return E_FAIL;
 	
-		m_pShaderCom->Begin(0);
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		return E_FAIL;
 
-		m_pVIBufferCom->Bind_Buffers();
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		return E_FAIL;
 
-		m_pVIBufferCom->Render();
+
+	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", m_index)))
+		return E_FAIL;
 	
+	m_pShaderCom->Begin(0);
+
+	m_pVIBufferCom->Bind_Buffers();
+
+	m_pVIBufferCom->Render();
 
 	return S_OK;
 }

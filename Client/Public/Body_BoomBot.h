@@ -12,7 +12,7 @@ class CBody_BoomBot : public CPartObject
 public: 
 	typedef struct CBody_BoomBot_Desc : CPartObject::PARTOBJECT_DESC
     {
-        class CActor* pParentObj;
+        class CMonster* pParentObj;
      } CBody_BoomBot_Desc;
 
 private:
@@ -29,7 +29,6 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 	virtual HRESULT Render_Shadow() override;
-
     void ChangeState(_int nextState);
 
 private:
@@ -37,9 +36,8 @@ private:
 	HRESULT Bind_ShaderResources();
     HRESULT Set_StateMachine();
 
-
  private:
-    class CActor* m_pParentObj;
+    class CMonster* m_pParentObj;
     vector<class CStateMachine*> m_pStateMachine;
 
 public:

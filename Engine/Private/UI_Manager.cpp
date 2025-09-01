@@ -125,34 +125,35 @@ void CUI_Manager::ShakingEvent(_float fTimeDelta)
     m_UIEeventList[EVENT_SHAKING].clear();
 }
 
-HRESULT CUI_Manager::Set_OpenUI(const _uint& uid, _bool open)
+HRESULT CUI_Manager::Set_OpenUI(_bool bOpen, const _wstring& strCloneTag, class CGameObject* Owner)
 {
-   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-   {
-       if (iter.second->Get_UIID() == uid)
-       {
-               iter.second->Set_Open(open);
-       }
-   }
-  
-  return S_OK;
-}
-
-HRESULT CUI_Manager::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)
-{
-   for (auto& iter : m_UIObj[UIOBJECT::UI_CLONE])
-   {
-       if (iter.second->Get_UIID() == Openuid)
-       {
-           iter.second->Set_Open(true);
-       }
-
-       if (iter.second->Get_UIID() == Cloaseduid)
-       {
-           iter.second->Set_Open(false);
-       }
-   }
-    
+     auto iter = m_UIObj[UIOBJECT::UI_CLONE].find(strCloneTag);
+      
+     if (iter == m_UIObj[UIOBJECT::UI_CLONE].end())
+         return S_OK;
+     if ( bOpen)
+     {
+         if (nullptr != Owner)
+         {
+             iter->second->Show(Owner);
+         }
+         else
+         {
+             iter->second->Set_Open(bOpen);
+         }
+     }
+     else 
+     {
+         if (nullptr != Owner)
+         {
+             iter->second->Hide(Owner);
+         }
+         else
+         {
+             iter->second->Set_Open(bOpen);
+         }
+     }
+        
    return S_OK;
 }
 

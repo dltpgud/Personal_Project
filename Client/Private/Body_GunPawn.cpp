@@ -35,14 +35,12 @@ HRESULT CBody_GunPawn::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-    m_pFindBonMatrix = Get_SocketMatrix("L_Clavicle");
+    m_pSocketMatrix = Get_SocketMatrix("L_Clavicle");
 
     if (FAILED(Set_StateMachine()))
         return E_FAIL;
 
     m_fDeadTime = 2.f;
-
-     // Get_SocketMatrix("R_Canon_Scale_02");
 
     return S_OK;
 }
@@ -54,7 +52,7 @@ void CBody_GunPawn::Priority_Update(_float fTimeDelta)
 
 void CBody_GunPawn::Update(_float fTimeDelta)
 {
-    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta))
+    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta, &m_RimDesc))
     {
         if (m_pStateMachine[*m_pParentState]->Get_NextMachineIndex() != -1)
             ChangeState(m_pStateMachine[*m_pParentState]->Get_NextMachineIndex());
@@ -62,146 +60,6 @@ void CBody_GunPawn::Update(_float fTimeDelta)
             ChangeState(CGunPawn::ST_IDLE);
     }
 
-    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
-    {
-        m_RimDesc.fcolor = {1.f, 1.f, 1.f, 1.f};
-        m_RimDesc.iPower = 0.5;
-    }
-    else
-    {
-        m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
-    }
-
-
-   // _bool bMotionChange = {false}, bLoop = {false};
-   //
-   // if (*m_pParentState == CGunPawn::ST_GRENADE_PRESHOOT && m_iCurMotion != CGunPawn::ST_GRENADE_PRESHOOT)
-   // {
-   //     m_iCurMotion = CGunPawn::ST_GRENADE_PRESHOOT;
-   //     bMotionChange = true;
-   //     bLoop = false;
-   // }
-   //
-   // if (*m_pParentState == CGunPawn::ST_RUN_BACK && m_iCurMotion != CGunPawn::ST_RUN_BACK)
-   // {
-   //     m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-   //     m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.2f);
-   //     m_iCurMotion = CGunPawn::ST_RUN_BACK;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   //
-   // if (*m_pParentState == CGunPawn::ST_RUN_LEFT && m_iCurMotion != CGunPawn::ST_RUN_LEFT)
-   // {
-   //     m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-   //     m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.2f);
-   //     m_iCurMotion = CGunPawn::ST_RUN_LEFT;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   // if (*m_pParentState == CGunPawn::ST_RUN_RIGHT && m_iCurMotion != CGunPawn::ST_RUN_RIGHT)
-   // {
-   //     m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-   //     m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_Enemy_Step_Medium.ogg", 0.2f);
-   //     m_iCurMotion = CGunPawn::ST_RUN_RIGHT;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   //
-   // if (*m_pParentState == CGunPawn::ST_STUN_START && m_iCurMotion != CGunPawn::ST_STUN_START)
-   // {
-   //     m_iCurMotion = CGunPawn::ST_STUN_START;
-   //     m_fPlayAniTime = 0.5f;
-   //     bMotionChange = true;
-   //     bLoop = false;
-   // }
-   // else
-   //     m_fPlayAniTime = 0.6f;
-   //
-   // if (*m_pParentState == CGunPawn::ST_HIT_FRONT && m_iCurMotion != CGunPawn::ST_HIT_FRONT)
-   // {
-   //     m_iCurMotion = CGunPawn::ST_HIT_FRONT;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   //
-   // if (*m_pParentState == CGunPawn::ST_IDLE && m_iCurMotion != CGunPawn::ST_IDLE)
-   // {
-   //     m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-   //     m_iCurMotion = CGunPawn::ST_IDLE;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   // if (*m_pParentState == CGunPawn::ST_GRENADE_SHOOT && m_iCurMotion != CGunPawn::ST_GRENADE_SHOOT)
-   // {
-   //     m_iCurMotion = CGunPawn::ST_GRENADE_SHOOT;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   // if (*m_pParentState == CGunPawn::ST_RUN_BACK_FRONT && m_iCurMotion != CGunPawn::ST_RUN_BACK_FRONT)
-   // {
-   //     m_iCurMotion = CGunPawn::ST_RUN_BACK_FRONT;
-   //     bMotionChange = true;
-   //     bLoop = true;
-   // }
-   //
-   // if (*m_pParentState == CGunPawn::ST_PRESHOOT && m_iCurMotion != CGunPawn::ST_PRESHOOT)
-   // {
-   //     m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
-   //     m_bDeadState = true;
-   //     m_iCurMotion = CGunPawn::ST_PRESHOOT;
-   //     m_fPlayAniTime = 0.5;
-   //     bMotionChange = true;
-   //     bLoop = false;
-   // }
-   // else
-   //     m_fPlayAniTime = 1.f;
-   //
-   //
-   // if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
-   // {
-   //     m_RimDesc.fcolor = { 1.f,1.f,1.f,1.f };
-   //     m_RimDesc.iPower = 1;
-   // }
-   //
-   //
-   // if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_NORIM) {
-   //     m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
-   //     m_RimDesc.iPower = 1;
-   // }
-   //
-   // if (m_iCurMotion == CGunPawn::ST_RUN_LEFT || m_iCurMotion == CGunPawn::ST_RUN_RIGHT)
-   // {
-   //     m_FireTime += fTimeDelta;
-   //
-   //     if (m_FireTime > 0.5f) {
-   //         Make_Bullet();
-   //         m_FireTime = 0.f;
-   //     }
-   // }
-   //
-   // if (bMotionChange)
-   //     m_pModelCom->Set_Animation(m_iCurMotion, bLoop);
-   //
-   // if (true == m_pModelCom->Play_Animation(fTimeDelta * m_fPlayAniTime))
-   // {
-   //    
-   //     m_bFinishAni = true;
-   //     m_iCurMotion = CGunPawn::ST_IDLE;
-   //     m_pModelCom->Set_Animation(m_iCurMotion, true);
-   // }
-   // else
-   // {
-   //     m_bFinishAni = false;
-   //
-   //     if (m_iCurMotion == CGunPawn::ST_GRENADE_PRESHOOT)
-   //         m_bRUN = true;
-   //     else
-   //         m_bRUN = false;
-   //     if (m_iCurMotion == CGunPawn::ST_PRESHOOT)
-   //         m_pModelCom->Set_Animation(m_iCurMotion, false);
-   // }
-   //
     __super::Update(fTimeDelta);
 }
 
@@ -271,12 +129,12 @@ HRESULT CBody_GunPawn::Render_Shadow()
 void CBody_GunPawn::ChangeState(_int nextState)
 {
     if (m_pStateMachine[*m_pParentState])
-        m_pStateMachine[*m_pParentState]->Reset_StateMachine();
+        m_pStateMachine[*m_pParentState]->Reset_StateMachine(&m_RimDesc);
 
     *m_pParentState = nextState;
 
     if (m_pStateMachine[*m_pParentState])
-        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f);
+        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f, &m_RimDesc);
 }
 
 HRESULT CBody_GunPawn::Add_Components()
@@ -313,9 +171,6 @@ HRESULT CBody_GunPawn::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_bool))))
-        return E_FAIL;
-
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower,sizeof(_int))))
         return E_FAIL;
 
@@ -350,10 +205,10 @@ HRESULT CBody_GunPawn::Set_StateMachine()
     pAttackDesc.pParentModel = m_pModelCom;
     pAttackDesc.pParentPartObject = this;
     pAttackDesc.pParentObject = m_pParentObj;
-    pAttackDesc.pParentBoneMat = m_pFindBonMatrix;
+    pAttackDesc.pParentBoneMat = m_pSocketMatrix;
     pAttackDesc.pParentWorldMat = &m_WorldMatrix;
     pAttackDesc.iNextMachineIdx = CGunPawn::ST_MOVE;
-    pAttackDesc.fLength = static_cast<CGunPawn*>(m_pParentObj)->Get_fLength();
+    pAttackDesc.fLength = static_cast<CGunPawn*>(m_pParentObj)->Get_fAttackLength();
     m_pStateMachine[CGunPawn::ST_SHOOT] = CGunPawn_Attack::Create(&pAttackDesc);
 #pragma endregion
 
@@ -362,7 +217,7 @@ HRESULT CBody_GunPawn::Set_StateMachine()
     pMoveDesc.pParentModel = m_pModelCom;
     pMoveDesc.pParentObject = m_pParentObj;
     pMoveDesc.iNextMachineIdx = CGunPawn::ST_SHOOT;
-    pMoveDesc.fLength = static_cast<CGunPawn*>(m_pParentObj)->Get_fLength();
+    pMoveDesc.fLength = static_cast<CGunPawn*>(m_pParentObj)->Get_fAttackLength();
     m_pStateMachine[CGunPawn::ST_MOVE] = CGunPawn_Move::Create(&pMoveDesc);
 #pragma endregion
 
@@ -377,7 +232,7 @@ HRESULT CBody_GunPawn::Set_StateMachine()
 #pragma region Hit
     CGunPawn_Hit::HIT_DESC pHitDesc{};
     pHitDesc.pParentModel = m_pModelCom;
-    pHitDesc.iNextMachineIdx = CGunPawn::ST_SHOOT;
+    pHitDesc.iNextMachineIdx = CGunPawn::ST_MOVE;
     pHitDesc.HitType = static_cast<CGunPawn*>(m_pParentObj)->Get_AttackAngle();
     m_pStateMachine[CGunPawn::ST_HIT] = CGunPawn_Hit::Create(&pHitDesc);
 #pragma endregion

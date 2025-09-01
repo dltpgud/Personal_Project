@@ -12,8 +12,8 @@ private:
 
 public:
     virtual HRESULT Initialize(void* pDesc);
-    virtual void State_Enter(_uint* pState);
-    virtual _bool State_Processing(_float fTimeDelta, _uint* pState);
+    virtual void State_Enter(_uint* pState, _uint* pPreState);
+    virtual _bool State_Processing(_float fTimeDelta, _uint* pState, _uint* pPreState);
     virtual _bool State_Exit(_uint* pState);
     virtual void Init_CallBack_Func();
     virtual _bool IsActive(_uint stateFlags) const override;

@@ -37,6 +37,9 @@
     <Filter Include="Object\NPC">
       <UniqueIdentifier>{37f84bc8-59d7-41fe-9da2-01cef3acae08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Trigger">
+      <UniqueIdentifier>{514bb1f9-3c90-4406-a2fc-c9c51ba3185b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Tool.h">
@@ -84,6 +87,9 @@
     <ClInclude Include="..\Public\NPC.h">
       <Filter>Object\NPC</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Trigger.h">
+      <Filter>Object\Trigger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Tool.ico">
@@ -129,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\NPC.cpp">
       <Filter>Object\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trigger.cpp">
+      <Filter>Object\Trigger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

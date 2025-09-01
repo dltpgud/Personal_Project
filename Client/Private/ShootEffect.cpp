@@ -130,9 +130,6 @@ void CShootEffect::Late_Update(_float fTimeDelta)
 	_vector vHPos = XMVector3TransformCoord(m_Local, XMLoadFloat4x4(m_WorldPtr));
 
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, vHPos);
-	
-
-
 
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLEND, this)))
 		return;
@@ -179,14 +176,19 @@ HRESULT CShootEffect::Bind_ShaderResources()
 {
 	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_RGB[0], sizeof(_float4))))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_RGBEnd", &m_RGB[1], sizeof(_float4))))
 		return E_FAIL;
+
 	return S_OK;
 }
 

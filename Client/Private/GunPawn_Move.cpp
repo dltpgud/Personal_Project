@@ -1,9 +1,8 @@
 ﻿#include"stdafx.h"
 #include "GunPawn_Move.h"
-#include "GunPawn.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-#include "Body_GunPawn.h"
+
 CGunPawn_Move::CGunPawn_Move()
 {
 }
@@ -45,7 +44,7 @@ HRESULT CGunPawn_Move::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (HasFlag(PAUSED))
         return Result::None;
@@ -53,48 +52,36 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta)
     if (m_StateNodes.empty())
         return Result::None;
 
-    // nullptr 체크 추가
-    if (m_pParentObject == nullptr || m_fLength == nullptr)
-    {
-        Reset_StateMachine();
-        return Result::Finished;
-    }
-
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
 
-    if (*m_fLength < 15.f) {
-    
-    m_iNextIndex = BACK;
+    if (*m_fLength < 15.f) 
+    {
+       m_iNextIndex = BACK;
     }
 
     if (m_iCurIndex != m_iNextIndex)
     {
         if (m_iNextIndex == GO)
-            m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", CSound::SOUND_MONSTER_ROLL2, 0.2f);
+            m_pGameInstance->Play_Sound(L"ST_Enemy_Step_Medium.ogg", &m_pChannel, 1.f, true);
         if (m_iNextIndex == BACK)
-            m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", CSound::SOUND_MONSTER_ROLL2, 0.2f);
+            m_pGameInstance->Play_Sound(L"ST_Enemy_Step_Medium.ogg", &m_pChannel, 1.f, true);
 
         m_iCurIndex = m_iNextIndex;
         m_StateNodes[m_iCurIndex]->State_Enter();
     }
     
-    // 추가 nullptr 체크
-    CGunPawn* pGunPawn = dynamic_cast<CGunPawn*>(m_pParentObject);
-    if (pGunPawn == nullptr || pGunPawn->Get_Navi() == nullptr)
-    {
-        Reset_StateMachine();
-        return Result::Finished;
-    }
-    
-    _bool isFall = pGunPawn->Get_Navi()->ISFall();
+    m_pGameInstance->SetChannelVolume( &m_pChannel, 60.f,
+    m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+ 
+    _bool isFall = m_pParentObject->Get_Navigation()->Get_bFalling();
 
     if (true == isFall)
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
     if (*m_fLength > 20.f && false == isFall)
@@ -103,39 +90,30 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta)
         if (m_pGameInstance->Get_Player()->Get_onCell())
         {
             m_pGameInstance->Add_Job(
-                [this]()
+                [&]()
                 {
-                    // Job 내부에서도 nullptr 체크
-                    if (m_pParentObject != nullptr)
-                    {
-                        CGunPawn* pGunPawn = dynamic_cast<CGunPawn*>(m_pParentObject);
-                        if (pGunPawn != nullptr && m_pGameInstance->Get_Player() != nullptr)
-                        {
-                            pGunPawn->Set_Taget(
+                    m_pParentObject->Get_Navigation()->Set_Taget(
                                 m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-                        }
-                    }
                 });
-            if (m_pParentObject->Get_Transform()->FollowPath(pGunPawn->Get_Navi(), fTimeDelta))
+            if (m_pParentObject->Get_Transform()->FollowPath(m_pParentObject->Get_Navigation(), fTimeDelta))
             {
-                Reset_StateMachine();
+                Reset_StateMachine(pRim);
                 return Result::Finished;
             }
         }else 
-            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,
-                                                      dynamic_cast<CGunPawn*>(m_pParentObject)->Get_Navi());
+            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,m_pParentObject->Get_Navigation());
     }
     else if (*m_fLength <= 20.f && *m_fLength >= 15.f)
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
 
     if (m_iCurIndex == BACK && false == isFall)
     {
 
-       m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, pGunPawn->Get_Navi());
-        m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
+       m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, m_pParentObject->Get_Navigation());
+       m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
     }
   
   if( m_StateNodes[m_iCurIndex]->State_Processing(fTimeDelta))
@@ -148,7 +126,7 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta)
         }
         else
         {
-            Reset_StateMachine();
+            Reset_StateMachine(pRim);
             SetFlag(FINISHED);
             return Result::Finished;
         }
@@ -156,10 +134,10 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta)
     return Result::Running;
 }
 
-void CGunPawn_Move::Reset_StateMachine()
+void CGunPawn_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
-   __super::Reset_StateMachine();
+    m_pGameInstance->StopSound(&m_pChannel);
+    __super::Reset_StateMachine(pRim);
 }
 
 CGunPawn_Move* CGunPawn_Move::Create(void* pArg)

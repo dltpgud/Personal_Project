@@ -19,9 +19,10 @@ HRESULT CMenu::Initialize_Prototype()
 
 HRESULT CMenu::Initialize(void* pArg)
 {	
- CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
+    CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
       pDesc->Update = true;
 	  pDesc->UID = UIID_Menu;
+
 	if (FAILED(__super::Initialize(pDesc)))
 		 return E_FAIL;
 
@@ -57,7 +58,7 @@ void CMenu::Update(_float fTimeDelta)
 	
 				if (m_pGameInstance->Get_DIMouseDown(DIM_LB))
 				{
-					m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg", CSound::SOUND_BGM, 1.f); 
+                        m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg",nullptr, 1.f); 
 						if (i == 1) {
 							m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1,true));
 						}
@@ -110,10 +111,6 @@ HRESULT CMenu::Render()
 		Set_UI_Pos(&Desc[i]);
 
         if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-            return E_FAIL;
-        if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-            return E_FAIL;
-        if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
             return E_FAIL;
 
         if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture",i-1 )))

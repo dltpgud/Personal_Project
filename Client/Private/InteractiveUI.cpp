@@ -23,9 +23,8 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
     pDesc->fZ = 0.f;
     pDesc->fSizeX = 50.f;
     pDesc->fSizeY = 50.f;
-    pDesc->Update = true;
-
-     pDesc->UID = UIID_InteractiveUI;
+    pDesc->Update = false;
+    pDesc->UID = UIID_InteractiveUI;
 
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
@@ -36,12 +35,15 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
 
     if (FAILED(Add_Components()))
         return E_FAIL;
-    m_bUpdate = false;
     return S_OK;
 }
 
 void CInteractiveUI::Priority_Update(_float fTimeDelta)
 {
+    if (false == IsLookingAtObject())
+        return;
+
+
     if (m_pGameInstance->Get_DIKeyDown(DIK_F))
     {
         m_bColor = true;
@@ -67,6 +69,9 @@ void CInteractiveUI::Update(_float fTimeDelta)
 
 void CInteractiveUI::Late_Update(_float fTimeDelta)
 {
+    if (false == IsLookingAtObject())
+        return;
+    
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
         return;
 }
@@ -96,17 +101,19 @@ HRESULT CInteractiveUI::Render()
 
     return S_OK;
 }
-
-_bool CInteractiveUI::Get_Interactive()
+_bool CInteractiveUI::Get_Interactive(class CGameObject* Owner)
 {
-    return m_bInteractive; 
+    if (m_pOwner == Owner && m_bInteractive)
+    {
+        m_bInteractive = false; 
+        return true;
+    }
+    return false;
 }
 
-
-
-void CInteractiveUI::Set_Interactive(_bool Interactive)
+void CInteractiveUI::Set_OnwerPos(const _vector& Pos)
 {
-    m_bInteractive = Interactive;
+    m_vOnwerPos = Pos;
 }
 
 HRESULT CInteractiveUI::Add_Components()
@@ -124,6 +131,34 @@ HRESULT CInteractiveUI::Add_Components()
         return E_FAIL;
 
     return S_OK;
+}
+
+_bool CInteractiveUI::IsLookingAtObject()
+{
+    _vector PlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+    _vector PlayerForward = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_LOOK);
+
+    _vector dir = m_vOnwerPos - PlayerPos;
+
+    dir = XMVectorSetY(dir, 0);
+    PlayerForward = XMVectorSetY(PlayerForward, 0);
+
+    dir = XMVector3Normalize(dir);
+    PlayerForward = XMVector3Normalize(PlayerForward);
+
+    _float dot = XMVectorGetX(XMVector3Dot(PlayerForward, dir));
+
+    constexpr _float maxAngle = XMConvertToRadians(30.f);
+
+    if (dot > cosf(maxAngle))
+    {
+        m_pGameInstance->Set_OpenUI(false, TEXT("WeaPon_Aim"));
+        return true;
+    }
+    else {
+        m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+        return false;
+    }
 }
 
 CInteractiveUI* CInteractiveUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

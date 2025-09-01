@@ -27,14 +27,10 @@ HRESULT CGameObject::Initialize_Prototype()
 
 HRESULT CGameObject::Initialize(void* pArg)
 {
-    /*추가적인 구조체 초기화작업이 필요하다면*/
-    if (nullptr != pArg)
-    {
-        GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-        m_iObjectType = pDesc->Object_Type;
-        m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
-    }else
-        m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pArg);
+    GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
+     m_iObjectType   = pDesc->Object_Type;
+     m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
+
     if (nullptr == m_pTransformCom)
         return E_FAIL;
 
@@ -61,7 +57,7 @@ void CGameObject::Late_Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
 
-    if (nullptr!= m_pColliderCom  )
+    if (m_pColliderCom)
     {
         m_pGameInstance->Add_DebugComponents(m_pColliderCom);
     }
@@ -78,23 +74,17 @@ HRESULT CGameObject::Render()
 HRESULT CGameObject::Add_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, const _wstring& strComponentTag,
                                    CComponent** ppOut, void* pArg)
 {
-    /* 게임 인스턴스에 있는 사본을  가져오고*/
     CComponent* pComponent = m_pGameInstance->Clone_Component(iLevelIndex, strPrototypeTag, pArg);
     if (nullptr == pComponent)
         return E_FAIL;
 
-    /*넣으려는 컴포넌트가 이미 존재한다면 실패 */
     if (nullptr != Find_Component(strComponentTag))
         return E_FAIL;
 
-    /*그게 아니면 맵컨테이너에 추가 하고*/
     m_Components.emplace(strComponentTag, pComponent);
 
-    /*리턴 값으로 내보낸다*/
     *ppOut = pComponent;
 
-    /*포인터를 리턴 값으로 내보내면서 공유하게 됐으니까 레퍼런스 카운트 올려주고..지워지는 건 맵 컨테이너 해제 될때 같이
-     * 된다.*/
     Safe_AddRef(pComponent);
 
     return S_OK;

@@ -1,22 +1,23 @@
 ﻿#include "stdafx.h"
-#include "ShootingUI.h"
+#include "Player_ShootingStateUI.h"
 #include "GameInstance.h"
 #include "Weapon.h"
-CShootingUI::CShootingUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{ pDevice, pContext }
+#include "Player_StateNode.h"
+CPlayer_ShootingStateUI::CPlayer_ShootingStateUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{ pDevice, pContext }
 {
 }
 
-CShootingUI::CShootingUI(const CShootingUI& Prototype)
+CPlayer_ShootingStateUI::CPlayer_ShootingStateUI(const CPlayer_ShootingStateUI& Prototype)
 	: CUI{ Prototype }
 {
 }
 
-HRESULT CShootingUI::Initialize_Prototype()
+HRESULT CPlayer_ShootingStateUI::Initialize_Prototype()
 {
 	return  S_OK;
 }
 
-HRESULT CShootingUI::Initialize(void* pArg)
+HRESULT CPlayer_ShootingStateUI::Initialize(void* pArg)
 {
 	CShootingUI_DESC* Desc = static_cast <CShootingUI_DESC*>(pArg) ;
 	m_iWeaPonState = Desc->iWeaPonState;
@@ -36,13 +37,13 @@ HRESULT CShootingUI::Initialize(void* pArg)
 	return S_OK;
 }
 
-void CShootingUI::Priority_Update(_float fTimeDelta)
+void CPlayer_ShootingStateUI::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CShootingUI::Update(_float fTimeDelta)
+void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 {
-	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::HendGun)
+    if (*m_iWeaPonState & CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::HendGun)
 	{
 		m_iTex = Prrr;
 		m_RGB.x  = 0.0f;
@@ -58,7 +59,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::HendGun)
+	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::HendGun)
 	{
 		m_iTex = CLack;
 		m_RGB.x= 0.5f;
@@ -74,7 +75,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
+	if (*m_iWeaPonState & CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
 	{
 		m_iTex = Tra;
 		m_RGB.x= 0.0f;
@@ -89,7 +90,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
+	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
 	{
 		m_iTex = CLack;
 		m_RGB.x = 0.f;
@@ -108,7 +109,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::MissileGatling)
+	if (*m_iWeaPonState & CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::MissileGatling)
 	{
 		m_iTex = TaKa;
 		m_RGB.x = 1.f;
@@ -124,7 +125,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::MissileGatling)
+	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::MissileGatling)
 	{
 		m_iTex = CLack2;
 		m_RGB.x = 1.f;
@@ -140,7 +141,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_SHOOT && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
+	if (*m_iWeaPonState &CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
 	{
 		m_iTex = Flink;
 		m_RGB.x = 0.0f;
@@ -156,7 +157,7 @@ void CShootingUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (m_iWeaPonState == CWeapon::WS_RELOAD && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
+	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
 	{
 		m_iTex = CLack;
 		m_RGB.x = 0.5f;
@@ -171,13 +172,13 @@ void CShootingUI::Update(_float fTimeDelta)
 	}
 }
 
-void CShootingUI::Late_Update(_float fTimeDelta)
+void CPlayer_ShootingStateUI::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
 		return;
 }
 
-HRESULT CShootingUI::Render()
+HRESULT CPlayer_ShootingStateUI::Render()
 {
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_RGB,sizeof(_float4))))
 		return E_FAIL;
@@ -203,19 +204,19 @@ HRESULT CShootingUI::Render()
 	return S_OK;
 }
 
-void CShootingUI::Set_RandomPos(_bool WeaponUP, _bool WeaponDown, _bool WeaponSide)
+void CPlayer_ShootingStateUI::Set_RandomPos(_bool WeaponUP, _bool WeaponDown, _bool WeaponSide)
 {
 	m_bWeaponUP = WeaponUP;
 	m_bWeaponDown = WeaponDown;
 	m_bWeaponSide = WeaponSide;
 }
 
-void CShootingUI::Set_PosClack(_float X, _float Y)
+void CPlayer_ShootingStateUI::Set_PosClack(_float X, _float Y)
 {
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX - X) - ViewportDesc.Width * 0.5f, -(m_fY + Y) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 }
 
-HRESULT CShootingUI::Add_Components()
+HRESULT CPlayer_ShootingStateUI::Add_Components()
 {
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
@@ -256,9 +257,9 @@ HRESULT CShootingUI::Add_Components()
 	return S_OK;
 }
 
-CShootingUI* CShootingUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CPlayer_ShootingStateUI* CPlayer_ShootingStateUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CShootingUI* pInstance = new CShootingUI(pDevice, pContext);
+	CPlayer_ShootingStateUI* pInstance = new CPlayer_ShootingStateUI(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
@@ -269,9 +270,9 @@ CShootingUI* CShootingUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 	return pInstance;
 }
 
-CGameObject* CShootingUI::Clone(void* pArg)
+CGameObject* CPlayer_ShootingStateUI::Clone(void* pArg)
 {
-	CShootingUI* pInstance = new CShootingUI(*this);
+	CPlayer_ShootingStateUI* pInstance = new CPlayer_ShootingStateUI(*this);
 
 	if (FAILED(pInstance->Initialize(pArg)))
 	{
@@ -282,7 +283,7 @@ CGameObject* CShootingUI::Clone(void* pArg)
 	return pInstance;
 }
 
-void CShootingUI::Free()
+void CPlayer_ShootingStateUI::Free()
 {
 	__super::Free();
 

@@ -4,6 +4,7 @@
 #include "Body_GunPawn.h"
 #include "Weapon.h"
 #include "MonsterHP.h"
+#include "Player.h"
 CGunPawn::CGunPawn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CMonster{pDevice, pContext}
 {
 }
@@ -23,20 +24,18 @@ HRESULT CGunPawn::Initialize(void* pArg)
     Desc->fSpeedPerSec = 10.f;
     Desc->fRotationPerSec = XMConvertToRadians(90.f);
     Desc->JumpPower = 3.f;
+    Desc->iHP = 100;
+    Desc->bOnCell = true;
+    Desc->iState = ST_IDLE;
+    Desc->fFixY = 0.f;
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
-
-    m_fMAXHP = 100.f;
-    m_fHP = m_fMAXHP;
-    m_bOnCell = true;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
-
-    m_iState = ST_MOVE;
 
     static_cast<CMonsterHP*>(m_PartObjects[PART_HP])
     ->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
@@ -47,9 +46,6 @@ HRESULT CGunPawn::Initialize(void* pArg)
 void CGunPawn::Priority_Update(_float fTimeDelta)
 {
     Compute_Length();
-
-    if (m_iState != ST_HIT)
-        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
 
     __super::Priority_Update(fTimeDelta);
     return ;
@@ -75,18 +71,25 @@ void CGunPawn::HIt_Routine()
 {
     Compute_Angle();
     static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_HIT);
-    m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-    static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_fHP);
+    m_iHP -= static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Weapon_Info().Damage;
+    static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_iHP);
     static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_HitStart(true);
 }
 
 void CGunPawn::Dead_Routine()
 {
     static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_DEAD);
- 
     Erase_PartObj(PART_HP);
 }
 
+void CGunPawn::Wake_up()
+{
+    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
+}
+void CGunPawn::Seeping()
+{
+    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
+}
 HRESULT CGunPawn::Add_Components()
 {
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
@@ -95,7 +98,7 @@ HRESULT CGunPawn::Add_Components()
     OBBDesc.vExtents = _float3(1.f, 1.3f, 0.5f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = {0.f, 0.f, 0.f};
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
                                       reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
 
@@ -121,8 +124,8 @@ HRESULT CGunPawn::Add_PartObjects()
         return E_FAIL;
 
     CMonsterHP::CMonsterHP_DESC HpDesc{};
-    HpDesc.fMaxHP = m_fMAXHP;
-    HpDesc.fHP = m_fHP;
+    HpDesc.iMaxHP = m_iMAXHP;
+    HpDesc.iHP = m_iHP;
     HpDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
         return E_FAIL;

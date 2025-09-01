@@ -1,8 +1,6 @@
 #include"stdafx.h"
 #include "JetFly_Dead.h"
-#include "JetFly.h"
 #include "GameInstance.h"
-#include "Body_JetFly.h"
 
 CJetFly_Dead::CJetFly_Dead()
 {
@@ -24,36 +22,40 @@ HRESULT CJetFly_Dead::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CJetFly_Dead::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CJetFly_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-    dynamic_cast<CBody_JetFly*>(m_pParentPartObject)->Set_DeadState(true);
+    m_pParentPartObject->Set_DeadState(true);
 
     _vector vPos =  m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
 
-    _bool isFall = dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi()->ISFall();
+    _bool isFall = m_pParentObject->Get_Navigation()->Get_bFalling();
 
     _float3 fPos ={ XMVectorGetX(vPos), XMVectorGetY(vPos), XMVectorGetZ(vPos) };
 
-    _float Y = dynamic_cast<CJetFly*>(m_pParentObject)->Get_Navi()->Compute_HeightOnCell(&fPos);
+    _float Y = m_pParentObject->Get_Navigation()->Compute_HeightOnCell(&fPos);
 
-    isFall == true ? Y = -7 : Y;
-
-    if (XMVectorGetY(vPos) >=Y)
+    m_pParentObject->Get_Transform()->Set_MoveSpeed(8.f);
+    m_pParentObject->Set_onCell(false);
+    
+    if (true == isFall && false == m_pParentObject->GetTriggerFlag(CActor::Trigger_Terrain))
     {
-        dynamic_cast<CJetFly*>(m_pParentObject)->Set_onCell(false);
-        m_pParentObject->Get_Transform()->Set_MoveSpeed(10.f);
         m_pParentObject->Get_Transform()->Go_Move(CTransform::DOWN, fTimeDelta);
     }
 
-    if (1.f == dynamic_cast<CBody_JetFly*>(m_pParentPartObject)->Get_threshold())
+    if (XMVectorGetY(vPos) > Y && false ==isFall)
+    {
+       m_pParentObject->Get_Transform()->Go_Move(CTransform::DOWN, fTimeDelta);
+    }
+    
+    if (1.f == m_pParentPartObject->Get_threshold())
         m_pParentObject->Set_Dead(true);
 
-     return  __super::StateMachine_Playing(fTimeDelta);
+     return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      
 
-void CJetFly_Dead::Reset_StateMachine()
+void CJetFly_Dead::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CJetFly_Dead* CJetFly_Dead::Create(void* pArg)

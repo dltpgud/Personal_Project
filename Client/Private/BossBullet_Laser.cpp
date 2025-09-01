@@ -17,61 +17,41 @@ HRESULT CBossBullet_Laser::Initialize_Prototype()
 
 HRESULT CBossBullet_Laser::Initialize(void* pArg)
 {
+   CBossBullet_Laser_DESC* pDesc = static_cast<CBossBullet_Laser_DESC*>(pArg); 
+   m_bRightLeft = pDesc->bRightLeft;
+   m_pSocketMatrix = pDesc->pSocketMatrix;
+   m_pParentMatrix = pDesc->pParentMatrix;
 
-    CBossBullet_Laser_DESC* pDesc = static_cast<CBossBullet_Laser_DESC*>(pArg); 
-    pDesc->fRotationPerSec =XMConvertToRadians(120.f);
-    m_bRightLeft = pDesc->bRightLeft;
-    m_pSocketMatrix = pDesc->pSocketMatrix;
-    m_pParentMatrix = pDesc->pParentMatrix;
-    m_pParentState = pDesc->state;
-    pDesc->fLifeTime= 4.5f;
-   if (FAILED(__super::Initialize(pDesc)))
+    if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
-
-     
 
     if (FAILED(Add_Components()))
         return E_FAIL;
 
+    m_pTransformCom->Set_Scaling(0.1f, 0.1f, 0.1f);
+   
+    if (m_bRightLeft == true) {
+        m_pTransformCom->Rotation(XMConvertToRadians(0.0f), XMConvertToRadians(-90.0f), XMConvertToRadians(0.0f));
+        m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(1.f, -0.7f, 0.f, 1.f));
+    }
+    else 
+    if (m_bRightLeft == false) {
+        m_pTransformCom->Rotation(XMConvertToRadians(0.0f), XMConvertToRadians(90.0f), XMConvertToRadians(0.0f));
+        m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(-1.f, 0.7f, 0.f, 1.f));
+    }
 
- m_pTransformCom->Set_Scaling(0.1f, 0.1f, 0.1f);
-
- if (m_bRightLeft == true) {
-     m_pTransformCom->Rotation(XMConvertToRadians(0.0f), XMConvertToRadians(-90.0f), XMConvertToRadians(0.0f));
-     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(1.f, -0.7f, 0.f, 1.f));
- }
- else 
- if (m_bRightLeft == false) {
-     m_pTransformCom->Rotation(XMConvertToRadians(0.0f), XMConvertToRadians(90.0f), XMConvertToRadians(0.0f));
-     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(-1.f, 0.7f, 0.f, 1.f));
- }
-
-
-
-    //m_RGB[0] = {1.f, 1.f, 0.f,0.5f};
     m_Clolor[CSkill::COLOR::CSTART] = { 0.f, 0.f, 0.f,0.5f };
     m_Clolor[CSkill::COLOR::CEND] = { 1.f, 0.f, 0.f,1.f };
 
     m_pTransformCom->Set_Scaling(0.5f, 0.5f, 10.f);
-
 
     return S_OK;
 }
 
 void CBossBullet_Laser::Priority_Update(_float fTimeDelta)
 {
-   
-    if (m_pParentState == CBillyBoom::ST_DEAD)
-    {
-        m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", CSound::SOUND_EFFECT, 1.f);
-
-        m_pGameInstance->StopSound(CSound::SOUND_EFFECT_LASER);
-    }
-
     m_fTimeSum += fTimeDelta;
-
     __super::Priority_Update(fTimeDelta);
-    return;
 }
 
 void CBossBullet_Laser::Update(_float fTimeDelta)
@@ -81,8 +61,6 @@ void CBossBullet_Laser::Update(_float fTimeDelta)
 
 void CBossBullet_Laser::Late_Update(_float fTimeDelta)
 {
-    m_pTransformCom->Set_Scaling(0.5f, 0.5f, 10.f);
-
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLEND, this)))
         return;
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
@@ -100,14 +78,14 @@ void CBossBullet_Laser::Late_Update(_float fTimeDelta)
     __super::Late_Update(fTimeDelta);
 }
 
-void CBossBullet_Laser::Dead_Rutine(_float fTimeDelta)
+void CBossBullet_Laser::Dead_Rutine()
 {
     m_bDead = true;
 }
 
 HRESULT CBossBullet_Laser::Render()
 {
-     if (FAILED(Bind_ShaderResources()))
+    if (FAILED(Bind_ShaderResources()))
          return E_FAIL;
 
     _uint iNumMesh = m_pModelCom->Get_NumMeshes();
@@ -125,7 +103,6 @@ HRESULT CBossBullet_Laser::Render()
     }
 
     return S_OK;
-
 }
 
 HRESULT CBossBullet_Laser::Add_Components()
@@ -134,7 +111,6 @@ HRESULT CBossBullet_Laser::Add_Components()
         reinterpret_cast<CComponent**>(&m_pNavigationCom))))
         return E_FAIL;
 
-;
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
         reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
@@ -143,20 +119,18 @@ HRESULT CBossBullet_Laser::Add_Components()
         TEXT("Com_Beam"), reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
-
     if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto Component Fire1_Terrain"),
         TEXT("Com_Texture_Mask"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
     CBounding_OBB::BOUND_OBB_DESC		OBBDesc{};
-
     OBBDesc.vRotation = { 0.f,0.f,0.f };
     OBBDesc.vExtents = _float3(2.f, 2.f, 14.f);
     OBBDesc.vCenter = _float3(0.f, 0.5f, -14.f);
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
-        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
-        return E_FAIL;
 
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return E_FAIL;
 
     return S_OK;
 }

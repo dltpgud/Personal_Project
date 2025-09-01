@@ -41,9 +41,6 @@ void CNonAni::Late_Update(_float fTimeDelta)
   
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
-        return;
 }
 
 HRESULT CNonAni::Render_Shadow()
@@ -112,7 +109,7 @@ void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
 
     CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
     m_pModelCom->Center_Ext(&AABBDesc.vCenter, &AABBDesc.vExtents);
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider_OBB"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider"),
                                       reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
         return ;
 }

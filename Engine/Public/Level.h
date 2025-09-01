@@ -14,30 +14,26 @@ public:
 	virtual HRESULT Initialize();
 	virtual void Update(_float fTimeDelta);
 	virtual HRESULT Render();
-        HRESULT Load_to_Next_Map_terrain(const _uint& iLevelIndex, const _wstring& strLayerTag,
-                                         const _wstring& strProto,
-                                         const _tchar* strProtoMapPath, void* Arg = nullptr);
-        HRESULT Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _wstring& strLayerTag,
-                                           const _wstring& strProto,
+   
+    HRESULT Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
                                            const _tchar* strProtoMapPath, void* Arg = nullptr);
-        HRESULT Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
+    HRESULT Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
                                       const _tchar* strProtoMapPath, void* Arg = nullptr);
-        HRESULT Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
-                                         const _tchar* strProtoMapPath,
-                                        void* Arg = nullptr);
-        HRESULT Load_to_Next_Map_Monster(const _uint& iLevelIndex, const _wstring& strLayerTag,
-                                         const _wstring& strProto,
-                                         const _wstring& strProtoComponet, const _tchar* strProtoMapPath,
-                                         void* Arg = nullptr);
-        HRESULT Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
+    HRESULT Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
+                                         const _tchar* strProtoMapPath, void* Arg = nullptr);
+    HRESULT Load_to_Next_Map_Monster(const _uint& iLevelIndex, const _wstring& strLayerTag,const _wstring& strProto,
+                                         const _wstring& strProtoComponet, const _tchar* strProtoMapPath, void* Arg = nullptr);
+    HRESULT Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
                                      const _tchar* strProtoMapPath, void* Arg = nullptr);
 
-    protected:
+protected:
 	ID3D11Device*			m_pDevice = { nullptr };
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	_bool m_bPade{ false };
-public:
+     FMOD::Channel* m_pChannel = nullptr;
+
+    public:
 	virtual void			Free() override;
 };
 

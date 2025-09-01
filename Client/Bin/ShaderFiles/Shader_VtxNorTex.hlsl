@@ -55,15 +55,13 @@ struct PS_IN
     float4 vProjPos : TEXCOORD2;
 };
 
-
 struct PS_OUT
 {
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
-    vector vPickDepth : SV_TARGET3;
-    vector vEmissive : SV_TARGET5;
-    vector vOutLine : SV_TARGET6;
+    vector vEmissive : SV_TARGET4;
+    vector vOutLine : SV_TARGET5;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -72,18 +70,10 @@ PS_OUT PS_MAIN(PS_IN In)
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord * 30.f);
 	
- 
     Out.vDiffuse = vector(vMtrlDiffuse.rgb, 1.f);
-
-
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-
-    Out.vOutLine = vector(0.f, 0.f, 1.f, 0.f);
-    
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
-
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
 	
 	return Out;
 }
@@ -106,13 +96,10 @@ PS_OUT PS_Fire(PS_IN In)
 
     vMtrlDiffuse = float4(color, 1);
     
-    
     Out.vDiffuse = vector(vMtrlDiffuse.rgb, 0.8f);
-
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f); 
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     return Out;
 }
 

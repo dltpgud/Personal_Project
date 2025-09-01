@@ -53,7 +53,6 @@ HRESULT CLight_Manager::Clear()
 }
 
 
-
 CLight_Manager* CLight_Manager::Create()
 {
 	CLight_Manager* pInstance = new CLight_Manager();

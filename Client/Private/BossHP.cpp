@@ -26,8 +26,8 @@ HRESULT CBossHPUI::Initialize(void* pArg)
     Desc->UID = UIID_BossHP ;
     Desc->fSpeedPerSec = 0.f;
     Desc->fRotationPerSec = 0.f;
-    m_fHP = Desc->fHP;
-    m_fMaxHP = Desc->fMaxHP;
+    m_iHP = Desc->fHP;
+    m_imaxHP = Desc->fMaxHP;
 
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
@@ -40,8 +40,8 @@ HRESULT CBossHPUI::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-    m_fHP_Pluse = m_fHP  / m_fMaxHP;
-    m_fRatio = m_fHP * 0.001f / m_fMaxHP;
+    m_fHP_Pluse = static_cast<_float>(m_iHP)  / static_cast<_float>(m_imaxHP);
+    m_fRatio = static_cast<_float>(m_iHP) * 0.001f / static_cast<_float>(m_imaxHP);
     
     m_fHealthHP = 1.f;
     return S_OK;
@@ -53,20 +53,21 @@ void CBossHPUI::Priority_Update(_float fTimeDelta)
 
 void CBossHPUI::Update(_float fTimeDelta)
 {
-    if (m_fHP_Pluse != m_fHP / m_fMaxHP)
+    if (m_fHP_Pluse != static_cast<_float>(m_iHP) / static_cast<_float>(m_imaxHP))
     {
         m_fHP_Pluse -= m_fRatio;
 
-        if (m_fHP_Pluse <= m_fHP / m_fMaxHP)
+        if (m_fHP_Pluse <= static_cast<_float>(m_iHP) /static_cast<_float>(m_imaxHP))
         {
-            m_fHP_Pluse = (m_fHP / m_fMaxHP);
+            m_fHP_Pluse = (static_cast<_float>(m_iHP) / static_cast<_float>(m_imaxHP));
         }
     }
+
+    m_CurRito = static_cast<_float>(m_iHP) / static_cast<_float>(m_imaxHP);
 }
 
 void CBossHPUI::Late_Update(_float fTimeDelta)
 {
-    m_CurRito = m_fHP / m_fMaxHP; 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this))) 
         return;
     if (FAILED(m_pGameInstance->ADD_UI_ShakingList(this)))

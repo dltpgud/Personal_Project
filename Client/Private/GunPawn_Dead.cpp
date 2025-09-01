@@ -1,8 +1,6 @@
 #include"stdafx.h"
 #include "GunPawn_Dead.h"
-#include "GunPawn.h"
 #include "GameInstance.h"
-#include "Body_GunPawn.h"
 
 CGunPawn_Dead::CGunPawn_Dead()
 {
@@ -25,18 +23,18 @@ HRESULT CGunPawn_Dead::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CGunPawn_Dead::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CGunPawn_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-    dynamic_cast<CBody_GunPawn*>(m_pParentPartObject)->Set_DeadState(true);
+    m_pParentPartObject->Set_DeadState(true);
 
-    if (1.f == dynamic_cast<CBody_GunPawn*>(m_pParentPartObject)->Get_threshold())
+    if (1.f == m_pParentPartObject->Get_threshold())
         m_pParentObject->Set_Dead(true);
 
-     return  __super::StateMachine_Playing(fTimeDelta);
+    return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      
-void CGunPawn_Dead::Reset_StateMachine()
+void CGunPawn_Dead::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CGunPawn_Dead* CGunPawn_Dead::Create(void* pArg)

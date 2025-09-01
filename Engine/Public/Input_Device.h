@@ -12,25 +12,21 @@ private:
     virtual ~CInput_Device() = default;
 
 public:
-    // 현재 키 상태
     _byte Get_DIKeyState(_ubyte byKeyID) const
     {
         return m_byKeyState[byKeyID];
     }
 
-    // 현재 마우스 버튼 상태
     _byte Get_DIMouseState(MOUSEKEYSTATE eMouse) const
     {
         return m_tMouseState.rgbButtons[eMouse];
     }
 
-    // 이번 프레임에 처음 눌린 마우스 버튼
     _bool Get_DIMouseDown(MOUSEKEYSTATE eMouse) const
     {
         return (m_tMouseState.rgbButtons[eMouse] & 0x80) && !(m_PreMouseState[eMouse] & 0x80);
     }
 
-    // 이번 프레임에 처음 눌린 키
     _bool Get_DIKeyDown(_ubyte byKeyID) const
     {
         return !(m_PreKeyState[byKeyID] & 0x80) && (m_byKeyState[byKeyID] & 0x80);
@@ -41,8 +37,6 @@ public:
         return !m_tMouseState.rgbButtons[eMouse] && m_PreMouseState[eMouse];
     }
 
-
-    // 이번 프레임에 아무 키나 눌렸는지
     _bool Get_DIAnyKey() const
     {
         for (_uint i = 0; i < 256; ++i)
@@ -53,7 +47,6 @@ public:
         return false;
     }
 
-    // 마우스 이동 값 (X, Y, Z)
     _long Get_DIMouseMove(MOUSEMOVESTATE eMouseState) const
     {
         switch (eMouseState)
@@ -65,7 +58,6 @@ public:
         }
     }
 
-    // 마우스 고정
     _bool Mouse_Fix(_bool Fix);
 
 public:

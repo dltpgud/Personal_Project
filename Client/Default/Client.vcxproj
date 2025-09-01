@@ -247,11 +247,12 @@
     <ClInclude Include="..\Public\Particle_Explosion.h" />
     <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\PlayerBullet.h" />
-    <ClInclude Include="..\Public\PlayerEffectUI.h" />
-    <ClInclude Include="..\Public\PlayerUI.h">
+    <ClInclude Include="..\Public\Player_StateUI.h" />
+    <ClInclude Include="..\Public\Player_HpUI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Player_Fall.h" />
+    <ClInclude Include="..\Public\Player_Health.h" />
     <ClInclude Include="..\Public\Player_Hit.h" />
     <ClInclude Include="..\Public\Player_Idle.h" />
     <ClInclude Include="..\Public\Player_Jump.h" />
@@ -264,10 +265,9 @@
     <ClInclude Include="..\Public\Player_Sturn.h" />
     <ClInclude Include="..\Public\Player_Swich.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
-    <ClInclude Include="..\Public\Shock.h" />
     <ClInclude Include="..\Public\ShockWave.h" />
     <ClInclude Include="..\Public\ShootEffect.h" />
-    <ClInclude Include="..\Public\ShootingUI.h" />
+    <ClInclude Include="..\Public\Player_ShootingStateUI.h" />
     <ClInclude Include="..\Public\Sky.h" />
     <ClInclude Include="..\Public\SpriteTexture.h" />
     <ClInclude Include="..\Public\StateMachine.h" />
@@ -275,6 +275,7 @@
     <ClInclude Include="..\Public\Terrain.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\Trigger.h" />
     <ClInclude Include="..\Public\Wall.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -361,11 +362,12 @@
     <ClCompile Include="..\Private\Particle_Explosion.cpp" />
     <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\PlayerBullet.cpp" />
-    <ClCompile Include="..\Private\PlayerEffectUI.cpp" />
-    <ClCompile Include="..\Private\PlayerUI.cpp">
+    <ClCompile Include="..\Private\Player_StateUI.cpp" />
+    <ClCompile Include="..\Private\Player_HpUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Player_Fall.cpp" />
+    <ClCompile Include="..\Private\Player_Health.cpp" />
     <ClCompile Include="..\Private\Player_Hit.cpp" />
     <ClCompile Include="..\Private\Player_Idle.cpp" />
     <ClCompile Include="..\Private\Player_Jump.cpp" />
@@ -378,10 +380,9 @@
     <ClCompile Include="..\Private\Player_Sturn.cpp" />
     <ClCompile Include="..\Private\Player_Swich.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
-    <ClCompile Include="..\Private\Shock.cpp" />
     <ClCompile Include="..\Private\ShockWave.cpp" />
     <ClCompile Include="..\Private\ShootEffect.cpp" />
-    <ClCompile Include="..\Private\ShootingUI.cpp" />
+    <ClCompile Include="..\Private\Player_ShootingStateUI.cpp" />
     <ClCompile Include="..\Private\Sky.cpp" />
     <ClCompile Include="..\Private\SpriteTexture.cpp" />
     <ClCompile Include="..\Private\StateMachine.cpp" />
@@ -389,6 +390,7 @@
     <ClCompile Include="..\Private\Terrain.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\Trigger.cpp" />
     <ClCompile Include="..\Private\Wall.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>

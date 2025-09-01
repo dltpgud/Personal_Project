@@ -26,7 +26,6 @@ public:
     virtual HRESULT Render_Shadow() override;
     virtual HRESULT Render() override;
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-    virtual CModel* Get_Model() override { return m_pModelCom; }
     virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat);
 
 

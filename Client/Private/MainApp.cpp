@@ -6,7 +6,7 @@
 #include "Menu.h"
 #include "Loading.h"
 #include "Cursor.h"
-#include "PlayerUI.h"
+#include "Player_HpUI.h"
 #include"WeaponUI.h"
 #include "Aim.h"
 #include "InteractiveUI.h"
@@ -32,7 +32,7 @@ HRESULT CMainApp::Initialize()
 	if(FAILED(Open_Level(LEVEL_MENU)))
 		return E_FAIL;
    
-	   if (FAILED(m_pGameInstance->Add_Font(TEXT("Robo"), TEXT("../Bin/Resources/Fonts/Cart.spritefont"))))
+    if (FAILED(m_pGameInstance->Add_Font(TEXT("Robo"), TEXT("../Bin/Resources/Fonts/Cart.spritefont"))))
             return E_FAIL;
 	return S_OK;
 }
@@ -41,9 +41,8 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update(fTimeDelta);
 
-#ifdef _DEBUG
-        m_fTimeAcc += fTimeDelta;
-#endif
+    m_fTimeAcc += fTimeDelta;
+
 }
 
 void CMainApp::Render()
@@ -53,7 +52,7 @@ void CMainApp::Render()
 
     m_pGameInstance->Draw(); 
 
-#ifdef _DEBUG
+
     ++m_iNumRender;
 
     if (m_fTimeAcc >= 1.f)
@@ -62,10 +61,12 @@ void CMainApp::Render()
         m_fTimeAcc = 0.f;
         m_iNumRender = 0;
     }
+#ifdef _DEBUG
     m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(1150.f, 0.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.5f);
 
+#else
+		SetWindowText(g_hWnd, m_szFPS);
 #endif
-
 	if (FAILED(m_pGameInstance->Render_End()))
 		 return;
 }

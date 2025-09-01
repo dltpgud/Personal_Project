@@ -1,6 +1,5 @@
 #include"stdafx.h"
 #include "JetFly_Idle.h"
-#include "JetFly.h"
 #include "GameInstance.h"
 
 CJetFly_Idle::CJetFly_Idle()
@@ -19,14 +18,14 @@ HRESULT CJetFly_Idle::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CJetFly_Idle::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CJetFly_Idle::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-     return  __super::StateMachine_Playing(fTimeDelta);
+    return __super::StateMachine_Playing(fTimeDelta, pRim);
 }  
 
-void CJetFly_Idle::Reset_StateMachine()
+void CJetFly_Idle::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CJetFly_Idle* CJetFly_Idle::Create(void* pArg)

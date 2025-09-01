@@ -1,8 +1,6 @@
 #include"stdafx.h"
 #include "MecanoBot_Hit.h"
-#include "Body_MecanoBot.h"
 #include "GameInstance.h"
-#include "MecanoBot.h"
 CMecanoBot_Hit::CMecanoBot_Hit()
 {
 }
@@ -40,7 +38,7 @@ HRESULT CMecanoBot_Hit::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CMecanoBot_Hit::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CMecanoBot_Hit::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     switch (*m_HitType)
     {
@@ -54,12 +52,15 @@ CStateMachine::Result CMecanoBot_Hit::StateMachine_Playing(_float fTimeDelta)
         break;
     default: break;
     }
-    
-     return __super::StateMachine_Playing(fTimeDelta);
+
+    *pRim->eState = RIM_LIGHT_DESC::STATE_RIM;
+    pRim->fcolor = {1.f, 1.f, 1.f, 1.f};
+    pRim->iPower = 0.5f;
+    return __super::StateMachine_Playing(fTimeDelta, pRim);
 }      
-void CMecanoBot_Hit::Reset_StateMachine()
+void CMecanoBot_Hit::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CMecanoBot_Hit* CMecanoBot_Hit::Create(void* pArg)

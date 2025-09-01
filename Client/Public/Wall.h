@@ -27,7 +27,7 @@ public:
     virtual HRESULT Render() override;
     virtual HRESULT Render_Shadow() override;
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-    virtual CModel* Get_Model() override { return m_pModelCom; }
+
    
 
 private:
@@ -35,7 +35,7 @@ private:
     CModel* m_pModelCom = { nullptr };
     _float4 m_fDoorEmissiveColor{};
     _wstring m_pModelName{};
-
+    _float3 m_fExtend;
 
 private:
     HRESULT Add_Components();

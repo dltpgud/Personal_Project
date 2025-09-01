@@ -12,7 +12,14 @@ END
 BEGIN(Client)
 class CTerrain : public CGameObject
 {
-    enum Terrain_TYPE { TYPE_MAIN};
+public:
+    struct CTerrain_DESC : CGameObject::GAMEOBJ_DESC
+    {
+        _int Buffer[2];
+        _int   ilava{};
+        _bool  IsMain{};
+        _float flavaOffset{};
+    };
 
 private:
     CTerrain(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -29,33 +36,18 @@ public:
     virtual HRESULT Render() override;
     virtual HRESULT Render_Shadow() override;
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-    virtual void Set_Buffer(_uint x, _uint y)override;
+    void Set_Buffer(_int BufferX, _int BufferY);
     _bool isPowerOfTwoPlusOne(_int num)
     {
         if (num <= 1)
-            return false; // 1 이하 제외
+            return false; 
         int x = num - 1;  // num - 1이 2의 거듭제곱인지 확인
         if((x & (x - 1)) == 0)
             return true;
 
         return false;
     }
-    CVIBuffer_Terrain* Get_buffer()
-    {
-        return m_pVIBufferCom;
-    }
-    virtual _float3* Get_VtxPos();
 
-    _uint Get_SizeX()
-    {
-        return m_pSize[0];
-    }
-    _uint Get_SizeY()
-    {
-        return m_pSize[1];
-    }
-    virtual void Set_Scalra_uint(_uint scalra);
-    virtual void Set_Scalra_float(_float scalra);
 private:
     CTexture* m_pTextureCom = {nullptr};
     CShader* m_pShaderCom = {nullptr};
@@ -63,12 +55,12 @@ private:
     CNavigation* m_pNavigationCom = {nullptr};
     _uint m_pSize[2]{};
     _bool m_bMain = {false};
-    _uint m_bFire{0};
-    _float m_iUVoffset{ 0.f };
+    _uint m_iFire{0};
+    _float m_fUVoffset{ 0.f };
     _float m_fTimeSum{ 0.f };
 
 private:
-    HRESULT Add_Components();
+    HRESULT Add_Components(void* pArg);
 
 public:
     static CTerrain* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

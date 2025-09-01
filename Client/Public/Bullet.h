@@ -16,9 +16,11 @@ public:
 public:
     typedef struct CBULLET_DESC : CSkill::Skill_DESC
     {
-        _uint state = {  };
         _vector pTagetPos{};
-    }CBULLET_DESC;
+        _float2 fScale{};
+        _float fRadius = 0.1f;
+    }
+    CBULLET_DESC;
 private:
     CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CBullet(const CBullet& Prototype);
@@ -31,25 +33,19 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-    virtual void Dead_Rutine(_float fTimeDelta) override;
-    void Reset(void* Arg);
+    virtual void Dead_Rutine() override;
+
 
 private:
-    HRESULT Add_Components();
+    HRESULT Add_Components(void* pArg);
     HRESULT Bind_ShaderResources();
-    HRESULT BIND_BULLET_TYPE();
 private:
     _vector m_pTagetPos = {};
-    _vector m_vPlayerAt{};
     _vector m_vDir{};
-    _bool m_bjump{ true };
-    _bool m_bMakeWave = true;
+    _bool m_bMoveStop{};
     CTexture* m_pTextureCom = { nullptr };
     CVIBuffer_Point* m_pVIBufferCom = { nullptr };
-    _float m_fCollSize = 0.f;
     _float2 m_pScale{};
-_uint m_pParentState = { };
-
 
 public:
     static CBullet* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

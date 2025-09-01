@@ -1,9 +1,9 @@
 #pragma once
-
 #include "Client_Defines.h"
 #include "StateMachine.h"
+
 BEGIN(Engine)
-class CActor;
+
 END
 
 BEGIN(Client) 
@@ -38,12 +38,12 @@ private:
     virtual ~CBillyBoom_Laser() = default;
 
 public:
-    virtual Result StateMachine_Playing(_float fTimeDelta);
-    virtual void Reset_StateMachine();
+    virtual Result StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim) override;
+    virtual void Reset_StateMachine(RIM_LIGHT_DESC* pRim) override;
 
 private:
-    virtual void Init_CallBack_Func();
-    virtual HRESULT Initialize(void* pArg);
+    virtual void Init_CallBack_Func() override;
+    virtual HRESULT Initialize(void* pArg) override;
 
 private:
     HRESULT Make_Laser();
@@ -51,11 +51,11 @@ private:
 private:
     const _float4x4* m_pPerantPartBonMatrix[BONE_INDEX_END]{};
     const _float4x4* m_pPerantWorldMat{};
-    _float m_pDamage{20.f};
 
     _float m_BeamY{-45.f};
     _float m_BeamZ{15.f};
     _uint m_iBoneIndex[BONE_INDEX_END]{};
+    _float m_fRimTimeSum{};
 
 public:
     static CBillyBoom_Laser* Create(void* pArg);

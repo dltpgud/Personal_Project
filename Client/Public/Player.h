@@ -7,23 +7,30 @@ class CCollider;
 END
 
 BEGIN(Client)
-class CPlayerUI;
+class CPlayer_HpUI;
 class CWeapon;
 class CPlayer final : public CActor
 {
 public:
+
 	enum PARTOBJID { PART_BODY, PART_WEAPON, PART_END };
-	enum STATE_UITYPE {
-		STATE_UI_IDlE, STATE_UI_SPRINT, STATE_UI_HIT, STATE_UI_HEALTH, STATE_UI_END
-	};
+
+    enum PLAYER_FLAGS : _uint
+    {
+          FLAG_CHANGE  = 1 << 0, 
+          FLAG_HIT     = 1 << 1,   
+          FLAG_STURN   = 1 << 2,
+          FLAG_UPDATE  = 1 << 3,  
+          FLAG_HEALTH  = 1 << 4, 
+          FLAG_KEYLOCK = 1 << 5,
+    };
        
-    private:
+private:
 	CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CPlayer(const CPlayer& Prototype);
 	virtual ~CPlayer() = default;
 
 public:
-
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
     virtual void Priority_Update(_float fTimeDelta) override;
@@ -32,40 +39,46 @@ public:
 	virtual HRESULT Render() override;
 	virtual void HIt_Routine()override;
 	virtual void Stun_Routine()override;
-	
-	virtual _float Weapon_Damage() override;
 
+public:
 	const _float4x4* Get_CameraBone();
     void WeaponCallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
     void BodyCallBack(_int Body, _uint AnimIdx, _int Duration, function<void()> func);
-
+    void Set_PartObj_Set_Anim(_int Part, _int Index, _bool IsLoop);
+    _bool Set_PartObj_Play_Anim(_int Part, _float fTimeDelta, _float fPlayAniTime = 1.f);
 
 	void Choose_Weapon(const _uint& WeaponNum);
     CWeapon::WEAPON_NODE_DESC Get_Weapon_Info() const;
 
-    void Set_onCell(_bool bOnCell) { m_bOnCell = bOnCell; }
-    _float Get_fY() { return m_fY; } const
-	void Set_UIState(_uint state) {m_eUIState = state;}
-	void Set_bUpdate(_bool SetUpdate) {m_bUpdate = SetUpdate;}
-    void Set_Change() {m_bchange =false;};
-    _bool Get_Change() {return m_bchange;};
-    void Set_PartObj_Set_Anim(_int Part, _int Index, _bool IsLoop);
-    _bool Set_PartObj_Play_Anim(_int Part, _float fTimeDelta, _float fPlayAniTime = 1.f);
-    _bool get_hit(){return m_bHit;}
-    void Set_hit() {m_bHit = false;}
-private:
-	_uint				   m_eUIState{};
-    _bool                  m_bchange = {false};
-	_bool				   m_bHit = { false };
-	_bool                  m_bUpdate{ true };
+    
+    void SetFlag(PLAYER_FLAGS flag, _bool value)
+    {
+        if (value)
+        {
+            m_iState = flag;
+            m_iState |= FLAG_UPDATE;
+        }
+        else
+            m_iState &= ~flag; 
+    }
+
+    void AddFlag(PLAYER_FLAGS flag)
+    {
+        m_iState |= flag;
+    }
+
+    _bool GetFlag(PLAYER_FLAGS flag) const
+    {
+        return (m_iState & flag) != 0;
+    }
 
 private:
 	HRESULT Add_Components();
 	HRESULT Add_PartObjects();
 
 private:
-    class CPlayer_StateMachine* m_pStateMachine{};
-    CPlayerUI*                  m_pPlayerUI = {nullptr};
+    class CPlayer_StateMachine* m_pStateMachine = {nullptr};
+    CPlayer_HpUI*               m_pPlayerUI = {nullptr};
     const _float4x4*            m_pCameraBone = {nullptr};
 
 public:
@@ -75,8 +88,6 @@ public:
 
 };
 END
-
-
 //////////////////////////////////MODEL_ANIM_DATA//////////////////////////////////////////////
 /* enum STATE {
     STATE_COOLING_LONG,

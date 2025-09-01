@@ -41,11 +41,8 @@ private:
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
-
-	      _float4x4 m_NewWordMatrix{};
-		  _matrix m_pParentMatrix{};
-
-
+    _float4x4 m_NewWordMatrix{};
+    _matrix m_pParentMatrix{};
 
 	_float2 m_textureSize{1024.f,512.f};
 	_float2 m_frameSize{256.f,256.f};

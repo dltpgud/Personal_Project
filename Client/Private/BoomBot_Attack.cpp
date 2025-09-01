@@ -1,9 +1,7 @@
 #include"stdafx.h"
 #include "BoomBot_Attack.h"
-#include "BoomBot.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-#include "Body_BoomBot.h"
 
 CBoomBot_Attack::CBoomBot_Attack()
 {
@@ -26,49 +24,57 @@ HRESULT CBoomBot_Attack::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBoomBot_Attack::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBoomBot_Attack::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (*m_fLength > 30.f || *m_fLength < 15.f)
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
-    
+
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
 
-
-  return  __super::StateMachine_Playing(fTimeDelta);
+    return __super::StateMachine_Playing(fTimeDelta, pRim);
 }
 
-void CBoomBot_Attack::Reset_StateMachine()
+void CBoomBot_Attack::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 void CBoomBot_Attack::Init_CallBack_Func()
 {
-   m_pParentModel->Callback(8, 0,[this](){Make_Bullet();});
+    m_pParentModel->Callback(8, 0, [&]() { Make_Bullet(); });
 }
 
 void CBoomBot_Attack::Make_Bullet()
 {
-    m_pGameInstance->Play_Sound(L"ST_MortarPod_Shoot.ogg", CSound::SOUND_EFFECT, 0.3f);
+    m_pGameInstance->Play_Sound(L"ST_MortarPod_Shoot.ogg", &m_pChannel, 1.f);
+    m_pGameInstance->SetChannelVolume( &m_pChannel, 60.f, m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) -
+            m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+
     _vector Hend_Local_Pos = {m_pParentBoneMat->_41, m_pParentBoneMat->_42, m_pParentBoneMat->_43,
                               m_pParentBoneMat->_44};
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(m_pParentWorldMat));
 
-    _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) -
-                  m_pParentPartObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
-    _float m_pDamage = 2.f;
+    _vector Dir = XMVectorSet(m_pParentWorldMat->_41, m_pParentWorldMat->_42, m_pParentWorldMat->_43, 1.f) +
+                  XMVectorSet(m_pParentWorldMat->_31, m_pParentWorldMat->_32, m_pParentWorldMat->_33, 0.f) * 20.f; 
+
+    if (m_pParentObject->IsLookAtPlayer(15.f))
+        Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+
+
     CBullet::CBULLET_DESC Desc{};
     Desc.fSpeedPerSec = 20.f;
     Desc.pTagetPos = Dir;
     Desc.vPos = vHPos;
-    Desc.fDamage = &m_pDamage;
-    Desc.iActorType = CSkill::MONSTER::TYPE_BOOMBOT;
+    Desc.iDamage = 2;
+    Desc.iActorType = CSkill::NOMAL_MONSTER;
     Desc.iSkillType = CSkill::STYPE_STURN;
-
+    Desc.fScale     = _float2{0.2f, 0.2f};
+    Desc.fClolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
+    Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.1f, 1.f, 1.f); 
 
     CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
     m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"), pGameObject);

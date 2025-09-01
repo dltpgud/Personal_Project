@@ -3,7 +3,7 @@
 #include "PartObject.h"
 
 BEGIN(Engine)
-class CActor;
+
 END
 
 BEGIN(Client)
@@ -12,7 +12,7 @@ class CBody_BillyBoom : public CPartObject
 public: 
 	typedef struct CBody_BillyBoom_Desc : CPartObject::PARTOBJECT_DESC
     {
-        class CActor* pParentObj;
+        class CMonster* pParentObj;
 
     } CBody_BillyBoom_Desc;
 
@@ -34,8 +34,6 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 
-	void SetDir();
-    _vector Get_Dir() { return m_AttackDir;}
 	void ChangeState(_int nextState);
 
 private:
@@ -47,12 +45,11 @@ private:
 	_float  m_fEmissivePower{};
 	_int    m_iEmissiveMashNum{};
 	_float3 m_fEmissiveColor{};
-	_vector m_AttackDir{};
 
 	const _float4x4* m_pFindAttBonMatrix[BM_END]{};
 	_float4x4        m_HeandWorldMatrix{};
 
-    class CActor* m_pParentObj{};
+    class CMonster* m_pParentObj{};
 	CCollider* m_pHeanColl{};
     vector<class CStateMachine*> m_pStateMachine;
 

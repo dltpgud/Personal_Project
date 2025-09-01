@@ -50,9 +50,9 @@ public:
 
     void Set_Scaling(_float fScaleX, _float fScaleY, _float fScaleZ);
     void LookAt(_fvector vAt);
-    void Go_Move(MOVE MoveType , _float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool Demage = false);
-    void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck,_int* isFall, class CNavigation* pNavigation = nullptr);
-    void CTransform::StartJump()
+    void Go_Move(MOVE MoveType , _float fTimeDelta, class CNavigation* pNavigation = nullptr, _bool JumpFall = false);
+    void Go_jump(_float fTimeDelta , _float YPos, _bool* Jumpcheck,_float* isFall, class CNavigation* pNavigation = nullptr);
+    void StartJump()
     {
         m_fJumpVelocity = m_JumpPower;
         m_bIsLanding = false; // 점프 시작 시 착지 상태 초기화
@@ -72,6 +72,11 @@ public:
     void Stop_Move();
     void Rotation_to_Player(_float fTimeDelta);
     void Set_Rotation_to_Player();
+    void Set_fGravity(_float fGravity)
+    {
+        m_fGravity = fGravity;
+    }
+
     _bool FollowPath(CNavigation* pNavigation, _float fTimedelta);
     /* 현재 상태를 기준으로 추가로 더 회전한다. */
     void Turn(_fvector vAxis, _float fTimeDelta);
@@ -147,10 +152,11 @@ private:
     _float4x4 m_WorldMatrix = {};
     _float m_fSpeedPerSec = {};
     _float m_fRotationPerSec = {};
-
+    _bool m_bIsFalling{};
     _bool m_bCanDoubleJump{true};
     _float m_JumpPower{};
     _float m_fJumpVelocity = 0.f;
+    _float m_fVelocity = 0.f;
     _bool m_bIsLanding = false; // 착지 중인지 확인
   
     _int m_CurrentPathIndex{0}; // 경로 인덱스 초기화

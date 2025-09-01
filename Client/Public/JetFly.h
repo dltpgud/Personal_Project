@@ -34,6 +34,8 @@ public:
     virtual HRESULT Render() override;
     virtual void HIt_Routine()override;
     virtual void Dead_Routine() override;
+    virtual void Wake_up() override;
+    virtual void Seeping() override;
 
 private:
     HRESULT Add_Components();

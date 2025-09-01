@@ -64,7 +64,21 @@ _float3 CBounding_OBB::Get_iCurCenter()
 {
     return m_pBoundDesc->Center;
 }
+_bool CBounding_OBB::IsInside(const _float3& pos)
+{
+    return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
+}
+void CBounding_OBB::Set_Info(BOUND_DESC* pBoundDesc)
+{
+  BOUND_OBB_DESC* pDesc = static_cast<BOUND_OBB_DESC*>(pBoundDesc);
+    m_pBoundDesc_Original->Center = pDesc->vCenter;
+    m_pBoundDesc_Original->Extents = pDesc->vExtents;
 
+  	_float4 vRotation = {};
+
+  XMStoreFloat4(&vRotation,XMQuaternionRotationRollPitchYaw(pDesc->vRotation.x, pDesc->vRotation.y, pDesc->vRotation.z));
+    m_pBoundDesc_Original->Orientation = vRotation;
+}
 #ifdef _DEBUG
 
 HRESULT CBounding_OBB::Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor)

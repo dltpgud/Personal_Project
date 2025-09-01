@@ -4,7 +4,7 @@
 
 
 BEGIN(Engine)
-
+class CActor;
 class ENGINE_DLL CCollider final : public CComponent
 {
 public:
@@ -15,16 +15,26 @@ protected:
 	CCollider(const CCollider& Prototype);
 	virtual ~CCollider() = default;
 
- public:
+public:
 	virtual HRESULT Initialize_Prototype(TYPE eColliderType);
 	virtual HRESULT Initialize(void* pArg) override;
-     _bool IsColl();
 
-    public:
-	_bool Intersect(CCollider* pTargetCollider);
-	_bool RayIntersects(_vector RayPos, _vector RayDir, _float& fDis);
-	_float Get_iCurRadius() ;
+ public:
+    _bool   IsColl();
+	_bool   Intersect(CCollider* pTargetCollider);
+	_bool   RayIntersects(_vector RayPos, _vector RayDir, _float& fDis);
+	_float  Get_iCurRadius() ;
     _float3 Get_iCurCenter();
+    
+   
+    void SetTriggerCallback(function<void(CActor* other, _bool bColliding, _bool bPlayer)> cb)
+    {
+        m_Callback = std::move(cb);
+    }
+
+    void CollUpdate(CActor* target);
+    void Set_Info(void* pArg);
+    _bool IsInside(const _float3& pos);
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render() override;
@@ -43,10 +53,10 @@ public:
 
 private:
 	TYPE				m_eColliderType = { TYPE_END };
-
+    function<void(CActor* other, _bool bColliding, _bool bPlayer)> m_Callback;
 	class CBounding* m_pBounding = { nullptr };
 	_bool				m_isColl = { false };
-
+  
 
 
 

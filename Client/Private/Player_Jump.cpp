@@ -1,8 +1,7 @@
-﻿ #include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Player_Jump.h"
 #include "Weapon.h"
 #include "Body_Player.h"
-
 CPlayer_Jump::CPlayer_Jump()
 {
 }
@@ -15,10 +14,8 @@ HRESULT CPlayer_Jump::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CPlayer_Jump::State_Enter(_uint* pState)
+void CPlayer_Jump::State_Enter(_uint* pState, _uint* pPreState)
 {
-   // *pState &= ~MOV_HIT;
-    
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_JUMP_RUN_LOOP; 
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
     m_StateDesc.bLoop = true;
@@ -27,30 +24,33 @@ void CPlayer_Jump::State_Enter(_uint* pState)
 
     m_pParentObject->Set_onCell(false);  
 
-    __super::State_Enter(pState);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState)
+_bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState, _uint* pPreState)
 {
+    if ((*pState & MOV_SPRINT)!=0)
+        m_pGameInstance->Set_OpenUI(true, TEXT("PlayerState"));
+
     Move_KeyFlage(pState);
 
-    // 더블 점프 입력 처리 
-    if (!m_bDoubleJump  && m_pGameInstance->Get_DIKeyDown(DIK_SPACE))
+    if (!m_bDoubleJump && m_pGameInstance->Get_DIKeyDown(DIK_SPACE) &&
+        false == m_pParentObject->GetFlag(CPlayer::FLAG_KEYLOCK))
     {
         m_bDoubleJump = true;
        
         if (!m_bDoubleJumpSound)
         {
             m_pParentObject->Get_Transform()->Reset_DoubleJumpTime();
-            m_pGameInstance->Play_Sound(L"ST_Player_DoubleJump.ogg", CSound::SOUND_BGM, 0.5f);
+            m_pGameInstance->Play_Sound(L"ST_Player_DoubleJump.ogg", &m_pChannel, 0.5f);
             m_bDoubleJumpSound = true;
         }
     }
 
-    _int isFall{10};
-    m_pParentObject->Get_Transform()->Go_jump(fTimeDelta * m_fJumpSpeedMultiplier, m_pParentObject->Get_fY(), &m_bJump,&isFall, m_pParentObject->Get_Navi());
+    _float isFall{};
+    m_pParentObject->Get_Transform()->Go_jump(fTimeDelta * m_fJumpSpeedMultiplier, m_pParentObject->Get_fY(), &m_bJump,&isFall, m_pParentObject->Get_Navigation());
 
-    if (isFall < 0) {
+    if (isFall < 0.f) {
         if (false == m_JumpFall) 
         {
             m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_JUMP_FALL, true);
@@ -63,7 +63,8 @@ _bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState)
         return true;
     }
     
-    if (__super::State_Processing(fTimeDelta, pState))
+
+    if (__super::State_Processing(fTimeDelta, pState, pPreState))
     {
         return true;
     }
@@ -74,15 +75,18 @@ _bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState)
 _bool CPlayer_Jump::State_Exit(_uint* pState)
 {
     m_bJump = false;
-    m_pParentObject->Set_onCell(true);
-
-  //  *pState &= ~BEH_SHOOT;
-
     m_bDoubleJump = false;
     m_bDoubleJumpSound = false;
     m_JumpFall = false;
-    
-    return true;
+
+    // 점프가 완전히 끝났을 때만 셀을 설정
+    // 총쏘기 상태일 때는 점프 상태를 유지하고, 점프가 끝났을 때만 셀을 찾음
+    m_pParentObject->Set_onCell(true);
+    m_pParentObject->Get_Navigation()->Find_CurrentCell(
+        m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+
+    // 점프가 끝났으므로 false를 반환하여 IDLE 상태로 전환
+    return false;
 }
 
 void CPlayer_Jump::Init_CallBack_Func()
@@ -90,7 +94,7 @@ void CPlayer_Jump::Init_CallBack_Func()
     for (_int i = 0; i < BODY_TYPE::T_END; i++)
     {
         m_pParentObject->BodyCallBack(i, CBody_Player::BODY_JUMP_RUN_LOOP, 1, [this]()
-                                      { m_pGameInstance->Play_Sound(L"ST_Player_Jump.ogg", CSound::SOUND_BGM, 1.f); });
+                                      { m_pGameInstance->Play_Sound(L"ST_Player_Jump.ogg", &m_pChannel, 1.f); });
     }
 }
 
@@ -112,11 +116,9 @@ _bool CPlayer_Jump::CanEnter(_uint* pState)
     if (*pState & MOV_STURN)
         return false;
 
-    if (m_pGameInstance->Get_DIKeyDown(DIK_SPACE))
+    if (m_pGameInstance->Get_DIKeyDown(DIK_SPACE) && false ==  m_pParentObject->GetFlag(CPlayer::FLAG_KEYLOCK))
     {
         m_pParentObject->Get_Transform()->StartJump();
-     
-        *pState = MOV_JUMP; 
         return true;
     }
     
@@ -125,6 +127,11 @@ _bool CPlayer_Jump::CanEnter(_uint* pState)
 
 _bool CPlayer_Jump::CheckInputCondition(_uint stateFlags)
 {
+    // 점프 상태에서는 총쏘기와 리로드가 가능하도록 수정
+    // if (stateFlags & (BEH_SHOOT | BEH_RELOAD))
+    // {
+    //     return false;
+    // }
     return true;
 }
 

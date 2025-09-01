@@ -6,7 +6,7 @@ CMonster::CMonster(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActo
 {
 }
 
-CMonster::CMonster(const CMonster& Prototype) : CActor{Prototype}, m_iAttackAngleType{Prototype.m_iAttackAngleType}
+CMonster::CMonster(const CMonster& Prototype) : CActor{Prototype}
 {
 }
 
@@ -20,8 +20,8 @@ HRESULT CMonster::Initialize(void* pArg)
 {
     CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
     Desc->iNumPartObjects = PART_END;
-    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::ACTOR;
-  
+    Desc->Object_Type = GAMEOBJ_TYPE::ACTOR;
+    Desc->iType = CActor::TYPE_MONSTER;
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
@@ -67,7 +67,7 @@ void CMonster::Compute_Length()
 
     _vector vDir = vPlayerPos - vPos;
 
-    m_fLength = XMVectorGetX(XMVector3Length(vDir));
+    m_fAttackLength = XMVectorGetX(XMVector3Length(vDir));
 }
 
 void CMonster::Compute_Angle()
@@ -89,24 +89,45 @@ void CMonster::Compute_Angle()
 
     _float fLeftRight = XMVectorGetX(XMVector3Dot(vRight, vDir));
 
-    if (fFrontBack >= 0.0f) // 菊率 馆备
+    if (fFrontBack >= 0.0f) 
     {
-        if (fabsf(fLeftRight) <= 0.382f) // cos(67.5∑)
+        if (fabsf(fLeftRight) <= 0.382f)
             m_iAttackAngleType = AT_FRONT;
         else if (fLeftRight > 0.0f)
             m_iAttackAngleType = AT_RIGHT;
         else
             m_iAttackAngleType = AT_LEFT;
     }
-    else // 第率 馆备
+    else 
     {
-        if (fabsf(fLeftRight) <= 0.382f) // cos(67.5∑)
+        if (fabsf(fLeftRight) <= 0.382f) 
             m_iAttackAngleType = AT_BACK;
         else if (fLeftRight > 0.0f)
             m_iAttackAngleType = AT_RIGHT;
         else
             m_iAttackAngleType = AT_LEFT;
     }
+}
+
+_bool CMonster::IsLookAtPlayer(_float angle)
+{
+    _vector PlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+    _vector PlayerForward = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_LOOK);
+
+    _vector dir = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION) - PlayerPos;
+
+    dir = XMVector3Normalize(dir);
+    PlayerForward = XMVector3Normalize(PlayerForward);
+
+    _float dot = XMVectorGetX(XMVector3Dot(PlayerForward, dir));
+
+    _float maxAngle = XMConvertToRadians(angle);
+
+    if (dot > cosf(maxAngle)) {
+        return true;
+    }
+
+    return false;
 }
 
 CMonster* CMonster::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -15,28 +15,30 @@ HRESULT CPlayer_Run::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CPlayer_Run::State_Enter(_uint* pState)
+void CPlayer_Run::State_Enter(_uint* pState, _uint* pPreState)
 {
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_RUN;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
     m_StateDesc.bLoop = true;
 
-    __super::State_Enter(pState);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Run::State_Processing(_float fTimedelta, _uint* pState)
+_bool CPlayer_Run::State_Processing(_float fTimedelta, _uint* pState,_uint* pPreState)
 {
-    return __super::State_Processing(fTimedelta, pState);
+    return __super::State_Processing(fTimedelta, pState, pPreState);
 }
 
 _bool CPlayer_Run::State_Exit(_uint* pState)
 {
-    //*pState &= ~BEH_SHOOT;
     return true;
 }
 
 void CPlayer_Run::Init_CallBack_Func()
 {
+    for(_int i = 0; i <BODY_TYPE::T_END; i++){ m_pParentObject->BodyCallBack(i, CBody_Player::BODY_RUN, 0,
+            [this]() { m_pGameInstance->Play_Sound(L"ST_Player_Footstep_Scuff_Sand.ogg", &m_pChannel, 1.f); });
+    }
 }
 
 _bool CPlayer_Run::IsActive(_uint stateFlags) const
@@ -54,18 +56,20 @@ void CPlayer_Run::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Run::CanEnter(_uint* pState)
 {
-    _bool isOtherAction = (*pState & (MOV_JUMP | BEH_RELOAD | BEH_SWICH | MOV_STURN)) != 0;
+    if (*pState & MOV_FALL)
+        return false;
+        
+    _bool isOtherAction = !(*pState & (MOV_JUMP | BEH_RELOAD | BEH_SWICH |BEH_SHOOT |MOV_STURN | MOV_HIT));
     _bool isRunningInput = Move_KeyFlage(pState) && !m_pGameInstance->Get_DIKeyState(DIK_LSHIFT);
-    _uint stateFlags = *pState;
 
-    return isRunningInput && !isOtherAction;
+    return isRunningInput && isOtherAction;
 }
 
-_bool CPlayer_Run::CheckInputCondition(_uint stateFlags) 
+_bool CPlayer_Run::CheckInputCondition(_uint stateFlags)
 {
     _bool Moving = Move_KeyFlage(&stateFlags) || m_pGameInstance->Get_DIKeyState(DIK_LSHIFT);
 
-    _bool isOtherAction = (stateFlags & (BEH_RELOAD | BEH_SWICH)) != 0;
+    _bool isOtherAction = (stateFlags & (BEH_RELOAD | BEH_SWICH | BEH_SHOOT | MOV_FALL | MOV_STURN | MOV_HIT)) != 0;
 
     return Moving && !isOtherAction;
 }

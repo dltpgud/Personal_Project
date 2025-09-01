@@ -14,29 +14,37 @@ public:
 
     enum STATE_NODE
     {
-        NODE_IDLE,
-        NODE_SWICH,
+        NODE_HEALTH,
+        NODE_HIT, 
         NODE_STUN,
-        NODE_HIT,
-        NODE_RUN,
-        NODE_SPRINT,
-        NODE_JUMP,
-        NODE_RELOAD,
-        NODE_SHOOT,
         NODE_FALL,
+
+        NODE_SHOOT,
+        NODE_RELOAD,
+        NODE_SWICH,
+
+        NODE_JUMP,
+        NODE_SPRINT,
+        NODE_RUN,
+        NODE_IDLE,
+     
         NODE_END
     };
+
 
 protected:
     CPlayer_StateMachine();
     virtual ~CPlayer_StateMachine() = default;
 
 public:
-    virtual HRESULT Initialize(void* pArg);
+    void    ResetMachine(); // 상태 머신 초기화
+    void    StateMachine_Playing(_float fTimeDelta); // 상태진행
 
-    void StateMachine_Playing(_float fTimeDelta);
 private:
-   void progress_Move(_float fTimeDelta, _uint* pState) ;
+   HRESULT  Initialize(void* pArg);
+   void     progress_Move(_float fTimeDelta, _uint* pState) ;
+   void     Check_UIState(_uint* pPreState) const;
+   HRESULT  Initialize_StateUI(_uint* CurWeapon);
 
 protected:
     CPlayer* m_pParentObject = {};
@@ -45,6 +53,8 @@ protected:
 private:
     vector<CPlayer_StateNode*> m_StateNodes;
     _uint m_iState{};
+    _uint m_iPreviousState{}; 
+    _uint m_iLastActiveState{}; 
 
 public:
     static CPlayer_StateMachine* Create(void* pArg);

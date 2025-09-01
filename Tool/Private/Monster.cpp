@@ -1,7 +1,5 @@
-#include "Monster.h"
 #include "stdafx.h"
 #include "Monster.h"
-
 #include "GameInstance.h"
 
 CMonster::CMonster(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
@@ -121,7 +119,7 @@ void CMonster::Set_Model(const _wstring& protoModel, _uint ILevel)
     //AABBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
     //AABBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
-        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return;
 }
 
@@ -131,32 +129,8 @@ _tchar* CMonster::Get_ProtoName()
     return m_Proto;
 }
 
-_float CMonster::check_BoxDist(_vector RayPos, _vector RayDir)
-{
-    _matrix matWorld = m_pTransformCom->Get_WorldMatrix_Inverse();
-
-    _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
-    _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
-    CurRayDir = XMVector3Normalize(CurRayDir);
-
-
-    //RayDir = XMVector3Normalize(RayDir);
-    _float Dist{};
-    if (m_pColliderCom->RayIntersects(RayPos, RayDir, Dist))
-    {
-        return Dist;
-    }
-
-    return _float(0xffff);
-}
-
 HRESULT CMonster::Add_Components()
 {
-    /* 멤버변수로 직접 참조를 하게되면 */
-    /* 1. 내가 내 컴포넌트를 이용하고자할 때 굳이 검색이 필요없이 특정 멤버변수로 바로 기능을 이용하면 된다. */
-    /* 2. 다른 객체가 내 컴포넌트를 검색하고자 할때 스위치케이스가 겁나 늘어나는 상황. */
-
-    /* For.Com_Shader */
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;

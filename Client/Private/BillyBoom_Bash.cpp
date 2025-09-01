@@ -1,10 +1,7 @@
 #include"stdafx.h"
 #include "BillyBoom_Bash.h"
-#include "BillyBoom.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-#include "Body_BillyBoom.h"
-#include "BossBullet_Berrle.h"
 
 CBillyBoom_Bash::CBillyBoom_Bash()
 {
@@ -30,14 +27,29 @@ HRESULT CBillyBoom_Bash::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBillyBoom_Bash::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBillyBoom_Bash::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-   return  __super::StateMachine_Playing(fTimeDelta);
+    if (*pRim->eState == RIM_LIGHT_DESC::STATE_RIM)
+    {
+        pRim->iPower = 0.3f;
+        pRim->fcolor = {1.f, 1.f, 1.f, 1.f};
+        m_fRimTimeSum += fTimeDelta;
+    }
+
+    if (m_fRimTimeSum > 0.5f)
+    {
+        m_fRimTimeSum = 0.f;
+        *pRim->eState = RIM_LIGHT_DESC::STATE_NORIM;
+        pRim->fcolor = {0.f, 0.f, 0.f, 0.f};
+    }
+    return __super::StateMachine_Playing(fTimeDelta, pRim);
 }
 
-void CBillyBoom_Bash::Reset_StateMachine()
+void CBillyBoom_Bash::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    m_fRimTimeSum = 0.f;
+    m_pGameInstance->StopSound(&m_pChannel);
+    __super::Reset_StateMachine(pRim);
 }
 
 CBillyBoom_Bash* CBillyBoom_Bash::Create(void* pArg)

@@ -1,4 +1,4 @@
-#include "Navigation.h"
+ï»¿#include "Navigation.h"
 #include "Cell.h"
 #include "Shader.h"
 #include "GameInstance.h"
@@ -50,14 +50,14 @@ HRESULT CNavigation::Initialize(void* pArg)
         m_iCurrentCellIndex = 0;
     return S_OK;
 }
+
 void CNavigation::SetUp_Neighbor()
 {
-
     for (auto& pSourCell : m_Cells)
     {
         for (auto& pDestCell : m_Cells)
         {
-            if (pSourCell == pDestCell) // °°Àº ¼¿(»ï°¢Çü)ÀÌ¸é ¾Æ·¡ Á¶°Ç¹® ³Ñ±â°í..
+            if (pSourCell == pDestCell) // ê°™ì€ ì…€(ì‚¼ê°í˜•)ì´ë©´ ì•„ë˜ ì¡°ê±´ë¬¸ ë„˜ê¸°ê³ ..
                 continue;
 
             if (true ==
@@ -74,7 +74,8 @@ void CNavigation::SetUp_Neighbor()
         }
     }
 }
-_bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide, _bool Demage)
+
+_bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide)
 {
    if (m_iCurrentCellIndex <= -1 || m_iCurrentCellIndex > m_Cells.size())
        return false;
@@ -99,15 +100,7 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                        *Slide = XMVectorZero();
                        return false;
                    }
-   
-                   if (true == Demage) {
-                       if (CCell::DEMAGE == m_Cells[iNeighborIndex]->Get_Type())
-                       {
-                     
-                           *Slide = XMVectorZero();
-                           return false;
-                       }
-                   }
+                   
                    if (CCell::SAFE == m_Cells[iNeighborIndex]->Get_Type())
                    {
                        m_vSafePos = m_Cells[iNeighborIndex]->GetCenter();
@@ -144,15 +137,6 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
                        *Slide = XMVectorZero();
                        return false;
                    }
-                   if (true == Demage)
-                   {
-                       if (CCell::DEMAGE == m_Cells[iNeighborIndex]->Get_Type())
-                       {
-
-                           *Slide = XMVectorZero();
-                           return false;
-                       }
-                   }
 
                    if (CCell::SAFE == m_Cells[iNeighborIndex]->Get_Type())
                    {
@@ -182,8 +166,8 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
 #ifdef _DEBUG
 HRESULT CNavigation::Render()
 {
-    if (false == m_bRender)
-        return S_OK;
+   // if (false == m_bRender)
+   //     return S_OK;
 
     if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
         return E_FAIL;
@@ -226,8 +210,8 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
         return {};
 
     priority_queue<AStarNode, std::vector<AStarNode>, std::greater<>> openList;
-    unordered_map<_uint, _float> costSoFar; // gCost ÀúÀå¿ë
-    unordered_map<_uint, _uint> cameFrom;  // ºÎ¸ğ ³ëµå ÀúÀå¿ë
+    unordered_map<_uint, _float> costSoFar; // gCost ì €ì¥ìš©
+    unordered_map<_uint, _uint> cameFrom;  // ë¶€ëª¨ ë…¸ë“œ ì €ì¥ìš©
 
     openList.push({startIndex, 0.f, 0.f, startIndex});
     costSoFar[startIndex] = 0.f;
@@ -243,7 +227,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
 
         if (current.index == goalIndex)
         {
-            // °æ·Î º¹¿ø
+            // ê²½ë¡œ ë³µì›
             vector<_uint> path;
             _uint cur = goalIndex;
             while (cur != cameFrom[cur])
@@ -259,7 +243,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
         const CCell* currCell = m_Cells[current.index];
         _vector currCenter = currCell->GetCenter();
 
-        // ÀÌ¿ô ¼øÈ¸
+        // ì´ì›ƒ ìˆœíšŒ
         for (int i = 0; i < CCell::LINE_END; ++i)
         {
             _int neighborIndex = currCell->Get_Neighbors(i);
@@ -269,7 +253,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
             const CCell* neighborCell = m_Cells[neighborIndex];
             _vector neighborCenter = neighborCell->GetCenter();
 
-            // ÇöÀç ³ëµå¿¡¼­ ÀÌ¿ô ³ëµå±îÁö °Å¸®
+            // í˜„ì¬ ë…¸ë“œì—ì„œ ì´ì›ƒ ë…¸ë“œê¹Œì§€ ê±°ë¦¬
             _float stepCost = XMVectorGetX(XMVector3Length(neighborCenter - currCenter));
             _float newG = costSoFar[current.index] + stepCost;
 
@@ -277,7 +261,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
             {
                 costSoFar[neighborIndex] = newG;
 
-                // ÈŞ¸®½ºÆ½: ¸ñÇ¥ ÁßÁ¡°ú ÀÌ¿ô ÁßÁ¡ °£ °Å¸® (À¯Å¬¸®µå °Å¸®)
+                // íœ´ë¦¬ìŠ¤í‹±: ëª©í‘œ ì¤‘ì ê³¼ ì´ì›ƒ ì¤‘ì  ê°„ ê±°ë¦¬ (ìœ í´ë¦¬ë“œ ê±°ë¦¬)
                 _float h = XMVectorGetX(XMVector3Length(goalCenter - neighborCenter));
 
                 openList.push({static_cast<_uint>(neighborIndex), newG, h, current.index});
@@ -286,14 +270,6 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
         }
     }
     return {};
-}
-
-_uint CNavigation::Get_CurrentCell_Type()
-{
-    if (m_iCurrentCellIndex <= -1 || m_iCurrentCellIndex > m_Cells.size())
-        return 0;
-
-    return m_Cells[m_iCurrentCellIndex]->Get_Type();
 }
 
 _bool CNavigation::Snap(_fvector vP1, _fvector vP2, _vector distance)
@@ -460,7 +436,7 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
 
     SetUp_Neighbor();
     
-    m_bRender = true;
+ 
 
     return S_OK;
 }
@@ -479,7 +455,7 @@ HRESULT CNavigation::Delete_ALLCell()
     m_Cells.clear();
     m_Cells.shrink_to_fit();
     m_iCurrentCellIndex = -1;
-    m_bRender = false;
+  
     m_vecNomoveType.clear();
     m_vecNomoveType.shrink_to_fit();
 
@@ -509,7 +485,7 @@ void CNavigation::Delete_Cell(_vector LocalRayPos, _vector LocalRayDir)
     m_Cells.erase(m_Cells.begin() + Index);
 }
 
-_bool CNavigation::ISFall()
+_bool CNavigation::Get_bFalling()
 {
     if (0 > m_iCurrentCellIndex || m_Cells.size() < m_iCurrentCellIndex)
         return false;
@@ -517,6 +493,20 @@ _bool CNavigation::ISFall()
     if (m_Cells[m_iCurrentCellIndex]->Get_Type() == CCell::TYPE::FALL)
     {
         return true;       
+    }
+    else
+        return false;
+}
+
+_bool CNavigation::Get_bDemage(_int& HP)
+{
+    if (0 > m_iCurrentCellIndex || m_Cells.size() < m_iCurrentCellIndex)
+        return false;
+
+    if (m_Cells[m_iCurrentCellIndex]->Get_Type() == CCell::TYPE::DEMAGE)
+    {
+        HP -= 1;
+        return true;
     }
     else
         return false;
@@ -563,7 +553,7 @@ _int CNavigation::Find_Cell_ByPosition(_vector vTargetPos)
     {
         if (true == m_Cells[i]->isIn(vAfterLocalPos, vBeforeLocalPos, &iNeighborIndex, &slide))
         {
-            return i;
+            return static_cast<_int>(i);
         }
     }
     return -1;

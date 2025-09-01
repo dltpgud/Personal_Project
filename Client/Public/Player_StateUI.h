@@ -3,26 +3,33 @@
 #include "UI.h"
 #include "Player.h"
 BEGIN(Engine)
-	class CShader;
-	class CTexture;
-	class CVIBuffer_Rect;
-	END
+ class CShader;
+ class CTexture;
+ class CVIBuffer_Rect;
+END
 
 BEGIN(Client)
 
-class CPlayerEffectUI: public CUI
+class CPlayer_StateUI: public CUI
 {
-		enum TYPE{ IDlE,SPRINT, HIT, HEALTH, TYPE_END};
+    enum TYPE
+    {
+        SPRINT,
+        DEFULT,
+		COLOR,
+        TYPE_END
+    };
+
 public:
-		typedef struct CPlayerEffectUI_DESC : public CUI::CUI_DESC
-		{
-			const _uint* State{};
-		}CPlayerEffectUI_DESC;
+	typedef struct CPlayerEffectUI_DESC : public CUI::CUI_DESC
+	{
+            const _uint* State{};
+	}CPlayerEffectUI_DESC;
 
 private:
-	CPlayerEffectUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CPlayerEffectUI(const CPlayerEffectUI& Prototype);
-	virtual ~CPlayerEffectUI() = default;
+	CPlayer_StateUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CPlayer_StateUI(const CPlayer_StateUI& Prototype);
+	virtual ~CPlayer_StateUI() = default;
 
 public:
 	virtual HRESULT Initialize_Prototype() override;
@@ -35,16 +42,15 @@ public:
     void            Set_scale(_int i);
 
 public:
-	const _uint* m_iPlayerState = nullptr;
 	TYPE m_iType{};
 	_uint m_iStateTex{ 0 };
 	_uint m_iPass{};
-	_int m_iDisCard{ -1 };
 	_bool m_bDisCard = false;
 	_float m_ScaleX{ 0.f };
 	_float m_ScaleY{ 0.f };
-	_float m_alpha[3];
-	_int m_idiscardNum{};
+	_float3 m_alpha{};
+    _float3 m_fStateColor{};
+     const _uint* m_pPlayerState{};
 
 private:
 	CTexture* m_pTextureCom[5] = {nullptr};
@@ -55,7 +61,7 @@ private:
 	HRESULT Add_Components();
 
 public:	
-	static CPlayerEffectUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CPlayer_StateUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void		 Free() override;
 

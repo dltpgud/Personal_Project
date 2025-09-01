@@ -162,7 +162,7 @@ CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, v
 
 void CObject_Manager::Set_Player(const _wstring& ProtoTag, void* pArg)
 {
- m_pPlayer = Clone_Prototype(ProtoTag, pArg);
+    m_pPlayer = Clone_Prototype(ProtoTag, pArg);
 }
 
 _bool CObject_Manager::IsGameObject(_uint iLevelIndex, const _wstring& strLayerTag)
@@ -183,7 +183,7 @@ CGameObject::PICKEDOBJ_DESC CObject_Manager::Pking_onMash(const _uint& Level, co
 
 	if (nullptr == pLayer)
     {
-            return {};
+       return {};
     } 
 	return pLayer->Pking_onMash(RayPos, RayDir);
 			
@@ -193,7 +193,7 @@ CGameObject* CObject_Manager::Recent_GameObject(_uint iLevelIndex, const _wstrin
 {
 	CLayer* pLayer = Find_Layer(iLevelIndex, strLayerTag);
 	if (nullptr == pLayer)
-		MSG_BOX("못 가져옴");
+		MSG_BOX("Layer_Empty");
 	return  pLayer->Recent_GameObject();
 }
 
@@ -201,7 +201,7 @@ list<class CGameObject*> CObject_Manager::Get_ALL_GameObject(_uint iLevelIndex, 
 {
 	CLayer* pLayer = Find_Layer(iLevelIndex, strLayerTag);
 	if (nullptr == pLayer)
-		MSG_BOX("못 가져옴");
+		MSG_BOX("Layer_Empty");
 
 	return  pLayer->Get_GameObject_List();
 }
@@ -238,16 +238,14 @@ void CObject_Manager::Free()
 
     Safe_Release(m_pPlayer);
 
+	for (size_t i = 0; i < m_iNumLevels; i++)
+    {
+		for (auto& Pair : m_pLayers[i])
+				Safe_Release(Pair.second);
+		m_pLayers[i].clear();
+	}
+	Safe_Delete_Array(m_pLayers);
 	
-		for (size_t i = 0; i < m_iNumLevels; i++)
-		{
-			for (auto& Pair : m_pLayers[i])
-					Safe_Release(Pair.second);
-			m_pLayers[i].clear();
-		}
-		Safe_Delete_Array(m_pLayers);
-	
-
 	for (auto& Pair : m_Prototypes)
 		Safe_Release(Pair.second);
  	m_Prototypes.clear();

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "StateMachine.h"
 #include "GameInstance.h"
-#include "GameObject.h"
+#include "Monster.h"
 CStateMachine::CStateMachine() : m_pGameInstance(CGameInstance::GetInstance())
 {
     Safe_AddRef(m_pGameInstance);
@@ -9,20 +9,20 @@ CStateMachine::CStateMachine() : m_pGameInstance(CGameInstance::GetInstance())
 
 HRESULT CStateMachine::Initialize(void* pArg)
 {
-    auto pDesc = static_cast<STATEMACHINE_DESC*>(pArg);
+    STATEMACHINE_DESC* pDesc = static_cast<STATEMACHINE_DESC*>(pArg);
     m_pParentModel      = pDesc->pParentModel;
+    m_pParentObject     = pDesc->pParentObject;
+    m_pParentPartObject = pDesc->pParentPartObject;
     m_iBaseIndex        = pDesc->iBaseIndex;
     m_iNextMachineIdx   = pDesc->iNextMachineIdx;
-    m_pParentPartObject = pDesc->pParentPartObject;
-    m_pParentObject     = pDesc->pParentObject;
-
     m_iNextIndex = m_iBaseIndex;
+
     SetFlag(ACTIVE);
     Init_CallBack_Func();
     return S_OK;
 }
 
-CStateMachine::Result CStateMachine::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CStateMachine::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (HasFlag(PAUSED))
         return Result::None;
@@ -32,7 +32,7 @@ CStateMachine::Result CStateMachine::StateMachine_Playing(_float fTimeDelta)
 
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         SetFlag(FINISHED);
         return Result::Finished;
     }
@@ -55,7 +55,7 @@ CStateMachine::Result CStateMachine::StateMachine_Playing(_float fTimeDelta)
         }
         else
         {
-            Reset_StateMachine();
+            Reset_StateMachine(pRim);
             SetFlag(FINISHED);
             return Result::Finished;
         }
@@ -64,11 +64,12 @@ CStateMachine::Result CStateMachine::StateMachine_Playing(_float fTimeDelta)
     return Result::Running;
 }
 
-void CStateMachine::Reset_StateMachine()
+void CStateMachine::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
     m_iCurIndex = -1;
     m_iNextIndex = m_iBaseIndex;
-
+    *pRim->eState = RIM_LIGHT_DESC::STATE_NORIM;
+    pRim->fcolor = {0.f, 0.f, 0.f, 0.f};
     ClearFlag(PAUSED);
     ClearFlag(FINISHED);
     SetFlag(ACTIVE);

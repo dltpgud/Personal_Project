@@ -34,9 +34,8 @@ HRESULT CBody_JetFly::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-    m_fPlayAniTime = 0.5f;
     m_fDeadTime = 2.5f;
-    m_pFindBonMatrix = Get_SocketMatrix("Canon_Scale");
+    m_pSocketMatrix = Get_SocketMatrix("Canon_Scale");
 
     if (FAILED(Set_StateMachine()))
         return E_FAIL;
@@ -53,22 +52,12 @@ void CBody_JetFly::Priority_Update(_float fTimeDelta)
 void CBody_JetFly::Update(_float fTimeDelta)
 {
 
-    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta))
+    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta, &m_RimDesc))
     {
         if (m_pStateMachine[*m_pParentState]->Get_NextMachineIndex() != -1)
             ChangeState(m_pStateMachine[*m_pParentState]->Get_NextMachineIndex());
         else
             ChangeState(CJetFly::ST_IDLE);
-    }
-
-    if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
-    {
-        m_RimDesc.fcolor = {1.f, 1.f, 1.f, 1.f};
-        m_RimDesc.iPower = 1;
-    }
-    else
-    {
-        m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
     }
 
     __super::Update(fTimeDelta);
@@ -140,12 +129,12 @@ HRESULT CBody_JetFly::Render_Shadow()
 void CBody_JetFly::ChangeState(_int nextState)
 {
     if (m_pStateMachine[*m_pParentState])
-        m_pStateMachine[*m_pParentState]->Reset_StateMachine();
+        m_pStateMachine[*m_pParentState]->Reset_StateMachine(&m_RimDesc);
 
     *m_pParentState = nextState;
 
     if (m_pStateMachine[*m_pParentState])
-        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f);
+        m_pStateMachine[*m_pParentState]->StateMachine_Playing(0.f, &m_RimDesc);
 }
 
 HRESULT CBody_JetFly::Add_Components()
@@ -182,9 +171,6 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_int))))
-        return E_FAIL;
-
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_int))))
         return E_FAIL;
 
@@ -219,10 +205,10 @@ HRESULT CBody_JetFly::Set_StateMachine()
     pAttackDesc.pParentModel = m_pModelCom;
     pAttackDesc.pParentPartObject = this;
     pAttackDesc.pParentObject = m_pParentObj;
-    pAttackDesc.pPerantPartBonMatrix = m_pFindBonMatrix;
+    pAttackDesc.pPerantPartBonMatrix = m_pSocketMatrix;
     pAttackDesc.pPerantWorldMat = &m_WorldMatrix;
     pAttackDesc.iNextMachineIdx = CJetFly::ST_MOVE;
-    pAttackDesc.fLength = static_cast<CJetFly*>(m_pParentObj)->Get_fLength();
+    pAttackDesc.fLength = static_cast<CJetFly*>(m_pParentObj)->Get_fAttackLength();
     m_pStateMachine[CJetFly::ST_SHOOT] = CJetFly_Attack::Create(&pAttackDesc);
 #pragma endregion
 
@@ -231,7 +217,7 @@ HRESULT CBody_JetFly::Set_StateMachine()
     pMoveDesc.pParentModel = m_pModelCom;
     pMoveDesc.pParentObject = m_pParentObj;
     pMoveDesc.iNextMachineIdx = CJetFly::ST_SHOOT;
-    pMoveDesc.fLength = static_cast<CJetFly*>(m_pParentObj)->Get_fLength();
+    pMoveDesc.fLength = static_cast<CJetFly*>(m_pParentObj)->Get_fAttackLength();
     m_pStateMachine[CJetFly::ST_MOVE] = CJetFly_Move::Create(&pMoveDesc);
 #pragma endregion
 

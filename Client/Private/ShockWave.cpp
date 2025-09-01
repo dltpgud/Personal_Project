@@ -14,8 +14,6 @@ CShockWave::CShockWave(const CShockWave& Prototype)
 
 HRESULT CShockWave::Initialize_Prototype()
 {
-
-
 	return S_OK;
 }
 
@@ -32,40 +30,42 @@ HRESULT CShockWave::Initialize(void * pArg)
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY (m_vPos, 1.7f));
 	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.f;
-	m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg", CSound::SOUND_EFFECT, 1.f);
-	
+
+    m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg", nullptr, 1.f);
+    m_fColor = {0.95f, 0.95f, 0.f, 1.f};
 	return S_OK;
 }
 
 void CShockWave::Priority_Update(_float fTimeDelta)
 {
-
 	__super::Priority_Update(fTimeDelta);
 	return ;
 }
 
 void CShockWave::Update(_float fTimeDelta)
 {
-	m_fTime += fTimeDelta*1.2f;
+	m_fTimeSum += fTimeDelta*1.2f;
 	m_fCurrentScale += m_fScaleSpeed * fTimeDelta;
 	m_pTransformCom->Set_Scaling(m_fCurrentScale, 10.f, m_fCurrentScale);
+
 	__super::Update(fTimeDelta);
 }
 
 void CShockWave::Late_Update(_float fTimeDelta)
 {
-
-
-	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
+	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
 		return;
 
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
+        return;
 
 	if (FAILED(m_pGameInstance->Add_MonsterBullet(this)))
 		return;
-		__super::Late_Update(fTimeDelta);
+
+    __super::Late_Update(fTimeDelta);
 }
 
-void CShockWave::Dead_Rutine(_float fTimeDelta)
+void CShockWave::Dead_Rutine()
 {
 	m_bDead = true;
 }
@@ -75,27 +75,37 @@ HRESULT CShockWave::Render()
 	if (FAILED(Bind_ShaderResources()))
 		return E_FAIL;
 
+	_uint iNumMesh = m_pModelCom->Get_NumMeshes();
 
-		_uint iNumMesh = m_pModelCom->Get_NumMeshes();
+	for (_uint i = 0; i < iNumMesh; i++)
+	{
+		if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
+			"g_DiffuseTexture")))
+			return E_FAIL;
 
-		for (_uint i = 0; i < iNumMesh; i++)
-		{
-			if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
-				"g_DiffuseTexture")))
-				return E_FAIL;
+		if (FAILED(m_pShaderCom->Begin(4)))
+			return E_FAIL;
 
-			if (FAILED(m_pShaderCom->Begin(4)))
-				return E_FAIL;
-
-			m_pModelCom->Render(i);
-		}
+		m_pModelCom->Render(i);
+	}
 	
 	return S_OK;
 }
 
+_bool CShockWave::Comput_SafeZone(_fvector vPlayerPos)
+{
+    _vector vCurrCenter = XMVectorSetW(XMLoadFloat3(&m_pColliderCom->Get_iCurCenter()), 1.f);
+   
+    _float fLength = XMVectorGetX(XMVector3Length(vPlayerPos - vCurrCenter));
+
+    if (fLength < m_pColliderCom->Get_iCurRadius())
+        return true;
+    else
+        return false;
+}
+
 HRESULT CShockWave::Add_Components()
 {
-	
 	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto_Component_ShockWave"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom))))
 		return E_FAIL;
@@ -110,9 +120,8 @@ HRESULT CShockWave::Add_Components()
  	CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
 
 	if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"), 
-		TEXT("Com_Collider_Sphere"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere))) 
+		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere))) 
 		return E_FAIL;
-
 
 	return S_OK;
 }
@@ -131,14 +140,11 @@ HRESULT CShockWave::Bind_ShaderResources()
  	if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
 		return E_FAIL;
 
-
-	if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_RGB, sizeof(_float4))))
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_fColor, sizeof(_float4))))
 		return E_FAIL;
 
-
-	if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTime, sizeof(_float))))
+	if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
 		return E_FAIL;
-
 	
 	return S_OK;
 }

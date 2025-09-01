@@ -87,10 +87,10 @@ struct PS_OUT
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
-    vector vPickDepth : SV_TARGET3;
-    vector vRim : SV_TARGET4;
-    vector vEmissive : SV_TARGET5;
-    vector vOutLine : SV_TARGET6;
+    vector vRim : SV_TARGET3;
+    vector vEmissive : SV_TARGET4;
+    vector vOutLine : SV_TARGET5;
+    vector vAmbient : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -107,8 +107,8 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
+    Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     return Out;
 }
 
@@ -126,8 +126,9 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
 
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vPickDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
+    Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
     return Out;
 }
 

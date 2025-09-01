@@ -18,7 +18,7 @@ HRESULT CTerrain::Initialize(void* pArg)
 {
 
     GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    m_iObjectType = pDesc->Object_Type;
+    m_iObjectType =DATA_TERRAIN;
 
     size_t iLen = wcslen(pDesc->ProtoName) + 1;
     m_Proto = new wchar_t[iLen];
@@ -106,11 +106,11 @@ void CTerrain::Set_Buffer(_uint x, _uint y)
 
 }
 
-void CTerrain::Set_Scalra_uint(_uint scalra)
+void CTerrain::Set_iFire(_uint scalra)
 {  m_bFire = scalra; 
 }
 
-void CTerrain::Set_Scalra_float(_float scalra)
+void CTerrain::Set_Offset(_float scalra)
 {  m_iUVoffset = scalra; 
 }
 

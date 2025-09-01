@@ -9,6 +9,7 @@
 #include <memory.h>
 #include <tchar.h>
 
+#define IMGUI_DISABLE_INLINE_FUNCTIONS
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>

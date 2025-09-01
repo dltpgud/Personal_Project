@@ -15,20 +15,18 @@ HRESULT CPlayer_Idle::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CPlayer_Idle::State_Enter(_uint* pState)
+void CPlayer_Idle::State_Enter(_uint* pState, _uint* pPreState)
 {
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_IDLE;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
     m_StateDesc.bLoop = true;
 
-    //*pState &= ~MOV_HIT;
-    
-    __super::State_Enter(pState);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Idle::State_Processing(_float fTimedelta, _uint* pState)
+_bool CPlayer_Idle::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
-    return __super::State_Processing(fTimedelta, pState);
+    return __super::State_Processing(fTimedelta, pState, pPreState);
 }
 
 _bool CPlayer_Idle::State_Exit(_uint* iState)
@@ -55,7 +53,10 @@ void CPlayer_Idle::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Idle::CanEnter(_uint* pState)
 {
-    _bool stateinput = !(*pState & (MOV_RUN | MOV_FALL | MOV_JUMP | MOV_SPRINT | BEH_RELOAD | BEH_SWICH));
+   if (*pState & MOV_FALL)
+       return false;
+       
+   _bool stateinput = !(*pState & (MOV_RUN | MOV_JUMP | MOV_SPRINT | MOV_HIT | MOV_STURN | MOV_HEALTH | BEH_SHOOT | BEH_RELOAD | BEH_SWICH));
     _bool KeyInput = !Move_KeyFlage(pState);
     
     return KeyInput && stateinput;
@@ -63,7 +64,10 @@ _bool CPlayer_Idle::CanEnter(_uint* pState)
 
 _bool CPlayer_Idle::CheckInputCondition(_uint stateFlags) 
 {
-    return !(stateFlags & ( MOV_RUN | MOV_SPRINT | MOV_JUMP |
+    if (stateFlags & MOV_FALL)
+        return false;
+        
+    return !(stateFlags & (MOV_RUN | MOV_SPRINT | MOV_JUMP |
                            BEH_RELOAD | BEH_SWICH));
 }
 

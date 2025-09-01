@@ -327,7 +327,6 @@ void CWeaponUI::Set_ScecondWeapon(const _uint& type)
 HRESULT CWeaponUI::Set_WeaponUI_Pos()
 {
     /*hendGun*/
-    m_Desc[0].UID = UIID_PlayerWeaPon;
     m_Desc[0].fX = m_fXPos;
     m_Desc[0].fY = 650.f;
     m_Desc[0].fZ = 0.4f;
@@ -336,7 +335,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[0].fSpeedPerSec = 0.f;
 
     /*AssaultRifle*/
-    m_Desc[1].UID = UIID_PlayerWeaPon;
     m_Desc[1].fX = m_fXPos;
     m_Desc[1].fY = 650.f;
     m_Desc[1].fZ = 0.4f;
@@ -345,7 +343,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[1].fSpeedPerSec = 0.f;
 
     /*MissileGatling*/
-    m_Desc[2].UID = UIID_PlayerWeaPon;
     m_Desc[2].fX = m_fXPos;
     m_Desc[2].fY = 650.f;
     m_Desc[2].fZ = 0.4f;
@@ -354,7 +351,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[2].fSpeedPerSec = 0.f;
 
     /*HeavyCrossbow*/
-    m_Desc[3].UID = UIID_PlayerWeaPon;
     m_Desc[3].fX = m_fXPos;
     m_Desc[3].fY = 650.f;
     m_Desc[3].fZ = 0.4f;
@@ -363,7 +359,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[3].fSpeedPerSec = 0.f;
 
     /*Fream*/
-    m_Desc[4].UID = UIID_PlayerWeaPon;
     m_Desc[4].fX = m_fXPos;
     m_Desc[4].fY = 650.f;
     m_Desc[4].fZ = 0.5f;
@@ -372,7 +367,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
     m_Desc[4].fSpeedPerSec = 0.f;
 
     /*Tan*/
-    m_Desc[5].UID = UIID_PlayerWeaPon;
     m_Desc[5].fX = 1000.f;
     m_Desc[5].fY = 670.f;
     m_Desc[5].fZ = 0.5f;
@@ -392,7 +386,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
 HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 {
     /*hendGun*/
-    m_ScecondDesc[0].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[0].fX = m_fXPos + 40.f;
     m_ScecondDesc[0].fY = 580.f;
     m_ScecondDesc[0].fZ = 0.4f;
@@ -401,7 +394,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[0].fSpeedPerSec = 0.f;
 
     /*AssaultRifle*/
-    m_ScecondDesc[1].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[1].fX = m_fXPos + 40.f;
     m_ScecondDesc[1].fY = 580.f;
     m_ScecondDesc[1].fZ = 0.4f;
@@ -410,7 +402,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[1].fSpeedPerSec = 0.f;
 
     /*MissileGatling*/
-    m_ScecondDesc[2].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[2].fX = m_fXPos + 40.f;
     m_ScecondDesc[2].fY = 580.f;
     m_ScecondDesc[2].fZ = 0.4f;
@@ -419,7 +410,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[2].fSpeedPerSec = 0.f;
 
     /*HeavyCrossbow*/
-    m_ScecondDesc[3].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[3].fX = m_fXPos + 40.f;
     m_ScecondDesc[3].fY = 580.f;
     m_ScecondDesc[3].fZ = 0.4f;
@@ -428,7 +418,6 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
     m_ScecondDesc[3].fSpeedPerSec = 0.f;
 
     /*Fream*/
-    m_ScecondDesc[4].UID = UIID_PlayerWeaPon;
     m_ScecondDesc[4].fX = m_fXPos + 40.f;
     m_ScecondDesc[4].fY = 580.f;
     m_ScecondDesc[4].fZ = 0.5f;

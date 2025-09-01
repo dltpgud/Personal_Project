@@ -18,6 +18,11 @@ public:
 	_vector Get_Point(POINT ePoint) const {
 		return XMLoadFloat3(&m_vPoints[ePoint]);
 	}
+	
+	void Set_Y(_float Y) {
+      for (_int i =0; i  < POINT_END; i++)   
+	 	m_vPoints[i].y = Y;
+	}
 
 	void Set_Neighbor(LINE eLine, CCell* pNeighbor) {
 		m_iNeighbors[eLine] = pNeighbor->m_iIndex;  // 라인에 따른 인덱스 설정..

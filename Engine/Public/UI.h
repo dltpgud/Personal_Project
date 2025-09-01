@@ -50,16 +50,32 @@ public:
         m_bUpdate = open;
     }
 
+    
+	void Show(class CGameObject* pOwner)
+    {
+        m_pOwner = pOwner;
+        m_bUpdate = true;
+    }
+
+    void Hide(class CGameObject* pRequest)
+    {
+        if (m_pOwner == pRequest)
+        {
+            m_bUpdate = false;
+            m_pOwner = nullptr;
+        }
+    }
 
     const _uint& Get_UIID()
     {
         return m_UIID;
     }
+
 protected:
     _float m_fX{}, m_fY{}, m_fZ{}, m_fSizeX{}, m_fSizeY{};
     _float4x4 m_ViewMatrix{}, m_ProjMatrix{};
     _uint m_UIID{};
- 
+  class CGameObject* m_pOwner{};
     _uint m_iDeleteLevel{};
     _bool m_bUpdate{true};
     /*wincx ,wincy 가져오기*/

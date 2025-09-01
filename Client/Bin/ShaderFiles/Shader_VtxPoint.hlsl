@@ -101,10 +101,9 @@ struct PS_OUT
     vector vDiffuse : SV_TARGET0;
     vector vNormal : SV_TARGET1;
     vector vDepth : SV_TARGET2;
-    vector vPickDepth : SV_TARGET3;
-    vector vRim : SV_TARGET4;
-    vector vEmissive : SV_TARGET5;
-    vector vOutLine : SV_TARGET6;
+    vector vRim : SV_TARGET3;
+    vector vEmissive : SV_TARGET4;
+    vector vOutLine : SV_TARGET5;
 };
 
 
@@ -124,6 +123,11 @@ PS_OUT PS_MAIN(PS_IN In)
     
 
     Out.vDiffuse = vMtrlDiffuse;
+    Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+    Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     return Out;
 }
@@ -150,9 +154,12 @@ PS_OUT PS_PLAYERBULLET(PS_IN In)
     if (Out.vDiffuse.a <= 0.01f)
         discard;
     
-    
-
     Out.vDiffuse = vMtrlDiffuse;
+    Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+    Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     return Out;
 }
@@ -172,9 +179,12 @@ PS_OUT PS_PLAYERBULLETDEAD(PS_IN In)
     if (Out.vDiffuse.a <= 0.f)
         discard;
     
-    
-
     Out.vDiffuse = vMtrlDiffuse;
+    Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+    Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     return Out;
 }
@@ -198,6 +208,11 @@ PS_OUT PS_MAIN_HP_Bar_BackGround(PS_IN In)
     if (Out.vDiffuse.a == 0.f)  
         discard;
 
+    Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+    Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     return Out;
 }
@@ -230,6 +245,12 @@ PS_OUT PS_MAIN_HP(PS_IN In)
     if (Out.vDiffuse.a == 0.f)   
         discard;
     
+    Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+    Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    
     return Out;
 }
 
@@ -243,11 +264,21 @@ PS_OUT PS_MAIN_Dissolve(PS_IN In)
 
     if (maskValue < threshold)
     {
+        Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+        Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+        Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
         return Out;
     }
     else
     {
         Out.vDiffuse = 0;
+        Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+        Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+        Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 0.0f);
         return Out;
     }
 }

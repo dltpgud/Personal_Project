@@ -4,6 +4,7 @@
 #include "Body_BoomBot.h"
 #include "Weapon.h"
 #include "MonsterHP.h"
+#include "Player.h"
 CBoomBot::CBoomBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CMonster{pDevice, pContext}
 {
 }
@@ -24,13 +25,12 @@ HRESULT CBoomBot::Initialize(void* pArg)
     Desc->fSpeedPerSec = 9.f;
     Desc->fRotationPerSec = XMConvertToRadians(120.f);
     Desc->JumpPower = 3.f;
-    if (FAILED(__super::Initialize(Desc)))
+    Desc->iHP = 100;
+    Desc->bOnCell = true;
+    Desc->iState = ST_IDLE;
+    Desc->fFixY = 0.f;
+   if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
-
-    m_iState = ST_MOVE;
-    m_fMAXHP = 100.f;
-    m_fHP = m_fMAXHP;
-    m_bOnCell = true;
 
    if (FAILED(Add_Components()))
         return E_FAIL;
@@ -38,17 +38,12 @@ HRESULT CBoomBot::Initialize(void* pArg)
    if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-   
     return S_OK;
 }
 
 void CBoomBot::Priority_Update(_float fTimeDelta)
 {
     Compute_Length();
-
-    if (m_iState != ST_HIT)
-        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-
  
     __super::Priority_Update(fTimeDelta);
     return ;
@@ -74,8 +69,8 @@ void CBoomBot::HIt_Routine()
 {
    Compute_Angle();
    static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_HIT);
-   m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-   static_cast <CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_fHP);
+   m_iHP -= static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Weapon_Info().Damage;
+   static_cast <CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_iHP);
    static_cast <CMonsterHP*>(m_PartObjects[PART_HP])->Set_HitStart(true);
 }
 
@@ -95,7 +90,7 @@ HRESULT CBoomBot::Add_Components()
     CBounding_Sphere.vCenter = _float3(0.f, 0.5f, 0.f);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
-        TEXT("Com_Collider_Sphere"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
         return E_FAIL;
 
     CNavigation::NAVIGATION_DESC		Desc{};
@@ -105,6 +100,16 @@ HRESULT CBoomBot::Add_Components()
         return E_FAIL;
 
     return S_OK;
+}
+
+void CBoomBot::Wake_up()
+{
+    static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
+}
+
+void CBoomBot::Seeping()
+{
+    static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
 }
 
 HRESULT CBoomBot::Add_PartObjects()
@@ -120,8 +125,8 @@ HRESULT CBoomBot::Add_PartObjects()
         return E_FAIL;
 
     CMonsterHP::CMonsterHP_DESC HpDesc{};
-    HpDesc.fMaxHP = m_fMAXHP;
-    HpDesc.fHP = m_fHP;
+    HpDesc.iMaxHP = m_iMAXHP;
+    HpDesc.iHP = m_iHP;
     HpDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
        return E_FAIL;

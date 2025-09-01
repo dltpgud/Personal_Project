@@ -27,6 +27,8 @@ public:
 	virtual _bool RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)override;
 	virtual _float Get_iCurRadius() override;
 	virtual _float3 Get_iCurCenter() override;
+    virtual void Set_Info(BOUND_DESC* pBoundDesc) override;
+    virtual _bool IsInside(const _float3& pos) override;
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor)override;

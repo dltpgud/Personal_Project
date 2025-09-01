@@ -44,7 +44,7 @@ void CPartObject::Update(_float fTimeDelta)
 		if (m_fDeadTimeSum >= m_fDeadTime) {
 			m_fthreshold += fTimeDelta;
 			if (m_fthreshold > 1.f) {
-				m_fthreshold = 1.0f;  // 이미지가 완전히 나타나면 멈춤
+				m_fthreshold = 1.0f;  
 			}
 		}
 	}
@@ -68,28 +68,6 @@ HRESULT CPartObject::Render()
 const _float4x4* CPartObject::Get_SocketMatrix(const _char* pBoneName)
 {
 	return m_pModelCom->Get_BoneMatrix(pBoneName);
-}
-
-void CPartObject::Set_BoneUpdateMatrix(const _uint& iIndex, _fmatrix NewMatrix)
-{
-    m_pModelCom->Set_BoneUpdateMatrix(iIndex, NewMatrix);
-}
-
-void CPartObject::Rotation(CTransform* Transform)
-{
-    _matrix met = XMMatrixLookAtLH(
-        XMLoadFloat4x4(&m_WorldMatrix).r[3],
-                         Transform->Get_TRANSFORM(CTransform::T_POSITION),
-                         XMVectorSet(0.f, 1.f, 0.f, 0.f));
-
-    _matrix Wmet = XMMatrixInverse(nullptr, met);
-
-    _float4x4 wmet{};
-
-    XMStoreFloat4x4(&wmet, Wmet);
-    XMStoreFloat4((_float4*)&m_WorldMatrix.m[0][0], XMVectorSet(wmet._11, 0.f, wmet._13, wmet._14));
-    XMStoreFloat4((_float4*)&m_WorldMatrix.m[1][0], XMVectorSet(0.f, 1.f, 0.f, wmet._24));
-    XMStoreFloat4((_float4*)&m_WorldMatrix.m[2][0], XMVectorSet(wmet._31, 0.f, wmet._33, wmet._34));
 }
 
 void CPartObject::Free()

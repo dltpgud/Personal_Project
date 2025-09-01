@@ -24,6 +24,7 @@ public:
         ANIMAPOBJ,
         MONSTER,
         NPC,
+        TRIGGER,
         POROTO_TYPE_END
     };
 
@@ -39,7 +40,6 @@ public:
 private:
     void Tool();
     void Map();
-    void Another();
     void Menu_File();
     void ComboType();
     void MapNONANIObj_ListBox();
@@ -48,6 +48,7 @@ private:
     void Wall_ListBox();
     void Monster_ListBox();
     void NPC_ListBox();
+    void Trigger();
     HRESULT Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTag, _int Iindex, _uint Comindex);
 
     void Push_Proto_vec();
@@ -66,6 +67,7 @@ private:
     void Save_NonAniObj(const _tchar* tFPath);
     void Save_Wall(const _tchar* tFPath);
     void Save_Ani(const _tchar* tFPath);
+    void Save_Trigger(const _tchar* tFPath);
     void Save_Navigation (const _tchar* tFPath);
     void Save_Monster(const _tchar* tFPath);
     void Save_NPC(const _tchar* tFPath);
@@ -73,6 +75,7 @@ private:
     void Load_Terrain(const _tchar* tFPath);
     void Load_NonAniObj(const _tchar* tFPath);
     void Load_Wall(const _tchar* tFPath);
+    void Load_Trigger(const _tchar* tFPath);
     void Load_Ani(const _tchar* tFPath);
     void Load_Navigation(const _tchar* tFPath);
     void Load_Monster(const _tchar* tFPath);
@@ -106,6 +109,7 @@ private:
     _bool m_bshow_win_aniObj = false;
     _bool m_bshow_win_Monster = false;
     _bool m_bshow_win_NPC = false;
+    _bool m_bshow_win_Trigger = false;
     /*메세지 박스*/
     _bool m_bshow_Del_MessageBox = false;
     _bool m_bshow_Save_MessageBox = false;
@@ -124,7 +128,7 @@ private:
     _int m_CopyiIcomtem_selected_idx{};
     _int m_WeaPon{};
     _int m_iCellType{};
-
+    _int m_TriggerType{};
     _uint m_iScene{};
     _uint m_iCellCount{};
     POROTO_TYPE m_pType{};
@@ -145,7 +149,7 @@ private:
     CTransform* m_pObjTransform = {nullptr};
 
     _wstring m_wPrototype_Key{};
-    const _tchar* m_tFPath[7]{};
+    const _tchar* m_tFPath[8]{};
 
     vector<_char*> m_protokey[POROTO_TYPE_END];
     vector<_char*> m_protoComkey[POROTO_TYPE_END];

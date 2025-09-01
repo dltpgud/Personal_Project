@@ -28,19 +28,19 @@ public:
 	virtual HRESULT Render() override;
 
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-	virtual void Set_Buffer(_uint x, _uint y) override;
+	 void Set_Buffer(_uint x, _uint y) ;
 
-	virtual void Set_Scalra_uint(_uint scalra); 
-	virtual void Set_Scalra_float(_float scalra);
+	virtual void Set_iFire(_uint scalra); 
+	virtual void Set_Offset(_float scalra);
         virtual HRESULT Render_Shadow() override;
  	CVIBuffer_Terrain* Get_buffer() { return m_pVIBufferCom; }
 	virtual _float3* Get_VtxPos();
-	virtual _wstring Get_ComPonentName() override { return m_wModel; }
+	_wstring Get_ComPonentName(){ return m_wModel; }
 
-	virtual _tchar* Get_ProtoName() override;
+     _tchar* Get_ProtoName() ;
 
-	virtual _uint Get_Scalra() override { return m_bFire; };
-	virtual _float Get_Scalra_float() override { return m_iUVoffset; };
+	_uint Get_iFire()  { return m_bFire; };
+	_float Get_offset()  { return m_iUVoffset; };
 
  _uint Get_SizeX()  {
 		return m_pSize[0];

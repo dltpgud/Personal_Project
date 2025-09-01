@@ -51,7 +51,6 @@ void CParticle_Explosion::Priority_Update(_float fTimeDelta)
 
 void CParticle_Explosion::Update(_float fTimeDelta)
 {
-
 	m_pVIBufferCom->Spread(fTimeDelta);
 }
 
@@ -115,25 +114,21 @@ HRESULT CParticle_Explosion::Bind_ShaderResources()
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
 		return E_FAIL;
 
-
 	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_textureSize",&m_textureSize, sizeof(_float2))))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_frameSize", &m_frameSize, sizeof(_float2))))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_framesPerRow", &m_framesPerRow, sizeof(_int))))
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_currentFrame", &m_currentFrame, sizeof(_int))))
 		return E_FAIL;
 	
-
-
-
-
-
 	return S_OK;
 }
 

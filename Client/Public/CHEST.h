@@ -16,8 +16,8 @@ public :
 	enum State { IDLE, HOVDER, OPEN};
     enum FLAG : _ubyte
     {
-        HOVER = 1 << 0, // 00000001
-        ICON = 1 << 1   // 00000010
+        HOVER = 1 << 0, 
+        ICON = 1 << 1   
     };
 
 private:

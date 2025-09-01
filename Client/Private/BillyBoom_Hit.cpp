@@ -1,8 +1,7 @@
 #include"stdafx.h"
 #include "BillyBoom_Hit.h"
-#include "Body_BillyBoom.h"
 #include "GameInstance.h"
-#include "BillyBoom.h"
+
 CBillyBoom_Hit::CBillyBoom_Hit()
 {
 }
@@ -40,7 +39,7 @@ HRESULT CBillyBoom_Hit::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBillyBoom_Hit::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBillyBoom_Hit::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     switch (*m_HitType)
     {
@@ -54,12 +53,19 @@ CStateMachine::Result CBillyBoom_Hit::StateMachine_Playing(_float fTimeDelta)
         break;
     default: break;
     }
-    
-     return __super::StateMachine_Playing(fTimeDelta);
+     
+    *pRim->eState = RIM_LIGHT_DESC::STATE_RIM;
+    pRim->fcolor = {1.f, 1.f, 1.f, 1.f};
+    pRim->iPower = 0.5f;
+    if (Result::Finished == __super::StateMachine_Playing(fTimeDelta, pRim))
+    {
+        return Result::Finished;
+    }
+    return Result::Running;
 }      
-void CBillyBoom_Hit::Reset_StateMachine()
+void CBillyBoom_Hit::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CBillyBoom_Hit* CBillyBoom_Hit::Create(void* pArg)
