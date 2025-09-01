@@ -1,84 +1,103 @@
 ﻿
 #include "Sound.h"
 
-CSound::CSound() 
+CSound::CSound() : m_pSystem{nullptr}
 {
-	ZeroMemory(&m_pChannelArr, sizeof(Channel*) * SOUND_EFFECT * SOUND_BGM * SOUND_BGM2 * MAXCHANNEL);
-	m_pSystem = nullptr;
 }
-
 
 HRESULT CSound::Initialize()
 {
-	// 사운드를 담당하는 대표객체를 생성하는 함수
-	result = System_Create(&m_pSystem, FMOD_VERSION);
-
-	// 1. 시스템 포인터, 2. 사용할 가상채널 수 , 초기화 방식) 
-	result = m_pSystem->init(512, FMOD_INIT_NORMAL, NULL);
-
-	//FMOD::System* system;
-	//FMOD::ChannelGroup* channelGroup = nullptr;
-	//system->createChannelGroup("MyChannelGroup", &channelGroup);
-
-
+	System_Create(&m_pSystem, FMOD_VERSION);
+	m_pSystem->init(512, FMOD_INIT_NORMAL, NULL);
+    m_pSystem->createChannelGroup("BGMChannelGroup", &m_pChannelGroupBGM);
+    m_pSystem->createChannelGroup("SEChannelGroup", &m_pChannelGroupSE);
 	return S_OK;
 }
 
-
-void CSound::Play_Sound(_tchar* pSoundKey, CHANNELID eID, _float fVolume)
+void CSound::Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop)
 {
-//	map<TCHAR*, Sound*>::iterator iter;
-//	
-//	// iter = find_if(m_mapSound.begin(), m_mapSound.end(), CTag_Finder(pSoundKey));
-//	iter = find_if(m_mapSound.begin(), m_mapSound.end(),
-//		[&](auto& iter)->_bool
-//		{
-//			return !lstrcmp(pSoundKey, iter.first);
-//		});
-//	
-//	if (iter == m_mapSound.end())
-//		return;
-//	
-//	_bool* bPlay = FALSE;
-//	
-//	result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
-//	
-//	m_pChannelArr[eID]->setVolume(fVolume);
-//	
-//	m_pSystem->update();
+ 	//map<TCHAR*, Sound*>::iterator iter;
+ 	//
+ 	//iter = find_if(m_mapSound.begin(), m_mapSound.end(),
+ 	//	[&](auto& iter)->_bool
+ 	//	{
+ 	//		return !lstrcmp(pSoundKey, iter.first);
+ 	//	});
+ 	//
+ 	//if (iter == m_mapSound.end())
+ 	//	return;
+    //
+	// FMOD::Channel* m_pChannel = nullptr;
+    //
+	//if (nullptr != ppChannel)
+    //        m_pSystem->playSound(iter->second, m_pChannelGroupSE, false, ppChannel);
+    //else {
+    //    m_pSystem->playSound(iter->second, m_pChannelGroupSE, false, &m_pChannel);
+	//}
+	//if (bLoop)
+    //    {
+    //        if (nullptr != ppChannel)
+    //        (*ppChannel)->setMode(FMOD_LOOP_NORMAL);
+    //        else
+    //            m_pChannel->setMode(FMOD_LOOP_NORMAL);
+    //}
+    //
+	//if (nullptr != ppChannel)
+    //   (*ppChannel)->setVolume(fVolume);
+    //else
+    //    m_pChannel->setVolume(fVolume);
+    //
+ 	//m_pSystem->update();
 }
 
-void CSound::PlayBGM(CHANNELID eID, _tchar* pSoundKey, _float fVolume)
+void CSound::PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume)
 {
-   // map<TCHAR*, Sound*>::iterator iter;
-   // 
-   // iter = find_if(m_mapSound.begin(), m_mapSound.end(), [&](auto& iter)->_bool
-   // 	{
-   // 		return !lstrcmp(pSoundKey, iter.first);
-   // 	});
-   // 
-   // if (iter == m_mapSound.end())
-   // 	return;
-   // 
-   // result = m_pSystem->playSound(iter->second, nullptr, false, &m_pChannelArr[eID]);
-   // m_pChannelArr[eID]->setMode(FMOD_LOOP_NORMAL);
-   // m_pChannelArr[eID]->setVolume(fVolume);
+    //map<TCHAR*, Sound*>::iterator iter;
+    //
+    //iter = find_if(m_mapSound.begin(), m_mapSound.end(), [&](auto& iter)->_bool
+    //	{
+    //		return !lstrcmp(pSoundKey, iter.first);
+    //	});
+    //
+    //if (iter == m_mapSound.end())
+    //	return;
+    //FMOD::Channel* m_pChannel = nullptr;
+    //
+    //if (nullptr != ppChannel)
+    //    m_pSystem->playSound(iter->second, m_pChannelGroupBGM, false, ppChannel);
+    //else
+    //    m_pSystem->playSound(iter->second, m_pChannelGroupBGM, false, &m_pChannel);
+    //
+	//if (nullptr != ppChannel)
+    //{
+    //    (*ppChannel)->setMode(FMOD_LOOP_NORMAL);
+    //    (*ppChannel)->setVolume(fVolume);
+    //}
+    //else {
+    //
+    //    m_pChannel->setMode(FMOD_LOOP_NORMAL);
+    //    m_pChannel->setVolume(fVolume);
+    //}
 }
 
-void CSound::StopSound(CHANNELID eID)
+void CSound::StopSound(FMOD::Channel** ppChannel)
 {
-	m_pChannelArr[eID]->stop();
+    (*ppChannel)->stop();
 }
 
 void CSound::StopAll()
 {
-	for (size_t i = 0; i < MAXCHANNEL; ++i)
-		m_pChannelArr[i]->stop();
+    m_pChannelGroupBGM->stop();
+    m_pChannelGroupSE->stop();
 }
 
-void CSound::SetChannelVolume(CHANNELID eID, _float fVolume)
+void CSound::SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength)
 {
-	m_pChannelArr[eID]->setVolume(fVolume);
+    _float fLength = XMVectorGetX(XMVector3Length(vLength)); 
+		
+	_float fVolume = (fLength > fDis) ? 0.f : (fDis - fLength);
+
+	(*ppChannel)->setVolume(fVolume * 0.01f);
 	m_pSystem->update();
 }
 
@@ -141,6 +160,7 @@ void CSound::Free()
 	}
 	m_mapSound.clear();
 
-	channelGroup->release();
+    m_pChannelGroupSE->release();
+	m_pChannelGroupBGM->release();
 	m_pSystem->release();
 }

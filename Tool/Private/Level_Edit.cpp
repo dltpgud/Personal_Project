@@ -7,6 +7,13 @@
 #include "Terrain.h"
 #include "VIBuffer_Terrain.h"
 #include "Actor.h"
+#include "Chest.h"
+#include "Door.h"
+#include "NPC.h"
+#include "Monster.h"
+#include "Wall.h"
+#include "fabric.h"
+#include "Trigger.h"
 CLevel_Edit::CLevel_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CLevel{pDevice, pContext}
 {
     ZeroMemory(&m_iBufferCount, sizeof(_int) * 2);
@@ -36,14 +43,13 @@ HRESULT CLevel_Edit::Initialize()
     m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
     m_tFPath[5] = L"../Bin/Data/Monster/Stage1_Monster.dat";
     m_tFPath[6] = L"../Bin/Data/NPC/Stage1_NPC.dat";
- 
-
+    m_tFPath[7] = L"../Bin/Data/Map/Stage1_Trigger.dat";
     for (_uint i = 0; i < 3; i++) { m_fscale[i] = 1; }
 
     if (FAILED(Ready_ToolCamera(TEXT("Layer_Camera"))))
         return E_FAIL;
 
-    if (FAILED(Ready_Light()))
+   if (FAILED(Ready_Light()))
         return E_FAIL;
 
     Push_Proto_vec();
@@ -159,6 +165,7 @@ void CLevel_Edit::Tool()
             m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage1.dat";
             m_tFPath[5] = L"../Bin/Data/Monster/Stage1_Monster.dat";
             m_tFPath[6] = L"../Bin/Data/NPC/Stage1_NPC.dat";
+            m_tFPath[7] = L"../Bin/Data/Map/Stage1_Trigger.dat";
         }
 
         if (m_iScene_Type == 1)
@@ -171,6 +178,8 @@ void CLevel_Edit::Tool()
             m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Stage2.dat";
             m_tFPath[5] = L"../Bin/Data/Monster/Stage2_Monster.dat";
             m_tFPath[6] = L"../Bin/Data/NPC/Stage2_NPC.dat";
+            m_tFPath[7] = L"../Bin/Data/Map/Stage2_Trigger.dat";
+           
         }
         if (m_iScene_Type == 2)
         {
@@ -182,6 +191,7 @@ void CLevel_Edit::Tool()
             m_tFPath[4] = L"../Bin/Data/Navigation/Navigation_Boss.dat";
             m_tFPath[5] = L"../Bin/Data/Monster/BossStage_Monster.dat";
             m_tFPath[6] = L"../Bin/Data/NPC/BossStage_NPC.dat";
+            m_tFPath[7] = L"../Bin/Data/Map/SetMap_Boss_Trigger.dat";
         }
     }
 
@@ -195,10 +205,7 @@ void CLevel_Edit::Tool()
         Map();
     }
 
-    if (m_bshow_another_window == true)
-    {
-        Another();
-    }
+
 }
 
 void CLevel_Edit::Map()
@@ -231,6 +238,10 @@ void CLevel_Edit::Map()
     {
         NPC_ListBox();
     }
+    if (true == m_bshow_win_Trigger)
+    {
+        Trigger();
+    }
     ImGui::Separator();
     Set_Cell_Type();
     ImGui::Separator();
@@ -240,13 +251,6 @@ void CLevel_Edit::Map()
     ImGui::Separator();
     Set_Speed();
     ImGui::Separator();
-
-    ImGui::End();
-}
-
-void CLevel_Edit::Another()
-{
-    ImGui::Begin("Another Tool");
 
     ImGui::End();
 }
@@ -281,7 +285,7 @@ void CLevel_Edit::ComboType()
     ImGui::Text("MapObj_Type");
     ImGui::SameLine(50.f, 50.f);
     _bool MapObj_Type = false;
-    const char* Obj_Type[] = {"Terrein", "Wall", "NonAniObj", "AniObj", "Monster", "NPC"}; // 콤보 상자
+    const char* Obj_Type[] = {"Terrein", "Wall", "NonAniObj", "AniObj", "Monster", "NPC", "Trigger"}; // 콤보 상자
     MapObj_Type = ImGui::Combo("##0", &m_iMapObj_Type, Obj_Type, IM_ARRAYSIZE(Obj_Type));
 
     if (MapObj_Type)
@@ -294,6 +298,7 @@ void CLevel_Edit::ComboType()
             m_bshow_win_aniObj = false;
             m_bshow_win_Monster = false;
             m_bshow_win_NPC = false;
+            m_bshow_win_Trigger = false;
         }
 
         if (m_iMapObj_Type == 1)
@@ -304,6 +309,7 @@ void CLevel_Edit::ComboType()
             m_bshow_win_aniObj = false;
             m_bshow_win_Monster = false;
             m_bshow_win_NPC = false;
+            m_bshow_win_Trigger = false;
         }
         if (m_iMapObj_Type == 2)
         {
@@ -313,6 +319,7 @@ void CLevel_Edit::ComboType()
             m_bshow_win_aniObj = false;
             m_bshow_win_Monster = false;
             m_bshow_win_NPC = false;
+            m_bshow_win_Trigger = false;
         }
         if (m_iMapObj_Type == 3)
         {
@@ -322,6 +329,7 @@ void CLevel_Edit::ComboType()
             m_bshow_win_aniObj = true;
             m_bshow_win_Monster = false;
             m_bshow_win_NPC = false;
+            m_bshow_win_Trigger = false;
         }
 
         if (m_iMapObj_Type == 4)
@@ -332,6 +340,7 @@ void CLevel_Edit::ComboType()
             m_bshow_win_aniObj = false;
             m_bshow_win_Monster = true;
             m_bshow_win_NPC = false;
+            m_bshow_win_Trigger = false;
         }
         if (m_iMapObj_Type == 5)
         {
@@ -341,7 +350,41 @@ void CLevel_Edit::ComboType()
             m_bshow_win_aniObj = false;
             m_bshow_win_Monster = false;
             m_bshow_win_NPC = true;
+            m_bshow_win_Trigger = false;
         }
+        if (m_iMapObj_Type == 6)
+        {
+            m_bshow_win_Terrian = false;
+            m_bshow_win_Wall = false;
+            m_bshow_win_NONaniObj = false;
+            m_bshow_win_aniObj = false;
+            m_bshow_win_Monster = false;
+            m_bshow_win_NPC = false;
+            m_bshow_win_Trigger = true;
+        }
+
+    }
+}
+
+void CLevel_Edit::Trigger()
+{
+     _bool MapObj_Type = false;
+    const char* Obj_Type[] = {"AABB", "OBB", "Sphere"}; // 콤보 상자
+     MapObj_Type = ImGui::Combo("#99", &m_TriggerType, Obj_Type, IM_ARRAYSIZE(Obj_Type));
+
+    if (ImGui::Button("Create"))
+    {
+        _tchar proto[64] = L"Proto GameObject Trigger";
+        CGameObject::GAMEOBJ_DESC pDec;
+        pDec.fSpeedPerSec = m_fspped;
+        pDec.fRotationPerSec = m_fRotfspped;
+        pDec.ProtoName = proto;
+        pDec.Object_Type = DATA_TRIGGER;
+        CGameObject* aObj = m_pGameInstance->Clone_Prototype(L"Proto GameObject Trigger", &pDec);
+        static_cast<CTrigger*>(aObj)->Set_Type(m_TriggerType);
+        static_cast<CTrigger*>(aObj)->Set_Trigger(m_iCellType);
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), aObj);
+        m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))->Get_Transform();
     }
 }
 
@@ -456,7 +499,7 @@ void CLevel_Edit::Terrain_ListBox()
             return;
 
         if(nullptr != m_PicObjTerrain)
-        static_cast<CTerrain*>(m_PicObjTerrain)->Set_Scalra_float(m_FireOffset);
+        static_cast<CTerrain*>(m_PicObjTerrain)->Set_Offset(m_FireOffset);
       
     }
 
@@ -557,6 +600,7 @@ void CLevel_Edit::NPC_ListBox()
     Create_Leyer_Botton(NPC, m_iItem_selected_idx[5], m_iIcomtem_selected_idx[5]);
 }
 
+
 #pragma endregion
 
 HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTag, _int Iindex, _uint Comindex)
@@ -606,15 +650,15 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTa
         pDec.Object_Type = DATA_TERRAIN;
         CGameObject* pTerrain = m_pGameInstance->Clone_Prototype(protKey, &pDec);
         if (true == m_bFireTile) {
-            static_cast<CTerrain*>(pTerrain)->Set_Scalra_uint(1);
-            static_cast<CTerrain*>(pTerrain)->Set_Scalra_float(m_FireOffset);
+            static_cast<CTerrain*>(pTerrain)->Set_iFire(1);
+            static_cast<CTerrain*>(pTerrain)->Set_Offset(m_FireOffset);
         }
         if (false == m_bFireTile)
-            static_cast<CTerrain*>(pTerrain)->Set_Scalra_uint(0);
+            static_cast<CTerrain*>(pTerrain)->Set_iFire(0);
 
         pTerrain->Set_Model(protcomKey);
 
-        pTerrain->Set_Buffer(m_iBufferCount[0], m_iBufferCount[1]);
+        static_cast<CTerrain*>(pTerrain)->Set_Buffer(m_iBufferCount[0], m_iBufferCount[1]);
 
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, pTerrain);
 
@@ -655,7 +699,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTa
             aObj->Set_Model(protcomKey);
             if (m_WeaPon < 0 || m_WeaPon > 3)
                 m_WeaPon = 0;
-            aObj->Set_Buffer(0, m_DoorType);
+            static_cast<CDoor*> (aObj)->Set_Door(m_DoorType);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
         }
         if (false == lstrcmpW(protKey, L"Proto GameObject Chest_aniObj"))
@@ -667,7 +711,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTa
             if (m_WeaPon < 1 || m_WeaPon > 3)
                 m_WeaPon = m_WeaPon = rand() % 3 + 1;
 
-            aObj->Set_Buffer(0, m_WeaPon);
+           static_cast<CChest*>( aObj)->Set_WeaPon(m_WeaPon);
             m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, pLayerTag, aObj);
         }
     }
@@ -694,6 +738,7 @@ HRESULT CLevel_Edit::Create_Layer_Obj(POROTO_TYPE type, const _wstring& pLayerTa
         }
     }
     break;
+
     }
 
     m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))->Get_Transform();
@@ -968,6 +1013,8 @@ HRESULT CLevel_Edit::Ready_Light()
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
+
+       
     return S_OK;
 }
 
@@ -1116,6 +1163,7 @@ void CLevel_Edit::Msg_Save_box()
             Save_Navigation(m_tFPath[4]);
             Save_Monster(m_tFPath[5]);
             Save_NPC(m_tFPath[6]);
+            Save_Trigger(m_tFPath[7]);
             m_bshow_Save_MessageBox = false; // 메시지 상자 닫기
         }
         ImGui::SameLine(); // 같은 줄에 Cancel 버튼 배치
@@ -1144,6 +1192,7 @@ void CLevel_Edit::Msg_Load_box()
             Load_Ani(m_tFPath[3]);
             Load_NonAniObj(m_tFPath[2]);
             Load_NPC(m_tFPath[6]);
+            Load_Trigger(m_tFPath[7]);
             // 로드가 완료되면 현재 오브젝트의 트랜스폼을 마지막으로 로드한 오브젝트의 트랜스 폼으로 정해준다.
             m_pObjTransform = m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))->Get_Transform();
 
@@ -1181,15 +1230,16 @@ void CLevel_Edit::Save_Terrain(const _tchar* tFPath)
     _float FireOffset{0.f};
     for (auto& ObjList : AllSave)
     {
-
-        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        if (ObjList)
         Type = ObjList->Get_ObjectType();
-        pModel = ObjList->Get_ComPonentName();
-        pPoroto = ObjList->Get_ProtoName();
-        bFire = ObjList-> Get_Scalra();
-        FireOffset = ObjList-> Get_Scalra_float();
+      
         if (Type == DATA_TERRAIN)
         {
+            Worldmat = dynamic_cast<CTerrain*>(ObjList)->Get_Transform()->Get_WorldMatrix();
+            pModel = dynamic_cast<CTerrain*>(ObjList)->Get_ComPonentName();
+            pPoroto = dynamic_cast<CTerrain*>(ObjList)->Get_ProtoName();
+            bFire = static_cast<CTerrain*>(ObjList)->Get_iFire();
+            FireOffset = static_cast<CTerrain*>(ObjList)->Get_offset();
             TileX = static_cast<CTerrain*>(ObjList)->Get_SizeX();
             TileY = static_cast<CTerrain*>(ObjList)->Get_SizeY();
 
@@ -1236,15 +1286,15 @@ void CLevel_Edit::Save_NonAniObj(const _tchar* tFPath)
 
     for (auto& ObjList : AllSave)
     {
-
-        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
-      
+   
+        if (ObjList)
         Type = ObjList->Get_ObjectType();
-        pModel = ObjList->Get_ComPonentName();
-        pPoroto = ObjList->Get_ProtoName();
-
+       
         if (Type == DATA_NONANIMAPOBJ)
         {
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            pModel = static_cast<Cfabric*>(ObjList)->Get_ComPonentName();
+            pPoroto = static_cast<Cfabric*> (ObjList)->Get_ProtoName();
             WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
         
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
@@ -1282,13 +1332,15 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
     for (auto& ObjList : AllSave)
     {
 
-        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+         if (ObjList)
         Type = ObjList->Get_ObjectType();
-        pModel = ObjList->Get_ComPonentName();
-        pPoroto = ObjList->Get_ProtoName();
-
+       
+     
         if (Type == DATA_WALL)
         {
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            pModel = dynamic_cast<CWALL*>(ObjList)->Get_ComPonentName();
+            pPoroto = dynamic_cast<CWALL*>(ObjList)->Get_ProtoName();
             WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
           
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
@@ -1298,6 +1350,55 @@ void CLevel_Edit::Save_Wall(const _tchar* tFPath)
 
             // wstring 데이터 쓰기
             WriteFile(hFile, pModel.c_str(), strLength * sizeof(_tchar), &dwByte, NULL);
+
+            // tchar 자료형 쓰기
+            DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
+            WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+            WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
+        }
+    }
+    CloseHandle(hFile);
+}
+
+void CLevel_Edit::Save_Trigger(const _tchar* tFPath)
+{
+    list<class CGameObject*> AllSave = m_pGameInstance->Get_ALL_GameObject(LEVEL_EDIT, TEXT("Layer_Map"));
+
+    HANDLE hFile = CreateFile(tFPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile)
+    {
+        DWORD err = GetLastError();
+      wcout << err;
+        return;
+    }
+
+    DWORD dwByte(0);
+    _matrix Worldmat = XMMatrixIdentity();
+    _int Type = {0};
+    _int TriggerType = {0};
+    _int ColType = {0};
+    _tchar* pPoroto = {};
+
+    for (auto& ObjList : AllSave)
+    {
+
+        if (ObjList)
+            Type = ObjList->Get_ObjectType();
+
+        if (Type == DATA_TRIGGER)
+        {
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            ColType = dynamic_cast<CTrigger*>(ObjList)->Get_Type();
+            TriggerType = dynamic_cast<CTrigger*>(ObjList)->Get_Trigger();
+  
+            pPoroto = dynamic_cast<CTrigger*>(ObjList)->Get_ProtoName();
+            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
+
+            WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
+
+            WriteFile(hFile, &ColType, sizeof(_int), &dwByte, nullptr);
+            WriteFile(hFile, &TriggerType, sizeof(_int), &dwByte, nullptr);
 
             // tchar 자료형 쓰기
             DWORD Length = (lstrlenW(pPoroto) + 1) * sizeof(_tchar);
@@ -1322,23 +1423,22 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
     _uint Type = {0};
     _wstring pModel = {};
     _tchar* pPoroto = {};
-    _uint WeaPonType = {};
+    _uint DataType = {};
     for (auto& ObjList : AllSave)
     {
-
-  
-        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
-        Type = ObjList->Get_ObjectType();
-        pModel = ObjList->Get_ComPonentName();
-        pPoroto = ObjList->Get_ProtoName();
-        WeaPonType = ObjList->Get_Scalra();
-
+        if (ObjList)
+            Type = ObjList->Get_ObjectType();
        
-
+        
+      
         if (Type == DATA_DOOR)
         {
-            if (WeaPonType < 0 || WeaPonType > 3)  // 사실 문 설정값이야
-                WeaPonType = 0;
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            pModel = static_cast<CDoor*>(ObjList)->Get_ComPonentName();
+            pPoroto = static_cast<CDoor*>(ObjList)->Get_ProtoName();
+            DataType =static_cast<CDoor*>(ObjList)->Get_Door();
+            if (DataType < 0 || DataType > 3) // 사실 문 설정값이야
+                DataType = 0;
 
             WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
          
@@ -1355,12 +1455,17 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
 
-            WriteFile(hFile, &WeaPonType, sizeof(_uint), &dwByte, nullptr);
+            WriteFile(hFile, &DataType, sizeof(_uint), &dwByte, nullptr);
         }
         else if (Type == DATA_CHEST)
         {
-            if (WeaPonType < 1 || WeaPonType > 3)
-                WeaPonType = rand() % 4;
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            pModel = static_cast<CChest*>(ObjList)->Get_ComPonentName();
+            pPoroto = static_cast<CChest*>(ObjList)->Get_ProtoName();
+            DataType = static_cast<CChest*>(ObjList)->Get_Weapon();
+
+            if (DataType < 1 || DataType > 3)
+                DataType = rand() % 4;
 
            WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
@@ -1376,7 +1481,7 @@ void CLevel_Edit::Save_Ani(const _tchar* tFPath)
             WriteFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
             WriteFile(hFile, pPoroto, Length, &dwByte, NULL);
 
-            WriteFile(hFile, &WeaPonType, sizeof(_uint), &dwByte, nullptr);
+            WriteFile(hFile, &DataType, sizeof(_uint), &dwByte, nullptr);
         }
     }
     CloseHandle(hFile);
@@ -1404,13 +1509,14 @@ _matrix Worldmat = XMMatrixIdentity();
     _tchar* pPoroto = {};
     for (auto& ObjList : AllSave)
     {
-        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
-        Type = ObjList->Get_ObjectType();
-        pModel = ObjList->Get_ComPonentName();
-        pPoroto = ObjList->Get_ProtoName();
-
+        if (ObjList)
+            Type = ObjList->Get_ObjectType();
+        
         if (Type == DATA_MONSTER)
         {
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            pModel = static_cast<CMonster*>(ObjList)->Get_ComPonentName();
+            pPoroto = dynamic_cast<CMonster*> (ObjList)->Get_ProtoName();
             WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
@@ -1446,13 +1552,14 @@ void CLevel_Edit::Save_NPC(const _tchar* tFPath)
     _tchar* pPoroto = {};
     for (auto& ObjList : AllSave)
     {
-        Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+        if (ObjList)
         Type = ObjList->Get_ObjectType();
-        pModel = ObjList->Get_ComPonentName();
-        pPoroto = ObjList->Get_ProtoName();
 
         if (Type == DATA_NPC)
         {
+            Worldmat = ObjList->Get_Transform()->Get_WorldMatrix();
+            pModel = static_cast<CNPC*>(ObjList)->Get_ComPonentName();
+            pPoroto = dynamic_cast<CNPC*>(ObjList)->Get_ProtoName();
             WriteFile(hFile, &Worldmat, sizeof(_matrix), &dwByte, nullptr);
             WriteFile(hFile, &Type, sizeof(_uint), &dwByte, nullptr);
 
@@ -1532,11 +1639,10 @@ void CLevel_Edit::Load_Terrain(const _tchar* tFPath)
         pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
         pDec.WorldMatrix = WorldMat;
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
-
-        pGameObject->Set_Buffer(TileX, TileY);
+       static_cast<CTerrain*>(pGameObject)->Set_Buffer(TileX, TileY);
         pGameObject->Set_Model(pModel);
-        pGameObject->Set_Scalra_float(FireOffset);
-        pGameObject->Set_Scalra_uint(bFire);
+       static_cast<CTerrain*>(pGameObject)->Set_Offset(FireOffset);
+        static_cast<CTerrain*>(pGameObject)->Set_iFire(bFire);
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
         m_vTerrain.push_back(pGameObject);
@@ -1597,14 +1703,15 @@ void CLevel_Edit::Load_NonAniObj(const _tchar* tFPath)
             Safe_Delete_Array(pPoroto);
             break;
         }
+        GAMEOBJ_DATA type = static_cast<GAMEOBJ_DATA>(Type);
 
         CGameObject::GAMEOBJ_DESC pDec;
         pDec.fSpeedPerSec = m_fspped;
         pDec.fRotationPerSec = m_fRotfspped;
         pDec.ProtoName = pPoroto;
-        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.Object_Type = type;
         pDec.WorldMatrix = WorldMat;
-        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pDec.ProtoName, &pDec);
 
         pGameObject->Set_Model(pModel);
   
@@ -1684,6 +1791,63 @@ void CLevel_Edit::Load_Wall(const _tchar* tFPath)
     CloseHandle(hFile);
 }
 
+void CLevel_Edit::Load_Trigger(const _tchar* tFPath)
+{
+    HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (INVALID_HANDLE_VALUE == hFile) // 개방 실패 시
+    {
+        return;
+    }
+
+    DWORD dwByte(0);
+
+    _matrix WorldMat = XMMatrixIdentity();
+    _uint Type = {0};
+    _int TriggerType = {0};
+    _int ColType = {0};
+    _tchar* pPoroto = {};
+    while (true)
+    {
+        _bool bFile(false);
+
+        bFile = ReadFile(hFile, &(WorldMat), sizeof(_matrix), &dwByte, nullptr);
+
+        bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(ColType), sizeof(_int), &dwByte, nullptr);
+        bFile = ReadFile(hFile, &(TriggerType), sizeof(_int), &dwByte, nullptr);
+
+        DWORD Length;
+        bFile = ReadFile(hFile, &Length, sizeof(DWORD), &dwByte, NULL);
+
+        pPoroto = new _tchar[Length + 1];
+        bFile = ReadFile(hFile, pPoroto, Length, &dwByte, NULL);
+        pPoroto[Length] = L'\0';
+
+        if (0 == dwByte)
+        {
+
+            Safe_Delete_Array(pPoroto);
+            break;
+        }
+
+        CGameObject::GAMEOBJ_DESC pDec;
+        pDec.fSpeedPerSec = m_fspped;
+        pDec.fRotationPerSec = m_fRotfspped;
+        pDec.ProtoName = pPoroto;
+        pDec.Object_Type = static_cast<GAMEOBJ_DATA>(Type);
+        pDec.WorldMatrix = WorldMat;
+        CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
+        dynamic_cast<CTrigger*>(pGameObject)->Set_Type(ColType);
+        dynamic_cast<CTrigger*>(pGameObject)->Set_Trigger(TriggerType);
+        m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
+
+        Safe_Delete_Array(pPoroto);
+    }
+
+        CloseHandle(hFile);
+}
+
 void CLevel_Edit::Load_Ani(const _tchar* tFPath)
 {
     HANDLE hFile = CreateFile(tFPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -1742,9 +1906,11 @@ void CLevel_Edit::Load_Ani(const _tchar* tFPath)
         CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(pPoroto, &pDec);
 
         pGameObject->Set_Model(pModel);
-  ;
-     
-            pGameObject->Set_Buffer(0, WaPonType);
+  
+        if( pDec.Object_Type ==DATA_CHEST)
+           static_cast<CChest*>(pGameObject)->Set_WeaPon(WaPonType);
+        if (pDec.Object_Type == DATA_DOOR)
+            static_cast<CDoor*>(pGameObject)->Set_Door(WaPonType);
         
         m_pGameInstance->Add_Clon_to_Layers(LEVEL_EDIT, TEXT("Layer_Map"), pGameObject);
 
@@ -1902,9 +2068,6 @@ void CLevel_Edit::ChsetWeapon()
 
 void CLevel_Edit::Key_input(_float ftimedelta)
 {
-   
-
-
 #pragma region 삭제 단축키
     if (m_pGameInstance->Get_DIKeyDown(DIK_DELETE)) //  전체 삭제
     {

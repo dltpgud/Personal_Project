@@ -33,7 +33,9 @@ public:
        _float            fEmissvePower{};
        _float            fPreEmissvePower{};
        _float            fFireRate{};
-       _float            Damage{};
+       _int              Damage{};
+       _float4           BulletColor[2]{};
+       _float2           BulletScale{};
     };
 
 private:
@@ -53,7 +55,6 @@ public:
 	void    Choose_Weapon(const _uint& WeaponNum);
     _uint*  Get_Weapon(){return &m_iWeapon;}
 	WEAPON_NODE_DESC Get_Weapon_Info() const {return m_vecWeaPone[m_iWeapon];}
-
     void    Weapon_CallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
     HRESULT Set_Animation(_int Index, _bool IsLoop);
     _bool   Play_Animation(_float fTimeDelta);

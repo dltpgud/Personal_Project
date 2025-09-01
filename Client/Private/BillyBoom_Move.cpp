@@ -1,7 +1,6 @@
 #include"stdafx.h"
 #include "BillyBoom_Move.h"
 #include "GameInstance.h"
-#include "Bullet.h"
 #include "Body_BillyBoom.h"
 #include "BillyBoom.h"
 CBillyBoom_Move::CBillyBoom_Move()
@@ -24,7 +23,7 @@ HRESULT CBillyBoom_Move::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (HasFlag(PAUSED))
         return Result::None;
@@ -34,27 +33,29 @@ CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta)
 
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         SetFlag(FINISHED);
         return Result::Finished;
     }
 
     if (m_iCurIndex != m_iNextIndex)
     {
-        m_pGameInstance->PlayBGM(CSound::SOUND_MONSTER_SETB, L"ST_BillyBoom_FootStep.ogg", 0.5f);
+        m_pGameInstance->Play_Sound(L"ST_BillyBoom_FootStep.ogg", &m_pChannel, 1.f, true);
         static_cast<CBillyBoom*>(m_pParentObject)->Set_bSkill(false);
         m_iCurIndex = m_iNextIndex;
         m_StateNodes[m_iCurIndex]->State_Enter();
     }
 
+    m_pGameInstance->SetChannelVolume( &m_pChannel, 80.f,
+      m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
-    m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,
-                                              static_cast<CBillyBoom*>(m_pParentObject)->Get_Navi());
+    m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,m_pParentObject->Get_Navigation());
   
     if (*m_fLength < 25.f)
     {
         static_cast<CBody_BillyBoom*>(m_pParentPartObject)->ChangeState(static_cast<CBillyBoom*>(m_pParentObject)->Get_NextSkil());
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         SetFlag(FINISHED);
         return Result::None;
     }
@@ -69,7 +70,7 @@ CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta)
         }
         else
         {
-            Reset_StateMachine();
+            Reset_StateMachine(pRim);
             SetFlag(FINISHED);
             return Result::Finished;
         }
@@ -78,11 +79,11 @@ CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta)
     return Result::Running;
 }
 
-void CBillyBoom_Move::Reset_StateMachine()
+void CBillyBoom_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(CSound::SOUND_MONSTER_SETB);
+    m_pGameInstance->StopSound(&m_pChannel);
     static_cast<CBillyBoom*>(m_pParentObject)->Set_bSkill(true);
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CBillyBoom_Move* CBillyBoom_Move::Create(void* pArg)

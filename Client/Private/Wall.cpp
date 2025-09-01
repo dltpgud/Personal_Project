@@ -47,7 +47,8 @@ void CWall::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
     
-    if (false ==m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 15.f))
+    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION),
+                                                          m_fExtend.x* m_fExtend.y))
         return;
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
@@ -130,6 +131,9 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_fDoorEmissiveColor = { 1.f,0.749f,0.2156f, 1.f };
     else if (ILevel == LEVEL_STAGE2)
         m_fDoorEmissiveColor = { 1.f,0.f,0.f, 1.f };
+   
+    _float3 fCenter{};
+    m_pModelCom->Center_Ext(&fCenter, &m_fExtend);
 }
 
 HRESULT CWall::Add_Components()

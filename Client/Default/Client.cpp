@@ -84,13 +84,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     Safe_AddRef(pGameInstance);
 
-    if (FAILED(pGameInstance->Add_Timer(TEXT("Timer_Default"))))
+  	if (FAILED(pGameInstance->Add_Timer(TEXT("Timer_Default"))))
         return FALSE;
     if (FAILED(pGameInstance->Add_Timer(TEXT("Timer_60"))))
         return FALSE;
 
-    _float		fTimeAcc = { 0.0f };
+    _float fTimeAcc = {0.0f};
 
+    // 기본 메시지 루프입니다.
     while (true)
     {
         if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -105,6 +106,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+        /* TimeDelta : 메세지루프를 한번 도는데 걸리는 시간. */
         pGameInstance->Update_TimeDelta(TEXT("Timer_Default"));
 
         fTimeAcc += pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
@@ -113,14 +115,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             pGameInstance->Update_TimeDelta(TEXT("Timer_60"));
 
+            /* TimeDelta : 1.f / 60.0 */
             pMainApp->Update(pGameInstance->Get_TimeDelta(TEXT("Timer_60")));
+            //pMainApp->Update(1.f / 60.0f);
             pMainApp->Render();
             pMainApp->Delete();
             fTimeAcc = 0.f;
         }
     }
-
-
 
     Safe_Release(pGameInstance);
     Safe_Release(pMainApp);

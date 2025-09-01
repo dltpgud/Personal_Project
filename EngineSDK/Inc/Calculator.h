@@ -31,8 +31,6 @@ public:
     _float  Compute_Random_Normal();
     _float  Compute_Random(_float fMin, _float fMax);
 
-
-    _bool isPicked(_float3* pOut, _bool IsPlayer);
 private:
     ID3D11Device* m_pDevice = {nullptr};
     ID3D11DeviceContext* m_pContext = {nullptr};

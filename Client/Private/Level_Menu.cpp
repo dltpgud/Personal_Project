@@ -1,12 +1,10 @@
 ﻿#include "stdafx.h"
 #include "LEVEL_MENU.h"
-#include "Level_Loading.h"
 #include "GameInstance.h"
-#include "Menu.h"
-#include "SpriteTexture.h"
 #include "Aim.h"
 #include "Player.h"
-#include "Fade.h"
+
+
 
 CLEVEL_MENU::CLEVEL_MENU(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
@@ -17,13 +15,13 @@ HRESULT CLEVEL_MENU::Initialize()
 {
 	if (m_pGameInstance->Get_Player() != nullptr)
 	{
-		static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_bUpdate(false);
+            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_UPDATE, false);
 	}
 
 	if (FAILED(Ready_UI()))
 		return E_FAIL;
 
-	m_pGameInstance->PlayBGM(CSound::SOUND_MENU, L"Menu.mp3",0.7f);
+	m_pGameInstance->PlayBGM(&m_pChannel, L"Menu.mp3",0.7f);
 
 	return S_OK;
 }
@@ -48,18 +46,18 @@ HRESULT CLEVEL_MENU::Ready_UI()
 {
    CUI::CUI_DESC DESC;
    DESC.iDeleteLevel = LEVEL_MENU;
-   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"menu",L"Prototype_GameObject_Menu",&DESC)))
+   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Menu",L"Prototype_GameObject_Menu",&DESC)))
 		return E_FAIL;
 
    CUI::CUI_DESC CURSORUIDESC;
    CURSORUIDESC.iDeleteLevel = LEVEL_MENU;
-   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"CURSOR", L"Prototype_GameObject_Cursor", &CURSORUIDESC)))
+   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Cursor", L"Prototype_GameObject_Cursor", &CURSORUIDESC)))
         return E_FAIL;
 
    CUI::CUI_DESC PlayerHPDESC;
    PlayerHPDESC.iDeleteLevel = LEVEL_STATIC;
    PlayerHPDESC.Update = false;
-   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"playerHP", L"Prototype_GameObject_PlayerHP_UI", &PlayerHPDESC)))
+   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"PlayerHP", L"Prototype_GameObject_PlayerHP_UI", &PlayerHPDESC)))
       	return E_FAIL;
    
    CUI::CUI_DESC WeaponUIDESC;
@@ -78,7 +76,7 @@ HRESULT CLEVEL_MENU::Ready_UI()
    Desc1.UID = UIID_PlayerWeaPon_Aim;
    Desc1.Update = false;
    Desc1.iDeleteLevel = LEVEL_STATIC;
-   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"WeaPon_Aim1", L"Prototype_GameObject_Player_Aim",&Desc1)))
+   if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"WeaPon_Aim", L"Prototype_GameObject_Player_Aim",&Desc1)))
    	    return E_FAIL;
 
    CUI::CUI_DESC FadeDESC{};
@@ -105,6 +103,6 @@ CLEVEL_MENU* CLEVEL_MENU::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 
 void CLEVEL_MENU::Free()
 {		
-	 m_pGameInstance->StopSound(CSound::SOUND_MENU);
+	 m_pGameInstance->StopSound(&m_pChannel);
 	__super::Free();
 }

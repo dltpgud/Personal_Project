@@ -34,19 +34,15 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Depth"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
-    /* For.Target_PickDepth */
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_PickDepth"), m_iWinSizeX, m_iWinSizeY,
+    
+    /* For.Target_MtrlAmbient */
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_MtrlAmbient"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
 
     /* For.Target_LightDepth*/
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_LightDepth"), g_iSizeX, g_iSizeY,
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
-        return E_FAIL;
-
-   	/* For.Target_Height */
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Height"), m_iWinSizeX, m_iWinSizeX,
-                                                 DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
 
     /* For.Target_Shade */
@@ -134,13 +130,13 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_GameObjects"), TEXT("Target_Depth"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_GameObjects"), TEXT("Target_PickDepth"))))
-        return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_GameObjects"), TEXT("Target_Rim"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_GameObjects"), TEXT("Target_Emissive"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_GameObjects"), TEXT("Target_OutLine"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_GameObjects"), TEXT("Target_MtrlAmbient"))))
         return E_FAIL;
 
     /* For.MRT_LightAcc */
@@ -148,13 +144,9 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_LightAcc"), TEXT("Target_Specular"))))
         return E_FAIL;
-
+  
     /* For.MRT_Shadow */
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("Target_LightDepth"))))
-        return E_FAIL;
-
-    	/* For.MRT_Height */
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Height"), TEXT("Target_Height"))))
         return E_FAIL;
 
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
@@ -340,8 +332,7 @@ void CRenderer::Initialize_SizeViewPort()
 }
 
 HRESULT CRenderer::Render_Priority()
-{
- 
+{ 
     for (auto& pRenderGameObject : m_RenderGameObjects[RG_PRIORITY])
     {
         if (nullptr != pRenderGameObject)
@@ -357,29 +348,28 @@ HRESULT CRenderer::Render_Priority()
 
 HRESULT CRenderer::Render_Shadow()
 {
-  //  m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-  //
-  //
-  //  m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
-  //
-  //  if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
-  //      return E_FAIL;
-  //
-  //  for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
-  //  {
-  //      if (nullptr != pRenderGameObject)
-  //          pRenderGameObject->Render_Shadow();
-  //
-  //      Safe_Release(pRenderGameObject);
-  //  }
-  //
-  //  m_RenderGameObjects[RG_SHADOW].clear();
-  //
-  //  if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
-  //      return E_FAIL;
-  //
-  //  m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
-
+    //m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+    //
+    //m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
+    //
+    //if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
+    //    return E_FAIL;
+    //
+    //for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
+    //{
+    //    if (nullptr != pRenderGameObject)
+    //        pRenderGameObject->Render_Shadow();
+    //
+    //    Safe_Release(pRenderGameObject);
+    //}
+    //
+    //m_RenderGameObjects[RG_SHADOW].clear();
+    //
+    //if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
+    //    return E_FAIL;
+    //
+    //m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
+   
     return S_OK;
 }
 
@@ -581,27 +571,6 @@ HRESULT CRenderer::Render_Bloom()
     return S_OK;
 }
 
-HRESULT CRenderer::Render_Height()
-{
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Height"))))
-        return E_FAIL;
-
-    for (auto& pRenderGameObject : m_RenderGameObjects[RG_HEIGHT])
-    {
-        if (nullptr != pRenderGameObject)
-                pRenderGameObject->Render_Height();
-
-        Safe_Release(pRenderGameObject);
-    }
-
-    m_RenderGameObjects[RG_HEIGHT].clear();
-
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Height"))))
-        return E_FAIL;
-
-    return S_OK;
-}
-
 HRESULT CRenderer::Render_Lights()
 {
     /* Shade */
@@ -614,11 +583,9 @@ HRESULT CRenderer::Render_Lights()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv",
-                                      m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_VIEW))))
+    if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv",
-                                      m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_PROJ))))
+    if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     if (FAILED(m_pShader->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
@@ -628,6 +595,8 @@ HRESULT CRenderer::Render_Lights()
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_NormalTexture", TEXT("Target_Normal"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_vMtrlAmbient", TEXT("Target_MtrlAmbient"))))
         return E_FAIL;
 
     m_pGameInstance->Render_Lights(m_pShader, m_pVIBuffer);
@@ -649,12 +618,14 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_LightViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
+    if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
 
     _float2 WindowSize = {(_float)m_iWinSizeX,(_float) m_iWinSizeY};
     m_pShader->Bind_RawValue("g_WinDowSize", &WindowSize, sizeof(_float2));
 
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_OutLineTexture", TEXT("Target_OutLine"))))
+        return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_ShadeTexture", TEXT("Target_Shade"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Diffuse"))))
@@ -669,7 +640,9 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_OutLineTexture", TEXT("Target_OutLine"))))
+ 
+
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
         return E_FAIL;
 
     m_pShader->Begin(3);
@@ -698,8 +671,6 @@ HRESULT CRenderer::Render_NonLight()
 
 HRESULT CRenderer::Render_Blend()
 {
-  
-
     m_RenderGameObjects[RG_BLEND].sort(
         [](CGameObject* pSour, CGameObject* pDest) -> _bool
         {
@@ -721,7 +692,6 @@ HRESULT CRenderer::Render_Blend()
 
 HRESULT CRenderer::Render_UI()
 {
-
      m_RenderGameObjects[RG_UI].sort(
         [](CGameObject* pSour, CGameObject* pDest) -> _bool
         {

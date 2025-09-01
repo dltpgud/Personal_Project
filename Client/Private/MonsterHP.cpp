@@ -20,8 +20,8 @@ HRESULT CMonsterHP::Initialize(void* pArg)
 {
 	CMonsterHP_DESC* Desc = static_cast <CMonsterHP_DESC*>(pArg) ;
 	{
-		m_fHP = Desc->fHP;
-		m_fMaxHP = Desc->fMaxHP;
+		m_iHP = Desc->iHP;
+		m_iMaxHP = Desc->iMaxHP;
 	}
 	if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
@@ -30,8 +30,8 @@ HRESULT CMonsterHP::Initialize(void* pArg)
 		return E_FAIL;
 
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 2.f, 0.f, 1.f));
-	m_fHP_Pluse = m_fHP * 1.3f / m_fMaxHP;
-	m_fRatio = m_fHP * 0.01f / m_fMaxHP;
+    m_fHP_Pluse = static_cast<_float>(m_iHP) * 1.3f / static_cast<_float> (m_iMaxHP);
+    m_fRatio =static_cast<_float>( m_iHP) * 0.01f / static_cast<_float>(m_iMaxHP);
 	return S_OK;
 }
 
@@ -45,16 +45,16 @@ void CMonsterHP::Update(_float fTimeDelta)
    if (false == m_bStart)
         return;
 
-   if (m_fHP_Pluse != m_fHP / m_fMaxHP)
+   if (m_fHP_Pluse != static_cast<_float>(m_iHP) / static_cast<_float>(m_iMaxHP))
    {
    	 m_fHP_Pluse -= m_fRatio;
    
-   	if (m_fHP_Pluse <= m_fHP / m_fMaxHP)
+   	if (m_fHP_Pluse <= static_cast<_float>(m_iHP) / static_cast<_float>(m_iMaxHP))
    	{
-   		m_fHP_Pluse = (m_fHP / m_fMaxHP);
+   		m_fHP_Pluse = ( static_cast<_float>(m_iHP) / static_cast<_float>(m_iMaxHP));
    	}
  
-   	m_fCurRatio = m_fHP / m_fMaxHP;
+   	m_fCurRatio = static_cast<_float>(m_iHP) / static_cast<_float>(m_iMaxHP);
    }
 }
 

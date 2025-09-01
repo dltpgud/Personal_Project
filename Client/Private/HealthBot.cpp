@@ -2,7 +2,7 @@
 #include "GameInstance.h"
 #include "HealthBot.h"
 #include "Body_HealthBot.h"
-#include "PlayerUI.h"
+#include "Player_HpUI.h"
 #include "Player.h"
 CHealthBot::CHealthBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{pDevice, pContext}
 {
@@ -21,11 +21,11 @@ HRESULT CHealthBot::Initialize(void* pArg)
 {
     CActor::Actor_DESC* Desc = static_cast<CActor::Actor_DESC*>(pArg);
     Desc->iNumPartObjects = PART_END;
-    Desc->fSpeedPerSec = 3.f;
     Desc->fRotationPerSec = XMConvertToRadians(60.f);
-    Desc->JumpPower = 3.f;
-    Desc->Object_Type = CGameObject::GAMEOBJ_TYPE::NPC;
-  
+    Desc->Object_Type = GAMEOBJ_TYPE::NPC;
+    Desc->bOnCell = true;
+    Desc->iState = ST_IDLE;
+
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
@@ -35,53 +35,62 @@ HRESULT CHealthBot::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-    m_iState = ST_Idle;
-    m_fMAXHP = 100.f;
-    m_fHP = m_fMAXHP;
-    m_bOnCell = true;
-   
     m_pInteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
     Safe_AddRef(m_pInteractiveUI);
-   
+
+    if (FAILED(Init_CallBack()))
+        return E_FAIL;
+  
     return S_OK;
 }
 
 void CHealthBot::Priority_Update(_float fTimeDelta)
 {
+    if (false == HasState(ST_DEAD))
+        m_pTransformCom->Rotation_to_Player(fTimeDelta);
+
     __super::Priority_Update(fTimeDelta);
 }
 
 void CHealthBot::Update(_float fTimeDelta)
 {
-    if (false == m_bInteract)
+    if (HasState(FLAG_INTERACTUI) && m_pInteractiveUI->Get_Interactive(this)) // 확인 여부
     {
-        m_pTransformCom->Rotation_to_Player(fTimeDelta);
-        intersect(fTimeDelta);
+        static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_HEALTH, true);
+
+        m_iState &= ~(ST_IDLE | ST_DEAD);
+        m_iState |= ST_INTERACT;
+
+        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+    }
+    else if (HasState(FLAG_INTERACTUI) && !(m_iState & ST_DEAD)) // 확인 안됐으면
+    {
+        m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+        SetState(FLAG_OPENUI, true);
     }
 
-    if (true == m_bHealth)
+    if ((m_iState & ST_INTERACT) && HasState(FLAG_INTERACTUI))
     {
-        m_fTimeSum += fTimeDelta;
-        if (true == m_bSound) {
-            m_pGameInstance->Play_Sound(L"ST_Healbot_Use_09_15_2023.ogg", CSound::SOUND_BGM, 1.f);
-            m_bSound = false;
-        }
-        if (m_fTimeSum > 1.f) {
-
-            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_UIState(CPlayer::STATE_UI_IDlE);
-            m_pGameInstance->Set_OpenUI(UIID_PlayerState, false);
-            m_fTimeSum = 0.f;
-            m_bHealth = false;
-        
-        }
+        m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+        m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
     }
+
     __super::Update(fTimeDelta);
 }
 
+
 void CHealthBot::Late_Update(_float fTimeDelta)
 {
-    if (true == m_bInteract && true == m_PartObjects[PART_BODY]->Get_Finish())
-        m_iState = ST_Dead;
+    if (HasState(ST_INTERACT) && static_cast<CBody_HealthBot*>(m_PartObjects[PART_BODY])->Get_Finish())
+    {
+        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+
+        m_iState &= ~(ST_IDLE | ST_INTERACT | FLAG_OPENUI);
+        m_iState |= ST_DEAD;
+    }
+
+    if (FAILED(m_pGameInstance->Add_Interctive(this)))
+        return;
 
     __super::Late_Update(fTimeDelta);
 }
@@ -92,63 +101,16 @@ HRESULT CHealthBot::Render()
     return S_OK; 
 }
 
-
-void CHealthBot::intersect(_float fTimedelta)
-{
-    _vector vPlayerPos = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-
-    _vector vDir = vPlayerPos - vPos;
-
-    _float fLength = XMVectorGetX(XMVector3Length(vDir));
-   
-    if (fLength <= 5.f)
-    {
-        m_pInteractiveUI->Set_Text(L"체력 회복");
-
-        m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-        m_pGameInstance->Set_OpenUI_Inverse(UIID_InteractiveUI,UIID_PlayerWeaPon_Aim);
-
-        if (m_pInteractiveUI->Get_Interactive())
-        {
-            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_UIState(CPlayer::STATE_UI_HEALTH);
-            m_pGameInstance->Set_OpenUI(UIID_PlayerState, true);
-            m_bHealth = true;
-            m_iState = ST_Interactive;
-            m_bInteract = true;
-            m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-            m_pInteractiveUI->Set_Interactive(false);
-        }
-        m_bOpenUI = true;
-    }
-    else {
-        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-        m_iState = ST_Idle;
-
-        if (m_bOpenUI == true) {
-            m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-            m_bOpenUI = false;
-        }
-    }
-
-    if ( m_bInteract == true && fLength <= 5.f)
-    {
-
-        static_cast<CPlayerUI*>(m_pGameInstance->Find_Clone_UIObj(L"playerHP"))->Set_HPGage(100);
-        m_pGameInstance->Set_OpenUI_Inverse( UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-    }
-}
-
 HRESULT CHealthBot::Add_Components()
 { 
-    CBounding_OBB::BOUND_OBB_DESC		OBBDesc{};
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
     _float3 Center{}, Extents{};
-    OBBDesc.vExtents = _float3(1.f, 1.3f, 0.5f);
+    OBBDesc.vExtents = _float3(1.f, 1.3f, 3.f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = { 0.f,0.f,0.f };
+
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
-        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
 
     return S_OK;
@@ -168,6 +130,36 @@ HRESULT CHealthBot::Add_PartObjects()
     return S_OK;
 }
 
+HRESULT CHealthBot::Init_CallBack()
+{
+    m_pColliderCom->SetTriggerCallback(
+     [this](CActor* other, _bool bColliding, _bool bPlayer)
+     {
+        if (bColliding && bPlayer)
+        {
+            if ( false == HasState(ST_DEAD)) // 충돌 중
+            {
+                m_pInteractiveUI->Set_Text(L"체력 회복");
+                m_pInteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+                m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
+                m_iState |= FLAG_INTERACTUI;
+            }
+        }
+        else if (bPlayer)
+        {
+            m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
+            SetState(FLAG_INTERACTUI, false);
+            if (HasState(FLAG_OPENUI))
+            {
+                m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
+                m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
+                SetState(FLAG_OPENUI, false);
+            }
+        }
+     });
+
+    return S_OK;
+}
 
 CHealthBot* CHealthBot::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

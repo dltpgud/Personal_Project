@@ -1,6 +1,5 @@
 #include"stdafx.h"
 #include "MecanoBot_Idle.h"
-#include "BoomBot.h"
 #include "GameInstance.h"
 
 CMecanoBot_Idle::CMecanoBot_Idle()
@@ -20,14 +19,14 @@ HRESULT CMecanoBot_Idle::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CMecanoBot_Idle::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CMecanoBot_Idle::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-     return  __super::StateMachine_Playing(fTimeDelta);
+    return __super::StateMachine_Playing(fTimeDelta, pRim);
 }  
 
-void CMecanoBot_Idle::Reset_StateMachine()
+void CMecanoBot_Idle::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CMecanoBot_Idle* CMecanoBot_Idle::Create(void* pArg)

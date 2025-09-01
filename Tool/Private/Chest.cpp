@@ -113,7 +113,7 @@ void CChest::Set_Model(const _wstring& protoModel, _uint ILevel)
     OBBDesc.vCenter = _float3(0.f, 0.5f, 0.f);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
-        TEXT("Com_Collider_OBB"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return;
 
 }
@@ -121,25 +121,6 @@ void CChest::Set_Model(const _wstring& protoModel, _uint ILevel)
 _tchar* CChest::Get_ProtoName()
 {
     return m_Proto;
-}
-
-_float CChest::check_BoxDist(_vector RayPos, _vector RayDir)
-{
-    _matrix matWorld = m_pTransformCom->Get_WorldMatrix_Inverse();
-
-    _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
-    _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
-    CurRayDir = XMVector3Normalize(CurRayDir);
-
-
-    //RayDir = XMVector3Normalize(RayDir);
-    _float Dist{};
-    if (m_pColliderCom->RayIntersects(RayPos, RayDir, Dist))
-    {
-        return Dist;
-    }
-
-    return _float(0xffff);
 }
 
 HRESULT CChest::Add_Components()

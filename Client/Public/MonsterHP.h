@@ -15,8 +15,8 @@ class CMonsterHP : public CPartObject
 public:
 	typedef struct CMonsterHP_DESC : public CPartObject::PARTOBJECT_DESC
 	{
-		_float fHP{};
-		_float fMaxHP{};
+		_int iHP{};
+		_int iMaxHP{};
 	}CMonsterHP_DESC;
 
 private:
@@ -33,8 +33,8 @@ public:
 	virtual HRESULT Render() override;
 
 public:
-	void Set_Monster_HP( _float fHp) {
-		m_fHP = fHp;
+	void Set_Monster_HP( _int iHp) {
+		m_iHP = iHp;
 	}
 	void Set_HitStart(_bool start) {
 	 	m_bStart = start;
@@ -44,10 +44,10 @@ private:
 	CTexture*	    m_pTextureCom = {};
 	CShader*		m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
-	_float m_fHP{};
-	_float m_fMaxHP{};
+	_int m_iHP{};
+	_int m_iMaxHP{};
+    _bool  m_bStart = {false};
 	_float m_fHP_Pluse = { 0.f };
-	_bool  m_bStart = {false};
 	_float m_fRatio = { 0.f };
     _float m_fCurRatio = {0.f};
     _float2 m_fPsize{1.2f, 0.1f};

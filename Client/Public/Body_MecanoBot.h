@@ -3,7 +3,7 @@
 #include "PartObject.h"
 
 BEGIN(Engine)
-class CActor;
+
 END
 
 BEGIN(Client)
@@ -12,7 +12,7 @@ class CBody_MecanoBot : public CPartObject
 public: 
 	typedef struct CBody_MecanoBot_Desc : CPartObject::PARTOBJECT_DESC
 	{
-            class CActor* pParentObj;
+            class CMonster* pParentObj;
      } CBody_MecanoBot_Desc;
 
 private:
@@ -38,7 +38,7 @@ private:
     HRESULT Set_StateMachine();
 
 private:	
-    class CActor* m_pParentObj;
+    class CMonster* m_pParentObj;
     vector<class CStateMachine*> m_pStateMachine ;
 public:
     static CBody_MecanoBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

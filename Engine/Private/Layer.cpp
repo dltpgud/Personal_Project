@@ -1,6 +1,7 @@
 ﻿#include "Layer.h"
 #include "GameObject.h"
-#include "Model.h"
+#include "Collider.h"
+
 CLayer::CLayer()
 {  
    
@@ -78,30 +79,27 @@ _bool CLayer::IsGameObject()
 CGameObject::PICKEDOBJ_DESC CLayer::Pking_onMash(_vector RayPos, _vector RayDir)
 {
     CGameObject::PICKEDOBJ_DESC Desc{};
-
     Desc.pPickedObj = nullptr;
-    Desc.fDis = {0xffff};
-    _vector vPos{};
-    _float fCurDIs{};
+    Desc.fDis = FLT_MAX; 
 
-        for (auto& pGameObject : m_GameObjects)
+    _float Dist = 0.0f;
+
+    for (auto& pGameObject : m_GameObjects)
+    {
+        if (nullptr == pGameObject)
+            continue;
+
+        if (pGameObject->Get_Collider() && pGameObject->Get_Collider()->RayIntersects(RayPos, RayDir, Dist))
         {
-            if (nullptr == pGameObject)
-                continue;
-
-            if (nullptr == pGameObject->Get_Model())
-                continue;
-
-            fCurDIs = pGameObject->check_BoxDist(RayPos, RayDir);
-
-            if (fCurDIs < Desc.fDis)
+            if (Dist < Desc.fDis)
             {
-                Desc.fDis = fCurDIs;
+                Desc.fDis = Dist;
                 Desc.pPickedObj = pGameObject;
-                Desc.vPos = RayPos + RayDir * fCurDIs;
+                Desc.vPos = RayPos + RayDir * Dist;
             }
         }
-      
+    }
+
     return Desc;
 }
 

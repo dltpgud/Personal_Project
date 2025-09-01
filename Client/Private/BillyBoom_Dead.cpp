@@ -1,6 +1,5 @@
 #include"stdafx.h"
 #include "BillyBoom_Dead.h"
-#include "BillyBoom.h"
 #include "GameInstance.h"
 #include "Body_BillyBoom.h"
 #include "Particle_Explosion.h"
@@ -27,7 +26,7 @@ HRESULT CBillyBoom_Dead::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (HasFlag(PAUSED))
         return Result::None;
@@ -37,7 +36,7 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta)
 
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         SetFlag(FINISHED);
         return Result::Finished;
     }
@@ -60,13 +59,16 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta)
 
     if (m_bEffect)
     {
-        m_pParentObject->Get_Transform()->Set_MoveSpeed(1.f);
+        *pRim->eState = RIM_LIGHT_DESC::STATE_RIM;
+        pRim->fcolor = {1.f, 0.8f, 0.f, 0.f};
         m_pParentObject->Get_Transform()->Go_Move(CTransform::DOWN, fTimeDelta);
     }
 
     if (m_iCurIndex != m_iNextIndex)
     {
-        m_pGameInstance->Play_Sound(L"ST_BillyBoom_Outro.ogg", CSound::SOUND_EFFECT, 1.f);
+        m_pParentObject->Get_Transform()->Set_MoveSpeed(1.5f);
+        m_pParentObject->Get_Transform()->Set_fGravity(0.f);
+        m_pGameInstance->Play_Sound(L"ST_BillyBoom_Outro.ogg", &m_pChannel, 1.f);
         m_iCurIndex = m_iNextIndex;
         m_StateNodes[m_iCurIndex]->State_Enter();
     }
@@ -81,7 +83,7 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta)
         }
         else
         {
-            Reset_StateMachine();
+            Reset_StateMachine(pRim);
             SetFlag(FINISHED);
             return Result::Finished;
         }
@@ -91,9 +93,9 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta)
 
      return Result::Running;
 }      
-void CBillyBoom_Dead::Reset_StateMachine()
+void CBillyBoom_Dead::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CBillyBoom_Dead* CBillyBoom_Dead::Create(void* pArg)

@@ -14,7 +14,6 @@ public:
     {
         PART_BODY,
         PART_HP,
-        PART_EFFECT,
         PART_END
     };
 
@@ -26,6 +25,12 @@ public:
         AT_RIGHT,
     };
 
+    enum FLAG
+    {
+        FLAG_DEAD,
+        FLAG_END
+    };
+    
 protected:
     CMonster(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CMonster(const CMonster& Prototype);
@@ -38,21 +43,21 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
+    virtual void Wake_up() {};
+    virtual void Seeping() {};
 
     void Compute_Length();
     void Compute_Angle();
-    _float* Get_fLength()  {
-        return &m_fLength;
-    }
+    _bool IsLookAtPlayer(_float angle);
 
-    _int* Get_AttackAngle()
-    {
-        return &m_iAttackAngleType;
-    }
+    _float* Get_fAttackLength() { return &m_fAttackLength;}
+    _int* Get_AttackAngle() { return &m_iAttackAngleType;}
+   
 
 protected:
-    _float m_fLength{};
+    _float m_fAttackLength{};
     _int m_iAttackAngleType{};
+
 
 public:
     static CMonster* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

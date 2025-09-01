@@ -3,9 +3,10 @@
 #include "Client_Defines.h"
 #include "Base.h"
 #include "StateNode.h"
-
+#include "Monster.h"
+#include "PartObject.h"
 BEGIN(Engine)
-class CGameObject;
+class CPartObject;
 END
 
 BEGIN(Client)
@@ -17,9 +18,10 @@ public:
     {
         _uint iBaseIndex = 0;
         class CModel* pParentModel = {};
-        class CGameObject* pParentObject = {};
-        class CGameObject* pParentPartObject = {};
+        class CMonster* pParentObject = {};
+        class CPartObject* pParentPartObject = {};
         _int iNextMachineIdx = -1;
+        _uint* iRim;
     };
 
     enum class Result
@@ -45,8 +47,8 @@ protected:
     virtual void Init_CallBack_Func() {};
 
 public:
-    virtual Result StateMachine_Playing(_float fTimeDelta);
-    virtual void Reset_StateMachine();
+    virtual Result StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim);
+    virtual void Reset_StateMachine(RIM_LIGHT_DESC* pRim);
    
 
 public:
@@ -78,11 +80,10 @@ public:
     }
 
 protected:
-    class CGameObject* m_pParentObject = {nullptr};
-    class CGameObject* m_pParentPartObject = {nullptr};
     class CModel* m_pParentModel = {nullptr};
     class CGameInstance* m_pGameInstance = {nullptr};
-
+    class CMonster* m_pParentObject = {};
+    class CPartObject* m_pParentPartObject = {};
     vector<CStateNode*> m_StateNodes;
 
     _int m_iNextMachineIdx = -1;
@@ -91,7 +92,8 @@ protected:
     _int m_iCurIndex = -1;
     _int m_iNextIndex = 0;
 
-    unsigned char m_Flags = 0;
+    _ubyte m_Flags = 0;
+    FMOD::Channel* m_pChannel = nullptr;
 
 public:
     static CStateMachine* Create(void* pArg);

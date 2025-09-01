@@ -89,21 +89,18 @@ public: /* For.Object_Manager*/
     public: /* For.Collider_Manager */
 	HRESULT Add_Monster( class CGameObject* Monster);
 	HRESULT Add_MonsterBullet( class CGameObject* MonsterBUllet);
-    HRESULT Add_Collider(class CCollider* Collider, _float Damage = 0);
+    HRESULT Add_Collider(class CCollider* Collider, _int Damage = 0);
     HRESULT Add_Interctive(class CGameObject* interect);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
 	HRESULT Find_Cell();
-    HRESULT changeCellType(_int type);
-        _vector Get_RayPos();
 #pragma endregion
 
 #pragma region UI_Manager
 public: /* For.UI_Manager*/
-	HRESULT Set_OpenUI(const _uint& uID, _bool UIopen);
     HRESULT UI_shaking(const _uint& uID, _float fTimeDelta);    
 	HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY);
     HRESULT ADD_UI_ShakingList(class CUI* UIOBJ);
-	HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
+    HRESULT Set_OpenUI(_bool bOpen, const _wstring& strCloneTag, class CGameObject* Owner = nullptr);
     CGameObject* Find_Clone_UIObj(const _wstring& strCloneTag);
     HRESULT Add_UI_To_Proto(const _wstring& strProtoTag, class CGameObject* pUI);
     HRESULT Add_UI_To_CLone(const _wstring& strCloneTag, const _wstring& strProtoTag, void* pArg = nullptr);
@@ -120,11 +117,11 @@ public: /* For.Component_Manager */
 
 #pragma region Sound
 public: /* For.Sound*/
-	void	Play_Sound(_tchar* pSoundKey,CSound::CHANNELID eID, _float fVolume);
-	void	PlayBGM(CSound::CHANNELID eID, _tchar* pSoundKey, _float fVolume);
-	void	StopSound(CSound::CHANNELID eID);
+    void    Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop = false);
+    void    PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume);
+    void    StopSound(FMOD::Channel** ppChannel);
 	void	StopAll();
-	void	SetChannelVolume(CSound::CHANNELID eID, _float fVolume);
+    void    SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength);
 	void	LoadSoundFile	(const _char* soundFile);
 #pragma endregion
 
@@ -166,7 +163,6 @@ public: /* For.Calculator */
 	_float Compute_Random(_float fMin, _float fMax);
 	HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 	_vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
-	_bool IsPicked(_float3* pOut, _bool IsPlayer);
 #pragma endregion
 
 #pragma region Font_Manager

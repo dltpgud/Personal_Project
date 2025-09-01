@@ -20,7 +20,7 @@ HRESULT CSceneCamera::Initialize_Prototype()
 HRESULT CSceneCamera::Initialize(void* pArg)
 {
     CSceneCamera_DESC* pDesc = static_cast<CSceneCamera_DESC*>(pArg);
-    pDesc->Object_Type = CGameObject::GAMEOBJ_TYPE::CAMERA;
+    pDesc->Object_Type = GAMEOBJ_TYPE::CAMERA;
     m_vStopPos = pDesc->vStopPos;
 
     if (FAILED(__super::Initialize(pDesc)))
@@ -46,7 +46,7 @@ void CSceneCamera::Priority_Update(_float fTimeDelta)
       if (false == m_bintro)
       {
           dynamic_cast<CBillyBoom*>(
-              m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Monster"), CGameObject::ACTOR))
+              m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Monster"), GAMEOBJ_TYPE::ACTOR))
               ->Change_State(CBillyBoom::ST_INTRO);
           m_bintro = true;
       }

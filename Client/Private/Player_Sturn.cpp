@@ -3,7 +3,7 @@
 #include "Player_Sturn.h"
 #include "Weapon.h"
 #include "Body_Player.h"
-#include "ShootingUI.h"
+#include "Player_StateUI.h"
 CPlayer_Sturn::CPlayer_Sturn()
 {
 }
@@ -16,25 +16,21 @@ HRESULT CPlayer_Sturn::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CPlayer_Sturn::State_Enter(_uint* pState)
+void CPlayer_Sturn::State_Enter(_uint* pState, _uint* pPreState)
 {
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_COOLING_LONG;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
-    m_StateDesc.bLoop = true;
-    static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"))->Set_Open(false);
-    static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"))->Set_Open(false);
-    m_fSturnTime = 2.f;
-    __super::State_Enter(pState);
+    m_StateDesc.bLoop = false; 
+    static_cast<CPlayer_StateUI*>(m_pGameInstance->Find_Clone_UIObj(L"PlayerState"))->Set_Open(true);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Sturn::State_Processing(_float fTimedelta, _uint* pState)
+_bool CPlayer_Sturn::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
-    __super::State_Processing(fTimedelta, pState);
-    m_fSturnTimeSum += fTimedelta;
-  
-    if (m_fSturnTimeSum > m_fSturnTime)
+    _bool bAnimFinished = __super::State_Processing(fTimedelta, pState, pPreState);
+    
+    if (bAnimFinished || !m_pParentObject->GetFlag(CPlayer::FLAG_STURN))
     {
-        m_pParentObject->Set_bStun(false);
         return true;
     }
     return false;
@@ -42,14 +38,17 @@ _bool CPlayer_Sturn::State_Processing(_float fTimedelta, _uint* pState)
 
 _bool CPlayer_Sturn::State_Exit(_uint* pState)
 {
-    m_fSturnTimeSum = 0;
-
+    m_pParentObject->SetFlag(CPlayer::FLAG_STURN, false);
+    m_pParentObject->SetFlag(CPlayer::FLAG_KEYLOCK, false);
+ 
     return true;
 }
 
 void CPlayer_Sturn::Init_CallBack_Func()
 {
-
+     for(_int i = 0; i <BODY_TYPE::T_END; i++){ m_pParentObject->BodyCallBack(i, CBody_Player::BODY_COOLING_LONG, 0,
+             [this]() { m_pGameInstance->Play_Sound(L"ST_Player_Stun_Loop.wav",  &m_pChannel, 0.5f); });
+     }
 }
 
 _bool CPlayer_Sturn::IsActive(_uint stateFlags) const
@@ -67,15 +66,15 @@ void CPlayer_Sturn::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Sturn::CanEnter(_uint* pState)
 {
-    if (*pState & (BEH_SHOOT | MOV_STURN))
+    if (*pState & MOV_STURN)
         return false;
 
-    return m_pParentObject->Get_bStun();
+    return m_pParentObject->GetFlag(CPlayer::FLAG_STURN);
 }
 
 _bool CPlayer_Sturn::CheckInputCondition(_uint stateFlags)
 {
-    return false;
+    return true;
 }
 
 CPlayer_Sturn* CPlayer_Sturn::Create(void* pArg)

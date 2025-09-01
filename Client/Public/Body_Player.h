@@ -16,7 +16,6 @@ public:
         BODY_RUN,
         BODY_SPRINT,
         BODY_JUMP_RUN_LOOP,
-
         BODY_JUMP_FALL,
         BODY_COOLING_LONG,
         BODY_COOLING_SHORT,
@@ -27,6 +26,13 @@ public:
         BODY_SPTINT_LOOP,
         BODY_WEAPON_THROW1,
         BODY_WEAPON_THROW2,
+        
+        // Hit 애니메이션들
+        BODY_HIT_FRONT,
+        BODY_HIT_BACK,
+        BODY_HIT_LEFT,
+        BODY_HIT_RIGHT,
+        BODY_HIT_HEAVY,
 
         BODY_HENDGUN_RELOAD = 52,
         BODY_HENDGUN_SHOOT,

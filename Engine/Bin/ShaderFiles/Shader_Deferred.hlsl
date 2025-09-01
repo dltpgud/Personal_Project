@@ -29,7 +29,7 @@ texture2D g_FinalTexture;
 texture2D g_BlurTexture;
 texture2D g_BrightnessTexTure;
 
-vector g_vMtrlAmbient = { 1.f, 1.f, 1.f, 1.f };
+texture2D g_vMtrlAmbient; //= { 1.f, 1.f, 1.f, 1.f };
 vector g_vMtrlSpecular = { 1.f, 1.f, 1.f, 1.f };
 
 vector g_vCamPosition;
@@ -55,13 +55,9 @@ float4 Compute_WorldPos(float2 vTexcoord)
     vWorldPos.z = vDepthDesc.x;
     vWorldPos.w = 1.f;
 
-	/* 뷰스페이스 상의 완벽한 픽셀의 위치를 구했다. */
-	/* 로컬위치 * 월드행렬 * 뷰행렬 * 튜ㅜ영행렬 / w */
     vWorldPos = vWorldPos * fViewZ;
     vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
 
-	/* 월드스페이스로 이동하자. */
-	/* 월드 페이스 상의 완벽한 픽셀의 위치를 구했다. */
     vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
 
     return vWorldPos;
@@ -124,47 +120,47 @@ struct PS_OUT_LIGHT
 
 PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
 {
-    PS_OUT_LIGHT Out;
+   PS_OUT_LIGHT Out;
+  
+  /* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴한다. */
+   vector vNormalDesc = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
+   // 0 ~ 1 -> -1 ~ 1 
+   vector vNormal = float4(vNormalDesc.xyz * 2.f - 1.f, 0.f);
+   
+   vector vDepthDesc = g_DepthTexture.Sample(PointSampler, In.vTexcoord);
+   // 정규화된 값을 풀어 원레 깊이로 복원
+   float fViewZ = vDepthDesc.y * g_fCamFar;
 
-	/* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴한다. */
-    vector vNormalDesc = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
-    // 0 ~ 1 -> -1 ~ 1 
-    vector vNormal = float4(vNormalDesc.xyz * 2.f - 1.f, 0.f);
-    
-    vector vDepthDesc = g_DepthTexture.Sample(PointSampler, In.vTexcoord);
-    // 정규화된 값을 풀어 원레 깊이로 복원
-    float fViewZ = vDepthDesc.y * g_fCamFar;
-	
-    // 빛이 오는 방향과 법선을 내적해 빛이 표면에 얼마나 닿는지 수치화해 음영을 구함.
-    // 음수 값이 나오면 음영이 반대로 들어감으로 최소값은 0으로 설정
-    float fShade = max(dot(normalize(g_vLightDir) * -1.f, vNormal), 0.f);
-
-    // Diffuse 와 Ambient 조명을 고려한 최종 조도를 구한다.
-    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
-
-    // 픽셀들의 월드 좌표를 복원한다.
-    float4 vWorldPos;
-    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = vDepthDesc.x;
-    vWorldPos.w = 1.f;
-    
-	// 월드 위치의 깊이값을 복원
-    vWorldPos = vWorldPos * fViewZ;
-    
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-
-    float4 vLook = vWorldPos - g_vCamPosition;
-    
-    //광원 방향을 기준으로 표면 법선에 반사된 방향
-    float4 vReflect = reflect(normalize(g_vLightDir), vNormal);
-    //정반사 계수 계산
-    // 내적 값이 1에 가까우면 하이라이트가 강해짐  
-    float fSpecular = pow(max(dot(normalize(vLook) * -1.f, normalize(vReflect)), 0.f), 30.f);
-    //광원의 스펙큘러 색과 머티리얼의 스펙큘러 반응도를 곱해 반사광 색상을 정한다.
-    Out.vSpecular = (g_vLightSpecular * g_vMtrlSpecular) * fSpecular * 0.8f;
-
+   // 빛이 오는 방향과 법선을 내적해 빛이 표면에 얼마나 닿는지 수치화해 음영을 구함.
+   // 음수 값이 나오면 음영이 반대로 들어감으로 최소값은 0으로 설정
+   float fShade = max(dot(normalize(g_vLightDir) * -1.f, vNormal), 0.f);
+  
+   // Diffuse 와 Ambient 조명을 고려한 최종 조도를 구한다.
+    vector vAmbiet = g_vMtrlAmbient.Sample(PointSampler, In.vTexcoord);
+    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * vAmbiet));
+  
+   // 픽셀들의 월드 좌표를 복원한다.
+   float4 vWorldPos;
+   vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+   vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+   vWorldPos.z = vDepthDesc.x;
+   vWorldPos.w = 1.f;
+   
+ // 월드 위치의 깊이값을 복원
+   vWorldPos = vWorldPos * fViewZ;
+   
+   vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+   vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
+  
+   float4 vLook = vWorldPos - g_vCamPosition;
+   
+   //광원 방향을 기준으로 표면 법선에 반사된 방향
+   float4 vReflect = reflect(normalize(g_vLightDir), vNormal);
+   //정반사 계수 계산
+   // 내적 값이 1에 가까우면 하이라이트가 강해짐  
+   float fSpecular = pow(max(dot(normalize(vLook) * -1.f, normalize(vReflect)), 0.f), 30.f);
+   //광원의 스펙큘러 색과 머티리얼의 스펙큘러 반응도를 곱해 반사광 색상을 정한다.
+   Out.vSpecular = (g_vLightSpecular * g_vMtrlSpecular) * fSpecular * 0.8f;
     return Out;
 }
 
@@ -199,7 +195,8 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_POINT(PS_IN In)
 
     float fShade = max(dot(normalize(vLightDir) * -1.f, vNormal), 0.f);
 
-    Out.vShade = (g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient))) * fAtt;
+    vector vAmbiet = g_vMtrlAmbient.Sample(PointSampler, In.vTexcoord);
+    Out.vShade = (g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * vAmbiet))) * fAtt;
 	
     float4 vLook = vWorldPos - g_vCamPosition;
     float4 vReflect = reflect(normalize(vLightDir), vNormal);
@@ -223,30 +220,46 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
     vector vRim = g_RimTexture.Sample(LinearSampler, In.vTexcoord);
     vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord); 
    
-    // 화면에서 좌,우,위,아래로 한 픽셀식 움직이고, Projpos.w / g_fCamFar 저장된 값을 g_fCamFar 와 곱해 실제 카메라 거리로 복원
-    float depthLeft = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(-(1.f / g_WinDowSize.x), 0.f)).y * g_fCamFar;
-    float depthRight = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2((1.f / g_WinDowSize.x), 0.f)).y * g_fCamFar;
-    float depthUp = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, -(1.f / g_WinDowSize.y))).y * g_fCamFar;
-    float depthDown = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, (1.f / g_WinDowSize.y))).y * g_fCamFar;
-    float depthMid = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord).y;
-    float depthON_OFF = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord).z;// 아웃라인 ON/OFF 플래그
-    float OutLine;
-    // 깊이 차이와 멀어질 수록 느스근해지는 기준을 비교해서 아웃라인을 결정, 깊이 기준 허용 오차를 거리 비례로 느슨하게 조정
-    if (depthMid*10.f  < abs(depthLeft - depthRight))
+   
+  // // 화면에서 좌,우,위,아래로 한 픽셀식 움직이고, Projpos.w / g_fCamFar 저장된 값을 g_fCamFar 와 곱해 실제 카메라 거리로 복원
+    float depthMid = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord).y * g_fCamFar;
+// 상하좌우
+    float depthLeft = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(-1.f / g_WinDowSize.x, 0.f)).y * g_fCamFar;
+    float depthRight = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(1.f / g_WinDowSize.x, 0.f)).y * g_fCamFar;
+    float depthUp = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, -1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthDown = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(0.f, 1.f / g_WinDowSize.y)).y * g_fCamFar;
+
+// 대각선 4방향
+    float depthUL = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(-1.f / g_WinDowSize.x, -1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthUR = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(1.f / g_WinDowSize.x, -1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthDL = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(-1.f / g_WinDowSize.x, 1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthDR = g_OutLineTexture.Sample(LinearSampler, In.vTexcoord + float2(1.f / g_WinDowSize.x, 1.f / g_WinDowSize.y)).y * g_fCamFar;
+
+// 차이 계산
+    float depthDiffH = abs(depthLeft - depthRight);
+    float depthDiffV = abs(depthUp - depthDown);
+    float depthDiffD1 = abs(depthUL - depthDR);
+    float depthDiffD2 = abs(depthUR - depthDL);
+
+// 거리 비례 임계값
+    float depthThreshold = sqrt(depthMid) * 0.01f; // ← sqrt로 완화하면 멀리서 오탐 줄임
+
+// 외곽 판정
+    bool isEdge = (depthDiffH > depthThreshold) ||
+              (depthDiffV > depthThreshold) ||
+              (depthDiffD1 > depthThreshold) ||
+              (depthDiffD2 > depthThreshold);
+
+    float OutLine = 1.f;
+    if (isEdge)
     {
-        OutLine = 0.f;
+    // 평균 (8방향 모두 포함)
+        float avgNeighbor = (depthLeft + depthRight + depthUp + depthDown + depthUL + depthUR + depthDL + depthDR) * 0.125f;
+
+        if (abs(depthMid - avgNeighbor) > depthThreshold)
+            OutLine = 0.f; // 외곽선 그리기
     }
-    else if (depthMid*9.f  < abs(depthUp - depthDown))
-    {
-        OutLine = 0.f;
-    }
-    else if (depthON_OFF >= 0.5f)
-    {
-        OutLine = 1.f;
-    }
-    else
-        OutLine = 1.f;
-        
+
     if (vDiffuse.a == 0.f)
         discard;
 
@@ -409,5 +422,4 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_BLUR_Y();
     }
-
 }

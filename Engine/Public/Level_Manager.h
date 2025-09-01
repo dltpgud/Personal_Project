@@ -1,10 +1,5 @@
 ﻿#pragma once
-
 #include "Base.h"
-
-/* 현재 화면에 보여줘야할 레벨의 주소를 들고 있는다. */
-/* 활성화된 레벨의 반복적인 업데이트 렌더호출의 역활. */
-/* 레벨 교체의 기능을 수행한다.(주소교체 & 기존레벨 삭제 & 기존레벨용 자원을 파괴)*/
 
 BEGIN(Engine)
 class CGameObject;
@@ -27,7 +22,6 @@ public:
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CLevel*			m_pCurrentLevel = { nullptr };
-	/*현재 게임에 보여줄 레벨객체의 주소를 저장한다. */
 	_uint					m_iCurrentLevelID = {};
 
 

@@ -4,7 +4,6 @@
 #include "Player.h"
 #include "UI.h"
 #include "ShootEffect.h"
-#include "ShootingUI.h"
 #include "PlayerBullet.h"
 #include "Body_Player.h"
 
@@ -36,7 +35,7 @@ HRESULT CWeapon::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-     if (FAILED(Init_CallBack()))
+    if (FAILED(Init_CallBack()))
         return E_FAIL;
 
     m_pTransformCom->Set_Scaling(0.01f, 0.01f, 0.01f);
@@ -91,17 +90,12 @@ HRESULT CWeapon::Render()
         if (m_iWeapon != MissileGatling)
         {
             if (FAILED(m_vecWeaPone[m_iWeapon].pModelCom->Bind_Material_ShaderResource(
-                    m_pShaderCom, i, aiTextureType_EMISSIVE, 0,
-                "g_EmissiveTexture")))
-                return E_FAIL;
-
-             if (FAILED(m_pShaderCom->Begin(3)))
+                    m_pShaderCom, i, aiTextureType_EMISSIVE, 0, "g_EmissiveTexture")))
                 return E_FAIL;
         }
-        else 
-            if (FAILED(m_pShaderCom->Begin(0)))
+             if (FAILED(m_pShaderCom->Begin(3)))
                 return E_FAIL;
-
+   
        m_vecWeaPone[m_iWeapon].pModelCom->Render(i);
     }
 
@@ -136,7 +130,6 @@ HRESULT CWeapon::Make_Bullet()
           break;
     case CWeapon::MissileGatling: 
           iCount = 4; 
-          m_vecWeaPone[m_iWeapon].fEmissvePower = 2.f;
           break;
     case CWeapon::HeavyCrossbow: 
           m_vecWeaPone[m_iWeapon].fEmissvePower = 3.f;
@@ -148,10 +141,7 @@ HRESULT CWeapon::Make_Bullet()
 
     m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
    
-    _float3	vPickPos{};
-    _vector At{};
-
-     At = XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 10.f;
+   _vector vTagetPos =  XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 100.f;
 
     _vector Hend_Local_Pos = {m_vecWeaPone[m_iWeapon].pBoneMatrix->_41 * m_vecWeaPone[m_iWeapon].iBulletOffset.x,
                               m_vecWeaPone[m_iWeapon].pBoneMatrix->_42 * m_vecWeaPone[m_iWeapon].iBulletOffset.y,
@@ -176,13 +166,16 @@ HRESULT CWeapon::Make_Bullet()
  
     CPlayerBullet::CPlayerBullet_DESC Desc{};
     Desc.fSpeedPerSec = 150.f;
-    Desc.pTagetPos = At;
+    Desc.vTagetPos = vTagetPos;
     Desc.vPos = vHPos;
-    Desc.iSkillType = m_iWeapon;
-    Desc.fDamage = &m_vecWeaPone[m_iWeapon].Damage;
+    Desc.iSkillType = CSkill :: STYPE_NOMAL;
+    Desc.iActorType = CSkill ::PLAYER;
+    Desc.fClolor[CSkill::COLOR::CSTART] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CSTART];
+    Desc.fClolor[CSkill::COLOR::CEND] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CEND];
+    Desc.iDamage = m_vecWeaPone[m_iWeapon].Damage;
     Desc.Local = Hend_Local_Pos;
     Desc.WorldPtr = &m_WorldMatrix;
-    Desc.iWeaponType = m_iWeapon;
+    Desc.fScale = m_vecWeaPone[m_iWeapon].BulletScale;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_PlayerBullet", &Desc);
     return S_OK;
@@ -200,7 +193,10 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.iBulletOffset = {1.7f, 2.0f, 3.0f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
     pWDesc.fFireRate = 0.7f;
-    pWDesc.Damage = 3.f;
+    pWDesc.Damage = 3;
+    pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
+    pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
+    pWDesc.BulletScale = {0.1f, 0.1f};
     m_vecWeaPone[CWeapon::HendGun] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -209,18 +205,24 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.fEmissvePower = 1.f;
     pWDesc.iBulletOffset = {1.1f, 0.8f, 1.2f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
-    pWDesc.fFireRate = 0.2f;
-    pWDesc.Damage = 10.f;
+    pWDesc.fFireRate = 0.3f;
+    pWDesc.Damage = 10;
+    pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
+    pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 0.f, 1.f};
+    pWDesc.BulletScale = {0.12f, 0.12f};
     m_vecWeaPone[CWeapon::AssaultRifle] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
     pWDesc.iMaxBullet = 20;
     pWDesc.iCurBullet = pWDesc.iMaxBullet;
-    pWDesc.fEmissvePower = 1.f;
+    pWDesc.fEmissvePower = 0.f;
     pWDesc.iBulletOffset = {1.f, 1.f, 1.5f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
-    pWDesc.fFireRate = 0.1f;
-    pWDesc.Damage = 15.f;
+    pWDesc.fFireRate = 0.2f;
+    pWDesc.Damage = 15;
+    pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.5f, 0.5f, 0.5f, 0.5f};
+    pWDesc.BulletColor[CSkill::COLOR::CEND] = {1.f, 1.f, 0.f, 1.f};
+    pWDesc.BulletScale = {0.2f, 0.2f};
     m_vecWeaPone[CWeapon::MissileGatling] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -230,7 +232,10 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.iBulletOffset = {1.f, 1.f, 1.5f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
     pWDesc.fFireRate = 0.5f;
-    pWDesc.Damage = 30.f;
+    pWDesc.Damage = 30;
+    pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
+    pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
+    pWDesc.BulletScale = {0.16f, 0.16f};
     m_vecWeaPone[CWeapon::HeavyCrossbow] = pWDesc;
 
     return S_OK;
@@ -243,10 +248,10 @@ HRESULT CWeapon::Init_CallBack()
     m_vecWeaPone[CWeapon::MissileGatling].pModelCom->Callback(CWeapon::WS_IDLE, 0, [this]() { ResetEmissive(); });
     m_vecWeaPone[CWeapon::HeavyCrossbow].pModelCom->Callback(CWeapon::WS_IDLE, 0, [this]() { ResetEmissive(); });
 
-    m_vecWeaPone[CWeapon::HendGun].pModelCom->Callback(CWeapon::WS_RELOAD, 30, [this]() { ResetBullet(); });
-    m_vecWeaPone[CWeapon::AssaultRifle].pModelCom->Callback(CWeapon::WS_RELOAD, 30, [this]() { ResetBullet(); });
-    m_vecWeaPone[CWeapon::MissileGatling].pModelCom->Callback(CWeapon::WS_RELOAD, 30, [this]() { ResetBullet(); });
-    m_vecWeaPone[CWeapon::HeavyCrossbow].pModelCom->Callback(CWeapon::WS_RELOAD, 40, [this]() { ResetBullet(); });
+    m_vecWeaPone[CWeapon::HendGun].pModelCom->Callback(CWeapon::WS_RELOAD, 55, [this]() { ResetBullet(); });
+    m_vecWeaPone[CWeapon::AssaultRifle].pModelCom->Callback(CWeapon::WS_RELOAD, 75, [this]() { ResetBullet(); });
+    m_vecWeaPone[CWeapon::MissileGatling].pModelCom->Callback(CWeapon::WS_RELOAD, 63, [this]() { ResetBullet(); });
+    m_vecWeaPone[CWeapon::HeavyCrossbow].pModelCom->Callback(CWeapon::WS_RELOAD, 60, [this]() { ResetBullet(); });
 
     m_vecWeaPone[CWeapon::HendGun].pModelCom->Callback(CWeapon::WS_SHOOT, 3, [this]() { Make_Bullet(); });
     m_vecWeaPone[CWeapon::AssaultRifle].pModelCom->Callback(CWeapon::WS_SHOOT, 3, [this]() { Make_Bullet(); });

@@ -20,7 +20,7 @@ HRESULT CBillyBoom_Idle::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBillyBoom_Idle::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBillyBoom_Idle::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (HasFlag(PAUSED))
         return Result::None;
@@ -30,7 +30,7 @@ CStateMachine::Result CBillyBoom_Idle::StateMachine_Playing(_float fTimeDelta)
 
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         SetFlag(FINISHED);
         return Result::Finished;
     }
@@ -52,7 +52,7 @@ CStateMachine::Result CBillyBoom_Idle::StateMachine_Playing(_float fTimeDelta)
         }
         else
         {
-            Reset_StateMachine();
+            Reset_StateMachine(pRim);
             SetFlag(FINISHED);
             return Result::Finished;
         }
@@ -61,9 +61,9 @@ CStateMachine::Result CBillyBoom_Idle::StateMachine_Playing(_float fTimeDelta)
     return Result::Running;
 }  
 
-void CBillyBoom_Idle::Reset_StateMachine()
+void CBillyBoom_Idle::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CBillyBoom_Idle* CBillyBoom_Idle::Create(void* pArg)

@@ -1,9 +1,9 @@
 #pragma once
-
 #include "Client_Defines.h"
 #include "StateMachine.h"
+
 BEGIN(Engine)
-class CActor;
+
 END
 
 BEGIN(Client)
@@ -31,12 +31,12 @@ public:
     virtual ~CJetFly_Attack() = default;
 
 public:
-    virtual Result StateMachine_Playing(_float fTimeDelta);
-    virtual void Reset_StateMachine();
+    virtual Result StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim) override;
+    virtual void Reset_StateMachine(RIM_LIGHT_DESC* pRim) override;
 
 private:
-    virtual void Init_CallBack_Func();
-    virtual HRESULT Initialize(void* pArg);
+    virtual void Init_CallBack_Func() override;
+    virtual HRESULT Initialize(void* pArg) override;
 
 private:
     void Make_Bullet();
@@ -46,7 +46,6 @@ private:
     const _float4x4* m_pPerantPartBonMatrix{};
     const _float4x4* m_pPerantWorldMat{};
  
-
 public:
     static CJetFly_Attack* Create(void* pArg);
 	virtual void Free();

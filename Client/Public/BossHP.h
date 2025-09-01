@@ -14,8 +14,8 @@ class CBossHPUI: public CUI
 public:
 		typedef struct CBossHPUI_DESC : public CUI::CUI_DESC
 		{
-			_float fMaxHP{};
-			_float fHP{};
+			_int fMaxHP{};
+			_int fHP{};
 		}CBossHPUI_DESC;
 
 private:
@@ -33,14 +33,14 @@ public:
     virtual void    ShakingEvent(_float fTimeDelta) override;
 
 public:
-	void Set_BossMaxHP(_float fMaxHP) { m_fMaxHP = fMaxHP; }
-	void Set_BossHP(_float fHP)       { m_fHP = fHP; }
-	void Set_HPGage(_int GageCount) 
+	void Set_BossMaxHP(_int fMaxHP) { m_imaxHP = fMaxHP; }
+	void Set_BossHP   (_int fHP)    { m_iHP = fHP; }
+	void Set_HPGage   (_int GageCount) 
 	{
 		if (GageCount < -1)
 			return;
 		
-		if(m_fMaxHP == m_fHP)
+		if(m_imaxHP == m_iHP)
 			return;
 
 		m_iGageCount = GageCount;
@@ -54,9 +54,9 @@ private:
 	HRESULT Add_Components();
 private:
 
-	_float m_fHP{};
-	_float m_fMaxHP{};
-	_float m_fHP_Pluse = { 0.f };
+	_int m_iHP{};
+	_int m_imaxHP{};
+	_float m_fHP_Pluse = { 0 };
 	_float m_fPrXPos{}, m_fPrYPos{};
 	_int   m_iGageCount = {-1};
 	_float m_fHealthHP{};

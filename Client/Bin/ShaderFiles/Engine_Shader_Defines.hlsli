@@ -82,22 +82,15 @@ BlendState BS_Default
 BlendState BS_AlphaBlend
 {
     BlendEnable[0] = true;
-	//BlendEnable[1] = true;
-
     SrcBlend[0] = Src_Alpha;
     DestBlend[0] = Inv_Src_Alpha;
     BlendOp[0] = Add;
-
-	//SrcBlend[1] = One;
-	//DescBlend[1] = One;
-	//BlendOp[1] = Add;
 };
 
 BlendState BS_Light
 {
     BlendEnable[0] = true;
     BlendEnable[1] = true;
-
     SrcBlend = one;
     DestBlend = one;
     BlendOp = Add;

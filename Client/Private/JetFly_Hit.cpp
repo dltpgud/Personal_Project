@@ -1,8 +1,7 @@
 #include"stdafx.h"
 #include "JetFly_Hit.h"
-#include "Body_JetFly.h"
 #include "GameInstance.h"
-#include "JetFly.h"
+
 CJetFly_Hit::CJetFly_Hit()
 {
 }
@@ -12,7 +11,6 @@ HRESULT CJetFly_Hit::Initialize(void* pArg)
     HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 	__super::Initialize(pDesc);
 
-	//애니메이션 하나뺴고 다 망가졌네..
     CStateNode::STATENODE_DESC pNodeDesc{};
     pNodeDesc.pParentModel = m_pParentModel;
     pNodeDesc.iCurrentState = 4;
@@ -23,13 +21,16 @@ HRESULT CJetFly_Hit::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CJetFly_Hit::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CJetFly_Hit::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {   
-     return __super::StateMachine_Playing(fTimeDelta);
+    *pRim->eState = RIM_LIGHT_DESC::STATE_RIM;
+    pRim->fcolor = {1.f, 1.f, 1.f, 1.f};
+    pRim->iPower = 0.5f;
+    return __super::StateMachine_Playing(fTimeDelta, pRim);
 }      
-void CJetFly_Hit::Reset_StateMachine()
+void CJetFly_Hit::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CJetFly_Hit* CJetFly_Hit::Create(void* pArg)

@@ -147,6 +147,7 @@
     <ClInclude Include="..\Public\Monster.h" />
     <ClInclude Include="..\Public\NPC.h" />
     <ClInclude Include="..\Public\Terrain.h" />
+    <ClInclude Include="..\Public\Trigger.h" />
     <ClInclude Include="..\Public\Wall.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="..\Private\Monster.cpp" />
     <ClCompile Include="..\Private\NPC.cpp" />
     <ClCompile Include="..\Private\Terrain.cpp" />
+    <ClCompile Include="..\Private\Trigger.cpp" />
     <ClCompile Include="..\Private\Wall.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Tool.cpp" />

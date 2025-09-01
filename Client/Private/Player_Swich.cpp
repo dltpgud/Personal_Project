@@ -15,26 +15,23 @@ HRESULT CPlayer_Swich::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CPlayer_Swich::State_Enter(_uint* pState)
+void CPlayer_Swich::State_Enter(_uint* pState, _uint* pPreState)
 {
-    // hit 플래그가 켜져 있으면 끄기
-   // *pState &= ~MOV_HIT;
-    
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_SWICH;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
 
-    __super::State_Enter(pState);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Swich::State_Processing(_float fTimedelta, _uint* pState)
+_bool CPlayer_Swich::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
     
-    return __super::State_Processing(fTimedelta,pState);
+    return __super::State_Processing(fTimedelta, pState, pPreState);
 }
 
 _bool CPlayer_Swich::State_Exit(_uint* pState)
 {
-    m_pParentObject->Set_Change();
+    m_pParentObject->SetFlag(CPlayer::FLAG_CHANGE, false);
    return true;
 }
 
@@ -42,7 +39,7 @@ void CPlayer_Swich::Init_CallBack_Func()
 {
     for (_int i = 0; i < BODY_TYPE::T_END; i++)
     {
-        m_pParentObject->BodyCallBack(i, CBody_Player::BODY_SWICH, 0,[this]() { m_pGameInstance->Play_Sound(L"ST_Player_Switch_T01.ogg", CSound::SOUND_EFFECT, 1.f); });
+        m_pParentObject->BodyCallBack(i, CBody_Player::BODY_SWICH, 0,[this]() { m_pGameInstance->Play_Sound(L"ST_Player_Switch_T01.ogg",  &m_pChannel, 1.f); });
     }
 }
 
@@ -64,7 +61,7 @@ _bool CPlayer_Swich::CanEnter(_uint* pState)
     if ((*pState & (MOV_JUMP | BEH_SWICH)) != 0)
         return false;
 
-    return m_pParentObject->Get_Change();
+    return m_pParentObject->GetFlag(CPlayer::FLAG_CHANGE);
 }
 
 _bool CPlayer_Swich::CheckInputCondition(_uint stateFlags)

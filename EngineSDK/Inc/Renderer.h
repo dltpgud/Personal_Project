@@ -56,7 +56,7 @@ private:
 	class CShader* m_pShader = { nullptr };
 
 	ID3D11DepthStencilView* m_pLightDepthStencilView = { nullptr };
-	_float4x4					m_WorldMatrix, m_ViewMatrix{}, m_ProjMatrix{};
+        _float4x4 m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 
 
 private:
@@ -79,7 +79,6 @@ private:
 	HRESULT Render_NonBlend(); /* MRT_GameObjects에 소속된 타겟들에게 객체들의 특정 정보(Diffuse + Normal)를 기록해준다. */
 	HRESULT Render_Bloom();
 
-    HRESULT Render_Height();
 	HRESULT Render_Lights(); /* 빛들의 연산결과를 MRT_LightAcc에 소속된 타겟들에게 그려준다. */
 	HRESULT Render_Final();
 	HRESULT Render_NonLight();

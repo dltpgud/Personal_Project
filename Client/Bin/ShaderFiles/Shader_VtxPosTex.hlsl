@@ -11,6 +11,7 @@ float4 g_Alpha;
 float4 g_RGB;
 float4 g_RGBEnd;
 float g_TimeSum;
+float3 g_StateColor;
 
 struct VS_IN_SAMPLE
 {
@@ -190,13 +191,9 @@ PS_OUT PS_MAIN_PLAYERHEALTH(PS_IN In)
   
     float4 Texture = g_Texture.Sample(LinearSampler, In.vTexcoord);
     
-    
     if (Texture.r >= 0.f)
     {
-    
-        Texture.r = 0.f;
-        Texture.g = 1.f;
-        Texture.b = 0.f;
+        Texture.rgb = g_StateColor;
     }
 
     Out.vColor = Texture;
@@ -273,10 +270,8 @@ PS_OUT PS_MAIN_Shooting(PS_IN In)
 PS_OUT PS_MAIN_Pade(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-    
-    float4 Texture = g_Texture.Sample(LinearSampler, In.vTexcoord);
-    
-    Out.vColor = Texture;
+   
+    Out.vColor = float4(0.f, 0.f, 0.f, 1.f);
     Out.vColor.a *= g_TimeSum;
     
     return Out;

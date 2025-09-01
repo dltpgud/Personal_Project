@@ -31,26 +31,18 @@ HRESULT CSky::Initialize(void * pArg)
 
 void CSky::Priority_Update(_float fTimeDelta)
 {
- 
+   
 }
 
 void CSky::Update(_float fTimeDelta)
 {
-	const _float4* pCamPosition = m_pGameInstance->Get_CamPosition();
-	if (nullptr != pCamPosition)
-	{
-		m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMLoadFloat4(pCamPosition));
-	}
+    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMLoadFloat4(m_pGameInstance->Get_CamPosition()));
 }
 
 void CSky::Late_Update(_float fTimeDelta)
 {	
-	const _float4* pCamPosition = m_pGameInstance->Get_CamPosition();
-	if (nullptr != pCamPosition)
-	{
-		if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_PRIORITY, this)))
+	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_PRIORITY, this)))
 			return;
-	}
 }
 
 HRESULT CSky::Render()
@@ -85,9 +77,6 @@ HRESULT CSky::Add_Components()
 
 HRESULT CSky::Bind_ShaderResources()
 {
-	if (nullptr == m_pTransformCom || nullptr == m_pShaderCom || nullptr == m_pTextureCom)
-		return E_FAIL;
-
 	if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
 		return E_FAIL;
 	
@@ -97,7 +86,7 @@ HRESULT CSky::Bind_ShaderResources()
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
 		return E_FAIL;
 
-	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
+	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_SKYTexture", 0)))
 		return E_FAIL;
 
 	return S_OK;

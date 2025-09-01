@@ -3,7 +3,7 @@
 #include "Player_StateMachine.h"
 #include "Weapon.h"
 #include "Body_Player.h"
-#include "ShootingUI.h"
+#include "Player_ShootingStateUI.h"
 CPlayer_Reload::CPlayer_Reload()
 {
 }
@@ -14,33 +14,17 @@ HRESULT CPlayer_Reload::Initialize(void* pDesc)
     if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
 
-    CShootingUI::CShootingUI_DESC SDesc{};
-    SDesc.iWeaPonTYPE = m_pCurWeapon;
-    SDesc.iWeaPonState = CWeapon::WS_RELOAD;
-    SDesc.fX = g_iWinSizeX * 0.7f;
-    SDesc.fY = g_iWinSizeY * 0.57f;
-    SDesc.fZ = 0.001f;
-    SDesc.fSizeX = 100.f;
-    SDesc.fSizeY = 100.f;
-    SDesc.UID = UIID_PlayerShooting;
-    SDesc.Update = false;
-    m_pGameInstance->Add_UI_To_CLone(L"ShootingReload", L"Prototype GameObject_ShootingUI", &SDesc);
-    m_pShootingUI = static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"));
+    m_pShootingUI = static_cast<CPlayer_ShootingStateUI*>(m_pGameInstance->Find_Clone_UIObj(L"Player_ShootingUI"));
     Safe_AddRef(m_pShootingUI);
-
+   
     if (FAILED(UI_CallBack()))
         return E_FAIL;
 
 	return S_OK;
 }
 
-void CPlayer_Reload::State_Enter(_uint* pState)
+void CPlayer_Reload::State_Enter(_uint* pState, _uint* pPreState)
 {
-    static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"))->Set_Open(false);
-    static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"))->Set_Open(false);
-
-    *pState &= ~MOV_HIT;
-
     _int CurMotion{};
 
     switch (*m_pCurWeapon)
@@ -66,31 +50,31 @@ void CPlayer_Reload::State_Enter(_uint* pState)
 
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_RELOAD;
+    m_StateDesc.bLoop = false; 
 
-    __super::State_Enter(pState);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Reload::State_Processing(_float fTimedelta, _uint* pState)
+_bool CPlayer_Reload::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
-    return __super:: State_Processing( fTimedelta,pState);
+    return __super::State_Processing(fTimedelta, pState, pPreState);
 }
 
 _bool CPlayer_Reload::State_Exit(_uint* pState)
 {
-    m_pShootingUI->Set_Open(false); 
-   return true;
+    return true;
 }
 
 void CPlayer_Reload::Init_CallBack_Func()
 {
     m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_RELOAD, 15, [this]()
-                                    {m_pGameInstance->Play_Sound(L"ST_Handgun_Reload.ogg", CSound::SOUND_BGM, 1.f);});
+                                    { m_pGameInstance->Play_Sound(L"ST_Handgun_Reload.ogg", &m_pChannel, 1.f); });
     m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 19, [this]()
-                                    { m_pGameInstance->Play_Sound(L"ST_AssaultRifle_Reload.ogg", CSound::SOUND_BGM, 1.f); });
+                                    { m_pGameInstance->Play_Sound(L"ST_AssaultRifle_Reload.ogg", &m_pChannel, 1.f); });
     m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_RELOAD, 19, [this]()
-                                    { m_pGameInstance->Play_Sound(L"ST_MissileGatling_Reload.ogg", CSound::SOUND_BGM, 1.f); });
+                                    { m_pGameInstance->Play_Sound(L"ST_MissileGatling_Reload.ogg",  &m_pChannel, 1.f); });
     m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_RELOAD, 30, [this]()
-                                    { m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_Reload.ogg", CSound::SOUND_BGM, 1.f); });    
+                                    { m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_Reload.ogg", &m_pChannel, 1.f); });
 }
 
 _bool CPlayer_Reload::IsActive(_uint stateFlags) const
@@ -108,7 +92,10 @@ void CPlayer_Reload::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Reload::CanEnter(_uint* pState) 
 {   
-     if (*pState & (BEH_SHOOT | MOV_JUMP | BEH_RELOAD | MOV_STURN))
+     if (*pState & MOV_FALL)
+         return false;
+         
+     if (*pState & (BEH_RELOAD | MOV_STURN | MOV_HIT))
          return false;
 
     _bool bkey = m_pGameInstance->Get_DIKeyDown(DIK_R);
@@ -120,6 +107,11 @@ _bool CPlayer_Reload::CanEnter(_uint* pState)
 
 _bool CPlayer_Reload::CheckInputCondition(_uint stateFlags) 
 {
+    if (stateFlags & (MOV_STURN | MOV_HIT))
+    {
+        m_pShootingUI->Set_Open(false);
+        return false;
+    }
     return true;
 }
 
@@ -135,8 +127,6 @@ HRESULT CPlayer_Reload::UI_CallBack()
                                         m_pShootingUI->Set_RandomPos(false, false, false);
                                         m_pShootingUI->Set_PosClack(-200.f, 80.f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_RELOAD, 50, [this]() { m_pShootingUI->Set_Open(false); });
-
 
     m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 20,[this]()
                                     {
@@ -148,21 +138,18 @@ HRESULT CPlayer_Reload::UI_CallBack()
                                         m_pShootingUI->Set_RandomPos(false, false, false);
                                         m_pShootingUI->Set_PosClack(-250.f, 60.f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 88, [this]() { m_pShootingUI->Set_Open(false); });
 
     m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_RELOAD, 25,[this]()
                                     {
                                         m_pShootingUI->Set_RandomPos(false, true, false);
                                         m_pShootingUI->Set_Open(true);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_RELOAD, 53, [this]() { m_pShootingUI->Set_Open(false); });
 
     m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_RELOAD, 25,[this]()
                                     {
                                         m_pShootingUI->Set_RandomPos(false, true, false);
                                         m_pShootingUI->Set_Open(true);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_RELOAD, 53, [this]() { m_pShootingUI->Set_Open(false); });
 
     return S_OK;
 }

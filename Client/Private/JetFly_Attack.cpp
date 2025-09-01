@@ -1,9 +1,8 @@
 #include"stdafx.h"
 #include "JetFly_Attack.h"
-#include "JetFly.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-#include "Body_JetFly.h"
+
 CJetFly_Attack::CJetFly_Attack()
 {
 }
@@ -39,49 +38,62 @@ HRESULT CJetFly_Attack::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CJetFly_Attack::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CJetFly_Attack::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     if (*m_fLength > 30.f || *m_fLength < 15.f)
     {
-       Reset_StateMachine();
+        Reset_StateMachine(pRim);
        return Result::Finished;
     }
 
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
    
-    return __super::StateMachine_Playing(fTimeDelta);
+    return __super::StateMachine_Playing(fTimeDelta,pRim);
 }
 
-void CJetFly_Attack::Reset_StateMachine()
+void CJetFly_Attack::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 void CJetFly_Attack::Init_CallBack_Func()
 {
-    m_pParentModel->Callback(3, 5, [this]() { Make_Bullet(); });
-    m_pParentModel->Callback(0, 5, [this]() { Make_Bullet(); });
-    m_pParentModel->Callback(1, 5, [this]() { Make_Bullet(); });
+    m_pParentModel->Callback(3, 5, [&]() { Make_Bullet(); });
+    m_pParentModel->Callback(0, 5, [&]() { Make_Bullet(); });
+    m_pParentModel->Callback(1, 5, [&]() { Make_Bullet(); });
 }
 
 void CJetFly_Attack::Make_Bullet()
 {
-          m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", CSound::SOUND_EFFECT, 0.3f);
+    m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", &m_pChannel, 1.f);
+    m_pGameInstance->SetChannelVolume( &m_pChannel, 60.f, m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+   
     _vector Hend_Local_Pos = {m_pPerantPartBonMatrix->_41, m_pPerantPartBonMatrix->_42, m_pPerantPartBonMatrix->_43,
                               m_pPerantPartBonMatrix->_44};
 
     _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(m_pPerantWorldMat));
 
-    _vector Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) -
-        dynamic_cast<CBody_JetFly*>(m_pParentPartObject)->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+    _vector vPos = XMVectorSet(m_pPerantWorldMat->_41, m_pPerantWorldMat->_42, m_pPerantWorldMat->_43, 1.f);
+    _vector vLook = XMVectorSet(m_pPerantWorldMat->_31, m_pPerantWorldMat->_32, m_pPerantWorldMat->_33, 0.f);
 
-    _float m_pDamage = 3.f;
+    _vector Dir = vPos + vLook * 20.f; 
+
+      Dir = XMVectorSetY(Dir, 0.f);
+
+     if (m_pParentObject->IsLookAtPlayer(15.f))
+          Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+
     CBullet::CBULLET_DESC Desc{};
     Desc.fSpeedPerSec = 20.f;
     Desc.pTagetPos = Dir;
     Desc.vPos = vHPos;
-    Desc.fDamage = &m_pDamage;
-    Desc.iActorType = CSkill::MONSTER::TYPE_JETFLY;
+    Desc.iDamage = 2;
+    Desc.iActorType = CSkill::NOMAL_MONSTER;
+    Desc.iSkillType = CSkill::STYPE_NOMAL;
+    Desc.fScale = _float2{0.2f, 0.2f};
+    Desc.fClolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
+    Desc.fClolor[CSkill::COLOR::CEND] = _float4(1.f, 0.f, 0.f, 1.f);
+
     CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
     m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"), pGameObject);
 }

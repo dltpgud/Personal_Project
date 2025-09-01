@@ -11,6 +11,7 @@
 #include "Wall.h"
 #include "Monster.h"
 #include "NPC.h"
+#include "Trigger.h"
 CMainApp::CMainApp()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
 {
@@ -100,9 +101,16 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 		CVIBuffer_Terrain::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
-	/* For.Prototype_Component_Collider_AABB */
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
 		CCollider::Create(m_pDevice, m_pContext, CCollider::TYPE_OBB))))
+		return E_FAIL;
+	
+    if(FAILED( m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
+		CCollider::Create(m_pDevice, m_pContext, CCollider::TYPE_AABB))))
+		return E_FAIL;
+   
+    if(FAILED( m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
+		CCollider::Create(m_pDevice, m_pContext, CCollider::TYPE_SPHERE))))
 		return E_FAIL;
 
 	/* For.Prototype_Component_Shader_VtxPosTex */
@@ -146,37 +154,37 @@ HRESULT CMainApp::Ready_Prototype_For_Component()
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Desertic Model_nonaniObj"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Desertic.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock2 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock2 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock2.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock3 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock3 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock3.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock4 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock4 Model_Wall"),
 	    CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock4.dat"), PreTransformMatrix))))
 	    return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock5 Model_nonaniObj"),
+    if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock5 Model_Wall"),
 	    CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock5.dat"), PreTransformMatrix))))
 	    return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock6 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock6 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock6.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock7 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock7 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock7.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock8 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock8 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/RocK8.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Arch3 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Arch3 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Arch3.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Arch2 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Arch2 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Arch2.dat"), PreTransformMatrix))))
 		return E_FAIL;
-	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock small wall1 Model_nonaniObj"),
+	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component Rock small wall1 Model_Wall"),
 		CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM, TEXT("../Bin/Data/NonAni/Rock_small_wall1.dat"), PreTransformMatrix))))
 		return E_FAIL;
 	if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Proto Component BossFloor Model_nonaniObj"),
@@ -333,6 +341,11 @@ HRESULT CMainApp::Ready_Prototype_For_GameObject()
 	if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject NPC_NPC"), CNPC::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
+
+    if (FAILED(m_pGameInstance->Add_Prototype(TEXT("Proto GameObject Trigger"), CTrigger::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+	
 	return S_OK;
 }
 

@@ -21,17 +21,15 @@ CGameInstance::CGameInstance()
 
 HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ ID3D11Device ** ppDevice, _Out_ ID3D11DeviceContext ** ppContext)
 {
-	/* 내 게임에 필요한 필수 기능들에 대한 초기화과정을 수행한다. */
-	/* 그래픽 카드를 초기화한다 */
+
 	m_pGraphic_Device = CGraphic_Device::Create(EngineDesc.hWnd, EngineDesc.isWindowed, EngineDesc.iWinSizeX, EngineDesc.iWinSizeY, ppDevice, ppContext);
 	if (nullptr == m_pGraphic_Device)
 		return E_FAIL;
-	/* 입력 장치를 초기화한다. */
+
 	m_pInput_Device = CInput_Device::Create(EngineDesc.hInstance, EngineDesc.hWnd, EngineDesc.iWinSizeX, EngineDesc.iWinSizeY);
 	if (nullptr == m_pGraphic_Device)
 		return E_FAIL;
 
-	/* 매니져를 준비한다. */
 	m_pTimer_Manager	 = CTimer_Manager::Create();
 	if (nullptr == m_pTimer_Manager)
 		return E_FAIL;
@@ -56,7 +54,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pUI_Manager)
 		return E_FAIL;
 
-	m_pSound		     = CSound::Create();
+	m_pSound = CSound::Create();
 	if (nullptr == m_pSound)
 		return E_FAIL;
 	
@@ -89,7 +87,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pFrustum)
 		return E_FAIL;
 
-    m_pThreadPool = CThreadPool::Create(thread::hardware_concurrency());
+    m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency()-1);
         if (nullptr == m_pThreadPool)
             return E_FAIL;
 
@@ -125,6 +123,7 @@ void CGameInstance::Draw()
 
 	/* 할일이 없어. 디버그모드에서만 디버그내용만 출력하는 용도 .*/
 	m_pLevel_Manager->Render();
+   
 }
 
 void CGameInstance::Delete()
@@ -354,7 +353,6 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _wstring
 	if (nullptr == m_pObject_Manager)
 		return E_FAIL;
 
-	/*원본을 탐색한다*/
  	CGameObject* pPrototype = m_pObject_Manager->Find_Prototype(strPrototypeTag);
 	if (nullptr == pPrototype)
 		return E_FAIL;
@@ -417,7 +415,7 @@ HRESULT CGameInstance::Add_MonsterBullet( CGameObject* MonsterBUllet)
 	return m_pCollider_Manager ->Add_MonsterBullet( MonsterBUllet);
 }
 
-HRESULT CGameInstance::Add_Collider(CCollider* Collider, _float Damage)
+HRESULT CGameInstance::Add_Collider(CCollider* Collider, _int Damage)
 {
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
@@ -449,35 +447,10 @@ HRESULT CGameInstance::Find_Cell()
 
 	return m_pCollider_Manager->Find_Cell();
 }
-
-HRESULT CGameInstance::changeCellType(_int type)
-{
-
-    if (nullptr == m_pCollider_Manager)
-        return E_FAIL;
-
-    return m_pCollider_Manager->changeCellType( type);
-}
-
-_vector CGameInstance::Get_RayPos()
-{
-    if (nullptr == m_pCollider_Manager)
-        return {};
-
-    return m_pCollider_Manager->Get_RayPos();
-}
-
 #pragma endregion
 
 
 #pragma region UI_Manager
-HRESULT CGameInstance::Set_OpenUI(const _uint& uID, _bool UIopen)
-{
-	if (nullptr == m_pUI_Manager)
-		return E_FAIL;
-
-	return m_pUI_Manager->Set_OpenUI(uID, UIopen);
-}
 
 HRESULT CGameInstance::UI_shaking(const _uint& uID, _float fTimeDelta)
 {
@@ -503,11 +476,11 @@ HRESULT CGameInstance::ADD_UI_ShakingList(CUI* UIOBJ)
     return m_pUI_Manager->ADD_UI_ShakingList(UIOBJ);
 }
 
-HRESULT CGameInstance::Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid)
+HRESULT CGameInstance::Set_OpenUI(_bool bOpen, const _wstring& strCloneTag, CGameObject* Owner)
 {
-	if (nullptr == m_pUI_Manager)
-		return E_FAIL;
-	return m_pUI_Manager->Set_OpenUI_Inverse(Openuid,Cloaseduid);
+      if (nullptr == m_pUI_Manager)
+        return E_FAIL;
+      return m_pUI_Manager->Set_OpenUI(bOpen, strCloneTag, Owner);
 }
 
 CGameObject* CGameInstance::Find_Clone_UIObj(const _wstring& strCloneTag)
@@ -567,25 +540,25 @@ CComponent* CGameInstance::Find_Prototype(_uint iLevelIndex, const _wstring& str
 #pragma endregion
 
 #pragma region Sound
-void CGameInstance::Play_Sound(_tchar* pSoundKey, CSound::CHANNELID eID, _float fVolume)
+void CGameInstance::Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop)
 {
 	if (m_pSound == nullptr)
 		return;
-	return m_pSound->Play_Sound(pSoundKey, eID, fVolume);
+   return m_pSound->Play_Sound(pSoundKey, ppChannel, fVolume, bLoop);
 }
 
-void CGameInstance::PlayBGM(CSound::CHANNELID eID, _tchar* pSoundKey, _float fVolume)
+void CGameInstance::PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume)
 {
 	if (m_pSound == nullptr)
 		return;
-	return m_pSound->PlayBGM(eID,pSoundKey, fVolume);
+	return m_pSound->PlayBGM(ppChannel,pSoundKey, fVolume);
 }
 
-void CGameInstance::StopSound(CSound::CHANNELID eID)
+void CGameInstance::StopSound(FMOD::Channel** ppChannel)
 {
 	if (m_pSound == nullptr)
 		return;
-	return m_pSound->StopSound(eID);
+	return m_pSound->StopSound(ppChannel);
 }
 
 void CGameInstance::StopAll()
@@ -595,11 +568,11 @@ void CGameInstance::StopAll()
 	return m_pSound->StopAll();
 }
 
-void CGameInstance::SetChannelVolume(CSound::CHANNELID eID, _float fVolume)
+void CGameInstance::SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength)
 {
 	if (m_pSound == nullptr)
 		return;
-	return m_pSound->SetChannelVolume(eID, fVolume);
+	return m_pSound->SetChannelVolume(ppChannel, fDis, vLength);
 }
 
 void CGameInstance::LoadSoundFile(const _char* soundFile)
@@ -785,10 +758,7 @@ _vector CGameInstance::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 {
 	return m_pCalculator->PointNomal(fP1, fP2, fP3);
 }
-_bool CGameInstance::IsPicked(_float3* pOut, _bool IsPlayer)
-{
-	return m_pCalculator->isPicked(pOut, IsPlayer);
-}
+
 #pragma endregion
 
 #pragma region Font_Manager
@@ -887,7 +857,6 @@ _bool CGameInstance::isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange)
 void CGameInstance::Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
 {
     return m_pFrustum->Transform_To_LocalSpace(WorldMatrixInv);
-
 }
 
 #pragma endregion
@@ -911,11 +880,12 @@ void CGameInstance::Free()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pSound);
-	Safe_Release(m_pComponent_Manager);	
-	Safe_Release(m_pUI_Manager);
-	Safe_Release(m_pObject_Manager);
-	Safe_Release(m_pLevel_Manager);
+	Safe_Release(m_pComponent_Manager);
+    Safe_Release(m_pObject_Manager);
+    Safe_Release(m_pUI_Manager);
+    Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pGraphic_Device);
+
 }

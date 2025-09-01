@@ -2,7 +2,7 @@
 
 
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-textureCUBE		g_Texture;
+textureCUBE     g_SKYTexture;
 
 
 
@@ -55,7 +55,7 @@ PS_OUT PS_MAIN(PS_IN In)
 {
 	PS_OUT			Out = (PS_OUT)0;
 
-	Out.vColor = g_Texture.Sample(LinearSampler, In.vTexcoord);
+    Out.vColor = g_SKYTexture.Sample(LinearSampler, In.vTexcoord);
 
 
 	return Out;

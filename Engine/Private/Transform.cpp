@@ -29,7 +29,7 @@ void CTransform::LookAt(_fvector vAt)
     Set_TRANSFORM(T_LOOK, XMVector3Normalize(vLook) * vScaled.z);
 }
 
-void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigation, _bool Demage)
+void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigation, _bool JumpFall)
 {
     TRANSFORM Move{};
     _int Dir{};
@@ -57,12 +57,19 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
     // DOWN 이동일 때만 중력 가속도 적용
     if (MoveType == DOWN)
     {
-        _vector vGravity = XMVectorSet(0.f, -m_fGravity * fTimeDelta, 0.f, 0.f);
-        vAfterPos += vGravity;
+        if (JumpFall)
+        {
+            m_fVelocity -= m_fGravity * fTimeDelta;
+            vAfterPos += XMVectorSet(0.f, m_fVelocity, 0.f, 0.f);
+        }
+        else
+        {
+            vAfterPos += XMVectorSet(0.f, -m_fGravity * fTimeDelta, 0.f, 0.f);
+        }
     }
 
     _vector Slide{};
-    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide, Demage)) {
+    if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide)) {
        vPosition += Slide;
     }
     else
@@ -71,7 +78,7 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
     Set_TRANSFORM(T_POSITION, vPosition);
 }
 
-void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _int* isFall, CNavigation* pNavigation)
+void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _float* isFall, CNavigation* pNavigation)
 {
     m_fJumpVelocity -= m_fGravity * fTimeDelta;
 
@@ -99,11 +106,13 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _int*
         // 부드러운 착지를 위한 감속 처리
         if (!m_bIsLanding)
         {
+            m_fVelocity = m_fJumpVelocity;
             m_bIsLanding = true;
             m_fJumpVelocity = 0.f;
         }
         else
         {
+            m_fVelocity = m_fJumpVelocity;
             m_fJumpVelocity = 0.f;
             *Jumpcheck = false;
             m_bCanDoubleJump = true; // 착지하면 더블 점프 가능 복구
@@ -126,12 +135,9 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
     {
-        vPosition += XMVectorZero();
-
         if (bStop != nullptr)
             *bStop = true;
     }
-    else
 
     Set_TRANSFORM(T_POSITION, vAfterPos);
 }
@@ -151,7 +157,7 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
          vPosition += XMVectorZero();
     
          if (bStop != nullptr)
-             *bStop = false;
+             *bStop = true;
      }
      else
         vPosition = vAfterPos;
@@ -162,7 +168,7 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
     {
         XMVectorSetY(Get_TRANSFORM(CTransform::T_POSITION), YPos);
         if (bStop != nullptr)
-           *bStop = false;
+           *bStop = true;
     }
 }
 

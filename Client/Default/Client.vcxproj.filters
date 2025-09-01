@@ -85,12 +85,6 @@
     <Filter Include="02.GameObjects\03.Actor\NPC">
       <UniqueIdentifier>{ae52ede4-97f4-4dae-89e2-f4ee211d33bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\NPC\HealthBot">
-      <UniqueIdentifier>{aea053b6-84c9-4a1f-bc0e-11df88b50f70}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\NPC\HealthBot\Body">
-      <UniqueIdentifier>{776463e0-3f2d-404e-b3a9-648d7cac8a22}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Bullet">
       <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
     </Filter>
@@ -115,12 +109,6 @@
     <Filter Include="02.GameObjects\05. Effect">
       <UniqueIdentifier>{ac2f6e33-6b24-4d72-bf50-da424bf00c76}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\04.UI\PlayerUI\State">
-      <UniqueIdentifier>{33bbb4a7-14ae-45a4-8401-034eb7cc1a23}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\04.UI\PlayerUI\Shooting">
-      <UniqueIdentifier>{2810b300-687c-4e3c-834a-8e001329e019}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Bullet\Player">
       <UniqueIdentifier>{03aa1484-4972-4d10-954f-48035698f265}</UniqueIdentifier>
     </Filter>
@@ -132,9 +120,6 @@
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Berrle">
       <UniqueIdentifier>{8c196b0d-3930-43d4-a24c-84cf07d85e14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\05. Effect\Shoot">
-      <UniqueIdentifier>{2f15e3f3-ad55-47bd-b901-26b4a131c32c}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\ShockWave">
       <UniqueIdentifier>{39c9ab58-c735-4170-a077-6cbdbe47c592}</UniqueIdentifier>
@@ -163,17 +148,8 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot">
       <UniqueIdentifier>{da0b2d90-f0fe-4c2e-8947-dc98d01f1481}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\Body">
-      <UniqueIdentifier>{3734b442-2bbf-4f17-8bf5-793f60674080}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\State">
-      <UniqueIdentifier>{cb151bb3-3487-410c-8739-3e7fc2f07779}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn">
       <UniqueIdentifier>{38c4814b-355d-4a1a-a3e9-99db99392428}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\Body">
-      <UniqueIdentifier>{f985c137-4d68-46a0-9cf9-e696677d55ba}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\State">
       <UniqueIdentifier>{9ac50337-93a1-49a9-a1ff-550623ec7e55}</UniqueIdentifier>
@@ -181,29 +157,11 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly">
       <UniqueIdentifier>{72c149fe-d61e-4db9-bda3-070b7a27b561}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\Body">
-      <UniqueIdentifier>{68706e6c-4bc6-458e-a9be-36ef4f867cfb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot">
       <UniqueIdentifier>{bd243b8e-af26-4dab-a993-74e9e0845e54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\Body">
-      <UniqueIdentifier>{57a3b578-378c-4374-8b18-59d88a08d3fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\State">
-      <UniqueIdentifier>{af3122c3-4ce0-48a5-813c-619d644fc159}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\State">
-      <UniqueIdentifier>{1728ee3c-40f2-4b35-bb3a-7c4ec6d6f0ca}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss">
       <UniqueIdentifier>{99d8ddec-d756-4a55-9528-fc55e0a5e88b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\Body">
-      <UniqueIdentifier>{f2fd4784-5a7b-49c6-bb25-587d96ebf4ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\State">
-      <UniqueIdentifier>{86109062-672c-4181-ab0a-8299cbdaa565}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult">
       <UniqueIdentifier>{f3ca7d39-20fe-4521-8768-6c634d6d504f}</UniqueIdentifier>
@@ -217,12 +175,6 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\StateMachine\Node">
       <UniqueIdentifier>{10b44afc-99ed-4f2f-8c31-3e16a3702336}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Player\00.Defult">
-      <UniqueIdentifier>{a9c19ce8-be75-4340-970a-dd107403a9eb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Player\00.Defult\Node">
-      <UniqueIdentifier>{e1f9d1aa-87ee-45c2-8aba-c27ea9d7e37a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Player\01.Body">
       <UniqueIdentifier>{b3714dd1-c571-4890-bb9a-37830a175434}</UniqueIdentifier>
     </Filter>
@@ -231,6 +183,78 @@
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Player\03.State">
       <UniqueIdentifier>{c8c07a10-2c5c-48d6-8772-85e5ca12132c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player\03.State\00.Defult">
+      <UniqueIdentifier>{a9c19ce8-be75-4340-970a-dd107403a9eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player\03.State\00.Defult\Node">
+      <UniqueIdentifier>{e1f9d1aa-87ee-45c2-8aba-c27ea9d7e37a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI\00. State">
+      <UniqueIdentifier>{51d65165-e52e-4c40-b804-dc17a93fca79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Player\00.Container">
+      <UniqueIdentifier>{259e7f53-1433-4c8e-9401-2e2c648cd56b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot">
+      <UniqueIdentifier>{aea053b6-84c9-4a1f-bc0e-11df88b50f70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot\01.Body">
+      <UniqueIdentifier>{776463e0-3f2d-404e-b3a9-648d7cac8a22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container">
+      <UniqueIdentifier>{4b921956-7ef1-498b-8912-b1a6130c2f94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\00.Container">
+      <UniqueIdentifier>{96b7131e-27d4-4248-9561-1055d0255ec4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\01.Body">
+      <UniqueIdentifier>{f2fd4784-5a7b-49c6-bb25-587d96ebf4ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\02.State">
+      <UniqueIdentifier>{86109062-672c-4181-ab0a-8299cbdaa565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack">
+      <UniqueIdentifier>{e2537ef3-9925-48f6-91e2-86010d590fff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\00.Container">
+      <UniqueIdentifier>{50bb5400-f0cf-4e10-a4cf-1263b2b6ec5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\01.Body">
+      <UniqueIdentifier>{68706e6c-4bc6-458e-a9be-36ef4f867cfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\02.State">
+      <UniqueIdentifier>{1728ee3c-40f2-4b35-bb3a-7c4ec6d6f0ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\00.Container">
+      <UniqueIdentifier>{d6f8afe0-f83d-4ae7-ae5b-8fa97663d186}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\01.Body">
+      <UniqueIdentifier>{f985c137-4d68-46a0-9cf9-e696677d55ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\00.Container">
+      <UniqueIdentifier>{fe2eac53-5791-4b3d-86c6-be74fbfaf043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\01.Body">
+      <UniqueIdentifier>{3734b442-2bbf-4f17-8bf5-793f60674080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State">
+      <UniqueIdentifier>{cb151bb3-3487-410c-8739-3e7fc2f07779}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\00.Container">
+      <UniqueIdentifier>{a7b454c8-6ef0-4eb1-a24a-683becf69848}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\01.Body">
+      <UniqueIdentifier>{57a3b578-378c-4374-8b18-59d88a08d3fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\02.State">
+      <UniqueIdentifier>{af3122c3-4ce0-48a5-813c-619d644fc159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI\01.Weapon">
+      <UniqueIdentifier>{b5078865-5ecd-4c3a-823d-f0d94cd96945}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\01. Map\Trigger">
+      <UniqueIdentifier>{15cf0692-010a-4e87-a62c-e93757535a88}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -267,9 +291,6 @@
     <ClInclude Include="..\Public\Loading.h">
       <Filter>02.GameObjects\04.UI\Loading</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerUI.h">
-      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Cursor.h">
       <Filter>02.GameObjects\04.UI\Cursor</Filter>
     </ClInclude>
@@ -291,20 +312,14 @@
     <ClInclude Include="..\Public\Body_Player.h">
       <Filter>02.GameObjects\03.Actor\Player\01.Body</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Player.h">
-      <Filter>02.GameObjects\03.Actor\Player</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Weapon.h">
       <Filter>02.GameObjects\03.Actor\Player\02.Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\WeaponUI.h">
-      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\WeaPonIcon.h">
       <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_GunPawn.h">
-      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Stage1.h">
       <Filter>01.Level\01.GamePlay\Stage1</Filter>
@@ -318,47 +333,29 @@
     <ClInclude Include="..\Public\SpriteTexture.h">
       <Filter>02.GameObjects\04.UI\SpriteTex</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Aim.h">
-      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\JetFly.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Body_JetFly.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\Body</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BoomBot.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_BoomBot.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\InteractiveUI.h">
       <Filter>02.GameObjects\04.UI\InteractiveUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\HealthBot.h">
-      <Filter>02.GameObjects\03.Actor\NPC\HealthBot</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\MonsterHP.h">
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult\MonsterHP</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\GunPawn.h">
-      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Body_HealthBot.h">
-      <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MecanoBot.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot</Filter>
+      <Filter>02.GameObjects\03.Actor\NPC\00.HealthBot\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_MecanoBot.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_StageBoss.h">
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_BillyBoom.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Camera_Free.h">
       <Filter>02.GameObjects\99 Camera\FPV</Filter>
@@ -372,17 +369,8 @@
     <ClInclude Include="..\Public\BossHP.h">
       <Filter>02.GameObjects\04.UI\Boss UI\Boss HP</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\BillyBoom.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Loader.h">
       <Filter>01.Level\99.Loading\Loader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerEffectUI.h">
-      <Filter>02.GameObjects\04.UI\PlayerUI\State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\ShootingUI.h">
-      <Filter>02.GameObjects\04.UI\PlayerUI\Shooting</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerBullet.h">
       <Filter>02.GameObjects\03.Actor\Bullet\Player</Filter>
@@ -390,17 +378,11 @@
     <ClInclude Include="..\Public\Bullet.h">
       <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\ShootEffect.h">
-      <Filter>02.GameObjects\05. Effect\Shoot</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\ShockWave.h">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BossBullet_Berrle.h">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Shock.h">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BossBullet_Laser.h">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\Laser</Filter>
@@ -418,37 +400,37 @@
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult\StateMachine</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BoomBot_Attack.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BoomBot_Idle.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BoomBot_Move.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BoomBot_Dead.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BoomBot_Hit.h">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Monster.h">
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MecanoBot_Idle.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MecanoBot_Hit.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MecanoBot_Dead.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MecanoBot_Attack.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MecanoBot_Move.h">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GunPawn_Idle.h">
       <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\State</Filter>
@@ -466,52 +448,40 @@
       <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\JetFly_Idle.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\JetFly_Hit.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\JetFly_Dead.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\JetFly_Attack.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\JetFly_Move.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Idle.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Hit.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Dead.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BillyBoom_Barre.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BillyBoom_Bash.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BillyBoom_ShockWave.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\BillyBoom_Laser.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Intro.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Move.h">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Player_StateMachine.h">
-      <Filter>02.GameObjects\03.Actor\Player\00.Defult</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\03.State\00.Defult</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Player_StateNode.h">
-      <Filter>02.GameObjects\03.Actor\Player\00.Defult\Node</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\03.State\00.Defult\Node</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Player_Idle.h">
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
@@ -543,6 +513,63 @@
     <ClInclude Include="..\Public\Player_Sturn.h">
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Player_Health.h">
+      <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player_ShootingStateUI.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\00. State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player_StateUI.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\00. State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player.h">
+      <Filter>02.GameObjects\03.Actor\Player\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\HealthBot.h">
+      <Filter>02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom.h">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom_Barre.h">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom_Bash.h">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom_Laser.h">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BillyBoom_ShockWave.h">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\JetFly.h">
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GunPawn.h">
+      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MecanoBot.h">
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BoomBot.h">
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\00.Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player_HpUI.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\00. State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Aim.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\01.Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\WeaponUI.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\01.Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ShootEffect.h">
+      <Filter>02.GameObjects\04.UI\PlayerUI\01.Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trigger.h">
+      <Filter>02.GameObjects\01. Map\Trigger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -569,9 +596,6 @@
     <ClCompile Include="..\Private\Loading.cpp">
       <Filter>02.GameObjects\04.UI\Loading</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerUI.cpp">
-      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Cursor.cpp">
       <Filter>02.GameObjects\04.UI\Cursor</Filter>
     </ClCompile>
@@ -596,20 +620,11 @@
     <ClCompile Include="..\Private\Weapon.cpp">
       <Filter>02.GameObjects\03.Actor\Player\02.Weapon</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Player.cpp">
-      <Filter>02.GameObjects\03.Actor\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\WeaponUI.cpp">
-      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\WeaPonIcon.cpp">
       <Filter>02.GameObjects\02.Item\WeaPonIcon</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Body_GunPawn.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\Body</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\GunPawn.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_Stage1.cpp">
       <Filter>01.Level\01.GamePlay\Stage1</Filter>
@@ -623,41 +638,29 @@
     <ClCompile Include="..\Private\SpriteTexture.cpp">
       <Filter>02.GameObjects\04.UI\SpriteTex</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Aim.cpp">
-      <Filter>02.GameObjects\04.UI\PlayerUI</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Body_JetFly.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\Body</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BoomBot.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Body_BoomBot.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\InteractiveUI.cpp">
       <Filter>02.GameObjects\04.UI\InteractiveUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\HealthBot.cpp">
-      <Filter>02.GameObjects\03.Actor\NPC\HealthBot</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Body_HealthBot.cpp">
-      <Filter>02.GameObjects\03.Actor\NPC\HealthBot\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\NPC\00.HealthBot\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MonsterHP.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult\MonsterHP</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MecanoBot.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Body_MecanoBot.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_StageBoss.cpp">
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Body_BillyBoom.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Camera_Free.cpp">
       <Filter>02.GameObjects\99 Camera\FPV</Filter>
@@ -671,20 +674,11 @@
     <ClCompile Include="..\Private\BossHP.cpp">
       <Filter>02.GameObjects\04.UI\Boss UI\Boss HP</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerEffectUI.cpp">
-      <Filter>02.GameObjects\04.UI\PlayerUI\State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\ShootingUI.cpp">
-      <Filter>02.GameObjects\04.UI\PlayerUI\Shooting</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\PlayerBullet.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Bullet.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\ShootEffect.cpp">
-      <Filter>02.GameObjects\05. Effect\Shoot</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ShockWave.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
@@ -692,23 +686,14 @@
     <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Shock.cpp">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\BossBullet_Laser.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\Laser</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Particle_Explosion.cpp">
       <Filter>02.GameObjects\05. Effect\Particle</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\BillyBoom.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Fade.cpp">
       <Filter>02.GameObjects\04.UI\Fade</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\JetFly.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\StateNode.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult\StateMachine\Node</Filter>
@@ -717,37 +702,37 @@
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult\StateMachine</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BoomBot_Attack.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BoomBot_Idle.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BoomBot_Move.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BoomBot_Dead.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BoomBot_Hit.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Monster.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\00.Defult</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MecanoBot_Idle.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MecanoBot_Hit.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MecanoBot_Dead.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MecanoBot_Attack.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MecanoBot_Move.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GunPawn_Idle.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\State</Filter>
@@ -765,52 +750,40 @@
       <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\JetFly_Idle.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\JetFly_Hit.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\JetFly_Dead.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\JetFly_Attack.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\JetFly_Move.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Idle.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Hit.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Dead.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BillyBoom_Barre.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BillyBoom_Bash.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BillyBoom_ShockWave.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BillyBoom_Laser.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Intro.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Move.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player_StateMachine.cpp">
-      <Filter>02.GameObjects\03.Actor\Player\00.Defult</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\03.State\00.Defult</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player_StateNode.cpp">
-      <Filter>02.GameObjects\03.Actor\Player\00.Defult\Node</Filter>
+      <Filter>02.GameObjects\03.Actor\Player\03.State\00.Defult\Node</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player_Idle.cpp">
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
@@ -841,6 +814,63 @@
     </ClCompile>
     <ClCompile Include="..\Private\Player_Sturn.cpp">
       <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player_Health.cpp">
+      <Filter>02.GameObjects\03.Actor\Player\03.State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player_ShootingStateUI.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\00. State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player_StateUI.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\00. State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player.cpp">
+      <Filter>02.GameObjects\03.Actor\Player\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\HealthBot.cpp">
+      <Filter>02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom_Barre.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom_Bash.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom_Laser.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BillyBoom_ShockWave.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\JetFly.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GunPawn.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\03.GunPawn\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MecanoBot.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\02.MecanoBot\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BoomBot.cpp">
+      <Filter>02.GameObjects\03.Actor\Monster\01.BoomBot\00.Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player_HpUI.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\00. State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Aim.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\01.Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\WeaponUI.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\01.Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShootEffect.cpp">
+      <Filter>02.GameObjects\04.UI\PlayerUI\01.Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trigger.cpp">
+      <Filter>02.GameObjects\01. Map\Trigger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -31,14 +31,13 @@ public:
 	virtual HRESULT Render() override;	
 
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-	virtual CModel* Get_Model() override { return m_pModelCom; }
-	virtual _wstring Get_ComPonentName() override { return m_wModel; }
-	virtual _tchar* Get_ProtoName() override;
-	virtual _float check_BoxDist(_vector RayPos, _vector RayDir)override;
+     _wstring Get_ComPonentName(){ return m_wModel; }
+	_tchar* Get_ProtoName() ;
+	
 
-	virtual void Set_Buffer(_uint x, _uint y) override { m_DoorType = y; };
-
-	virtual _uint  Get_Scalra()override { return  m_DoorType; }
+                         
+   void Set_Door( _int DoorType){ m_DoorType = DoorType; };
+	 _uint Get_Door() { return  m_DoorType; }
 private:
 
 	CShader*					m_pShaderCom = { nullptr };

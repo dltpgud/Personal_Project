@@ -37,7 +37,7 @@ public:
     virtual HRESULT Render() override;
     virtual void HIt_Routine()override;
     virtual void Dead_Routine() override;
-    virtual void Set_CurrentHP(_float CurrentHp) override;
+    virtual void Set_CurrentHP(_int CurrentHp) override;
    
     void Change_State(_int state);
 
@@ -68,7 +68,7 @@ private:
     _int             m_iNextSkill {-1};
     _bool            m_bSkill = false;
     _bool            m_bFinishIntro = false;
-
+    
     mt19937 m_Rng{random_device{}()};
     uniform_int_distribution<int> m_Dist{0, 3};
 

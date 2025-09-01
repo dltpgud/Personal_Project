@@ -28,43 +28,40 @@ HRESULT CBody_HealthBot::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
+    if (FAILED(Init_CallBack()))
+        return E_FAIL;
+
     return S_OK;
 }
 
 void CBody_HealthBot::Priority_Update(_float fTimeDelta)
 {
-   
 }
 
 void CBody_HealthBot::Update(_float fTimeDelta)
 {
     _bool bMotionChange = {false}, bLoop = {false};
 
-    if (*m_pParentState == CHealthBot::ST_Dead && m_iCurMotion != CHealthBot::ST_Dead)
+    if ((*m_pParentState & CHealthBot::ST_DEAD))
     {
-        m_iCurMotion = CHealthBot::ST_Dead;
-        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
-        return;
+        m_bDeadState = true;
     }
 
-    if (*m_pParentState == CHealthBot::ST_Interactive && m_iCurMotion != CHealthBot::ST_Interactive)
+    if ((*m_pParentState & CHealthBot::ST_INTERACT) && m_iCurMotion != ST_Interactive)
     {
-        m_iCurMotion = CHealthBot::ST_Interactive;
-        m_RimDesc.fcolor = { 0.f,0.f,0.f,0.f };
+       m_iCurMotion = ST_Interactive;
         bMotionChange = true;
         bLoop = false;
     }
-    if (*m_pParentState == CHealthBot::ST_Idle && m_iCurMotion != CHealthBot::ST_Idle)
+    if ((*m_pParentState & CHealthBot::ST_IDLE) && m_iCurMotion != ST_Idle)
     {
-        m_iCurMotion = CHealthBot::ST_Idle;
-
+        m_iCurMotion = ST_Idle;
         bMotionChange = true;
-        bLoop = false;
+        bLoop = true;
     }
 
     if (*m_RimDesc.eState == RIM_LIGHT_DESC::STATE_RIM)
     {
-   
         m_RimDesc.fcolor = { 0.f,1.f,0.f,1.f };
         m_RimDesc.iPower = 5;
     }
@@ -81,18 +78,11 @@ void CBody_HealthBot::Update(_float fTimeDelta)
     if (true == m_pModelCom->Play_Animation(fTimeDelta))
     {
          m_bFinishAni = true;        
-        if(m_iCurMotion == CHealthBot::ST_Idle)
-         m_pModelCom->Set_Animation(m_iCurMotion, true);
-    }
-    else
-    {
-        m_bFinishAni = false;
     }
 }
 
 void CBody_HealthBot::Late_Update(_float fTimeDelta)
 {
-
     __super::Late_Update(fTimeDelta);
     if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
     { if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
@@ -102,7 +92,6 @@ void CBody_HealthBot::Late_Update(_float fTimeDelta)
 
 HRESULT CBody_HealthBot::Render()
 {
-
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
@@ -110,7 +99,6 @@ HRESULT CBody_HealthBot::Render()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
@@ -157,23 +145,27 @@ HRESULT CBody_HealthBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetBool", &m_RimDesc.eState, sizeof(_bool))))
-        return E_FAIL;
-
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimPow", &m_RimDesc.iPower, sizeof(_float))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    
-    _bool bshoot{};
-    if (m_iCurMotion == CHealthBot::ST_Dead)
-        bshoot = true;
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &bshoot, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
         return E_FAIL;
 
-        return S_OK;
+  return S_OK;
+}
+
+HRESULT CBody_HealthBot::Init_CallBack()
+{
+    m_pModelCom->Callback(ST_Interactive, 1, [this]()
+                          {
+                              m_pGameInstance->Play_Sound(L"ST_Healbot_Use_09_15_2023.ogg", nullptr, 1.f);
+                              m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
+                          });
+
+    return S_OK;
 }
 
 CBody_HealthBot* CBody_HealthBot::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

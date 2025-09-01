@@ -6,6 +6,7 @@
 #include "BossHP.h"
 #include "Particle_Explosion.h"
 #include "Fade.h"
+#include "Player.h"
 CBillyBoom::CBillyBoom(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CMonster{pDevice, pContext}
 {
 }
@@ -25,22 +26,20 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     Desc->fSpeedPerSec =  7.f;
     Desc->fRotationPerSec = XMConvertToRadians(120.f);
     Desc->JumpPower = 0.f;
+    Desc->iHP = 1000;
+    Desc->bOnCell = true;
+    Desc->fFixY = 0.5f;
+    Desc->iState = ST_IDLE;
 
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
-
-    m_iState = ST_IDLE;
-    m_fMAXHP = 1000.f;
-    m_fHP = m_fMAXHP;
-    m_bOnCell = true;
-    m_FixY = 0.5f;
-
+    
     if (FAILED(Add_Components()))
         return E_FAIL;
 
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
-
+    m_pGameInstance->Play_Sound(L"ST_BillyBoom_Presence.ogg", nullptr, 1.f);
     return S_OK;
 }
 
@@ -51,11 +50,7 @@ void CBillyBoom::Priority_Update(_float fTimeDelta)
    if (m_bFinishIntro)
        Change_Pattern(); 
 
-    if (m_iState != ST_HIT)
-        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-  
     __super::Priority_Update(fTimeDelta);
-    return ;
 }
 
 void CBillyBoom::Update(_float fTimeDelta)
@@ -77,25 +72,28 @@ HRESULT CBillyBoom::Render()
 void CBillyBoom::HIt_Routine()
 {
     m_iRim = RIM_LIGHT_DESC::STATE_RIM;
+
     if (m_bSkill)
         return;
+
     Compute_Angle();
     static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->ChangeState(CBillyBoom::ST_HIT);
-    m_pHP->Set_BossHP(m_fHP);
+    m_iHP -= static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Weapon_Info().Damage;
+    m_pHP->Set_BossHP(m_iHP);
 }
 
 void CBillyBoom::Dead_Routine()
 {
-    m_pHP->Set_BossHP(m_fHP);
+    m_pHP->Set_BossHP(m_iHP);
     static_cast<CBody_BillyBoom*>(m_PartObjects[PART_BODY])->ChangeState(CBillyBoom::ST_DEAD);
     m_bOnCell = false;
 }
 
-void CBillyBoom::Set_CurrentHP(_float CurrentHp)
+void CBillyBoom::Set_CurrentHP(_int CurrentHp)
 {
     if (m_bSkill)
         return;
-    m_fHP -= CurrentHp;
+    m_iHP -= CurrentHp;
 }
 
 void CBillyBoom::Change_State(_int state)
@@ -146,7 +144,7 @@ HRESULT CBillyBoom::Add_Components()
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = { 0.f, 0.f, 0.f };
 
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
         reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
 
@@ -170,15 +168,15 @@ HRESULT CBillyBoom::Add_PartObjects()
         return E_FAIL;
 
     CBossHPUI::CBossHPUI_DESC Desc{};
-    Desc.fMaxHP = m_fMAXHP;
-    Desc.fHP = m_fHP;
+    Desc.fMaxHP = m_iMAXHP;
+    Desc.fHP = m_iHP;
     Desc.Update = false;
     if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"BossHP", L"Prototype_GameObject_Boss_HP", &Desc)))
         return E_FAIL;
 
     m_pHP = static_cast<CBossHPUI*>(m_pGameInstance->Find_Clone_UIObj(L"BossHP"));
     Safe_AddRef(m_pHP);
-    m_pHP->Set_BossMaxHP(m_fMAXHP);
+    m_pHP->Set_BossMaxHP(m_iMAXHP);
 
     return S_OK;
 }

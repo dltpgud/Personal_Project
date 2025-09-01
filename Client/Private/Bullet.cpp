@@ -3,7 +3,6 @@
 #include "GameInstance.h"
 #include "GameObject.h"
 #include "ShockWave.h"
-#include "Shock.h"
 #include "BillyBoom.h"
 #
 CBullet::CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
@@ -21,17 +20,14 @@ HRESULT CBullet::Initialize_Prototype()
 
 HRESULT CBullet::Initialize(void* pArg)
 {
-
    CBULLET_DESC* pDesc = static_cast<CBULLET_DESC*>(pArg);
-   m_pTagetPos = pDesc->pTagetPos;
-    m_pParentState = pDesc->state;
+     m_pTagetPos                     = pDesc->pTagetPos;
+     m_pScale                        = pDesc->fScale;
+     
    if (FAILED(__super::Initialize(pDesc)))
        return E_FAIL; 
-  
-   if (FAILED(BIND_BULLET_TYPE()))
-        return E_FAIL;
 
-   if (FAILED(Add_Components()))
+   if (FAILED(Add_Components(pDesc)))
         return E_FAIL;
 
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
@@ -39,6 +35,7 @@ HRESULT CBullet::Initialize(void* pArg)
     _vector Dir = m_pTagetPos - m_vPos;
     Dir = XMVectorSetW(Dir, 0.f);
     m_vDir = XMVector3Normalize(Dir);
+
     m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 
     if (0.f == m_fLifeTime)
@@ -50,49 +47,35 @@ HRESULT CBullet::Initialize(void* pArg)
 void CBullet::Priority_Update(_float fTimeDelta)
 {
     __super::Priority_Update(fTimeDelta);
-    if (m_iActorType == CSkill::MONSTER::TYPE_BILLYBOOM)
-    {
-        if (m_pParentState == CBillyBoom::ST_DEAD)
-            m_bDead = true;
-    }
-
+    
     if (m_iSkillType == STYPE_SHOCKWAVE)
     {
-        if (m_bjump == true)
-          m_pTransformCom->Go_jump_Dir(fTimeDelta, m_vDir, 1.f, nullptr, &m_bjump);
-        else
-            Dead_Rutine(fTimeDelta);
+        m_pTransformCom->Go_jump_Dir(fTimeDelta, m_vDir, 1.f, m_pNavigationCom, &m_bMoveStop);
+      
     }
-    return ;
-
+    else
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir, m_pNavigationCom, &m_bMoveStop);
 }
 
 void CBullet::Update(_float fTimeDelta)
-{
-
- 
-    if (m_iSkillType != STYPE_SHOCKWAVE)
-    {
-        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir, m_pNavigationCom, &m_bMoveStop);
-     
-       if (true == m_bMoveStop)
-            m_bDead = true;
-    }
-
+{  
+    if (true == m_bMoveStop)
+            Dead_Rutine();
 
     __super::Update(fTimeDelta);
 }
 
 void CBullet::Late_Update(_float fTimeDelta)
 {
+    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 1.5f))
+        return;
 
-    if (true == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 1.5f))
-    {
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-            return;
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
-            return;
-    }
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
+        return;
+
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
+        return;
+    
     if (FAILED(m_pGameInstance->Add_MonsterBullet(this)))
         return;
 
@@ -119,165 +102,78 @@ HRESULT CBullet::Render()
     return S_OK;
 }
 
-void CBullet::Dead_Rutine(_float fTimeDelta)
+void CBullet::Dead_Rutine()
 {
-    if (true == m_bMakeWave && m_iSkillType ==STYPE_SHOCKWAVE)
+    if (m_iSkillType == STYPE_SHOCKWAVE)
     {
         CShockWave::CShockWave_DESC Desc{};
-        Desc.fDamage = m_pDamage;
+        Desc.iDamage = m_iDamage;
         Desc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
-        Desc.iActorType = CSkill::MONSTER::TYPE_BILLYBOOM;
+        Desc.iActorType = CSkill::BOSS_MONSTER;
         Desc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Skill"), L"Prototype_GameObject_ShockWave",
-                                                 &Desc);
-        CShock::CShock_DESC SDesc{};
-        SDesc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Skill"), L"Prototype_GameObject_Shock",
-                                                 &SDesc);
-
-        m_bMakeWave = false;
+        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Skill"), L"Prototype_GameObject_ShockWave",&Desc);
     }
 
     m_bDead = true;
-
 }
 
-void CBullet::Reset(void* Arg)
+HRESULT CBullet::Add_Components(void* pArg)
 {
-    CBULLET_DESC* pDesc = static_cast<CBULLET_DESC*>(Arg);
-    m_pTagetPos = pDesc->pTagetPos;
-    m_pParentState = pDesc->state;
-    m_vPos = pDesc->vPos;
-    m_fLifeTime = pDesc->fLifeTime;
-    m_pDamage = pDesc->fDamage;
-    m_iActorType = pDesc->iActorType;
-    m_iSkillType = pDesc->iSkillType;
+    CBULLET_DESC* pDesc = static_cast<CBULLET_DESC*>(pArg);
 
-    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
-    _vector Dir = m_pTagetPos - m_vPos;
-
-    Dir = XMVectorSetW(Dir, 0.f);
-    m_vDir = XMVector3Normalize(Dir);
-    // m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
-
-    if (FAILED(BIND_BULLET_TYPE()))
-        return ;
-
-    if (0.f == m_fLifeTime)
-        m_fLifeTime = 1.f;
-}
-
-
-HRESULT CBullet::Add_Components()
-{
-  CBounding_Sphere::BOUND_SPHERE_DESC		CBounding_Sphere{};
-  _float3 Center{}, Extents{};
-  CBounding_Sphere.fRadius = m_fCollSize;
-  CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
-
-  if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
-      TEXT("Com_Collider_Sphere"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
-      return E_FAIL;
-
-  if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
-      reinterpret_cast<CComponent**>(&m_pNavigationCom))))
-      return E_FAIL;
-
-  if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_MonsterBullet"),
-      TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
-      return E_FAIL;
-
-  if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
-      TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
-      return E_FAIL;
-
-  if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferPoint"),
-      TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
-      return E_FAIL;
+    CBounding_Sphere::BOUND_SPHERE_DESC	 CBounding_Sphere{};
+    _float3 Center{}, Extents{};
+    CBounding_Sphere.fRadius = pDesc->fRadius;
+    CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
+    
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
+        return E_FAIL;
+    
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+        reinterpret_cast<CComponent**>(&m_pNavigationCom))))
+        return E_FAIL;
+    
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_MonsterBullet"),
+        TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
+        return E_FAIL;
+    
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
+        TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom))))
+        return E_FAIL;
+    
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferPoint"),
+        TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
+        return E_FAIL;
 
   return S_OK;
 }
 
 HRESULT CBullet::Bind_ShaderResources()
 {
-  if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-      return E_FAIL;
-
-  if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
-      return E_FAIL;
-
-  if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
-      return E_FAIL;
-
-  if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
-      return E_FAIL;
-
-  if (FAILED(m_pShaderCom->Bind_RawValue("g_PSize", &m_pScale, sizeof(_float2))))
-      return E_FAIL;
-
-  if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbStart", &m_Clolor[CSkill::COLOR::CSTART], sizeof(_float4))))
-      return E_FAIL;
-
-  if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbEnd", &m_Clolor[CSkill::COLOR::CEND], sizeof(_float4))))
-      return E_FAIL;
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+    
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+    
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+    
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
+        return E_FAIL;
+    
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_PSize", &m_pScale, sizeof(_float2))))
+        return E_FAIL;
+    
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbStart", &m_Clolor[CSkill::COLOR::CSTART], sizeof(_float4))))
+        return E_FAIL;
+    
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbEnd", &m_Clolor[CSkill::COLOR::CEND], sizeof(_float4))))
+        return E_FAIL;
 
   return S_OK;
 }
-
-HRESULT CBullet::BIND_BULLET_TYPE()
-{
-    m_fCollSize = 0.1f;
-    switch (m_iActorType)
-    {
-     
-    case CSkill::MONSTER::TYPE_GUNPAWN:
-        m_pScale.x = 0.2f;
-        m_pScale.y = 0.2f;
-        m_Clolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
-        m_Clolor[CSkill::COLOR::CEND] = _float4(1.f, 0.f, 0.f, 1.f);
-        break;
-
-    case CSkill::MONSTER::TYPE_BOOMBOT:
-        m_pScale.x = 0.2f;
-        m_pScale.y = 0.2f;
-        m_Clolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
-        m_Clolor[CSkill::COLOR::CEND] = _float4(1.f, 0.1f, 1.f, 1.f); 
-        break;
-
-    case CSkill::MONSTER::TYPE_JETFLY:
-        m_pScale.x = 0.2f;
-        m_pScale.y = 0.2f;
-        m_Clolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
-        m_Clolor[CSkill::COLOR::CEND] = _float4(1.f, 0.f, 0.f, 1.f);
-        break;
-
-    case CSkill::MONSTER::TYPE_MECANOBOT:
-        m_pScale.x = 0.2f;
-        m_pScale.y = 0.2f;
-        m_Clolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
-        m_Clolor[CSkill::COLOR::CEND] = _float4(1.f, 0.f, 0.f, 1.f);
-        break;
-    case CSkill::MONSTER::TYPE_BILLYBOOM:
-        m_pScale.x = 1.f;
-        m_pScale.y = 1.f;
-        m_Clolor[CSkill::COLOR::CSTART] = _float4(1.f, 0.f, 0.f, 1.f);
-        m_Clolor[CSkill::COLOR::CEND] = _float4(1.f, 1.f, 0.f, 1.f); 
-        break;
-    }
-
-    switch (m_iSkillType)
-    {
-    case CSkill::STYPE_SHOCKWAVE:
-        m_pScale.x = 0.6f;
-        m_pScale.y = 0.6f;
-        m_Clolor[CSkill::COLOR::CSTART] = _float4(1.f, 1.f, 0.f, 1.f);
-        m_Clolor[CSkill::COLOR::CEND] = _float4(1.f, 0.f, 0.f, 1.f);
-        m_fCollSize = 0.5f;
-        break;
-    }
-    return S_OK;
-}
-
 
 CBullet* CBullet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

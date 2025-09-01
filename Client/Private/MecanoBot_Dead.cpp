@@ -1,8 +1,6 @@
 #include"stdafx.h"
 #include "MecanoBot_Dead.h"
-#include "MecanoBot.h"
 #include "GameInstance.h"
-#include "Body_MecanoBot.h"
 
 CMecanoBot_Dead::CMecanoBot_Dead()
 {
@@ -14,7 +12,7 @@ HRESULT CMecanoBot_Dead::Initialize(void* pArg)
 	__super::Initialize(pDesc);
 
 	CStateNode::STATENODE_DESC pNodeDesc{};
-        pNodeDesc.iCurrentState = 10; // 16;
+    pNodeDesc.iCurrentState = 10; 
     pNodeDesc.bIsLoop = true;
     pNodeDesc.pParentModel = m_pParentModel;
     pNodeDesc.iNextStateIdx = 0;
@@ -24,18 +22,18 @@ HRESULT CMecanoBot_Dead::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CMecanoBot_Dead::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CMecanoBot_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-    dynamic_cast<CBody_MecanoBot*>(m_pParentPartObject)->Set_DeadState(true);
+    m_pParentPartObject->Set_DeadState(true);
 
-    if (1.f == dynamic_cast<CBody_MecanoBot*>(m_pParentPartObject)->Get_threshold())
+    if (1.f == m_pParentPartObject->Get_threshold())
         m_pParentObject->Set_Dead(true);
 
-     return  __super::StateMachine_Playing(fTimeDelta);
+   return __super::StateMachine_Playing(fTimeDelta, pRim);
 }      
-void CMecanoBot_Dead::Reset_StateMachine()
+void CMecanoBot_Dead::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CMecanoBot_Dead* CMecanoBot_Dead::Create(void* pArg)

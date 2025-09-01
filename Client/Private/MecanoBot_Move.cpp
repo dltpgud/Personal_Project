@@ -1,9 +1,8 @@
 ﻿#include"stdafx.h"
 #include "MecanoBot_Move.h"
-#include "MecanoBot.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-#include "Body_MecanoBot.h"
+
 CMecanoBot_Move::CMecanoBot_Move()
 {
 }
@@ -45,22 +44,8 @@ HRESULT CMecanoBot_Move::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-    // nullptr 체크 추가
-    if (m_pParentObject == nullptr || m_fLength == nullptr)
-    {
-        Reset_StateMachine();
-        return Result::Finished;
-    }
-
-    CMecanoBot* pMecanoBot = dynamic_cast<CMecanoBot*>(m_pParentObject);
-    if (pMecanoBot == nullptr || pMecanoBot->Get_Navi() == nullptr)
-    {
-        Reset_StateMachine();
-        return Result::Finished;
-    }
-
     if (HasFlag(PAUSED))
         return Result::None;
 
@@ -69,7 +54,7 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta)
 
     if (m_iNextIndex < 0 || m_iNextIndex >= static_cast<_int>(m_StateNodes.size()))
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
 
@@ -81,19 +66,21 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta)
     if (m_iCurIndex != m_iNextIndex)
     {
         if (m_iNextIndex == GO)
-            m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", CSound::SOUND_MONSTER_ROLL2, 0.2f);
+            m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", &m_pChannel, 1.f, true);
         if (m_iNextIndex == BACK)
-            m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", CSound::SOUND_MONSTER_ROLL2, 0.2f);
+            m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", &m_pChannel, 1.f, true);
 
         m_iCurIndex = m_iNextIndex;
         m_StateNodes[m_iCurIndex]->State_Enter();
     }
+     m_pGameInstance->SetChannelVolume( &m_pChannel, 80.f,
+     m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
 
-      _bool isFall = pMecanoBot->Get_Navi()->ISFall();
+      _bool isFall = m_pParentObject->Get_Navigation()->Get_bFalling();
 
-         if (true == isFall)
+      if (true == isFall)
       {
-          Reset_StateMachine();
+          Reset_StateMachine(pRim);
           return Result::Finished;
       }
 
@@ -103,34 +90,30 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta)
         if (m_pGameInstance->Get_Player()->Get_onCell())
         {
             m_pGameInstance->Add_Job(
-                [this]()
+                [&]()
                 {
-                    dynamic_cast<CMecanoBot*>(m_pParentObject)
-                        ->Set_Taget(
-                            m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                   m_pParentObject->Get_Navigation()
+                        ->Set_Taget(m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
                 });
-            if (m_pParentObject->Get_Transform()->FollowPath(pMecanoBot->Get_Navi(), fTimeDelta))
+            if (m_pParentObject->Get_Transform()->FollowPath(m_pParentObject->Get_Navigation(), fTimeDelta))
             {
-                Reset_StateMachine();
+                Reset_StateMachine(pRim);
                 return Result::Finished;
             }
         }
         else
-            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,
-                                                      dynamic_cast<CMecanoBot*>(m_pParentObject)->Get_Navi());
+            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta, m_pParentObject->Get_Navigation());
     }
     else if (*m_fLength <= 20.f && *m_fLength >= 15.f)
     {
-        Reset_StateMachine();
+        Reset_StateMachine(pRim);
         return Result::Finished;
     }
 
     if (m_iCurIndex == BACK && false == isFall)
     {
-
-       m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta,
-                                                  pMecanoBot->Get_Navi());
-        m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
+       m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, m_pParentObject->Get_Navigation());
+       m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
     }
   
   if( m_StateNodes[m_iCurIndex]->State_Processing(fTimeDelta))
@@ -143,7 +126,7 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta)
         }
         else
         {
-            Reset_StateMachine();
+            Reset_StateMachine(pRim);
             SetFlag(FINISHED);
             return Result::Finished;
         }
@@ -151,10 +134,10 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta)
     return Result::Running;
 }
 
-void CMecanoBot_Move::Reset_StateMachine()
+void CMecanoBot_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(CSound::SOUND_MONSTER_ROLL2);
-   __super::Reset_StateMachine();
+    m_pGameInstance->StopSound(&m_pChannel);
+    __super::Reset_StateMachine(pRim);
 }
 
 CMecanoBot_Move* CMecanoBot_Move::Create(void* pArg)

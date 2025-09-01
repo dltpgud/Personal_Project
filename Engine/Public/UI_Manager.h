@@ -34,8 +34,7 @@ public:
     void Clear(_uint iClearLevelID);
     void ShakingEvent(_float fTimeDelta);
 
-    HRESULT Set_OpenUI(const _uint& uid, _bool open);
-    HRESULT Set_OpenUI_Inverse(const _uint& Openuid, const _uint& Cloaseduid);
+    HRESULT Set_OpenUI(_bool bOpen, const _wstring& strCloneTag,class CGameObject* Owner = nullptr);
     HRESULT Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY );
     HRESULT UI_shaking(const _uint& uID,_float fTimeDelta);
     HRESULT ADD_UI_ShakingList(class CUI* uiobj);

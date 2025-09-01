@@ -3,7 +3,7 @@
 #include "Player_StateMachine.h"
 #include "Weapon.h"
 #include "Body_Player.h"
-#include "ShootingUI.h"
+#include "Player_ShootingStateUI.h "
 
 CPlayer_Shoot::CPlayer_Shoot()
 {
@@ -14,19 +14,10 @@ HRESULT CPlayer_Shoot::Initialize(void* pDesc)
 	if(FAILED (__super::Initialize(pDesc)))
 		return E_FAIL;
 
-    CShootingUI::CShootingUI_DESC SDesc{};
-    SDesc.iWeaPonTYPE = m_pCurWeapon;
-    SDesc.iWeaPonState = CWeapon::WS_SHOOT;
-    SDesc.fX = g_iWinSizeX * 0.7f;
-    SDesc.fY = g_iWinSizeY * 0.57f;
-    SDesc.fZ = 0.001f;
-    SDesc.fSizeX = 100.f;
-    SDesc.fSizeY = 100.f;
-    SDesc.UID = UIID_PlayerShooting;
-    SDesc.Update = false;
-    m_pGameInstance->Add_UI_To_CLone(L"ShootingShoot", L"Prototype GameObject_ShootingUI", &SDesc);
-    m_pShootingUI = static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"));
+    m_pShootingUI = static_cast<CPlayer_ShootingStateUI*>(m_pGameInstance->Find_Clone_UIObj(L"Player_ShootingUI"));
     Safe_AddRef(m_pShootingUI);
+    m_pAutoShootingUI = static_cast<CPlayer_ShootingStateUI*>(m_pGameInstance->Find_Clone_UIObj(L"Player_AutoShootingUI"));
+    Safe_AddRef(m_pAutoShootingUI);
 
     if (FAILED(UI_CallBack()))
         return S_OK;
@@ -34,13 +25,11 @@ HRESULT CPlayer_Shoot::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CPlayer_Shoot::State_Enter(_uint* pState)
+void CPlayer_Shoot::State_Enter(_uint* pState, _uint* pPreState)
 {
-    static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingReload"))->Set_Open(false);
-    static_cast<CShootingUI*>(m_pGameInstance->Find_Clone_UIObj(L"ShootingShoot"))->Set_Open(false);
-
     _int CurMotion{};
-
+    
+    // 점프 상태일 때도 일반 총쏘기 애니메이션 사용 (점프 총쏘기 애니메이션이 없으므로)
     switch (*m_pCurWeapon)
     {
     case CWeapon::HendGun: 
@@ -58,83 +47,65 @@ void CPlayer_Shoot::State_Enter(_uint* pState)
     default: break;
     }
     
-    //*pState &= ~MOV_HIT;
-
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
+
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_SHOOT;
     m_StateDesc.bLoop = m_bAutoFire;
 
-    __super::State_Enter(pState);
+    __super::State_Enter(pState, pPreState);
 }
 
-_bool CPlayer_Shoot::State_Processing(_float fTimedelta, _uint* pState)
+_bool CPlayer_Shoot::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
     if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0)
         return true;
 
     if (false == m_bAutoFire) // 단발
     {
-        // 단발 모드에서는 애니메이션이 끝나면 발사 종료
-        if (__super::State_Processing(fTimedelta, pState))
+        if (__super::State_Processing(fTimedelta, pState, pPreState))
         {
             return true;
         }
         return false;
     }
-
+    
     if (m_bAutoFire) // 연사
     {
-        // 마우스를 떼면 연사 종료
         if (m_pGameInstance->Get_DIMouseUp(MOUSEKEYSTATE::DIM_LB))
         {
+            m_bAutoFire = false;
+            m_fLastFireTime = 0.f;
+
             return true;
         }
         else
         {
             m_fLastFireTime += fTimedelta;
       
-            // 발사 속도에 따라 새로운 발사
             if (m_fLastFireTime >= m_pParentObject->Get_Weapon_Info().fFireRate)
             {
                 m_fLastFireTime = 0.f;
-                // 새로운 발사 애니메이션 시작
-                __super::State_Enter(pState);
+              
+                __super::State_Enter(pState, pPreState);
             }
-
-            // 애니메이션 재생
-            __super::State_Processing(fTimedelta, pState);
+   
+            __super::State_Processing(fTimedelta, pState, pPreState);
         }
     }
-
+    
     return false;
 }
 
 _bool CPlayer_Shoot::State_Exit(_uint* pState)
 {
-    m_pShootingUI->Set_Open(false);
-
     m_bAutoFire = false;
     m_fLastFireTime = 0.f;
-   
- 
-    if ((*pState & MOV_SPRINT) != 0)
+    m_pShootingUI->Set_Open(false);
+    m_pAutoShootingUI->Set_Open(false);
+    if (!m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::DIM_LB))
     {
-        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_SPRINT, true);
+        return true;
     }
-    else if ((*pState & MOV_RUN) != 0)
-    {
-        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_RUN, true);
-    }
-    else if ((*pState & MOV_JUMP) != 0)
-    {
-        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_JUMP_RUN_LOOP, true);
-    }
-    else
-    {
-        m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_IDLE, true);
-    }
-    
-    m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_WEAPON, CWeapon::WS_IDLE, true);
     
     return true;
 }
@@ -143,19 +114,18 @@ void CPlayer_Shoot::Init_CallBack_Func()
 {
     m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 3,[this]()
                                     {
-                                      m_pGameInstance->Play_Sound(L"ST_Handgun_PF_Shoot.ogg", CSound::SOUND_BGM, 1.f);
+                                      m_pGameInstance->Play_Sound(L"ST_Handgun_PF_Shoot.ogg",  &m_pChannel, 1.f);
                                     });
     m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_SHOOT, 3, [this]()
-                                    {
-                                      m_pGameInstance->Play_Sound(L"ST_AssaultRifle_PF_Shoot.ogg", CSound::SOUND_BGM, 1.f);
+                                    { m_pGameInstance->Play_Sound(L"ST_AssaultRifle_PF_Shoot.ogg", &m_pChannel, 1.f);
                                     });
     m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_SHOOT, 3, [this]()
                                     { 
-                                      m_pGameInstance->Play_Sound(L"ST_MissileGatling_PF_Shoot.ogg", CSound::SOUND_BGM, 1.f);
+                                      m_pGameInstance->Play_Sound(L"ST_MissileGatling_PF_Shoot.ogg", &m_pChannel, 1.f);
                                     });
     m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_SHOOT, 3, [this]()
                                     { 
-                                      m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_SF_Shoot_A.ogg", CSound::SOUND_BGM, 1.f);
+                                      m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_SF_Shoot_A.ogg", &m_pChannel, 1.f);
                                     });
 }
 
@@ -174,25 +144,28 @@ void CPlayer_Shoot::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Shoot::CanEnter(_uint* pState) 
 {
-    if ((*pState & (BEH_SHOOT | BEH_RELOAD | MOV_STURN)) != 0)
+    // 점프 중에도 총쏘기가 가능하도록 MOV_FALL 체크 제거
+    // if (*pState & MOV_FALL)
+    //     return false;
+         
+     if ((*pState & (BEH_RELOAD | BEH_SHOOT | MOV_STURN | MOV_HIT)) != 0)
+         return false;
+    
+    if (true == m_pParentObject->GetFlag(CPlayer::FLAG_KEYLOCK))
         return false;
 
-    // 탄약이 없으면 발사 불가
-    if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0)
+    if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0 ||
+        m_pParentObject->Get_Weapon_Info().iCurBullet > m_pParentObject->Get_Weapon_Info().iMaxBullet)
         return false;
 
-
-    // 마우스 좌클릭 입력 처리
     if (m_pGameInstance->Get_DIMouseDown(MOUSEKEYSTATE::DIM_LB))
     {
-        // 단발 
         m_bAutoFire = false;
         return true;
     }
     
     if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::DIM_LB))
     {
-        // 연사 
         m_bAutoFire = true;
         return true;
     }
@@ -202,54 +175,88 @@ _bool CPlayer_Shoot::CanEnter(_uint* pState)
 
 _bool CPlayer_Shoot::CheckInputCondition(_uint stateFlags) 
 {
+    if (stateFlags & (MOV_STURN | MOV_HIT))
+    {
+        m_pShootingUI->Set_Open(false);
+        m_pAutoShootingUI->Set_Open(false);
+        m_bAutoFire = false;
+        m_fLastFireTime = 0.f;
+        return false;
+    }
+    
+    if (m_pGameInstance->Get_DIMouseUp(MOUSEKEYSTATE::DIM_LB))
+    {
+        m_bAutoFire = false;
+        m_fLastFireTime = 0.f;
+        m_pShootingUI->Set_Open(false);
+        m_pAutoShootingUI->Set_Open(false);
+        return false;
+    }
+    
     return true;
 }
 
 HRESULT CPlayer_Shoot::UI_CallBack()
 {   
-    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 4,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 3,[this]()
                                     {  
                                       m_pShootingUI->Set_RandomPos(true, false, false);
                                       m_pShootingUI->Set_Open(true);
+
+                                      if (m_bAutoFire)
+                                      {
+                                          m_pAutoShootingUI->Set_Open(true);
+                                          m_pAutoShootingUI->Set_RandomPos(true, false, false);
+                                      }
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon, 0.2f, 0.2f, 0.2f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerHP, 0.2f, -0.2f, 0.2f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon_Aim, 0.2f, 0.2f,-0.2f);
                                       m_pGameInstance->Set_UI_shaking(UIID_BossHP, 0.2f, 0.2f,-0.2f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 15,[this](){m_pShootingUI->Set_Open(false);});
 
-    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_SHOOT, 4,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_SHOOT, 3,[this]()
                                     {
                                       m_pShootingUI->Set_RandomPos(true, false, false);
                                       m_pShootingUI->Set_Open(true);
+
+                                      if (m_bAutoFire)
+                                      {
+                                          m_pAutoShootingUI->Set_Open(true);
+                                          m_pAutoShootingUI->Set_RandomPos(true, false, false);
+                                      }
+
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon, 0.2f, 0.3f, 0.3f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerHP, 0.2f, -0.3f, 0.3f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon_Aim, 0.2f, 0.3f,-0.3f);
                                       m_pGameInstance->Set_UI_shaking(UIID_BossHP, 0.2f, 0.3f,-0.3f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_SHOOT, 15,[this](){m_pShootingUI->Set_Open(false);});
 
-    m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_SHOOT, 4,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_SHOOT, 3,[this]()
                                     {
                                       m_pShootingUI->Set_RandomPos(true, false, false);
                                       m_pShootingUI->Set_Open(true);
+
+                                      if (m_bAutoFire)
+                                      {
+                                          m_pAutoShootingUI->Set_Open(true);
+                                          m_pAutoShootingUI->Set_RandomPos(true, false, false);
+                                      }
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon, 0.2f, 0.6f, 0.6f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerHP, 0.2f, -0.6f, 0.6f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon_Aim, 0.2f, 0.6f,-0.6f);
                                       m_pGameInstance->Set_UI_shaking(UIID_BossHP, 0.2f, 0.6f,-0.6f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_SHOOT, 15,[this]() { m_pShootingUI->Set_Open(false); });
 
-    m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_SHOOT, 4,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_SHOOT, 3,[this]()
                                     {
                                       m_pShootingUI->Set_RandomPos(true, false, false);
                                       m_pShootingUI->Set_Open(true);
+
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon, 0.2f, 1.f, 1.f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerHP, 0.2f, -1.f, 1.f);
                                       m_pGameInstance->Set_UI_shaking(UIID_PlayerWeaPon_Aim, 0.2f, 1.f,-1.f); 
                                       m_pGameInstance->Set_UI_shaking(UIID_BossHP, 0.2f, 1.f,-1.f);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_SHOOT, 15,[this]() { m_pShootingUI->Set_Open(false); });
 
     return S_OK;
 }
@@ -271,4 +278,5 @@ void CPlayer_Shoot::Free()
 {
 	__super::Free();
     Safe_Release(m_pShootingUI);
+    Safe_Release(m_pAutoShootingUI);
 }

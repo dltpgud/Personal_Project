@@ -22,7 +22,7 @@ public:
 		_vector vPos{};
 		_vector vTgetPos{};
 		_vector Local{};
-	const _float4x4* WorldPtr{};
+	    const _float4x4* WorldPtr{};
 		_uint iWeaponType{};
 	}CShootEffect_DESC;
 private:

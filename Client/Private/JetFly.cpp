@@ -4,6 +4,7 @@
 #include "Weapon.h"
 #include "MonsterHP.h"
 #include "Body_JetFly.h"
+#include "Player.h"
 CJetFly::CJetFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CMonster{pDevice, pContext}
 {
 }
@@ -23,13 +24,13 @@ HRESULT CJetFly::Initialize(void* pArg)
     Desc->fSpeedPerSec = 5.f;
     Desc->fRotationPerSec = XMConvertToRadians(90.f);
     Desc->JumpPower = 3.f;
+    Desc->iHP = 100;
+    Desc->bOnCell = true;
+    Desc->fFixY = 5.f;
+    Desc->iState = ST_IDLE;
+
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
-
-    m_fMAXHP = 100.f;       
-    m_fHP = m_fMAXHP;
-    m_bOnCell = { true };
-    m_FixY = 5.f;
 
     if (FAILED(Add_Components()))
         return E_FAIL;
@@ -37,25 +38,18 @@ HRESULT CJetFly::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-    m_iState = ST_MOVE;
-
     return S_OK;
 }
 
 void CJetFly::Priority_Update(_float fTimeDelta)
 {
     Compute_Length();
-    if (m_iState != ST_HIT)
-        m_iRim = RIM_LIGHT_DESC::STATE_NORIM;
-
-    
-        __super::Priority_Update(fTimeDelta);
-    return ;
+    __super::Priority_Update(fTimeDelta);
 }
 
 void CJetFly::Update(_float fTimeDelta)
 {
-        __super::Update(fTimeDelta);
+    __super::Update(fTimeDelta);
 }
 
 void CJetFly::Late_Update(_float fTimeDelta)
@@ -73,15 +67,23 @@ void CJetFly::HIt_Routine()
 {
      Compute_Angle();
      static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_HIT);
-     m_iRim = RIM_LIGHT_DESC::STATE_RIM;
-     static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_fHP);
+     m_iHP -= static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Get_Weapon_Info().Damage;
+     static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_iHP);
      static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_HitStart(true);
+}
+void CJetFly::Wake_up()
+{
+    static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
+}
+
+void CJetFly::Seeping()
+{
+    static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
 }
 
 void CJetFly::Dead_Routine()
 {
     static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_DEAD);
-  
     Erase_PartObj(PART_HP);
 }
 
@@ -94,7 +96,7 @@ HRESULT CJetFly::Add_Components()
     CBounding_Sphere.vCenter = _float3(0.f, 0.5f, 0.f);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
-        TEXT("Com_Collider_Sphere"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
+        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
         return E_FAIL;
 
     CNavigation::NAVIGATION_DESC		Desc{};
@@ -119,8 +121,8 @@ HRESULT CJetFly::Add_PartObjects()
         return E_FAIL;
 
     CMonsterHP::CMonsterHP_DESC HpDesc{};
-    HpDesc.fMaxHP = m_fMAXHP;
-    HpDesc.fHP = m_fHP;
+    HpDesc.iMaxHP = m_iMAXHP;
+    HpDesc.iHP = m_iHP;
     HpDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_MonsterHP"), PART_HP, &HpDesc)))
       return E_FAIL;

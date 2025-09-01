@@ -17,14 +17,16 @@ class CDOOR final : public CGameObject
 	enum State {OPEN, ClOSE};
 	enum State2 { OPEN2, IDLE,ClOSE2};
 
-	enum DoorFlags : _ubyte
-    {
-       DOOR_INTERACT = 1 << 0, // 00000001
-       DOOR_OPEN = 1 << 1,     // 00000010
-       DOOR_SOUND = 1 << 2     // 00000100
-    };
+enum DOOR_FLAGS
+{
+    DOOR_INTERACT = 1 << 0, 
+    DOOR_OPEN     = 1 << 1,  
+    DOOR_SOUND    = 1 << 2,
+    DOOR_UIACTIVE = 1 << 3 
+};
 
-    private:
+
+ private:
 	CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CDOOR(const CDOOR& Prototype);
 	virtual ~CDOOR() = default;
@@ -33,7 +35,7 @@ public:
 
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
-        virtual void Priority_Update(_float fTimeDelta) override;
+    virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;	
@@ -54,7 +56,7 @@ private:
 private:
 	DoorType m_iDoorType{};
 	CInteractiveUI* m_InteractiveUI = { nullptr };
-
+     FMOD::Channel* m_pChannel = nullptr;
 	_uint  m_iState = { 0 }; // 현재 문 상태 체크
     _ubyte m_flags = 0;
 	_uint m_ChangeLevelDoor{};

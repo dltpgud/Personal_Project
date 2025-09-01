@@ -1,11 +1,11 @@
 #pragma once
-
 #include "Client_Defines.h"
 #include "StateMachine.h"
 
 BEGIN(Engine)
-class CActor;
-END 
+
+END
+
 BEGIN(Client)
 
 class CBillyBoom_Move : public CStateMachine
@@ -21,12 +21,11 @@ private:
     virtual ~CBillyBoom_Move() = default;
 
 public:
-    virtual Result StateMachine_Playing(_float fTimeDelta);
-    virtual void Reset_StateMachine();
+    virtual Result StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim) override;
+    virtual void Reset_StateMachine(RIM_LIGHT_DESC* pRim) override;
 
 private:
-    virtual void Init_CallBack_Func() {};
-    virtual HRESULT Initialize(void* pArg);
+    virtual HRESULT Initialize(void* pArg) override;
 
 private:
     const _float* m_fLength{};

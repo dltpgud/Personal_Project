@@ -3,7 +3,7 @@
 #include "PartObject.h"
 
 BEGIN(Engine)
-class CActor;
+
 END
 
 BEGIN(Client)
@@ -12,7 +12,7 @@ class CBody_GunPawn : public CPartObject
 public: 
 	typedef struct BODY_GUNPAWN_DESC : CPartObject::PARTOBJECT_DESC
     {
-        class CActor* pParentObj;
+        class CMonster* pParentObj;
 	}BODY_GUNPAWN_DESC;
 
 private:
@@ -32,6 +32,7 @@ public:
 
 	void ChangeState(_int nextState);
 
+
 private:
 	HRESULT Add_Components();
 	HRESULT Bind_ShaderResources();
@@ -39,7 +40,8 @@ private:
 
 private:
     vector<class CStateMachine*> m_pStateMachine ;
-    class CActor* m_pParentObj;
+    class CMonster* m_pParentObj;
+
 public:
 	static CBody_GunPawn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

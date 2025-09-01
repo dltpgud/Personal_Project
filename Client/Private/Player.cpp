@@ -2,8 +2,8 @@
 #include "Player.h"
 #include "GameInstance.h"
 #include "Body_Player.h"
-#include "PlayerUI.h"
-#include "PlayerEffectUI.h"
+#include "Player_HpUI.h"
+#include "Player_StateUI.h"
 #include "Player_StateMachine.h"
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{ pDevice, pContext }
 {
@@ -23,10 +23,15 @@ HRESULT CPlayer::Initialize(void* pArg)
     CActor::Actor_DESC Desc{};
 
     Desc.iNumPartObjects = PART_END;
-    Desc.fSpeedPerSec = 4.f; 
+    Desc.fSpeedPerSec = 2.f; 
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
-    Desc.JumpPower = 20.5f; 
- 
+    Desc.JumpPower = 15.f; 
+    Desc.iType = CActor::TYPE_PLAYER;
+    Desc.iHP = 500;
+    Desc.fFixY = 2.f;
+    Desc.bOnCell = true;
+    Desc.iState = FLAG_UPDATE;
+
     if (FAILED(__super::Initialize(&Desc)))
         return E_FAIL;
 
@@ -36,30 +41,23 @@ HRESULT CPlayer::Initialize(void* pArg)
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
 
-    m_FixY = 2.f;
-    m_bOnCell = true;
-
-    m_fMAXHP = 500.f;
-    m_fHP = m_fMAXHP;
-
-    m_pPlayerUI = static_cast<CPlayerUI*>(m_pGameInstance->Find_Clone_UIObj(L"playerHP"));
-    m_pPlayerUI->Set_PlayerMaxHP(m_fMAXHP);
-    m_pPlayerUI->Set_PlayerHP(m_fMAXHP);
-
     CPlayer_StateMachine::PLAYER_STATEMACHINE_DESC pDesc{};
     pDesc.pParentObject = this;
     pDesc.pCurWeapon = static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_Weapon();
     m_pStateMachine = CPlayer_StateMachine::Create(&pDesc);
+
     return S_OK;
 }
 
 void CPlayer::Priority_Update(_float fTimeDelta)
 {
-    if (false == m_bUpdate)
-        return ;
+    if (false == GetFlag(FLAG_UPDATE))
+    {
+        m_pStateMachine->ResetMachine();
+        return;
+    }
 
-    
-    if (m_pGameInstance->MouseFix())
+    if (m_pGameInstance->MouseFix() && false == GetFlag(FLAG_KEYLOCK))
     {
         _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_UP));
 
@@ -84,45 +82,12 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 
 void CPlayer::Update(_float fTimeDelta)
 {
-    if (false == m_bUpdate)
+    if (false == GetFlag(FLAG_UPDATE))
         return ;
 
-    //if (false == m_bJump) {
-    //    if (m_pNavigationCom->ISFall())
-    //    {
-    //        Set_onCell(false);
-    //        if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)) >= -6.5f)
-    //        {
-    //            m_bFallLock = true;
-    //            m_pTransformCom->Go_Move(CTransform::DOWN ,fTimeDelta);
-    //        }
-    //
-    //        if (XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION)) < -6.5f) {
-    //            if (false == m_bBurnSound) {
-    // 
-    //                m_pGameInstance->Play_Sound(L"ST_Player_Burn_Trigger.ogg", CSound::SOUND_HIT, 1.f);
-    //                m_pGameInstance->PlayBGM(CSound::SOUND_HIT, L"ST_Player_Burn_Loop.ogg", 0.5f);
-    //                m_bBurnSound = true;
-    //            }
-    //            m_pGameInstance->Set_OpenUI_Inverse(UIID_PlayerWeaPon_Aim, UIID_InteractiveUI);
-    //            m_DemageCellTime += fTimeDelta;
-    //            m_bFallLock = false;
-    //            HIt_Routine();
-    //            m_fHP -= 10.f/100.f;
-    //            if (m_DemageCellTime > 1.f) {
-    //                Set_onCell(true);
-    //                m_bBurnSound = false;
-    //                m_pGameInstance->StopSound(CSound::SOUND_HIT);
-    //                m_pGameInstance->Play_Sound(L"ST_Player_Burn_Stop.ogg", CSound::SOUND_HIT, 1.f);
-    //                
-    //                m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_pNavigationCom->Get_SafePos());
-    //                m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
-    //                m_DemageCellTime = 0.f;
-    //            }
-    //        }
-    //    }
-    //}
-    //
+    if (m_pNavigationCom->Get_bDemage(m_iHP))
+        Check_Coll();
+
     __super::Update(fTimeDelta);
 }
 
@@ -138,29 +103,16 @@ HRESULT CPlayer::Render()
 
 void CPlayer::HIt_Routine()
 {
-    m_pPlayerUI->Set_PlayerHP(m_fHP);
-    if (m_pGameInstance->Get_iCurrentLevel() != LEVEL_BOSS) {
-      //  if (m_bBurnSound == false)
-            m_pGameInstance->Play_Sound(L"ST_Player_Flash_Stop.ogg", CSound::SOUND_HIT, 1.f);
-    }
-    m_eUIState = STATE_UI_HIT;
-    m_bHit = true;
-    m_pGameInstance->Set_OpenUI(UIID_PlayerState, true);
+    m_pPlayerUI->Set_PlayerHP(m_iHP);
+    SetFlag(FLAG_HIT, true);
 }
 
 void CPlayer::Stun_Routine()
 {
-    m_bStun = true;
-
-        m_pGameInstance->Play_Sound(L"ST_Player_Stun_Loop.wav", CSound::SOUND_PlAYER_STURN, 0.5f);
-    
+    m_pPlayerUI->Set_PlayerHP(m_iHP);
+    SetFlag(FLAG_STURN, true);
+    AddFlag(FLAG_KEYLOCK);
 }
-
-_float CPlayer::Weapon_Damage()
-{
-    return 0.f; // static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Damage();
-}
-
 
 const _float4x4* CPlayer::Get_CameraBone()
 {
@@ -179,7 +131,7 @@ void CPlayer::BodyCallBack(_int Body,_uint AnimIdx, _int Duration, function<void
 
 void CPlayer::Choose_Weapon(const _uint& WeaponNum)
 {
-    m_bchange = true;
+    SetFlag(FLAG_CHANGE, true);
     static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Choose_Weapon(WeaponNum);
 }
 
@@ -220,11 +172,11 @@ _bool CPlayer::Set_PartObj_Play_Anim(_int Part, _float fTimeDelta, _float fPlayA
 HRESULT CPlayer::Add_Components()
 {
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = _float3(0.5f, 0.75f, 0.5f);
+    OBBDesc.vExtents = _float3(0.75f, 0.75f, 0.75f);
     OBBDesc.vCenter = _float3(0.f, 0.f, 0.f);
     OBBDesc.vRotation = {};
 
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider_OBB"), 
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"), 
                                       reinterpret_cast<CComponent**>(&m_pColliderCom),&OBBDesc)))
         return E_FAIL;
 
@@ -232,6 +184,10 @@ HRESULT CPlayer::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pNavigationCom))))
        return E_FAIL;
     
+    m_pPlayerUI = static_cast<CPlayer_HpUI*>(m_pGameInstance->Find_Clone_UIObj(L"PlayerHP"));
+    m_pPlayerUI->Set_PlayerMaxHP(m_iMAXHP);
+    m_pPlayerUI->Set_PlayerHP(m_iMAXHP);
+
     return S_OK;
 }
 
@@ -248,12 +204,6 @@ HRESULT CPlayer::Add_PartObjects()
     WeaponDesc.pSocketMatrix = static_cast<CBody_Player*>(m_PartObjects[PART_BODY])->Get_SocketMatrix("Weapon_Attachement");
 
     if (FAILED(__super::Add_PartObject(TEXT("Prototype_GameObject_Weapon"), PART_WEAPON, &WeaponDesc)))
-        return E_FAIL;
-
-    CPlayerEffectUI::CPlayerEffectUI_DESC Desc{};
-    Desc.State = &m_eUIState;
-    Desc.iDeleteLevel = LEVEL_STATIC;
-    if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"Runstate", L"Prototype GameObject_PlayerEffectUI",&Desc)))
         return E_FAIL;
 
    return S_OK;

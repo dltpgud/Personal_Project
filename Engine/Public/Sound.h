@@ -6,21 +6,19 @@ BEGIN(Engine)
 
 class CSound :public CBase
 {
-public:
-	enum CHANNELID { SOUND_EFFECT, SOUND_LEVEL, SOUND_HIT,SOUND_MENU, SOUND_LODING, SOUND_EFFECT_BGM, SOUND_EFFECT_BGM2, SOUND_PlAYER_STURN, SOUND_MONSTER_SETB, SOUND_EFFECT_LASER, SOUND_MONSTER_ROLL1, SOUND_MONSTER_FLY,SOUND_MONSTER_ROLL2,SOUND_BGM, SOUND_BGM2, MAXCHANNEL };
 private:
-	CSound();
+    CSound();
 	virtual ~CSound() = default;
 
 public:
-	HRESULT Initialize();
+    HRESULT Initialize();
 
 public:
-	void Play_Sound(_tchar* pSoundKey, CHANNELID eID, _float fVolume);
-	void PlayBGM(CHANNELID eID, _tchar* pSoundKey, _float fVolume);
-	void StopSound(CHANNELID eID);
+    void Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop = false);
+    void PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume);
+    void StopSound(FMOD::Channel** ppChannel);
 	void StopAll();
-	void SetChannelVolume(CHANNELID eID, _float fVolume);
+    void SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength);
 
 public:
 	void LoadSoundFile(const _char* soundFile);
@@ -29,23 +27,13 @@ public:
 private:	
 	USE_LOCK;
 
-	// 사운드 리소스 정보를 갖는 객체 
 	map<TCHAR*, Sound*> m_mapSound;
-
-	// FMOD_CHANNEL : 재생하고 있는 사운드를 관리할 객체 
-	Channel* m_pChannelArr[MAXCHANNEL];
-
-	// 사운드 ,채널 객체 및 장치를 관리하는 객체 
+    ChannelGroup* m_pChannelGroupBGM{};
+    ChannelGroup* m_pChannelGroupSE{};
 	System* m_pSystem = nullptr;
 
-	FMOD_RESULT result{};
-
-	ChannelGroup* channelGroup{};
-
-
-
 public:
-	static CSound* Create();
+    static CSound* Create();
 	virtual void Free() override;
 };
 

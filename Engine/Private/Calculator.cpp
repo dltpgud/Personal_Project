@@ -15,10 +15,11 @@ CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RaDir, _bool forPlayer )
 {   
-    _uint iNumViewports = {1};
-    D3D11_VIEWPORT ViewportDesc{};
-    _float3 vMousePos;
-     m_pContext->RSGetViewports(&iNumViewports, &ViewportDesc);
+    _float3 vMousePos{};
+    
+    // 뷰포트 정보를 직접 계산 (RSGetViewports 대신)
+    _float ViewportWidth = static_cast<_float>(m_iViewportWidth);
+    _float ViewportHeight = static_cast<_float>(m_iViewportHeight);
 
     if (false == forPlayer)
      { // 맵툴에서는 마우스 위치에 따라서 Ray를 쏘는 위치가 바뀌어야 한다.
@@ -27,8 +28,8 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
         ScreenToClient(g_hWnd, &ptMouse);
 
         // 뷰 포트 -> 투영
-        vMousePos.x = ptMouse.x / (ViewportDesc.Width * 0.5f) - 1.f;
-        vMousePos.y = ptMouse.y / -(ViewportDesc.Height * 0.5f) + 1.f;
+        vMousePos.x = ptMouse.x / (ViewportWidth * 0.5f) - 1.f;
+        vMousePos.y = ptMouse.y / -(ViewportHeight * 0.5f) + 1.f;
         vMousePos.z = 0.f;
     }
     else if (true == forPlayer)
@@ -38,8 +39,8 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
                  ptPlayerAim.y = 360;
 
         // 뷰 포트 -> 투영
-         vMousePos.x = ptPlayerAim.x / (ViewportDesc.Width * 0.5f) - 1.f;
-         vMousePos.y = ptPlayerAim.y / -(ViewportDesc.Height * 0.5f) + 1.f;
+         vMousePos.x = ptPlayerAim.x / (ViewportWidth * 0.5f) - 1.f;
+         vMousePos.y = ptPlayerAim.y / -(ViewportHeight * 0.5f) + 1.f;
          vMousePos.z = 0.f;
     }
 
@@ -259,55 +260,6 @@ _float CCalculator::Compute_Random(_float fMin, _float fMax)
     return (fMax - fMin) * Compute_Random_Normal() + fMin;
 }
 
-_bool CCalculator::isPicked(_float3* pOut, _bool IsPlayer)
-{
-
-
-    POINT			ptMouse{};
-
-    if (false == IsPlayer) {
-        GetCursorPos(&ptMouse);
-
-        /* 뷰포트 상의 마우스 위치를 구했다. */
-        ScreenToClient(g_hWnd, &ptMouse);
-    }
-    if (true == IsPlayer)
-    {
-        ptMouse.x = static_cast<LONG> (m_iViewportWidth * 0.5f);
-        ptMouse.y = static_cast<LONG> (m_iViewportHeight * 0.5f);
-    }
-
-
-    _uint			iIndex = ptMouse.y * m_iViewportWidth + ptMouse.x;
-
-    m_pGameInstance->Copy_RT_Resource(TEXT("Target_PickDepth"), m_pTexture2D);
-
-    D3D11_MAPPED_SUBRESOURCE		SubResource{};
-
-    m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ_WRITE, 0, &SubResource);
-
-    _float4* pPixel = static_cast<_float4*>(SubResource.pData) + iIndex;
-
-    _float3			vWorldPos = {};
-
-    /* 투영공간상의 위치를 구한다. */
-    vWorldPos.x = ptMouse.x / (m_iViewportWidth * 0.5f) - 1.f;
-    vWorldPos.y = ptMouse.y / (m_iViewportHeight * -0.5f) + 1.f;
-    vWorldPos.z = pPixel->x;
-
-    /* 뷰공간상의 위치를 구한다. */
-    _vector			vPosition = XMVector3TransformCoord(XMLoadFloat3(&vWorldPos), m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_PROJ));
-
-
-    /* 월드공간상의 위치를 구한다. */
-    vPosition = XMVector3TransformCoord(vPosition, m_pGameInstance->Get_TransformMatrix_Inverse(CPipeLine::D3DTS_VIEW));
-
-    m_pContext->Unmap(m_pTexture2D, 0);
-
-    XMStoreFloat3(pOut, vPosition);
-
-    return _bool(pPixel->w);
-}
 
 CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd, _uint iViewportWidth, _uint iViewportHeight )
 {

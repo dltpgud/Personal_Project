@@ -1,6 +1,5 @@
 #include"stdafx.h"
 #include "BoomBot_Idle.h"
-#include "BoomBot.h"
 #include "GameInstance.h"
 
 CBoomBot_Idle::CBoomBot_Idle()
@@ -20,13 +19,13 @@ HRESULT CBoomBot_Idle::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBoomBot_Idle::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBoomBot_Idle::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-     return  __super::StateMachine_Playing(fTimeDelta);
+    return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      
-void CBoomBot_Idle::Reset_StateMachine()
+void CBoomBot_Idle::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CBoomBot_Idle* CBoomBot_Idle::Create(void* pArg)

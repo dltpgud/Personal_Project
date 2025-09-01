@@ -13,8 +13,6 @@ HRESULT CLevel_Manager::Open_Level(_uint iCurrentLevelID, CLevel* pNewLevel)
     if (nullptr == pNewLevel)
         return E_FAIL;
 
-    /* 최초레벨할당할때 지우면 큰일난다. m_iCurrentLevelID : 의도치 않은 값으로 초기화되어있기때문에 의도치않은
-     * 레벨자원을 지우잖어. */
     if (nullptr != m_pCurrentLevel)
          m_pGameInstance->Clear(m_iCurrentLevelID);
 

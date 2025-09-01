@@ -9,14 +9,11 @@ CTimer::CTimer(void)
 	ZeroMemory(&m_CpuTick, sizeof(LARGE_INTEGER));
 }
 
-
-
 HRESULT CTimer::Ready_Timer(void)
 {
-	QueryPerformanceCounter(&m_FrameTime);			// 1077
-	QueryPerformanceCounter(&m_LastTime);			// 1085
-	QueryPerformanceCounter(&m_FixTime);			// 1090
-
+	QueryPerformanceCounter(&m_FrameTime);			
+	QueryPerformanceCounter(&m_LastTime);		
+	QueryPerformanceCounter(&m_FixTime);			
 	QueryPerformanceFrequency(&m_CpuTick);
 
 	return S_OK;
@@ -24,7 +21,7 @@ HRESULT CTimer::Ready_Timer(void)
 
 void CTimer::Update_Timer(void)
 {
-	QueryPerformanceCounter(&m_FrameTime);			// 1500
+	QueryPerformanceCounter(&m_FrameTime);			
 
 	if (m_FrameTime.QuadPart - m_FixTime.QuadPart >= m_CpuTick.QuadPart)
 	{

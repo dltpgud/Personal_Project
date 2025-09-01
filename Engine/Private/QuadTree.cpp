@@ -1,4 +1,4 @@
-#include "..\Public\QuadTree.h"
+﻿#include "..\Public\QuadTree.h"
 
 #include "GameInstance.h"
 
@@ -101,9 +101,9 @@ _bool CQuadTree::isDraw(CGameInstance * pGameInstance, const _float3 * pVertices
 
 	_float		fCamDistance = XMVector3Length(XMLoadFloat3(&pVerticesPos[m_iCenter]) - vCamPosition).m128_f32[0];
 
-	_float		fWidth = static_cast <_uint>(m_iCorners[CORNER_RT] - m_iCorners[CORNER_LT]);
+	_float fWidth = static_cast<_float>(m_iCorners[CORNER_RT] - m_iCorners[CORNER_LT]);
 
-	if (fCamDistance * 0.1f > fWidth) 
+	if (fCamDistance * 0.5f > fWidth) 
 		return true;
 
 	return false;

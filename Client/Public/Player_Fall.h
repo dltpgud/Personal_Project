@@ -12,8 +12,8 @@ private:
 
 public:
     virtual HRESULT Initialize(void* pDesc) override;
-    virtual void State_Enter(_uint* pState) override;
-    virtual _bool State_Processing(_float fTimeDelta, _uint* pState) override;
+    virtual void State_Enter(_uint* pState, _uint* pPreState) override;
+    virtual _bool State_Processing(_float fTimeDelta, _uint* pState, _uint* pPreState) override;
     virtual _bool State_Exit(_uint* pState) override;
     virtual void Init_CallBack_Func() override;
     virtual _bool IsActive(_uint stateFlags) const override;
@@ -21,11 +21,11 @@ public:
     virtual _bool CanEnter(_uint* pState) override;
     virtual _bool CheckInputCondition(_uint stateFlags) override;
 
-private:
 
+private:
     _bool m_bSetBody{};
-    _float m_FallTimedelta{};
-    _float m_FallTime{};
+    _bool m_bFromJump{};
+ 
 
 public:
     static CPlayer_Fall* Create(void* pArg);

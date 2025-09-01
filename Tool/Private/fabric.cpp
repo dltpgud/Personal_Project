@@ -143,23 +143,6 @@ _tchar* Cfabric::Get_ProtoName()
     return m_Proto;
 }
 
-_float Cfabric::check_BoxDist(_vector RayPos, _vector RayDir)
-{
-    _matrix matWorld = m_pTransformCom->Get_WorldMatrix_Inverse();
-   
-    _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
-    _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
-    CurRayDir = XMVector3Normalize(CurRayDir);
-
-    _float Dist{};
-    if (m_pColliderCom->RayIntersects(RayPos, RayDir, Dist))
-    {
-        return Dist;
-    }
-
-    return _float(0xffff);
-}
-
 
 
 HRESULT Cfabric::Add_Components()

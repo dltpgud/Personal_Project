@@ -1,21 +1,21 @@
 ﻿#include "stdafx.h"
-#include "PlayerUI.h"
+#include "Player_HpUI.h"
 #include "GameInstance.h"
 
-CPlayerUI::CPlayerUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{pDevice, pContext}
+CPlayer_HpUI::CPlayer_HpUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{pDevice, pContext}
 {
 }
 
-CPlayerUI::CPlayerUI(const CPlayerUI& Prototype) : CUI{Prototype}
+CPlayer_HpUI::CPlayer_HpUI(const CPlayer_HpUI& Prototype) : CUI{Prototype}
 {
 }
 
-HRESULT CPlayerUI::Initialize_Prototype()
+HRESULT CPlayer_HpUI::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CPlayerUI::Initialize(void* pArg)
+HRESULT CPlayer_HpUI::Initialize(void* pArg)
 {
     CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
@@ -40,30 +40,30 @@ HRESULT CPlayerUI::Initialize(void* pArg)
     if (FAILED(Add_Components()))
         return E_FAIL;
 
-    m_fHealthHP = 1.f;
+    m_iHealthHP = 1;
     return S_OK;
 }
 
-void CPlayerUI::Priority_Update(_float fTimeDelta)
+void CPlayer_HpUI::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CPlayerUI::Update(_float fTimeDelta)
+void CPlayer_HpUI::Update(_float fTimeDelta)
 {
     if (m_iGageCount != -1)
     {
         m_iGageCount--;
-        m_fHP += m_fHealthHP;
+        m_iHP += m_iHealthHP;
    
-        m_pGameInstance->Get_Player()->Set_HealthCurrentHP(m_fHealthHP);
-
+        m_pGameInstance->Get_Player()->Set_HealthCurrentHP(m_iHealthHP);
+        swprintf_s(m_tfHP, 50, L"%d\n", m_iHP);
         if (true == m_pGameInstance->Get_Player()->IsFullHP() || m_iGageCount == 0)
                 m_iGageCount = -1;  
     }
-    m_fRatio = m_fHP / m_fMaxHP;
+    m_fRatio = static_cast<_float>(m_iHP) /  static_cast<_float>(m_iMaxHP);
 }
 
-void CPlayerUI::Late_Update(_float fTimeDelta)
+void CPlayer_HpUI::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
         return;
@@ -71,7 +71,7 @@ void CPlayerUI::Late_Update(_float fTimeDelta)
         return;
 }
 
-HRESULT CPlayerUI::Render()
+HRESULT CPlayer_HpUI::Render()
 {  
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
@@ -107,7 +107,7 @@ HRESULT CPlayerUI::Render()
     return S_OK;
 }
 
-void CPlayerUI::ShakingEvent(_float fTimeDelta)
+void CPlayer_HpUI::ShakingEvent(_float fTimeDelta)
 {
     if (m_fShakingTime > 0.f)
     {
@@ -124,7 +124,7 @@ void CPlayerUI::ShakingEvent(_float fTimeDelta)
 }
 
 
-HRESULT CPlayerUI::Add_Components()
+HRESULT CPlayer_HpUI::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Player_HpBar"),
                                       TEXT("Com_Texture_PlayerHpBar"),
@@ -142,9 +142,9 @@ HRESULT CPlayerUI::Add_Components()
     return S_OK;
 }
 
-CPlayerUI* CPlayerUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CPlayer_HpUI* CPlayer_HpUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CPlayerUI* pInstance = new CPlayerUI(pDevice, pContext);
+    CPlayer_HpUI* pInstance = new CPlayer_HpUI(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
@@ -155,9 +155,9 @@ CPlayerUI* CPlayerUI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
     return pInstance;
 }
 
-CGameObject* CPlayerUI::Clone(void* pArg)
+CGameObject* CPlayer_HpUI::Clone(void* pArg)
 {
-    CPlayerUI* pInstance = new CPlayerUI(*this);
+    CPlayer_HpUI* pInstance = new CPlayer_HpUI(*this);
 
     if (FAILED(pInstance->Initialize(pArg)))
     {
@@ -168,7 +168,7 @@ CGameObject* CPlayerUI::Clone(void* pArg)
     return pInstance;
 }
 
-void CPlayerUI::Free()
+void CPlayer_HpUI::Free()
 {
     __super::Free();
 

@@ -8,23 +8,28 @@ END
 
 BEGIN(Client)
 class CInteractiveUI;
-class CPlayerUI;
+class CPlayer_HpUI;
 class CHealthBot final : public CActor
 {
 public:
     enum PARTOBJID
     {
         PART_BODY,
-        PART_WEAPON,
-        PART_EFFECT,
         PART_END
     };
     enum STATE
     {
-      ST_Idle,
-      ST_Interactive,
-      ST_Dead,
+      ST_IDLE     = 0 ,
+      ST_INTERACT = 1 << 0, 
+      ST_DEAD     = 1 << 1
     };                   
+
+    enum FLAG : _uint
+    {
+        FLAG_NONE = 1 << 2,
+        FLAG_OPENUI = 1 << 3,    
+        FLAG_INTERACTUI = 1 << 4   
+    };
 
 private:
     CHealthBot(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -42,15 +47,24 @@ public:
 private:
     HRESULT Add_Components();
     HRESULT Add_PartObjects();
-    void    intersect(_float fTimedelta);
+    HRESULT Init_CallBack();
+    void SetState(_uint flag, bool value)
+    {
+        if (value)
+            m_iState |= flag;
+        else
+            m_iState &= ~flag;
+    }
+
+    bool HasState(_uint flag) const
+    {
+        return (m_iState & flag) != 0;
+    }
 
 private:
-    _bool m_bInteract = false;
+   
     CInteractiveUI* m_pInteractiveUI = { nullptr };
-    _bool m_bOpenUI = false;
-    _bool m_bHealth = false;
-    _float m_fTimeSum{ 0.f };
-    _bool m_bSound{ true };
+   
 public:
     static CHealthBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual CGameObject* Clone(void* pArg) override;

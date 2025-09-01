@@ -50,19 +50,20 @@ void CLevel_Loading::Update(_float fTimeDelta)
         case LEVEL_STAGE1:
             if (m_pGameInstance->Get_DIAnyKey())
             {
-                m_pGameInstance->StopSound(CSound::SOUND_MENU);
-                m_pGameInstance->StopSound(CSound::SOUND_LODING);
+                if (m_pFade)
+                    m_pFade->Set_Fade(false);
+                m_pGameInstance->StopSound(&m_pChannel);
                 m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage1::Create(m_pDevice, m_pContext));
             }
             break;
         case LEVEL_STAGE2:
             if (m_pFade)
-                m_pFade->Set_Fade(false);
-            m_pGameInstance->StopSound(CSound::SOUND_LEVEL);
+            m_pFade->Set_Fade(false); 
+            m_pGameInstance->StopSound(&m_pChannel);
             m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage2::Create(m_pDevice, m_pContext));
             break;
         case LEVEL_BOSS:
-            m_pGameInstance->StopSound(CSound::SOUND_LEVEL);
+            m_pGameInstance->StopSound(&m_pChannel);
             m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_StageBoss::Create(m_pDevice, m_pContext));
             break;
         }
@@ -75,10 +76,7 @@ HRESULT CLevel_Loading::Render()
     m_pLoader->Output_LoadingState();
 #endif
 
-    if (LEVEL_MENU == m_eNextLevelID )
-        return S_OK;
-
-    if (m_pFade && true == m_pFade->Check_Update())
+    if (LEVEL_MENU == m_eNextLevelID || LEVEL_STAGE2 == m_eNextLevelID || LEVEL_BOSS == m_eNextLevelID)
         return S_OK;
 
     if (false == m_pLoader->Finished())
@@ -113,7 +111,7 @@ HRESULT CLevel_Loading::Render()
 
 HRESULT CLevel_Loading::Ready_UI()
 {
-    m_pGameInstance->Play_Sound(L"ST_Music_Credits.wav", CSound::SOUND_LODING, 0.5f);
+    m_pGameInstance->Play_Sound(L"ST_Music_Credits.wav", &m_pChannel, 0.5f);
 
     if (m_pGameInstance->Find_Clone_UIObj(L"Fade") != nullptr)
     {
@@ -121,12 +119,11 @@ HRESULT CLevel_Loading::Ready_UI()
         Safe_AddRef(m_pFade);
     }
 
-    m_pGameInstance->Set_OpenUI(UIID_Cursor, false);
-    m_pGameInstance->Set_OpenUI(UIID_Menu, false);
-    m_pGameInstance->Set_OpenUI(UIID_PlayerHP, false);
-    m_pGameInstance->Set_OpenUI(UIID_PlayerState, false);
-    m_pGameInstance->Set_OpenUI(UIID_PlayerWeaPon_Aim, false);
-    m_pGameInstance->Set_OpenUI(UIID_PlayerWeaPon, false);
+    m_pGameInstance->Set_OpenUI(false, TEXT("Cursor"));
+    m_pGameInstance->Set_OpenUI(false, TEXT("Menu"));
+    m_pGameInstance->Set_OpenUI(false, TEXT("PlayerHP"));
+    m_pGameInstance->Set_OpenUI(false, TEXT("WeaPon_Aim"));
+    m_pGameInstance->Set_OpenUI(false, TEXT("WeaponUI"));
 
     return S_OK;
 }
@@ -284,12 +281,12 @@ CLevel_Loading* CLevel_Loading::Create(ID3D11Device* pDevice, ID3D11DeviceContex
     }
 
     return pInstance;
-}
+    }
 
 void CLevel_Loading::Free()
 {
     __super::Free();
-    m_pGameInstance->StopSound(CSound::SOUND_LODING);
+    m_pGameInstance->StopSound(&m_pChannel);
     Safe_Release(m_pLoader);
     Safe_Release(m_pFade);
 }

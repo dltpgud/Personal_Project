@@ -44,6 +44,7 @@ void CAim::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_UI, this)))
 		return;
+
     if (FAILED(m_pGameInstance->ADD_UI_ShakingList(this)))
         return;
 }

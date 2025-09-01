@@ -16,21 +16,17 @@ HRESULT CSkill::Initialize_Prototype()
 
 HRESULT CSkill::Initialize(void* pArg)
 {
-	if(nullptr != pArg)
-	{
-	Skill_DESC* pDesc = static_cast<Skill_DESC*> (pArg);
+    Skill_DESC* pDesc = static_cast<Skill_DESC*> (pArg);
 	   m_vPos = pDesc->vPos;
 	   m_fLifeTime = pDesc->fLifeTime;
-	   m_pDamage = pDesc->fDamage;
+	   m_iDamage = pDesc->iDamage;
 	   m_iActorType = pDesc->iActorType;
 	   m_iSkillType = pDesc->iSkillType;
-	   if (FAILED(__super::Initialize(pDesc)))
+       m_Clolor[CSkill::COLOR::CSTART] = pDesc->fClolor[CSkill::COLOR::CSTART];
+       m_Clolor[CSkill::COLOR::CEND] = pDesc->fClolor[CSkill::COLOR::CEND];
+    if (FAILED(__super::Initialize(pDesc)))
 		   return E_FAIL;
-	}
-	else
-	if (FAILED(__super::Initialize(pArg)))
-		return E_FAIL;
-
+	
 	if (0.f == m_fLifeTime)
 		m_fLifeTime = 10.f;
 
@@ -39,39 +35,22 @@ HRESULT CSkill::Initialize(void* pArg)
 
 void CSkill::Priority_Update(_float fTimeDelta)
 {
-	if(true == m_bDead )
-		return ;
-
 	m_fTimeSum += fTimeDelta;
-
-
-
 	if (m_fTimeSum > m_fLifeTime)
 	{
-		Dead_Rutine(fTimeDelta);
+		Dead_Rutine();
 	}
-	return ;
 }
 
 void CSkill::Update(_float fTimeDelta)
 {
-
-
 	__super::Update(fTimeDelta);
 }
 
 void CSkill::Late_Update(_float fTimeDelta)
 {
-		if(true == m_bDeadSkii)
-		Dead_Rutine(fTimeDelta);
-
-
-	if (true == m_bMoveStop)
-		Dead_Rutine(fTimeDelta);
-
-
 	if(m_pNavigationCom != nullptr)
-m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
+     m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
 	
    __super::Late_Update(fTimeDelta);	
 }
@@ -81,9 +60,9 @@ HRESULT CSkill::Render()
 	return S_OK;
 }
 
-_float CSkill::Get_Damage()
+_int CSkill::Get_Damage()
 {
-	return *m_pDamage;
+	return m_iDamage;
 }
 
 _uint CSkill::Get_SkillType()
@@ -95,19 +74,6 @@ _uint CSkill::Get_ActorType()
 {
 	return m_iActorType;
 }
-
-_bool CSkill::Comput_SafeZone(_fvector vPlayerPos)
-{
- _vector vCurrCenter =  XMVectorSetW(XMLoadFloat3(&m_pColliderCom->Get_iCurCenter()), 1.f);;
-
- _float fLength = XMVectorGetX( XMVector3Length(vPlayerPos - vCurrCenter ));
-  
- if (fLength < m_pColliderCom->Get_iCurRadius())
-	 return true;
- else
-	 return false;
-}
-
 
 void CSkill::Free()
 {

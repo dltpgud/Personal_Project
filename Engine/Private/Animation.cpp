@@ -49,7 +49,7 @@ HRESULT CAnimation::Initialize(HANDLE& hFile)
 _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones, _bool isLoop, _float fTimeDelta)
 {
     // 콜백함수 실행
-    Run_CallbackFunc(round(m_fCurrentPosition));
+    Run_CallbackFunc(static_cast<int>(round(m_fCurrentPosition)));
 
     // 애니메이션 전환 중 이면 보션 전환 중 시간을 증가시키고
     if (m_fChangingTime < m_fMotionChangingTIme)

@@ -1,8 +1,6 @@
 #include"stdafx.h"
 #include "BoomBot_Dead.h"
-#include "BoomBot.h"
 #include "GameInstance.h"
-#include "Body_BoomBot.h"
 
 CBoomBot_Dead::CBoomBot_Dead()
 {
@@ -25,19 +23,18 @@ HRESULT CBoomBot_Dead::Initialize(void* pArg)
 	return S_OK;
 }
 
-CStateMachine::Result CBoomBot_Dead::StateMachine_Playing(_float fTimeDelta)
+CStateMachine::Result CBoomBot_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-    dynamic_cast<CBody_BoomBot*>(m_pParentPartObject)->Set_DeadState(true);
+    m_pParentPartObject->Set_DeadState(true);
+    
+    if (1.f == m_pParentPartObject->Get_threshold())
+        m_pParentObject->Set_Dead(true);
 
-    if (1.f == dynamic_cast<CBody_BoomBot*>(m_pParentPartObject)->Get_threshold())
-         m_pParentObject->Set_Dead(true);
-
-
-     return  __super::StateMachine_Playing(fTimeDelta);
+     return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      
-void CBoomBot_Dead::Reset_StateMachine()
+void CBoomBot_Dead::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-   __super::Reset_StateMachine();
+    __super::Reset_StateMachine(pRim);
 }
 
 CBoomBot_Dead* CBoomBot_Dead::Create(void* pArg)

@@ -12,8 +12,8 @@ private:
 
 public:
     virtual HRESULT Initialize(void* pDesc) override;
-    virtual void State_Enter(_uint* pState) override;
-    virtual _bool State_Processing(_float fTimeDelta, _uint* pState) override;
+    virtual void State_Enter(_uint* pState, _uint* pPreState) override;
+    virtual _bool State_Processing(_float fTimeDelta, _uint* pState, _uint* pPreState) override;
     virtual _bool State_Exit(_uint* pState) override;
     virtual void Init_CallBack_Func() override;
     virtual _bool IsActive(_uint stateFlags) const override;
@@ -29,8 +29,8 @@ private:
     _float m_fLastFireTime{ 0.f }; 
 
 private:
-	class CShootingUI* m_pShootingUI{};
-  
+	class CPlayer_ShootingStateUI* m_pShootingUI{};
+    class CPlayer_ShootingStateUI* m_pAutoShootingUI{};
 
 public:
     static CPlayer_Shoot* Create(void* pArg);
