@@ -108,16 +108,18 @@ void CLevel_Edit::Update(_float fTimeDelta)
         cout << a << " " << b << " " << c << " " << d << " " << e << " " << f << endl;
         //_vector m_Eye = XMVectorSet(143, 394, 432, 0.f);
         //_vector m_Dire = XMVectorSet(139, 17, 2, 0.f);
-        _vector dir = XMVectorSet(a, b, c, 0.f);
-        _vector pos = XMVectorSet(d, e, f, 1.f);
-        XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(dir, dir+pos, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
-        XMStoreFloat4x4(&ProjMatrix,
-                        XMMatrixOrthographicLH(g_iWinSizeX , g_iWinSizeY,
-                                                 Desc.fNearZ, 1000));
+     
+        _vector m_Eye = XMVectorSet(a, b, c, 0.f);
+        _vector m_Dire = XMVectorSet(d, e, f, 1.f);
+
+           XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye, m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+        XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f),
+                                                              (_float)g_iWinSizeX / g_iWinSizeY, Desc.fNearZ, 1000));
 
         m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
 
         m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ, XMLoadFloat4x4(&ProjMatrix));
+
 
         Key_input(fTimeDelta);
     }

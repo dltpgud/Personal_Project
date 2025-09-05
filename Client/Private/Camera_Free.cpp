@@ -40,7 +40,7 @@ void CCamera_Free::Priority_Update(_float fTimeDelta)
      _float4 At;
      XMStoreFloat4(&At, Eye+ m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_LOOK));
      m_pTransformCom->LookAt(XMLoadFloat4(&At));
-   
+  
     __super::Priority_Update(fTimeDelta);
 }
 
@@ -56,6 +56,8 @@ HRESULT CCamera_Free::Render()
 {
     return S_OK;
 }
+
+
 
 CCamera_Free* CCamera_Free::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -88,3 +90,4 @@ void CCamera_Free::Free()
     __super::Free();
     Safe_Release(m_pPlayer);
 }
+

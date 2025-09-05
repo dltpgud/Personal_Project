@@ -60,27 +60,28 @@ struct VS_OUT
 VS_OUT VS_MAIN(  VS_IN In)
 {	
 	VS_OUT			Out = (VS_OUT)0;
+    
+    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
 
-	float			fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);  
-
-	matrix			BoneMatrix = g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
+    matrix BoneMatrix = g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
 		g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
 		g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
 		g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
 
-	vector		vPosition = mul(float4(In.vPosition, 1.f), BoneMatrix);
-    vector		vNormal = mul(float4(In.vNormal, 0.f), BoneMatrix);
 
-	matrix		matWV, matWVP;
-	
-	matWV = mul(g_WorldMatrix, g_ViewMatrix);
-	matWVP = mul(matWV, g_ProjMatrix);
-	vPosition = mul(vPosition, matWVP);
+    vector vPosition = mul(float4(In.vPosition, 1.f), BoneMatrix);
+    vector vNormal = mul(float4(In.vNormal, 0.f), BoneMatrix);
 
-	Out.vPosition = vPosition;	
+    matrix matWV, matWVP;
+
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWV, g_ProjMatrix);
+    vPosition = mul(vPosition, matWVP);
+    
+    Out.vPosition = vPosition;
     Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
-	Out.vTexcoord = In.vTexcoord;	
-	Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    Out.vTexcoord = In.vTexcoord;
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = vPosition;
     Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
     Out.vBinormal = vector(normalize(cross(Out.vNormal.xyz, Out.vTangent.xyz)), 0.f);
@@ -124,7 +125,7 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vRim = 0.f;
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.02f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
 	return Out;
 }
@@ -174,7 +175,7 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);;
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     return Out;
 }
 
@@ -210,7 +211,7 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
     return Out;
 }
@@ -230,7 +231,7 @@ PS_OUT PS_WEAPON(PS_IN In)
     Out.vEmissive = vMtrlEmissive * g_EmissivePower;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.019f, 0.f);
     Out.vRim = 0.f;
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
     return Out;
@@ -269,7 +270,7 @@ PS_OUT PS_Door(PS_IN In)
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vRim = (rim * g_DoorRimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vEmissive = vEmissive;
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     return Out;
@@ -284,8 +285,8 @@ PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
 	
-    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
-    //Out.vLightDepth = vector(In.vProjPos.z / g_fCamFar, 0.f, 0.f, 0.f);
+    Out.vLightDepth = vector((In.vProjPos.z / In.vProjPos.w) * 0.5f + 0.5f,
+    In.vProjPos.w / 1000.f, 1.f, 0.f);
 
     return Out;
 }
@@ -315,7 +316,7 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
     return Out;
 }
@@ -381,7 +382,7 @@ technique11 DefaultTechnique
     pass DefaultPass5
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_None, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -389,7 +390,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_LIGHTDEPTH();
     }
 
-    pass DefaultPass7
+    pass DefaultPass6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);

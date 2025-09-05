@@ -168,6 +168,11 @@ namespace Engine
 		float			fTrackPosition;
 	}KEYFRAME;
 
+	typedef struct CASCADE_DATA
+    {
+       _float4x4 LightViewProj;      // 라이트 VP 행렬
+       std::vector<_float3> Corners; // 월드 공간 프러스텀 꼭짓점 (8개)
+    } CASCADE_DATA;
 
 	typedef struct ENGINE_DLL VTXPARTICLE_RECT
 	{

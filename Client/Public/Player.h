@@ -15,16 +15,39 @@ public:
 
 	enum PARTOBJID { PART_BODY, PART_WEAPON, PART_END };
 
+    enum DIRECTION : _uint
+    {
+        DIR_FORWARD = 1 << 0,
+        DIR_RIGHT = 1 << 1,
+        DIR_BACK = 1 << 2,
+        DIR_LEFT = 1 << 3
+    };
+    enum MOVEMENT : _uint
+    {
+        MOV_IDLE = 1 << 4,
+        MOV_RUN = 1 << 5,
+        MOV_SPRINT = 1 << 6,
+        MOV_JUMP = 1 << 7,
+        MOV_HIT = 1 << 8,
+        MOV_FALL = 1 << 9,
+        MOV_STURN = 1 << 10,
+        MOV_HEALTH = 1 << 11,
+    };
+   
+    enum BEHAVIOR : _uint
+    {
+        BEH_RELOAD = 1 << 12,
+        BEH_SHOOT = 1 << 13,
+        BEH_SWICH = 1 << 14,
+        BRH_CHANGE = 1 << 15, 
+    };
+
     enum PLAYER_FLAGS : _uint
     {
-          FLAG_CHANGE  = 1 << 0, 
-          FLAG_HIT     = 1 << 1,   
-          FLAG_STURN   = 1 << 2,
-          FLAG_UPDATE  = 1 << 3,  
-          FLAG_HEALTH  = 1 << 4, 
-          FLAG_KEYLOCK = 1 << 5,
+        FLAG_UPDATE = 1 << 16,
+        FLAG_KEYLOCK = 1 << 17,
     };
-       
+
 private:
 	CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CPlayer(const CPlayer& Prototype);
@@ -40,6 +63,8 @@ public:
 	virtual void HIt_Routine()override;
 	virtual void Stun_Routine()override;
 
+    virtual void Set_State(_uint flag, _bool value) override;
+ 
 public:
 	const _float4x4* Get_CameraBone();
     void WeaponCallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
@@ -49,28 +74,6 @@ public:
 
 	void Choose_Weapon(const _uint& WeaponNum);
     CWeapon::WEAPON_NODE_DESC Get_Weapon_Info() const;
-
-    
-    void SetFlag(PLAYER_FLAGS flag, _bool value)
-    {
-        if (value)
-        {
-            m_iState = flag;
-            m_iState |= FLAG_UPDATE;
-        }
-        else
-            m_iState &= ~flag; 
-    }
-
-    void AddFlag(PLAYER_FLAGS flag)
-    {
-        m_iState |= flag;
-    }
-
-    _bool GetFlag(PLAYER_FLAGS flag) const
-    {
-        return (m_iState & flag) != 0;
-    }
 
 private:
 	HRESULT Add_Components();

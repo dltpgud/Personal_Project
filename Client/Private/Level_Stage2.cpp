@@ -155,6 +155,20 @@ HRESULT CLevel_Stage2::Ready_Light()
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;
 
+    
+   _float4x4 ViewMatrix, ProjMatrix;
+        _vector m_Eye = XMVectorSet(41, 812, 211, 0.f);
+        _vector m_Dire = XMVectorSet(138.6, 17, 2, 0.f);
+
+        XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye, m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+        XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f),
+                                                              (_float)g_iWinSizeX / g_iWinSizeY, 0.1, 1000));
+
+        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
+
+        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ, XMLoadFloat4x4(&ProjMatrix));
+
+
 	return S_OK;
 }
 
@@ -172,7 +186,7 @@ HRESULT CLevel_Stage2::Ready_UI()
 
 HRESULT CLevel_Stage2::Ready_Layer_Player()
 {
-    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_UPDATE, true);
+    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::FLAG_UPDATE, true);
 
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(5.f, 0.f, 6.f, 1.f));
 

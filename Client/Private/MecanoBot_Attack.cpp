@@ -17,20 +17,14 @@ HRESULT CMecanoBot_Attack::Initialize(void* pArg)
 	CStateNode::STATENODE_DESC pNodeDesc{};
 	pNodeDesc.pParentModel = m_pParentModel;
 	pNodeDesc.iCurrentState = 9;
-    pNodeDesc.bIsLoop = true;
+    pNodeDesc.bIsLoop = false;
     m_StateNodes.push_back(CStateNode::Create(&pNodeDesc));
   
 	return S_OK;
 }
 
 CStateMachine::Result CMecanoBot_Attack::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
-{
-    if (*m_fLength > 30.f || *m_fLength < 15.f)
-    {
-        Reset_StateMachine(pRim);
-        return Result::Finished;
-    }
-    
+{    
    m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
 
   return __super::StateMachine_Playing(fTimeDelta, pRim);

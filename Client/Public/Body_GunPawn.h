@@ -21,7 +21,6 @@ private:
 	virtual ~CBody_GunPawn() = default;
 
 public:
-
 	virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
     virtual void Priority_Update(_float fTimeDelta) override;
@@ -29,9 +28,7 @@ public:
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 	virtual HRESULT Render_Shadow() override;
-
 	void ChangeState(_int nextState);
-
 
 private:
 	HRESULT Add_Components();

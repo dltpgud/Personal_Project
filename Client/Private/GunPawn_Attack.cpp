@@ -47,7 +47,7 @@ HRESULT CGunPawn_Attack::Make_Bullet()
 
     _vector Dir = XMVectorSet(m_pParentWorldMat->_41, m_pParentWorldMat->_42, m_pParentWorldMat->_43, 1.f) +
                   XMVectorSet(m_pParentWorldMat->_31, m_pParentWorldMat->_32, m_pParentWorldMat->_33, 0.f) * 20.f; 
-   
+   Dir = XMVectorSetY(Dir, 2.f);
     if (m_pParentObject->IsLookAtPlayer(15.f))
         Dir = m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
 
@@ -68,7 +68,7 @@ HRESULT CGunPawn_Attack::Make_Bullet()
 }
 
 CStateMachine::Result CGunPawn_Attack::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
-{ 
+{
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
 
   return __super::StateMachine_Playing(fTimeDelta, pRim);

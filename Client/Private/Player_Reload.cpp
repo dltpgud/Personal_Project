@@ -79,23 +79,23 @@ void CPlayer_Reload::Init_CallBack_Func()
 
 _bool CPlayer_Reload::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & BEH_RELOAD) != 0;
+    return (stateFlags & CPlayer::BEH_RELOAD) != 0;
 }
 
 void CPlayer_Reload::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= BEH_RELOAD; 
+        *pState |= CPlayer:: BEH_RELOAD; 
     else
-        *pState &= ~BEH_RELOAD; 
+        *pState &= ~CPlayer::BEH_RELOAD;
 }
 
 _bool CPlayer_Reload::CanEnter(_uint* pState) 
 {   
-     if (*pState & MOV_FALL)
+     if (*pState & CPlayer::MOV_FALL)
          return false;
          
-     if (*pState & (BEH_RELOAD | MOV_STURN | MOV_HIT))
+     if (*pState & (CPlayer::BEH_RELOAD | CPlayer::MOV_STURN | CPlayer::MOV_HIT))
          return false;
 
     _bool bkey = m_pGameInstance->Get_DIKeyDown(DIK_R);
@@ -107,7 +107,7 @@ _bool CPlayer_Reload::CanEnter(_uint* pState)
 
 _bool CPlayer_Reload::CheckInputCondition(_uint stateFlags) 
 {
-    if (stateFlags & (MOV_STURN | MOV_HIT))
+    if (stateFlags & (CPlayer::MOV_STURN | CPlayer::MOV_HIT))
     {
         m_pShootingUI->Set_Open(false);
         return false;

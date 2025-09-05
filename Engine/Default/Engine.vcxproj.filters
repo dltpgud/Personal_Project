@@ -348,9 +348,6 @@
     <ClInclude Include="..\Public\Collider_Manager.h">
       <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Actor.h">
-      <Filter>01.Utility\02.GameObjects\Actor</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Cube.h">
       <Filter>01.Utility\04.Component\VIBuffer\Cube</Filter>
     </ClInclude>
@@ -392,6 +389,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\TLS.h">
       <Filter>99.Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Actor.h">
+      <Filter>01.Utility\02.GameObjects\Actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

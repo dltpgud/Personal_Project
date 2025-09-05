@@ -102,14 +102,9 @@ HRESULT CBoomBot::Add_Components()
     return S_OK;
 }
 
-void CBoomBot::Wake_up()
+void CBoomBot::Set_State(_uint State)
 {
-    static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
-}
-
-void CBoomBot::Seeping()
-{
-    static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
+    static_cast<CBody_BoomBot*>(m_PartObjects[PART_BODY])->ChangeState(State);
 }
 
 HRESULT CBoomBot::Add_PartObjects()

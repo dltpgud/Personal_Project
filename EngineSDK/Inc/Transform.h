@@ -140,6 +140,18 @@ public:
     {
         return m_JumpPower;
     }
+    _fvector Get_Rotation_Vector() const
+    {
+        _vector scale, rotationQuat, translation;
+        // 월드 행렬을 분해
+        XMMatrixDecompose(&scale, &rotationQuat, &translation, XMLoadFloat4x4(&m_WorldMatrix));
+
+        // 쿼터니언을 Euler 각도로 변환
+        _fvector euler = XMQuaternionRotationRollPitchYawFromVector(rotationQuat);
+
+        // 결과를 _fvector로 반환
+        return euler; // 라디안 단위
+    }
 
 public:
     HRESULT Bind_ShaderResource(class CShader* pShader, const _char* pConstantName);

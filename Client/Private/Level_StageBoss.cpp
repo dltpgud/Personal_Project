@@ -147,7 +147,6 @@ HRESULT CLevel_StageBoss::Ready_UI()
 
 HRESULT CLevel_StageBoss::Ready_Layer_Player()
 {
-    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_UPDATE, true);
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(50.f, 0.f, 15.f, 1.f));
 	return S_OK;
 }

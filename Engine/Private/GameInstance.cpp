@@ -631,6 +631,11 @@ const _float4x4* CGameInstance::Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFO
 	return m_pPipeLine->Get_TransformFloat4x4_Inverse(eState);
 }
 
+const _float4x4* CGameInstance::Get_ShadowTransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState)
+{
+    return m_pPipeLine->Get_ShadowTransformFloat4x4_Inverse(eState);
+}
+
 _matrix CGameInstance::Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState)
 {
 	return m_pPipeLine->Get_TransformMatrix_Inverse(eState);

@@ -71,20 +71,16 @@ void CJetFly::HIt_Routine()
      static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_Monster_HP(m_iHP);
      static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_HitStart(true);
 }
-void CJetFly::Wake_up()
-{
-    static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
-}
-
-void CJetFly::Seeping()
-{
-    static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
-}
 
 void CJetFly::Dead_Routine()
 {
     static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(ST_DEAD);
     Erase_PartObj(PART_HP);
+}
+
+void CJetFly::Set_State(_uint State)
+{
+    static_cast<CBody_JetFly*>(m_PartObjects[PART_BODY])->ChangeState(State);
 }
 
 HRESULT CJetFly::Add_Components()

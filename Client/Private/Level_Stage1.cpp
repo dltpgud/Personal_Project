@@ -114,7 +114,7 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _wstring& pLayerTag)
    Desc.vAt = At;
    Desc.fFovy = XMConvertToRadians(45.0f);
    Desc.fNearZ = 0.1f;
-   Desc.fFarZ = 500.f;
+   Desc.fFarZ = 1000.f;
    Desc.fAspect = (_float)g_iWinSizeX / g_iWinSizeY;
    if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag, TEXT("Prototype_GameObject_Camera_Free"), &Desc)))
 	   return E_FAIL;
@@ -126,6 +126,8 @@ HRESULT CLevel_Stage1::Ready_Layer_Camera(const _wstring& pLayerTag)
    XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye,  m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
    XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f), (_float)g_iWinSizeX / g_iWinSizeY,
                                                          Desc.fNearZ, 1000));
+
+
 
    m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
 

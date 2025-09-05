@@ -84,7 +84,7 @@ void CDOOR::Update(_float fTimeDelta)
         if (m_ChangeLevelDoor == 2 && m_iState == State::OPEN && !(m_flags & DOOR_INTERACT))
         {
             static_cast<CFade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Fade(true,true);
-            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_UPDATE, false);
+            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::FLAG_UPDATE, false);
             m_pGameInstance->Set_Open_Bool(true);
             m_flags |= DOOR_INTERACT;
         }
@@ -165,7 +165,8 @@ HRESULT CDOOR::Render_Shadow()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+    if (FAILED(m_pShaderCom->Bind_Matrix(
+            "g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();

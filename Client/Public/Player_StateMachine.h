@@ -10,6 +10,7 @@ class CPlayer_StateMachine : public CBase
 public:
     struct PLAYER_STATEMACHINE_DESC : public CPlayer_StateNode::PLAYER_INFO_DESC
     {
+        _uint* iState;
     };
 
     enum STATE_NODE
@@ -52,7 +53,7 @@ protected:
 
 private:
     vector<CPlayer_StateNode*> m_StateNodes;
-    _uint m_iState{};
+    _uint* m_iState{};
     _uint m_iPreviousState{}; 
     _uint m_iLastActiveState{}; 
 

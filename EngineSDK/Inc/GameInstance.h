@@ -8,6 +8,7 @@
 #include "Calculator.h"
 #include "Actor.h"
 #include "ThreadPool.h"
+#include "Frustum.h"
 /* CGameInstance : */
 /* 내 Engine에 유일하게 존재하는 싱글톤클래스다. */
 /* Client사용자가 엔진의 기능을 이용하고자한다면 CGameInstance를 통해서 기능을 수행할 수 있도록 하겠다. */
@@ -138,6 +139,7 @@ public: /* For.PipeLine */
 	const _float4x4* Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState);
 	const _float4x4* Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
+    const _float4x4* Get_ShadowTransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
@@ -190,7 +192,6 @@ public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
     _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
     void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
-#pragma endregion
 
 #pragma region ThreadPool
 public: /* For.ThreadPool */

@@ -8,18 +8,6 @@ END
 BEGIN(Client)
 class CJetFly final : public CMonster
 {
-public:
-
-    enum STATE : _ubyte
-    {
-        ST_IDLE,
-        ST_SHOOT,
-        ST_HIT,
-        ST_DEAD,
-        ST_MOVE,
-        ST_END
-    }; 
-
 private:
     CJetFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CJetFly(const CJetFly& Prototype);
@@ -34,8 +22,7 @@ public:
     virtual HRESULT Render() override;
     virtual void HIt_Routine()override;
     virtual void Dead_Routine() override;
-    virtual void Wake_up() override;
-    virtual void Seeping() override;
+    virtual void Set_State(_uint State) override;
 
 private:
     HRESULT Add_Components();

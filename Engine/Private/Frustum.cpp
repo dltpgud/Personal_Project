@@ -1,4 +1,4 @@
-#include "..\Public\Frustum.h"
+ï»¿#include "..\Public\Frustum.h"
 #include "GameInstance.h"
 
 CFrustum::CFrustum()
@@ -9,7 +9,7 @@ CFrustum::CFrustum()
 
 HRESULT CFrustum::Initialize()
 {
-	/* Åõ¿µ½ºÆäÀÌ½º »óÀÇ ÀıµÎÃ¼ÀÇ ¿©´ü°³ ¸ğ¼­¸® Á¡À» ±¸Çß´Ù. */
+	/* íˆ¬ì˜ìŠ¤í˜ì´ìŠ¤ ìƒì˜ ì ˆë‘ì²´ì˜ ì—¬ëŸê°œ ëª¨ì„œë¦¬ ì ì„ êµ¬í–ˆë‹¤. */
 	m_vPoints[0] = _float3(-1.f, 1.f, 0.f);
 	m_vPoints[1] = _float3(1.f, 1.f, 0.f);
 	m_vPoints[2] = _float3(1.f, -1.f, 0.f);
@@ -25,7 +25,7 @@ HRESULT CFrustum::Initialize()
 
 void CFrustum::Update()
 {
-	/* ¿ùµå ½ºÆäÀÌ½º·Î ÀÌÀü½ÃÅ°ÀÚ. */
+	/* ì›”ë“œ ìŠ¤í˜ì´ìŠ¤ë¡œ ì´ì „ì‹œí‚¤ì. */
 	for (size_t i = 0; i < 8; i++)
 	{
 		XMStoreFloat3(&m_vWorldPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vPoints[i]),
@@ -35,6 +35,7 @@ void CFrustum::Update()
 	}
 
 	Make_Planes(m_vWorldPoints, m_WorldPlanes);
+
 }
 
 

@@ -4,6 +4,7 @@
 #include "Weapon.h"
 #include "Body_Player.h"
 #include "Player_ShootingStateUI.h"
+#include "Trigger.h"
 CPlayer_Fall::CPlayer_Fall()
 {
 }
@@ -18,7 +19,7 @@ HRESULT CPlayer_Fall::Initialize(void* pDesc)
 
 void CPlayer_Fall::State_Enter(_uint* pState, _uint* pPreState)
 {
-    if ((*pPreState & CPlayer_StateNode::MOV_HIT) != 0)
+    if ((*pPreState & CPlayer::MOV_HIT) != 0)
         return;
 
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_SPTINT_FALL;
@@ -26,13 +27,13 @@ void CPlayer_Fall::State_Enter(_uint* pState, _uint* pPreState)
     m_StateDesc.bLoop = true;
     m_pParentObject->Set_onCell(false);
     m_bSetBody = false;
-    m_pParentObject->AddFlag(CPlayer::FLAG_KEYLOCK);
+    m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK,true);
     __super::State_Enter(pState, pPreState);
 }
 
 _bool CPlayer_Fall::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
-    _bool bDead = m_pParentObject->GetTriggerFlag(CActor::Trigger_Terrain);
+    _bool bDead = m_pParentObject->GetTriggerFlag(CTrigger::FLAG_LAVA);
     if (false == bDead)
     {
         __super::State_Processing(fTimedelta, pState, pPreState);
@@ -57,8 +58,8 @@ _bool CPlayer_Fall::State_Exit(_uint* pState)
 {
     m_bSetBody = false;
     m_bFromJump = false;
-    m_pParentObject->SetTriggerFlag(CActor::Trigger_Terrain, false);
-    m_pParentObject->SetFlag(CPlayer::FLAG_KEYLOCK,false);
+    m_pParentObject->SetTriggerFlag(CTrigger::FLAG_LAVA, false);
+    m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK,false);
     m_pParentObject->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, m_pParentObject->Get_Navigation()->Get_SafePos());
     m_pParentObject->Set_onCell(true);
     m_pParentObject->Get_Navigation()->Find_CurrentCell(m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
@@ -81,18 +82,18 @@ void CPlayer_Fall::Init_CallBack_Func()
 
 _bool CPlayer_Fall::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & MOV_FALL) != 0;
+    return (stateFlags & CPlayer::MOV_FALL) != 0;
 }
 
 void CPlayer_Fall::SetActive(_bool active, _uint* pState)
 {
     if (active)
     {
-        *pState |= MOV_FALL;
+        *pState |= CPlayer::MOV_FALL;
     }
     else
     {
-        *pState &= ~MOV_FALL;
+        *pState &= ~CPlayer::MOV_FALL;
     }
 }
 
@@ -102,7 +103,7 @@ _bool CPlayer_Fall::CanEnter(_uint* pState)
 
     if (true == bFall)
     {
-        if ((*pState & MOV_JUMP) != 0)
+        if ((*pState & CPlayer::MOV_JUMP) != 0)
         {
             m_bFromJump = true;
             return false;

@@ -14,33 +14,6 @@ BEGIN(Client)
 class CPlayer_StateNode :public CBase
 {
 public:
-    enum DIRECTION : _uint
-    {
-        DIR_FORWARD = 1 << 0,
-        DIR_RIGHT   = 1 << 1,
-        DIR_BACK    = 1 << 2,
-        DIR_LEFT    = 1 << 3
-    };
-    enum MOVEMENT : _uint
-    {
-        MOV_IDLE    = 1 << 4,
-        MOV_RUN     = 1 << 5,
-        MOV_SPRINT  = 1 << 6,
-        MOV_JUMP    = 1 << 7,
-        MOV_HIT     = 1 << 8,
-        MOV_FALL    = 1 << 9,
-        MOV_STURN   = 1 << 10,
-        MOV_HEALTH  = 1 << 11,
-    };
-
-    enum BEHAVIOR : _uint
-    {
-        BEH_RELOAD  = 1 << 12,
-        BEH_SHOOT   = 1 << 13,
-        BEH_SWICH   = 1 << 14,
-    };
-
-public:
 	struct PLAYER_INFO_DESC
 	{
          CPlayer* pParentObject{};

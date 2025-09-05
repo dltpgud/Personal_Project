@@ -15,7 +15,7 @@ HRESULT CLEVEL_MENU::Initialize()
 {
 	if (m_pGameInstance->Get_Player() != nullptr)
 	{
-            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_UPDATE, false);
+            static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::FLAG_UPDATE, false);
 	}
 
 	if (FAILED(Ready_UI()))

@@ -53,8 +53,7 @@ void CBody_BoomBot::Priority_Update(_float fTimeDelta)
 
 void CBody_BoomBot::Update(_float fTimeDelta)
 {
-    if (CStateMachine::Result::Finished ==
-        m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta, &m_RimDesc))
+    if (CStateMachine::Result::Finished == m_pStateMachine[*m_pParentState]->StateMachine_Playing(fTimeDelta, &m_RimDesc))
     {
       if (m_pStateMachine[*m_pParentState]->Get_NextMachineIndex() != -1)
          ChangeState(m_pStateMachine[*m_pParentState]->Get_NextMachineIndex());
@@ -68,6 +67,9 @@ void CBody_BoomBot::Update(_float fTimeDelta)
 void CBody_BoomBot::Late_Update(_float fTimeDelta)
 {
     __super::Late_Update(fTimeDelta);
+
+     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
 
     if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
     {
