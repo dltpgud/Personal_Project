@@ -58,11 +58,6 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta, RIM
         return Result::Finished;
     }
 
-    if (*m_fLength < 15.f) 
-    {
-       m_iNextIndex = BACK;
-    }
-
     if (m_iCurIndex != m_iNextIndex)
     {
         if (m_iNextIndex == GO)
@@ -81,12 +76,17 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta, RIM
 
     if (true == isFall)
     {
-        Reset_StateMachine(pRim);
-        return Result::Finished;
+        m_iNextIndex = JETPACK;
     }
-    if (*m_fLength > 20.f && false == isFall)
+    else if (*m_fLength < 10.f)
     {
-        m_iCurIndex = GO;
+        m_iNextIndex = BACK;
+    }
+    else
+        m_iNextIndex = GO;
+
+    if (*m_fLength > 13.f || isFall)
+    {
         if (m_pGameInstance->Get_Player()->Get_onCell())
         {
             m_pGameInstance->Add_Job(
@@ -95,25 +95,34 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta, RIM
                     m_pParentObject->Get_Navigation()->Set_Taget(
                                 m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
                 });
+            
             if (m_pParentObject->Get_Transform()->FollowPath(m_pParentObject->Get_Navigation(), fTimeDelta))
             {
-                Reset_StateMachine(pRim);
-                return Result::Finished;
+                if (false == isFall)
+                {
+                    Reset_StateMachine(pRim);
+                    return Result::Finished;
+                }
             }
-        }else 
-            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,m_pParentObject->Get_Navigation());
+        }
+        else
+        {
+            m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta, m_pParentObject->Get_Navigation());
+        }
+         
     }
-    else if (*m_fLength <= 20.f && *m_fLength >= 15.f)
+    else if (*m_fLength <= 13.f && *m_fLength > 10.f && false == isFall)
     {
         Reset_StateMachine(pRim);
         return Result::Finished;
     }
 
-    if (m_iCurIndex == BACK && false == isFall)
+    if (m_iCurIndex == BACK )
     {
 
        m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, m_pParentObject->Get_Navigation());
        m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
+
     }
   
   if( m_StateNodes[m_iCurIndex]->State_Processing(fTimeDelta))

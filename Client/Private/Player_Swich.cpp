@@ -31,7 +31,7 @@ _bool CPlayer_Swich::State_Processing(_float fTimedelta, _uint* pState, _uint* p
 
 _bool CPlayer_Swich::State_Exit(_uint* pState)
 {
-    m_pParentObject->SetFlag(CPlayer::FLAG_CHANGE, false);
+    m_pParentObject->Set_State(CPlayer::BRH_CHANGE, false);
    return true;
 }
 
@@ -45,23 +45,23 @@ void CPlayer_Swich::Init_CallBack_Func()
 
 _bool CPlayer_Swich::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & BEH_SWICH) != 0;
+    return (stateFlags & CPlayer::BEH_SWICH) != 0;
 }
 
 void CPlayer_Swich::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= BEH_SWICH;
+        *pState |= CPlayer::BEH_SWICH;
     else
-        *pState &= ~BEH_SWICH;
+        *pState &= ~CPlayer::BEH_SWICH;
 }
 
 _bool CPlayer_Swich::CanEnter(_uint* pState)
 {
-    if ((*pState & (MOV_JUMP | BEH_SWICH)) != 0)
+    if ((*pState & (CPlayer::MOV_JUMP | CPlayer::BEH_SWICH)) != 0)
         return false;
 
-    return m_pParentObject->GetFlag(CPlayer::FLAG_CHANGE);
+    return m_pParentObject->HasState(CPlayer::BRH_CHANGE);
 }
 
 _bool CPlayer_Swich::CheckInputCondition(_uint stateFlags)

@@ -240,8 +240,10 @@ _bool CTransform::FollowPath(CNavigation* pNavigation, _float fTimedelta)
     
     // targetPos가 유효한지 확인
     if (XMVectorGetX(XMVector3Length(targetPos)) < 0.001f)
+    {
+        ++m_CurrentPathIndex; // 다음 포인트로 넘어가기
         return false;
-
+    }
     const _vector dir = targetPos - currentPos;
     _vector dirXZ = XMVectorSetY(dir, 0.f);
     const _float distSq = XMVectorGetX(XMVector3LengthSq(dirXZ));

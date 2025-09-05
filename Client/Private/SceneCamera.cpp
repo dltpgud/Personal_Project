@@ -66,7 +66,7 @@ void CSceneCamera::Late_Update(_float fTimeDelta)
 
 HRESULT CSceneCamera::Render()
 {
-    return S_OK;
+	return S_OK;
 }
 
 CSceneCamera* CSceneCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -97,5 +97,5 @@ CGameObject* CSceneCamera::Clone(void* pArg)
 
 void CSceneCamera::Free()
 {
-    __super::Free();
+	__super::Free();
 }

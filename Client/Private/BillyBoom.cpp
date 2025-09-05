@@ -132,7 +132,7 @@ void CBillyBoom::Change_Pattern()
         }
     }
 
-    m_iNextSkill = static_cast<STATE>(RandomAttack); // Move 끝나면 쓸 스킬 저장
+    m_iNextSkill = static_cast<STATE>(RandomAttack + ST_BARRE); // Move 끝나면 쓸 스킬 저장
     m_iState = ST_MOVE;
 }
 

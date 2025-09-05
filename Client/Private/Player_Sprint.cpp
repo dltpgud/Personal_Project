@@ -29,7 +29,7 @@ void CPlayer_Sprint::State_Enter(_uint* pState, _uint* pPreState)
 
 _bool CPlayer_Sprint::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
-    if (*pState & BEH_SHOOT)
+    if (*pState & CPlayer::BEH_SHOOT)
     {
         return false;
     }
@@ -52,20 +52,20 @@ void CPlayer_Sprint::Init_CallBack_Func()
 
 _bool CPlayer_Sprint::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & MOV_SPRINT) != 0;
+    return (stateFlags & CPlayer::MOV_SPRINT) != 0;
 }
 
 void CPlayer_Sprint::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= MOV_SPRINT; 
+        *pState |= CPlayer::MOV_SPRINT; 
     else
-        *pState &= ~MOV_SPRINT; 
+        *pState &= ~CPlayer::MOV_SPRINT;
 }
 
 _bool CPlayer_Sprint::CanEnter(_uint* pState) 
 {      
-    if ((*pState & (BEH_RELOAD | BEH_SWICH | MOV_STURN | MOV_FALL)) != 0)
+    if ((*pState & (CPlayer::BEH_RELOAD | CPlayer::BEH_SWICH | CPlayer::MOV_STURN | CPlayer::MOV_FALL)) != 0)
         return false;
 
     _bool isShiftDown = m_pGameInstance->Get_DIKeyState(DIK_LSHIFT);
@@ -74,8 +74,8 @@ _bool CPlayer_Sprint::CanEnter(_uint* pState)
 
     if (isShiftDown && isMoving)
     {
-        *pState &= ~MOV_RUN;
-        *pState &= ~MOV_HIT;
+        *pState &= ~CPlayer::MOV_RUN;
+        *pState &= ~CPlayer::MOV_HIT;
         return true;
     }
 
@@ -89,7 +89,7 @@ _bool CPlayer_Sprint::CheckInputCondition(_uint stateFlags)
 
     _bool Moving = Move_KeyFlage(&stateFlags) && m_pGameInstance->Get_DIKeyState(DIK_LSHIFT);
 
-    _bool isOtherAction = (stateFlags & (BEH_RELOAD | BEH_SWICH)) != 0;
+    _bool isOtherAction = (stateFlags & (CPlayer::BEH_RELOAD | CPlayer::BEH_SWICH)) != 0;
   
     return Moving && !isOtherAction;
 }

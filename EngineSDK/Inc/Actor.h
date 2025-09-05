@@ -12,12 +12,7 @@ public:
     {
         TYPE_PLAYER, TYPE_MONSTER,TYPE_NPC
     };
-    enum Flag
-    {
-        Trigger_Terrain = 2 << 1  
-       
-    };
-
+ 
 public:
     typedef struct Actor_DESC : public CContainerObject::CONTAINEROBJECT_DESC
     {
@@ -43,7 +38,16 @@ public:
      virtual void HIt_Routine() {};
      virtual void Dead_Routine() {};
      virtual void Stun_Routine() {};
-
+     virtual void Set_State(_uint flag, _bool value)
+     {
+         if (value)
+         {
+             m_iState |= flag;
+         }
+         else
+             m_iState &= ~flag;
+     };
+     virtual _bool HasState(_uint flag) const {return (m_iState & flag) != 0;};
  public:
      void   Check_Coll();
      _uint  Get_Type() {return m_iType;}
@@ -60,31 +64,30 @@ public:
      virtual void Set_CurrentHP(_int CurrentHp){m_iHP -= CurrentHp;}
      void Set_HealthCurrentHP(_int Health);
      _bool IsFullHP() const { return m_iHP == m_iMAXHP;}
-
-     void SetTriggerFlag(Flag flag, _bool value)
+     _bool GetTriggerFlag(_uint flag) const
      {
-            if (value)
-            {
-                m_iFlag |= flag;
-            }
-            else
-                m_iFlag &= ~flag;
-     }
-     _bool GetTriggerFlag(Flag flag) const
+         return (m_iTriggerState & flag) != 0;
+     };
+     void SetTriggerFlag(_uint flag, _bool value)
      {
-            return (m_iFlag & flag) != 0;
-     }
+         if (value)
+         {
+             m_iTriggerState |= flag;
+         }
+         else
+             m_iTriggerState &= ~flag;
+     };
 
-protected:
+ protected:
      CNavigation* m_pNavigationCom = { nullptr };
      _int         m_iHP{};
      _int         m_iMAXHP{};
      _uint        m_iState = {};
+     _uint        m_iTriggerState = {};
      _float       m_fY{0.f};
      _float       m_FixY{0.f};
      _bool        m_bOnCell = {false};
      _uint        m_iType = {};
-     _uint        m_iFlag = {};
      _uint        m_iRim{}; 
     
 public:

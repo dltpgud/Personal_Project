@@ -40,23 +40,25 @@ void CPlayer_Idle::Init_CallBack_Func()
 
 _bool CPlayer_Idle::IsActive(_uint stateFlags) const
 {   
-    return (stateFlags & MOV_IDLE) != 0;
+    return (stateFlags & CPlayer::MOV_IDLE) != 0;
 }
 
 void CPlayer_Idle::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= MOV_IDLE; 
+        *pState |= CPlayer::MOV_IDLE; 
     else
-        *pState &= ~MOV_IDLE; 
+        *pState &= ~CPlayer::MOV_IDLE;
 }
 
 _bool CPlayer_Idle::CanEnter(_uint* pState)
 {
-   if (*pState & MOV_FALL)
+    if (*pState & CPlayer::MOV_FALL)
        return false;
        
-   _bool stateinput = !(*pState & (MOV_RUN | MOV_JUMP | MOV_SPRINT | MOV_HIT | MOV_STURN | MOV_HEALTH | BEH_SHOOT | BEH_RELOAD | BEH_SWICH));
+   _bool stateinput = !(*pState & (CPlayer::MOV_RUN | CPlayer::MOV_JUMP | CPlayer::MOV_SPRINT | CPlayer::MOV_HIT |
+                                    CPlayer::MOV_STURN | CPlayer::MOV_HEALTH | CPlayer::BEH_SHOOT |
+                                    CPlayer::BEH_RELOAD | CPlayer::BEH_SWICH));
     _bool KeyInput = !Move_KeyFlage(pState);
     
     return KeyInput && stateinput;
@@ -64,11 +66,10 @@ _bool CPlayer_Idle::CanEnter(_uint* pState)
 
 _bool CPlayer_Idle::CheckInputCondition(_uint stateFlags) 
 {
-    if (stateFlags & MOV_FALL)
+    if (stateFlags & CPlayer::MOV_FALL)
         return false;
         
-    return !(stateFlags & (MOV_RUN | MOV_SPRINT | MOV_JUMP |
-                           BEH_RELOAD | BEH_SWICH));
+    return !(stateFlags & (CPlayer::MOV_RUN | CPlayer::MOV_SPRINT | CPlayer::MOV_JUMP | CPlayer::BEH_RELOAD | CPlayer::BEH_SWICH));
 }
 
 CPlayer_Idle* CPlayer_Idle::Create(void* pArg)

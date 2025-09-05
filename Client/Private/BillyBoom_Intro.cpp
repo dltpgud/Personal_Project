@@ -6,6 +6,7 @@
 #include "SceneCamera.h"
 #include "Camera_Free.h"
 #include "Fade.h"
+#include "Player.h"
 CBillyBoom_Intro::CBillyBoom_Intro()
 {
 }
@@ -78,6 +79,7 @@ void CBillyBoom_Intro::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
     *m_fEmissivePower = 0.f;
     *m_fEmissiveColor = {0.f, 0.f, 0.f}; 
     static_cast<CBillyBoom*>(m_pParentObject)->Set_bFinishIntro(true);
+    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::FLAG_UPDATE, true);
     __super::Reset_StateMachine(pRim);
 }
 

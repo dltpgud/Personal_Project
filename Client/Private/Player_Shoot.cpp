@@ -28,8 +28,6 @@ HRESULT CPlayer_Shoot::Initialize(void* pDesc)
 void CPlayer_Shoot::State_Enter(_uint* pState, _uint* pPreState)
 {
     _int CurMotion{};
-    
-    // 점프 상태일 때도 일반 총쏘기 애니메이션 사용 (점프 총쏘기 애니메이션이 없으므로)
     switch (*m_pCurWeapon)
     {
     case CWeapon::HendGun: 
@@ -46,7 +44,6 @@ void CPlayer_Shoot::State_Enter(_uint* pState, _uint* pPreState)
         break;
     default: break;
     }
-    
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
 
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_SHOOT;
@@ -131,33 +128,33 @@ void CPlayer_Shoot::Init_CallBack_Func()
 
 _bool CPlayer_Shoot::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & BEH_SHOOT) != 0;
+    return (stateFlags & CPlayer::BEH_SHOOT) != 0;
 }
 
 void CPlayer_Shoot::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= BEH_SHOOT;
+        *pState |= CPlayer::BEH_SHOOT;
     else
-        *pState &= ~BEH_SHOOT; 
+        *pState &= ~CPlayer::BEH_SHOOT;
 }
 
 _bool CPlayer_Shoot::CanEnter(_uint* pState) 
 {
-    // 점프 중에도 총쏘기가 가능하도록 MOV_FALL 체크 제거
-    // if (*pState & MOV_FALL)
-    //     return false;
+    if (*pState & CPlayer::MOV_FALL)
+         return false;
          
-     if ((*pState & (BEH_RELOAD | BEH_SHOOT | MOV_STURN | MOV_HIT)) != 0)
+     if ((*pState & (CPlayer::BEH_RELOAD | CPlayer::BEH_SHOOT | CPlayer::MOV_STURN | CPlayer::MOV_HIT)) != 0)
          return false;
     
-    if (true == m_pParentObject->GetFlag(CPlayer::FLAG_KEYLOCK))
+    if (true == m_pParentObject->HasState(CPlayer::FLAG_KEYLOCK))
         return false;
 
     if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0 ||
         m_pParentObject->Get_Weapon_Info().iCurBullet > m_pParentObject->Get_Weapon_Info().iMaxBullet)
         return false;
 
+    // 점프 중에도 총을 쏠 수 있도록 허용
     if (m_pGameInstance->Get_DIMouseDown(MOUSEKEYSTATE::DIM_LB))
     {
         m_bAutoFire = false;
@@ -175,7 +172,7 @@ _bool CPlayer_Shoot::CanEnter(_uint* pState)
 
 _bool CPlayer_Shoot::CheckInputCondition(_uint stateFlags) 
 {
-    if (stateFlags & (MOV_STURN | MOV_HIT))
+    if (stateFlags & (CPlayer::MOV_STURN | CPlayer::MOV_HIT))
     {
         m_pShootingUI->Set_Open(false);
         m_pAutoShootingUI->Set_Open(false);

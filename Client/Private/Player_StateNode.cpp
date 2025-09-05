@@ -46,9 +46,9 @@ void CPlayer_StateNode::Init_CallBack_Func()
 
 _bool CPlayer_StateNode::Move_KeyFlage(_uint* pState)
 {
-    if (m_pParentObject->GetFlag(CPlayer::FLAG_KEYLOCK) == true)
+    if (m_pParentObject->HasState(CPlayer::FLAG_KEYLOCK) == true)
     {
-        *pState &= ~(DIR_FORWARD | DIR_BACK | DIR_LEFT | DIR_RIGHT);
+        *pState &= ~(CPlayer::DIR_FORWARD | CPlayer::DIR_BACK | CPlayer::DIR_LEFT | CPlayer::DIR_RIGHT);
         return false;
     }
    
@@ -57,26 +57,26 @@ _bool CPlayer_StateNode::Move_KeyFlage(_uint* pState)
     if (m_pGameInstance->Get_DIKeyDown(DIK_A) || m_pGameInstance->Get_DIKeyState(DIK_A)) 
 	{
 	  bMove = true;
-      *pState |= DIR_LEFT;
+            *pState |= CPlayer::DIR_LEFT;
 	}
     if (m_pGameInstance->Get_DIKeyDown(DIK_D) || m_pGameInstance->Get_DIKeyState(DIK_D))
 	{
       bMove = true;
-      *pState |= DIR_RIGHT;
+            *pState |= CPlayer::DIR_RIGHT;
 	}
 	if (m_pGameInstance->Get_DIKeyDown(DIK_W) || m_pGameInstance->Get_DIKeyState(DIK_W))
 	{
       bMove = true;
-      *pState |= DIR_FORWARD;
+            *pState |= CPlayer::DIR_FORWARD;
 	}
 	if (m_pGameInstance->Get_DIKeyDown(DIK_S) || m_pGameInstance->Get_DIKeyState(DIK_S))
 	{
       bMove = true;
-      *pState |= DIR_BACK;
+            *pState |= CPlayer::DIR_BACK;
 	}
 
 	if (false == bMove)
-	*pState &= ~(DIR_FORWARD | DIR_BACK | DIR_LEFT | DIR_RIGHT);
+            *pState &= ~(CPlayer::DIR_FORWARD | CPlayer::DIR_BACK | CPlayer::DIR_LEFT | CPlayer::DIR_RIGHT);
 
     return bMove;
 }
@@ -85,47 +85,47 @@ void CPlayer_StateNode::CheckState(_uint* State) const
 {
 
 
-    if (IsFlagOn(State, DIR_FORWARD))
+    if (IsFlagOn(State, CPlayer::DIR_FORWARD))
         std::cout << "앞으로 이동 중\n";
 
-    if (IsFlagOn(State, DIR_BACK))
+    if (IsFlagOn(State, CPlayer::DIR_BACK))
         std::cout << "뒤으로 이동 중\n";
 
-    if (IsFlagOn(State, DIR_LEFT))
+    if (IsFlagOn(State, CPlayer::DIR_LEFT))
         std::cout << "왼쪽으로 이동 중\n";
 
-    if (IsFlagOn(State, DIR_RIGHT))
+    if (IsFlagOn(State, CPlayer::DIR_RIGHT))
         std::cout << "오른쪽으로 이동 중\n";
 
-    if (IsFlagOn(State, BEH_RELOAD))
+    if (IsFlagOn(State, CPlayer::BEH_RELOAD))
         std::cout << "장전 중\n";
 
-    if (IsFlagOn(State, BEH_SHOOT))
+    if (IsFlagOn(State, CPlayer::BEH_SHOOT))
         std::cout << "쏘는 중\n";
 
-    if (IsFlagOn(State, BEH_SWICH))
+    if (IsFlagOn(State, CPlayer::BEH_SWICH))
         std::cout << "바꾸는 중\n";
 
-    if (IsFlagOn(State, MOV_IDLE))
+    if (IsFlagOn(State, CPlayer::MOV_IDLE))
         std::cout << "아이들\n";
 
-    if (IsFlagOn(State, MOV_RUN))
+    if (IsFlagOn(State, CPlayer::MOV_RUN))
         std::cout << "달리 중\n";
 
-    if (IsFlagOn(State, MOV_SPRINT))
+    if (IsFlagOn(State, CPlayer::MOV_SPRINT))
         std::cout << "스프린트 중\n";
 
-    if (IsFlagOn(State, MOV_JUMP))
+    if (IsFlagOn(State, CPlayer::MOV_JUMP))
         std::cout << "뛰는 중\n";
-    if (IsFlagOn( State,MOV_HIT))
+    if (IsFlagOn(State, CPlayer::MOV_HIT))
         std::cout << "아픈 중\n";
 
-    if (IsFlagOn(State, MOV_FALL))
+    if (IsFlagOn(State, CPlayer::MOV_FALL))
         std::cout << "떨어지는중 중\n";
 
-    if (IsFlagOn(State, MOV_STURN))
+    if (IsFlagOn(State, CPlayer::MOV_STURN))
         std::cout << "스턴 중\n";
-    if (IsFlagOn(State, MOV_HEALTH))
+    if (IsFlagOn(State, CPlayer::MOV_HEALTH))
         std::cout << "회복 중\n";
 }
 #endif

@@ -49,20 +49,20 @@ void CPlayer_StateUI::Priority_Update(_float fTimeDelta)
 
 void CPlayer_StateUI::Update(_float fTimeDelta)
 {
-    if (*m_pPlayerState & CPlayer_StateNode::MOV_SPRINT)
+    if (*m_pPlayerState & CPlayer::MOV_SPRINT)
     {
         m_bDisCard = true;
         m_iType = SPRINT;
         m_iPass = 3;
     }
-    else if ((*m_pPlayerState & CPlayer_StateNode::MOV_HIT) || (*m_pPlayerState & CPlayer_StateNode::MOV_FALL))
+    else if ((*m_pPlayerState & CPlayer::MOV_HIT) || (*m_pPlayerState & CPlayer::MOV_FALL))
     {
         m_bDisCard = false;
         m_iType = DEFULT;
         m_iPass = 0;
         m_pTransformCom->Set_Scaling(g_iWinSizeX, g_iWinSizeY, 0.f);
     }
-    else if (*m_pPlayerState & CPlayer_StateNode::MOV_HEALTH)
+    else if (*m_pPlayerState & CPlayer::MOV_HEALTH)
     {
         m_bDisCard = false;
         m_iType = COLOR;
@@ -70,7 +70,7 @@ void CPlayer_StateUI::Update(_float fTimeDelta)
         m_iPass = 4;
         m_pTransformCom->Set_Scaling(g_iWinSizeX, g_iWinSizeY, 0.f);
     }
-    else if (*m_pPlayerState & CPlayer_StateNode::MOV_STURN)
+    else if (*m_pPlayerState & CPlayer::MOV_STURN)
     {
         m_bDisCard = false;
         m_iType = COLOR;

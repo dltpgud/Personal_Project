@@ -29,7 +29,7 @@ _bool CPlayer_Sturn::State_Processing(_float fTimedelta, _uint* pState, _uint* p
 {
     _bool bAnimFinished = __super::State_Processing(fTimedelta, pState, pPreState);
     
-    if (bAnimFinished || !m_pParentObject->GetFlag(CPlayer::FLAG_STURN))
+    if (bAnimFinished )
     {
         return true;
     }
@@ -38,8 +38,7 @@ _bool CPlayer_Sturn::State_Processing(_float fTimedelta, _uint* pState, _uint* p
 
 _bool CPlayer_Sturn::State_Exit(_uint* pState)
 {
-    m_pParentObject->SetFlag(CPlayer::FLAG_STURN, false);
-    m_pParentObject->SetFlag(CPlayer::FLAG_KEYLOCK, false);
+    m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK, false);
  
     return true;
 }
@@ -53,23 +52,20 @@ void CPlayer_Sturn::Init_CallBack_Func()
 
 _bool CPlayer_Sturn::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & MOV_STURN) != 0;
+    return (stateFlags & CPlayer::MOV_STURN) != 0;
 }
 
 void CPlayer_Sturn::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= MOV_STURN; 
+        *pState |= CPlayer::MOV_STURN; 
     else
-        *pState &= ~MOV_STURN; 
+        *pState &= ~CPlayer::MOV_STURN;
 }
 
 _bool CPlayer_Sturn::CanEnter(_uint* pState)
 {
-    if (*pState & MOV_STURN)
-        return false;
-
-    return m_pParentObject->GetFlag(CPlayer::FLAG_STURN);
+    return (*pState & CPlayer::MOV_STURN);
 }
 
 _bool CPlayer_Sturn::CheckInputCondition(_uint stateFlags)

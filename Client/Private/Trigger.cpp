@@ -102,7 +102,7 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
     case TYPE_ASTAR:
      
         if (m_iCoType == CCollider::TYPE_AABB || m_iCoType == CCollider::TYPE_OBB) {
-            m_fExtents.y = 15.f;
+            m_fExtents.y = 25.f;
         }
         Set_Coll_Info();
 
@@ -120,10 +120,14 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
                   _float3 fPos{};
                   for (auto& monster :Monster)
                   {
-                      XMStoreFloat3(&fPos, monster->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                      auto pMonster = dynamic_cast<CMonster*>(monster);
+                      XMStoreFloat3(&fPos, pMonster->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
              
                       if (true == m_pColliderCom->IsInside(fPos))
-                          dynamic_cast<CMonster*>(monster)->Wake_up();
+                      {
+                          if (false == pMonster->HasState(CMonster::ST_DEAD) ||  pMonster->HasState(CMonster::ST_HIT))
+                                pMonster->Set_State(CMonster::ST_MOVE);
+                      }
                   }
               }
               else if (false == bColliding && true == bPlayer)
@@ -140,7 +144,8 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
                       pMonster -> Compute_Length();
                       if (true == m_pColliderCom->IsInside(fPos) && (*pMonster->Get_fAttackLength()) >= 70.f)
                       {
-                          pMonster->Seeping();
+                          if (pMonster->HasState(CMonster::ST_MOVE))
+                              pMonster->Set_State(CMonster::ST_IDLE);
                       }
                   }
               }
@@ -154,7 +159,7 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
             [this](CActor* other, _bool bColliding, _bool bPlayer)
             {
                 if (bColliding)
-                    other->SetTriggerFlag(CActor::Trigger_Terrain, true);
+                    other->SetTriggerFlag(FLAG_LAVA, true);
             });
     
         break;

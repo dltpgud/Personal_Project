@@ -2,7 +2,7 @@
 #include "Player_ShootingStateUI.h"
 #include "GameInstance.h"
 #include "Weapon.h"
-#include "Player_StateNode.h"
+#include "Player.h"
 CPlayer_ShootingStateUI::CPlayer_ShootingStateUI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CUI{ pDevice, pContext }
 {
 }
@@ -43,7 +43,7 @@ void CPlayer_ShootingStateUI::Priority_Update(_float fTimeDelta)
 
 void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 {
-    if (*m_iWeaPonState & CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::HendGun)
+    if (*m_iWeaPonState & CPlayer::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::HendGun)
 	{
 		m_iTex = Prrr;
 		m_RGB.x  = 0.0f;
@@ -59,7 +59,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::HendGun)
+	if (*m_iWeaPonState & CPlayer::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::HendGun)
 	{
 		m_iTex = CLack;
 		m_RGB.x= 0.5f;
@@ -75,7 +75,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState & CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
+	if (*m_iWeaPonState & CPlayer::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
 	{
 		m_iTex = Tra;
 		m_RGB.x= 0.0f;
@@ -90,7 +90,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
+	if (*m_iWeaPonState & CPlayer::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::AssaultRifle)
 	{
 		m_iTex = CLack;
 		m_RGB.x = 0.f;
@@ -109,7 +109,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState & CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::MissileGatling)
+	if (*m_iWeaPonState & CPlayer::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::MissileGatling)
 	{
 		m_iTex = TaKa;
 		m_RGB.x = 1.f;
@@ -125,7 +125,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::MissileGatling)
+	if (*m_iWeaPonState & CPlayer::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::MissileGatling)
 	{
 		m_iTex = CLack2;
 		m_RGB.x = 1.f;
@@ -141,7 +141,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState &CPlayer_StateNode::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
+	if (*m_iWeaPonState & CPlayer::BEH_SHOOT && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
 	{
 		m_iTex = Flink;
 		m_RGB.x = 0.0f;
@@ -157,7 +157,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		}
 	}
 
-	if (*m_iWeaPonState & CPlayer_StateNode::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
+	if (*m_iWeaPonState & CPlayer::BEH_RELOAD && *m_iWeaPonTYPE == CWeapon::HeavyCrossbow)
 	{
 		m_iTex = CLack;
 		m_RGB.x = 0.5f;

@@ -2,6 +2,8 @@
 #include "Client_Defines.h"
 #include "Camera.h"
 
+
+
 BEGIN(Client)
 class CPlayer;
 class CCamera_Free final: public CCamera
@@ -22,10 +24,11 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
-
+	
 private:
 	CPlayer* m_pPlayer = { nullptr };
 	const _float4x4*  m_PlayerEye = {};
+
 public:
 	static CCamera_Free* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

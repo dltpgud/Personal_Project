@@ -9,8 +9,10 @@ END
 BEGIN(Client)
 class CTrigger final : public CGameObject
 {
-    enum Trigger_Type{ TYPE_ASTAR,TYPE_LAVA   };
+    enum Trigger_Type{ TYPE_ASTAR,TYPE_LAVA };
 
+public:
+    enum Trigger_Flag{ FLAG_LAVA = 1 <<0};
 public:
     struct CTrigger_DESC : CGameObject::GAMEOBJ_DESC
     {

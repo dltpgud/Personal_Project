@@ -6,8 +6,8 @@
 #include "VIBuffer_Rect.h"
 #include "Shader.h"
 
-_uint g_iSizeX = 1280*10; // 그림자를 위한 변수
-_uint g_iSizeY = 720*10;
+_uint g_iSizeX = 8912; // 그림자를 위한 변수
+_uint g_iSizeY = 8912;
 
 CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{pDevice}, m_pContext{pContext}, m_pGameInstance{CGameInstance::GetInstance()}
@@ -169,8 +169,8 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 
 #ifdef _DEBUG
-   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
-   //     return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 50.f, 50.f, 150.f, 150.f)))
+        return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"),  50.f, 200.f, 150.f, 150.f)))
    //     return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"),   50.f, 350.f, 150.f, 150.f)))
@@ -253,10 +253,10 @@ HRESULT CRenderer::Draw()
 {
     if (FAILED(Render_Priority()))
         return E_FAIL;
+    if (FAILED(Render_NonBlend()))
+        return E_FAIL;
     if (FAILED(Render_Shadow()))
         return E_FAIL;
-    if (FAILED(Render_NonBlend()))
-        return E_FAIL; 
     if (FAILED(Render_Lights()))
         return E_FAIL;
     if (FAILED(Render_Final()))
@@ -348,27 +348,27 @@ HRESULT CRenderer::Render_Priority()
 
 HRESULT CRenderer::Render_Shadow()
 {
-    //m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-    //
-    //m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
-    //
-    //if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
-    //    return E_FAIL;
-    //
-    //for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
-    //{
-    //    if (nullptr != pRenderGameObject)
-    //        pRenderGameObject->Render_Shadow();
-    //
-    //    Safe_Release(pRenderGameObject);
-    //}
-    //
-    //m_RenderGameObjects[RG_SHADOW].clear();
-    //
-    //if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
-    //    return E_FAIL;
-    //
-    //m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
+    m_pContext->ClearDepthStencilView(m_pLightDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+    
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Shadow"), m_pLightDepthStencilView)))
+        return E_FAIL;
+
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_SHADOW]);
+    
+    for (auto& pRenderGameObject : m_RenderGameObjects[RG_SHADOW])
+    {
+        if (nullptr != pRenderGameObject)
+            pRenderGameObject->Render_Shadow();
+    
+        Safe_Release(pRenderGameObject);
+    }
+    
+    m_RenderGameObjects[RG_SHADOW].clear();
+    
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Shadow"))))
+        return E_FAIL;
+    
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_ORIGINAL]);
    
     return S_OK;
 }
@@ -620,10 +620,18 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
+    if (FAILED(m_pShader->Bind_Matrix("g_LightViewMatrixInv",m_pGameInstance->Get_ShadowTransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShader->Bind_Matrix("g_LightProjMatrixInv",m_pGameInstance->Get_ShadowTransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
+        return E_FAIL;
 
     _float2 WindowSize = {(_float)m_iWinSizeX,(_float) m_iWinSizeY};
     m_pShader->Bind_RawValue("g_WinDowSize", &WindowSize, sizeof(_float2));
 
+    _float2 ShadowSize = {(_float)g_iSizeX, (_float)g_iSizeY};
+    m_pShader->Bind_RawValue("g_shadowMapSize", &ShadowSize, sizeof(_float2));
+
+    
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_OutLineTexture", TEXT("Target_OutLine"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_ShadeTexture", TEXT("Target_Shade"))))
@@ -640,8 +648,7 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pShader->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
         return E_FAIL;
- 
-
+     
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
         return E_FAIL;
 

@@ -1,7 +1,7 @@
 #include"stdafx.h"
 #include "JetFly_Dead.h"
 #include "GameInstance.h"
-
+#include "Trigger.h"
 CJetFly_Dead::CJetFly_Dead()
 {
 }
@@ -13,7 +13,7 @@ HRESULT CJetFly_Dead::Initialize(void* pArg)
 
 	CStateNode::STATENODE_DESC pNodeDesc{};
     pNodeDesc.iCurrentState = 10; 
-    pNodeDesc.bIsLoop = false;
+    pNodeDesc.bIsLoop = true;
     pNodeDesc.pParentModel = m_pParentModel;
     pNodeDesc.iNextStateIdx = 0;
     pNodeDesc.fPlayAniTime = 0.5f;
@@ -37,7 +37,7 @@ CStateMachine::Result CJetFly_Dead::StateMachine_Playing(_float fTimeDelta, RIM_
     m_pParentObject->Get_Transform()->Set_MoveSpeed(8.f);
     m_pParentObject->Set_onCell(false);
     
-    if (true == isFall && false == m_pParentObject->GetTriggerFlag(CActor::Trigger_Terrain))
+    if (true == isFall && false == m_pParentObject->GetTriggerFlag(CTrigger::FLAG_LAVA))
     {
         m_pParentObject->Get_Transform()->Go_Move(CTransform::DOWN, fTimeDelta);
     }

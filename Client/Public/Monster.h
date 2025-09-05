@@ -24,13 +24,16 @@ public:
         AT_LEFT,
         AT_RIGHT,
     };
-
-    enum FLAG
+    enum COMMON_STATE
     {
-        FLAG_DEAD,
-        FLAG_END
+        ST_IDLE,
+        ST_SHOOT,
+        ST_HIT,
+        ST_DEAD,
+        ST_MOVE,
+        ST_END
     };
-    
+
 protected:
     CMonster(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CMonster(const CMonster& Prototype);
@@ -43,11 +46,16 @@ public:
     virtual void Update(_float fTimeDelta) override;
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-    virtual void Wake_up() {};
-    virtual void Seeping() {};
+    virtual void Set_State(_uint State) {};
+
+public:
+     _bool HasState(_uint flag) const {return m_iState ==flag;};
+
+
 
     void Compute_Length();
     void Compute_Angle();
+
     _bool IsLookAtPlayer(_float angle);
 
     _float* Get_fAttackLength() { return &m_fAttackLength;}

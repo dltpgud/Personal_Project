@@ -72,8 +72,9 @@ void CBody_BillyBoom::Update(_float fTimeDelta)
 void CBody_BillyBoom::Late_Update(_float fTimeDelta)
 {
   if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-  return;
-
+      return;
+  if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+      return;
   _matrix SocketMatrix = XMLoadFloat4x4(m_pFindAttBonMatrix[2]);
 
   for (size_t i = 0; i < 3; i++)
@@ -136,6 +137,38 @@ HRESULT CBody_BillyBoom::Render()
     }
 
     return S_OK;
+}
+
+HRESULT CBody_BillyBoom::Render_Shadow()
+{
+        if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", m_pTransformCom->Get_WorldMatrixPtr())))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",
+                                             m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",
+                                             m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+            return E_FAIL;
+
+        _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+        for (_uint i = 0; i < iNumMeshes; i++)
+        {
+            if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
+                return E_FAIL;
+
+            if (FAILED(m_pShaderCom->Begin(5)))
+                return E_FAIL;
+
+            m_pModelCom->Render(i);
+        }
+
+        return S_OK;
 }
 
 HRESULT CBody_BillyBoom::Add_Components()

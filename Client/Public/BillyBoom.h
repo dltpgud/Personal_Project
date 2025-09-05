@@ -11,14 +11,10 @@ class CBillyBoom final : public CMonster
 public:
     enum STATE 
     {
-        ST_BARRE,
+        ST_BARRE =6,
         ST_BASH,
         ST_LASER,
         ST_SHOCKWAVE,
-        ST_IDLE,
-        ST_HIT,
-        ST_DEAD,
-        ST_MOVE,
         ST_INTRO,
         ST_END
     };         

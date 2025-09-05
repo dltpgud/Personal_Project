@@ -23,7 +23,7 @@ HRESULT CPlayer_StateMachine::Initialize(void* pArg)
 {
     PLAYER_STATEMACHINE_DESC* pDesc = static_cast<PLAYER_STATEMACHINE_DESC*>(pArg);
     m_pParentObject = pDesc->pParentObject;
-    
+    m_iState = pDesc->iState;
 
     if (FAILED(Initialize_StateUI(pDesc->pCurWeapon)))
         return E_FAIL;
@@ -42,7 +42,7 @@ HRESULT CPlayer_StateMachine::Initialize(void* pArg)
     m_StateNodes[NODE_IDLE]   = CPlayer_Idle::Create(pDesc);
     m_StateNodes[NODE_HEALTH] = CPlayer_Health::Create(pDesc);
 
-    m_iState = CPlayer_StateNode::MOV_IDLE;
+    *m_iState = CPlayer::MOV_IDLE;
 
 	return S_OK;
 }
@@ -50,7 +50,7 @@ HRESULT CPlayer_StateMachine::Initialize(void* pArg)
 void CPlayer_StateMachine::ResetMachine()
 {
     m_iPreviousState = 0;
-    m_iState = CPlayer_StateNode::MOV_IDLE;
+    *m_iState = CPlayer::MOV_IDLE;
     m_iLastActiveState = 0;
     m_pGameInstance->Set_OpenUI(false, TEXT("Player_ShootingUI"));
     m_pGameInstance->Set_OpenUI(false, TEXT("Player_AutoShootingUI"));
@@ -67,46 +67,46 @@ void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
         if (nullptr == node)
             continue;
        
-        _bool bactive = node->IsActive(m_iState); // 활성여부
+        _bool bactive = node->IsActive(*m_iState); // 활성여부
 
-        progress_Move(fTimeDelta, &m_iState); // DIR 플래그로 이동
+        progress_Move(fTimeDelta, m_iState); // DIR 플래그로 이동
 
         if (!bactive) // 활성 안되어 있으니 검사
         {
-            if (node->CanEnter(&m_iState)) //상태를 활성화할 수 있는가?
+            if (node->CanEnter(m_iState)) //상태를 활성화할 수 있는가?
             {
                 Check_UIState(&m_iPreviousState);  // 이전 상태에 따른 UI 끄기 
-                node->State_Enter(&m_iState, &m_iPreviousState);  // 상태 진입
-                m_iPreviousState = m_iState;  
-                node->SetActive(true, &m_iState); //플래그 켜기
-                m_iLastActiveState = m_iState; // 현재 활성화된 상태 저장
+                node->State_Enter(m_iState, &m_iPreviousState);  // 상태 진입
+                m_iPreviousState = *m_iState;  
+                node->SetActive(true, m_iState); //플래그 켜기
+                m_iLastActiveState = *m_iState; // 현재 활성화된 상태 저장
             }
         }
         else
         {
-            if (node->State_Processing(fTimeDelta, &m_iState, &m_iPreviousState)) // 상태 진행
+            if (node->State_Processing(fTimeDelta, m_iState, &m_iPreviousState)) // 상태 진행
             {
-                _bool bReturnPrev = node->State_Exit(&m_iState); // 상태 탈출
-                m_iPreviousState = m_iState;  
-                node->SetActive(false, &m_iState); // 상태 크기
+                _bool bReturnPrev = node->State_Exit(m_iState); // 상태 탈출
+                m_iPreviousState = *m_iState;  
+                node->SetActive(false, m_iState); // 상태 크기
 
                 if (!bReturnPrev)
                 {
                     Check_UIState(&m_iPreviousState);  
-                    m_iState = CPlayer_StateNode::MOV_IDLE;
-                    m_StateNodes[NODE_IDLE]->State_Enter(&m_iState, &m_iPreviousState); 
+                    *m_iState |= CPlayer::MOV_IDLE;
+                    m_StateNodes[NODE_IDLE]->State_Enter(m_iState, &m_iPreviousState); 
                 }
             }
             else
             {
                 // 상태가 활성화되어 있지만 이전 상태와 다른 경우 State_Enter 재호출
-                if (m_iLastActiveState != m_iState && node->CanEnter(&m_iState))
+                if (m_iLastActiveState != *m_iState && node->CanEnter(m_iState))
                 {
                     Check_UIState(&m_iPreviousState); 
-                    node->State_Enter(&m_iState, &m_iPreviousState);
-                    m_iPreviousState = m_iState;  
-                    node->SetActive(true, &m_iState); 
-                    m_iLastActiveState = m_iState;
+                    node->State_Enter(m_iState, &m_iPreviousState);
+                    m_iPreviousState = *m_iState;  
+                    node->SetActive(true, m_iState); 
+                    m_iLastActiveState = *m_iState;
                 }
             }
         }
@@ -117,23 +117,22 @@ void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
 
 void CPlayer_StateMachine::progress_Move(_float fTimeDelta, _uint* pState) 
 {   
-    if (m_pParentObject->GetFlag(CPlayer::FLAG_KEYLOCK) == true)
+    if (m_pParentObject->HasState(CPlayer::FLAG_KEYLOCK) == true)
     {
-        *pState &= ~(CPlayer_StateNode::DIR_FORWARD | CPlayer_StateNode::DIR_BACK | CPlayer_StateNode::DIR_LEFT |
-                     CPlayer_StateNode::DIR_RIGHT);
+        *pState &= ~(CPlayer::DIR_FORWARD | CPlayer::DIR_BACK | CPlayer::DIR_LEFT |CPlayer::DIR_RIGHT);
         return ;
     }
 
-    if (*pState & CPlayer_StateNode::DIR_LEFT)
+    if (*pState & CPlayer::DIR_LEFT)
         m_pParentObject->Get_Transform()->Go_Move(CTransform::LEFT, fTimeDelta, m_pParentObject->Get_Navigation());
     
-    if (*pState & CPlayer_StateNode::DIR_RIGHT)
+    if (*pState & CPlayer::DIR_RIGHT)
         m_pParentObject->Get_Transform()->Go_Move(CTransform::RIGHT, fTimeDelta, m_pParentObject->Get_Navigation());
     
-    if (*pState & CPlayer_StateNode::DIR_FORWARD)
+    if (*pState & CPlayer::DIR_FORWARD)
         m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta, m_pParentObject->Get_Navigation());
     
-    if (*pState & CPlayer_StateNode::DIR_BACK)
+    if (*pState & CPlayer::DIR_BACK)
         m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, m_pParentObject->Get_Navigation());
 
 
@@ -141,14 +140,14 @@ void CPlayer_StateMachine::progress_Move(_float fTimeDelta, _uint* pState)
 
 void CPlayer_StateMachine::Check_UIState(_uint* pPreState) const
 {
-    if (((*pPreState & CPlayer_StateNode::MOV_HIT) == 0) || ((*pPreState & CPlayer_StateNode::MOV_SPRINT) == 0) ||
-        ((*pPreState & CPlayer_StateNode::MOV_HEALTH) == 0) || ((*pPreState & CPlayer_StateNode::MOV_FALL) == 0)||
-        (*pPreState & CPlayer_StateNode::MOV_STURN) == 0 || (*pPreState & CPlayer_StateNode::MOV_JUMP) == 0)
+    if (((*pPreState & CPlayer::MOV_HIT) == 0) || ((*pPreState & CPlayer::MOV_SPRINT) == 0) ||
+        ((*pPreState & CPlayer::MOV_HEALTH) == 0) || ((*pPreState & CPlayer::MOV_FALL) == 0)||
+        (*pPreState & CPlayer::MOV_STURN) == 0 || (*pPreState & CPlayer::MOV_JUMP) == 0)
     {
         m_pGameInstance->Set_OpenUI(false, TEXT("PlayerState"));
     }
 
-    if (((*pPreState & CPlayer_StateNode::BEH_RELOAD) == 0) || ((*pPreState & CPlayer_StateNode::BEH_SHOOT) == 0))
+    if (((*pPreState & CPlayer::BEH_RELOAD) == 0) || ((*pPreState & CPlayer::BEH_SHOOT) == 0))
     {
         m_pGameInstance->Set_OpenUI(false, TEXT("Player_ShootingUI"));
         m_pGameInstance->Set_OpenUI(false, TEXT("Player_AutoShootingUI"));
@@ -158,14 +157,14 @@ void CPlayer_StateMachine::Check_UIState(_uint* pPreState) const
 HRESULT CPlayer_StateMachine::Initialize_StateUI(_uint* CurWeapon)
 {
     CPlayer_StateUI::CPlayerEffectUI_DESC Desc{};
-    Desc.State = &m_iState;
+    Desc.State = m_iState;
     Desc.iDeleteLevel = LEVEL_STATIC;
     if (FAILED(m_pGameInstance->Add_UI_To_CLone(L"PlayerState", L"Prototype GameObject_PlayerEffectUI", &Desc)))
         return E_FAIL;
 
     CPlayer_ShootingStateUI::CShootingUI_DESC SDesc{};
     SDesc.iWeaPonTYPE = CurWeapon;
-    SDesc.iWeaPonState = &m_iState;
+    SDesc.iWeaPonState = m_iState;
     SDesc.fX = g_iWinSizeX * 0.7f;
     SDesc.fY = g_iWinSizeY * 0.57f;
     SDesc.fZ = 0.001f;

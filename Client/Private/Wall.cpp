@@ -110,7 +110,7 @@ HRESULT CWall::Render_Shadow()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pShaderCom->Begin(2)))
+        if (FAILED(m_pShaderCom->Begin(5)))
             return E_FAIL;
 
         m_pModelCom->Render(i);

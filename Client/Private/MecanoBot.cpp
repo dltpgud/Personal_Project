@@ -72,20 +72,15 @@ void CMecanoBot::HIt_Routine()
     static_cast<CMonsterHP*>(m_PartObjects[PART_HP])->Set_HitStart(true);
 }
 
-void CMecanoBot::Wake_up()
-{
-    static_cast<CBody_MecanoBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
-}
-
-void CMecanoBot::Seeping()
-{
-    static_cast<CBody_MecanoBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
-}
-
 void CMecanoBot::Dead_Routine()
 {
     static_cast<CBody_MecanoBot*>(m_PartObjects[PART_BODY])->ChangeState(ST_DEAD);
     Erase_PartObj(PART_HP); 
+}
+
+void CMecanoBot::Set_State(_uint State)
+{
+    static_cast<CBody_MecanoBot*>(m_PartObjects[PART_BODY])->ChangeState(State);
 }
 
 HRESULT CMecanoBot::Add_Components()

@@ -25,6 +25,10 @@ public:
     const _float4x4* Get_TransformFloat4x4_Inverse(TRANSFORM_STATE eState) {
         return &m_TransMatrixInverse[eState];
     }
+    const _float4x4* Get_ShadowTransformFloat4x4_Inverse(TRANSFORM_STATE eState)
+    {
+        return &m_ShadowTransMatrixInverse[eState];
+    }
     _matrix Get_TransformMatrix_Inverse(TRANSFORM_STATE eState) {
         return XMLoadFloat4x4(&m_TransMatrixInverse[eState]);
     }
@@ -85,7 +89,7 @@ private:
     _float4 m_vCamLook{};
     _float m_vCamfar{};
     _float4x4 m_ShadowTransMatrix[D3DTS_END];
-
+    _float4x4 m_ShadowTransMatrixInverse[D3DTS_END];
 
 public:
     static CPipeLine* Create();

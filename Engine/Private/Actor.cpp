@@ -44,7 +44,7 @@ void CActor::Priority_Update(_float fTimeDelta)
 	return ;
 }
 
-void CActor::Update(_float fTimeDelta)
+void CActor::Update(_float fTimeDelta)	
 {
 	__super::Update(fTimeDelta);
 }

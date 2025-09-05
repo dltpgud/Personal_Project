@@ -82,14 +82,11 @@ void CGunPawn::Dead_Routine()
     Erase_PartObj(PART_HP);
 }
 
-void CGunPawn::Wake_up()
+void CGunPawn::Set_State(_uint State)
 {
-    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_MOVE);
+    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(State);
 }
-void CGunPawn::Seeping()
-{
-    static_cast<CBody_GunPawn*>(m_PartObjects[PART_BODY])->ChangeState(ST_IDLE);
-}
+
 HRESULT CGunPawn::Add_Components()
 {
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};

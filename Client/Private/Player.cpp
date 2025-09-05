@@ -44,6 +44,7 @@ HRESULT CPlayer::Initialize(void* pArg)
     CPlayer_StateMachine::PLAYER_STATEMACHINE_DESC pDesc{};
     pDesc.pParentObject = this;
     pDesc.pCurWeapon = static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_Weapon();
+    pDesc.iState = &m_iState;
     m_pStateMachine = CPlayer_StateMachine::Create(&pDesc);
 
     return S_OK;
@@ -51,13 +52,13 @@ HRESULT CPlayer::Initialize(void* pArg)
 
 void CPlayer::Priority_Update(_float fTimeDelta)
 {
-    if (false == GetFlag(FLAG_UPDATE))
+    if (false == HasState(FLAG_UPDATE))
     {
         m_pStateMachine->ResetMachine();
         return;
     }
 
-    if (m_pGameInstance->MouseFix() && false == GetFlag(FLAG_KEYLOCK))
+    if (m_pGameInstance->MouseFix() && false == HasState(FLAG_KEYLOCK))
     {
         _float Y = XMVectorGetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_UP));
 
@@ -82,7 +83,7 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 
 void CPlayer::Update(_float fTimeDelta)
 {
-    if (false == GetFlag(FLAG_UPDATE))
+    if (false == HasState(FLAG_UPDATE))
         return ;
 
     if (m_pNavigationCom->Get_bDemage(m_iHP))
@@ -103,15 +104,34 @@ HRESULT CPlayer::Render()
 
 void CPlayer::HIt_Routine()
 {
+    if (false == HasState(FLAG_UPDATE))
+    {
+        return;
+    }
     m_pPlayerUI->Set_PlayerHP(m_iHP);
-    SetFlag(FLAG_HIT, true);
+    Set_State(MOV_HIT, true);
 }
 
 void CPlayer::Stun_Routine()
 {
+    if (false == HasState(FLAG_UPDATE))
+    {
+        return;
+    }
     m_pPlayerUI->Set_PlayerHP(m_iHP);
-    SetFlag(FLAG_STURN, true);
-    AddFlag(FLAG_KEYLOCK);
+    Set_State(MOV_STURN, true);
+    Set_State(FLAG_KEYLOCK,true);
+}
+
+void CPlayer::Set_State(_uint flag, _bool value)
+{
+        if (value)
+        {
+            m_iState |= flag;
+            m_iState |= FLAG_UPDATE;
+        }
+        else
+            m_iState &= ~flag;   
 }
 
 const _float4x4* CPlayer::Get_CameraBone()
@@ -131,7 +151,7 @@ void CPlayer::BodyCallBack(_int Body,_uint AnimIdx, _int Duration, function<void
 
 void CPlayer::Choose_Weapon(const _uint& WeaponNum)
 {
-    SetFlag(FLAG_CHANGE, true);
+    Set_State(BRH_CHANGE, true);
     static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Choose_Weapon(WeaponNum);
 }
 

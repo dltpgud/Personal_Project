@@ -56,7 +56,7 @@ void CHealthBot::Update(_float fTimeDelta)
 {
     if (HasState(FLAG_INTERACTUI) && m_pInteractiveUI->Get_Interactive(this)) // 확인 여부
     {
-        static_cast<CPlayer*>(m_pGameInstance->Get_Player())->SetFlag(CPlayer::FLAG_HEALTH, true);
+        static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::MOV_HEALTH, true);
 
         m_iState &= ~(ST_IDLE | ST_DEAD);
         m_iState |= ST_INTERACT;

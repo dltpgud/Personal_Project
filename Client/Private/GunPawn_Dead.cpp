@@ -1,7 +1,7 @@
 #include"stdafx.h"
 #include "GunPawn_Dead.h"
 #include "GameInstance.h"
-
+#include "Trigger.h"
 CGunPawn_Dead::CGunPawn_Dead()
 {
 }
@@ -26,6 +26,14 @@ HRESULT CGunPawn_Dead::Initialize(void* pArg)
 CStateMachine::Result CGunPawn_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     m_pParentPartObject->Set_DeadState(true);
+    _bool isFall = m_pParentObject->Get_Navigation()->Get_bFalling();
+    
+    if (true == isFall && false == m_pParentObject->GetTriggerFlag(CTrigger::FLAG_LAVA))
+    {
+        m_pParentObject->Get_Transform()->Set_MoveSpeed(8.f);
+        m_pParentObject->Set_onCell(false);
+        m_pParentObject->Get_Transform()->Go_Move(CTransform::DOWN, fTimeDelta);
+    }
 
     if (1.f == m_pParentPartObject->Get_threshold())
         m_pParentObject->Set_Dead(true);

@@ -36,7 +36,6 @@ _bool CPlayer_Health::State_Processing(_float fTimedelta, _uint* pState, _uint* 
 
 _bool CPlayer_Health::State_Exit(_uint* pState)
 {
-    m_pParentObject->SetFlag(CPlayer::FLAG_HEALTH, false);
     return true;
 }
 
@@ -53,20 +52,20 @@ void CPlayer_Health::Init_CallBack_Func()
 
 _bool CPlayer_Health::IsActive(_uint stateFlags) const
 {
-    return (stateFlags & MOV_HEALTH) != 0;
+    return (stateFlags & CPlayer::MOV_HEALTH) != 0;
 }
 
 void CPlayer_Health::SetActive(_bool active, _uint* pState)
 {
     if (active)
-        *pState |= MOV_HEALTH; 
+        *pState |= CPlayer::MOV_HEALTH; 
     else
-        *pState &= ~MOV_HEALTH;
+        *pState &= ~CPlayer::MOV_HEALTH;
 }
 
 _bool CPlayer_Health::CanEnter(_uint* pState)
 {
-    return m_pParentObject->GetFlag(CPlayer::FLAG_HEALTH) && !m_pParentObject->GetFlag(CPlayer::FLAG_STURN);
+    return (*pState & CPlayer::MOV_HEALTH) && !(*pState & CPlayer::MOV_STURN);
 }
 
 _bool CPlayer_Health::CheckInputCondition(_uint stateFlags)
