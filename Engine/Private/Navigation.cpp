@@ -166,8 +166,8 @@ _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos,
 #ifdef _DEBUG
 HRESULT CNavigation::Render()
 {
-   // if (false == m_bRender)
-   //     return S_OK;
+    if (false == m_bRender)
+        return S_OK;
 
     if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", m_WorldMatrix)))
         return E_FAIL;
@@ -436,7 +436,9 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
 
     SetUp_Neighbor();
     
- 
+  #ifdef _DEBUG
+    m_bRender = true;
+#endif 
 
     return S_OK;
 }
@@ -459,6 +461,9 @@ HRESULT CNavigation::Delete_ALLCell()
     m_vecNomoveType.clear();
     m_vecNomoveType.shrink_to_fit();
 
+ #ifdef _DEBUG
+    m_bRender = false;
+#endif 
     return S_OK;
 }
 

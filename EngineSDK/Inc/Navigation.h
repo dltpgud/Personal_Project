@@ -87,6 +87,7 @@ public:
 #ifdef _DEBUG
 private:
 	class CShader*				m_pShader = { nullptr };
+    _bool m_bRender{true};
 #endif
 
 public:
