@@ -46,7 +46,6 @@ using namespace DirectX;
 #include <set>
 using namespace std;
 
-
 #include "Engine_Typedef.h"
 #include "Engine_Macro.h"
 #include "Engine_Function.h"

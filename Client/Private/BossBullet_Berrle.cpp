@@ -88,7 +88,7 @@ void CBossBullet_Berrle::Update(_float fTimeDelta)
 
 void CBossBullet_Berrle::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLEND, this)))
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
        return;
  
     if (m_iSkillType == CSkill::STYPE_LASER)

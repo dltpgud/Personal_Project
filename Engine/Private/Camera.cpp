@@ -31,7 +31,7 @@ HRESULT CCamera::Initialize(void* pArg)
 	m_vEye = pDesc->vEye;
 	m_fFovy = pDesc->fFovy;
 	m_fAspect = pDesc->fAspect;
-	m_fNearZ = pDesc->fNearZ;
+    m_fNearZ = pDesc->fNearZ;
 	m_fFarZ = pDesc->fFarZ;
 
 
@@ -48,6 +48,7 @@ void CCamera::Priority_Update(_float fTimeDelta)
 	m_pGameInstance->Set_TransformMatrix(CPipeLine::D3DTS_PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNearZ, m_fFarZ));
 
 	m_pGameInstance->Set_Camfar(m_fFarZ);
+    m_pGameInstance->Set_CamNear(m_fNearZ);
 	return ;
 }
 

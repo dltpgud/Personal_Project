@@ -51,7 +51,11 @@ public:
 	void           Set_Taget(_vector Taget);
 	vector<_uint>  FindPath(_uint startIndex, _uint goalIndex);
     _vector        Get_TagetPos(_int index);
-    vector<_uint>  Get_PathPoints(){return m_PathPoints;};
+        vector<_uint> Get_PathPoints()
+        {
+            READ_LOCK;
+           return m_PathPoints;
+        };
 
     _bool          Get_bFalling();
     _bool          Get_bDemage(_int& HP);

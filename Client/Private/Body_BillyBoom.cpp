@@ -181,6 +181,14 @@ HRESULT CBody_BillyBoom::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
+     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+    for (_uint i = 0; i < iNumMeshes; i++) {
+
+        if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, i,TEXT("../Bin/Resources/Models/Nomal/T_BillyBoom_02_N.dds"))))
+        return E_FAIL;
+    }
+
      CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
 
      OBBDesc.vExtents  = {1.f, 0.5f, 1.f};

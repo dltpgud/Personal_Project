@@ -16,15 +16,18 @@ HRESULT CPlayer_Jump::Initialize(void* pDesc)
 
 void CPlayer_Jump::State_Enter(_uint* pState, _uint* pPreState)
 {
-    m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_JUMP_RUN_LOOP; 
-    m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
-    m_StateDesc.bLoop = true;
+    if ((*pState & (CPlayer::BEH_RELOAD | CPlayer::BEH_SHOOT))==0)
+    {
+        m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_JUMP_RUN_LOOP;
+        m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
+
+        m_StateDesc.bLoop = true;
+
+        __super::State_Enter(pState, pPreState);
+    }
 
     m_bJump = true;
-
     m_pParentObject->Set_onCell(false);  
-
-    __super::State_Enter(pState, pPreState);
 }
 
 _bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState, _uint* pPreState)
@@ -53,7 +56,11 @@ _bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState, _uint* pP
     if (isFall < 0.f) {
         if (false == m_JumpFall) 
         {
-            m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_JUMP_FALL, true);
+            // 장전 중이면 낙하 애니메이션도 변경하지 않음 (장전 애니메이션 유지)
+            if (!(*pState & CPlayer::BEH_RELOAD))
+            {
+                m_pParentObject->Set_PartObj_Set_Anim(CPlayer::PART_BODY, CBody_Player::BODY_JUMP_FALL, true);
+            }
             m_JumpFall = true;
         }
     }
@@ -63,10 +70,13 @@ _bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState, _uint* pP
         return true;
     }
     
-
-    if (__super::State_Processing(fTimeDelta, pState, pPreState))
+    if ((*pState & (CPlayer::BEH_RELOAD | CPlayer::BEH_SHOOT)) == 0)
     {
-        return true;
+        // 일반 점프 시에는 BODY와 WEAPON 모두 처리
+        if (__super::State_Processing(fTimeDelta, pState, pPreState))
+        {
+            return true;
+        }
     }
    
     return false;
@@ -74,13 +84,11 @@ _bool CPlayer_Jump::State_Processing(_float fTimeDelta, _uint* pState, _uint* pP
 
 _bool CPlayer_Jump::State_Exit(_uint* pState)
 {
-
     m_bJump = false;
     m_bDoubleJump = false;
     m_bDoubleJumpSound = false;
     m_JumpFall = false;
 
-    // 총을 쏘고 있더라도 착지 시 네비게이션 셀을 업데이트해야 함
     m_pParentObject->Set_onCell(true);
     m_pParentObject->Get_Navigation()->Find_CurrentCell(
         m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));

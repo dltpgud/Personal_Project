@@ -164,8 +164,8 @@ private:
     //_vector m_Eye = XMVectorSet(143, 394, 432, 0.f);
     //_vector m_Dire = XMVectorSet(139, 17, 2, 0.f);
 
-       
-    float a = 143.f, b = 394.f, c = 432.f, d = 139.f, e = 17.f, f = 2.f;
+
+    float a = 0.f, b = 500, c = 0.f, d =0.5, e = -1.f, f = 0.5f;
 
 public:
     static CLevel_Edit* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

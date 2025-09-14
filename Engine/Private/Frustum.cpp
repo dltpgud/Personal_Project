@@ -1,6 +1,7 @@
 ﻿#include "..\Public\Frustum.h"
 #include "GameInstance.h"
-
+#include <float.h> 
+#include <algorithm>
 CFrustum::CFrustum()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -35,7 +36,6 @@ void CFrustum::Update()
 	}
 
 	Make_Planes(m_vWorldPoints, m_WorldPlanes);
-
 }
 
 
@@ -83,8 +83,7 @@ void CFrustum::Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
     Make_Planes(vLocalPoints, m_LocalPlanes);
 }
 
-
-HRESULT CFrustum::Make_Planes(const _float3 * pPoints, _float4 * pPlanes)
+HRESULT CFrustum::Make_Planes(const _float3* pPoints, _float4* pPlanes)
 {
 	/* +x */
 	XMStoreFloat4(&pPlanes[0], XMPlaneFromPoints(XMLoadFloat3(&pPoints[1]), XMLoadFloat3(&pPoints[5]), XMLoadFloat3(&pPoints[6])));

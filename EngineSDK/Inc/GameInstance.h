@@ -105,7 +105,6 @@ public: /* For.UI_Manager*/
     CGameObject* Find_Clone_UIObj(const _wstring& strCloneTag);
     HRESULT Add_UI_To_Proto(const _wstring& strProtoTag, class CGameObject* pUI);
     HRESULT Add_UI_To_CLone(const _wstring& strCloneTag, const _wstring& strProtoTag, void* pArg = nullptr);
-    HRESULT Change_UI_Level(_uint iCurLevel);
 #pragma endregion
 
 #pragma region Component_Manager
@@ -143,7 +142,9 @@ public: /* For.PipeLine */
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
+        const _float* Get_CamNear();
     void Set_Camfar(_float fFar);
+        void Set_CamNear(_float fNear);
     const float* Get_CamFar();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
@@ -192,6 +193,8 @@ public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
     _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
     void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
+
+
 
 #pragma region ThreadPool
 public: /* For.ThreadPool */

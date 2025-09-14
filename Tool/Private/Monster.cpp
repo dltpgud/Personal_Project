@@ -64,8 +64,8 @@ void CMonster::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return ;
+   // if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+    //    return ;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -120,7 +120,7 @@ HRESULT CMonster::Render_Shadow()
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(6)))
+        if (FAILED(m_pShaderCom->Begin(5)))
             return E_FAIL;
 
         m_pModelCom->Render(i);

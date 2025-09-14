@@ -59,8 +59,8 @@ void Cfabric::Late_Update(_float fTimeDelta)
             return;
     }
 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
+ //   if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+ //       return;
        
     __super::Late_Update(fTimeDelta);
 }
@@ -109,7 +109,7 @@ HRESULT Cfabric::Render_Shadow()
     for (_uint i = 0; i < iNumMeshes; i++)
     {
 
-        if (FAILED(m_pShaderCom->Begin(3)))
+        if (FAILED(m_pShaderCom->Begin(2)))
             return E_FAIL;
 
         m_pModelCom->Render(i);

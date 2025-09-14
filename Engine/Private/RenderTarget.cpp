@@ -95,8 +95,6 @@ HRESULT CRenderTarget::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 
 	pVIBuffer->Render();
 
-
-
 	return S_OK;
 }
 #endif
@@ -118,8 +116,6 @@ CRenderTarget* CRenderTarget::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
 void CRenderTarget::Free()
 {
 	__super::Free();
-
-
 	Safe_Release(m_pRTV);
 	Safe_Release(m_pSRV);
 	Safe_Release(m_pTexture2D);

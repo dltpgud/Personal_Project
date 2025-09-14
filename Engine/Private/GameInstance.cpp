@@ -87,7 +87,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pFrustum)
 		return E_FAIL;
 
-    m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency()-1);
+    m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency());
         if (nullptr == m_pThreadPool)
             return E_FAIL;
 
@@ -135,7 +135,6 @@ void CGameInstance::Delete()
 void CGameInstance::Clear(_uint iClearLevelID)
 {
 	/*iClearLevelID에 해당하는 자원들을 정리한다.*/	
-	m_pUI_Manager->Clear(iClearLevelID);
 	m_pObject_Manager->Clear(iClearLevelID);
 	m_pComponent_Manager->Clear(iClearLevelID);
 	m_pCollider_Manager->Clear();
@@ -504,12 +503,6 @@ HRESULT CGameInstance::Add_UI_To_CLone(const _wstring& strCloneTag, const _wstri
     return m_pUI_Manager->Add_UI_To_CLone(strCloneTag, strProtoTag, pArg);
 }
 
-HRESULT CGameInstance::Change_UI_Level(_uint iCurLevel)
-{
-    if (nullptr == m_pUI_Manager)
-        return E_FAIL;
-    return m_pUI_Manager->Change_UI_Level(iCurLevel);
-}
 #pragma endregion
 
 #pragma region Component_Manager
@@ -657,12 +650,25 @@ const _float4* CGameInstance::Get_CamLook()
 	return m_pPipeLine->Get_CamLook();
 }
 
+const _float* CGameInstance::Get_CamNear()
+{
+    return m_pPipeLine->Get_CamNear();
+}
+
 void CGameInstance::Set_Camfar(_float fFar)
 {
     if (nullptr == m_pPipeLine)
         return ;
 
     return m_pPipeLine->Set_Camfar(fFar);
+}
+
+void CGameInstance::Set_CamNear(_float fNear)
+{
+    if (nullptr == m_pPipeLine)
+        return;
+
+    return m_pPipeLine->Set_CamNear(fNear);
 }
 
 const float* CGameInstance::Get_CamFar()

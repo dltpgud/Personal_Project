@@ -195,9 +195,10 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_iDoorType = DoorType::ITEM;
     if (protoModel == L"Proto Component StageDoor Model_aniObj")
         m_iDoorType = DoorType::STAGE;
+
     if (protoModel == L"Proto Component BossDoor Model_aniObj")
         m_iDoorType = DoorType::BOSS;
-
+         
     m_iDoorType == DoorType::ITEM ? m_iState = State2::ClOSE2 : m_iState = State::ClOSE;
 
     m_pModelCom->Set_Animation(m_iState, false);

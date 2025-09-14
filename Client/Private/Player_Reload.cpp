@@ -50,6 +50,7 @@ void CPlayer_Reload::State_Enter(_uint* pState, _uint* pPreState)
 
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_RELOAD;
+    
     m_StateDesc.bLoop = false; 
 
     __super::State_Enter(pState, pPreState);

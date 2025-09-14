@@ -41,9 +41,6 @@ void CWall::Update(_float fTimeDelta)
 
 void CWall::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
-        return;
-    
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
     
@@ -95,9 +92,6 @@ HRESULT CWall::Render()
 
 HRESULT CWall::Render_Shadow()
 {
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
-        return E_FAIL;
-
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
@@ -110,7 +104,7 @@ HRESULT CWall::Render_Shadow()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pShaderCom->Begin(5)))
+        if (FAILED(m_pShaderCom->Begin(2)))
             return E_FAIL;
 
         m_pModelCom->Render(i);

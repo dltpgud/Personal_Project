@@ -40,8 +40,8 @@ void CTerrain::Priority_Update(_float fTimeDelta)
 
 void CTerrain::Update(_float fTimeDelta)
 {
-    if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
-        m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
+    //if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
+    //    m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
         
     __super::Update(fTimeDelta);
 }

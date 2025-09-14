@@ -68,7 +68,7 @@ void CBody_GunPawn::Late_Update(_float fTimeDelta)
     __super::Late_Update(fTimeDelta);
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
+            return;
 
     if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
     {
@@ -89,6 +89,10 @@ HRESULT CBody_GunPawn::Render()
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
+
+        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
+                                                                 "g_NormalTexture")))
+                return E_FAIL;
 
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
@@ -149,6 +153,15 @@ HRESULT CBody_GunPawn::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_GunPawn_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
+
+     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
+
+    for (_uint i = 0; i < iNumMeshes; i++)
+     {
+         if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, i,
+                                                 TEXT("../Bin/Resources/Models/Nomal/T_GunPawn_N.dds"))))
+             return E_FAIL;
+     }
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),TEXT("Com_Texture_Mask"),
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))

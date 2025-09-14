@@ -20,7 +20,7 @@ public:
 	HRESULT Copy_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut);
 #ifdef _DEBUG
 public:
-        HRESULT Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
+    HRESULT Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT Render_Debug(const _wstring& strMRTTag, class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 
