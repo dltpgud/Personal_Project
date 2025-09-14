@@ -17,16 +17,28 @@ HRESULT CPlayer_Run::Initialize(void* pDesc)
 
 void CPlayer_Run::State_Enter(_uint* pState, _uint* pPreState)
 {
-    m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_RUN;
-    m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
-    m_StateDesc.bLoop = true;
+    if ((*pState & (CPlayer::BEH_RELOAD | CPlayer::BEH_SHOOT)) == 0)
+    {
+        m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_RUN;
+        m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
+        m_StateDesc.bLoop = true;
 
-    __super::State_Enter(pState, pPreState);
+        __super::State_Enter(pState, pPreState);
+    }
 }
 
 _bool CPlayer_Run::State_Processing(_float fTimedelta, _uint* pState,_uint* pPreState)
 {
-    return __super::State_Processing(fTimedelta, pState, pPreState);
+    if ((*pState & (CPlayer::BEH_RELOAD | CPlayer::BEH_SHOOT)) == 0)
+    {
+        // 일반 점프 시에는 BODY와 WEAPON 모두 처리
+        if (__super::State_Processing(fTimedelta, pState, pPreState))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 _bool CPlayer_Run::State_Exit(_uint* pState)

@@ -12,16 +12,6 @@ sampler LinearSamplerClamp = sampler_state
     AddressU = clamp;
     AddressV = clamp;
 };
-SamplerComparisonState ShadowSampler
-{
-    Filter = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-    AddressU = Clamp;
-    AddressV = Clamp;
-    ComparisonFunc = LESS_EQUAL;
-};
-
-
-
 
 sampler PointSampler = sampler_state
 {
@@ -115,20 +105,20 @@ BlendState BS_Light
 
 RasterizerState RS_Shadow
 {
-    FillMode = Solid; // 와이어프레임 X
-    CullMode = Back; // 뒤집힌 삼각형 제거
-    FrontCounterClockwise = false; // 시계/반시계 맞추기 (엔진 좌표계에 맞게)
-    DepthBias = 100; // 그림자 Acne 방지
-    SlopeScaledDepthBias = 1.0;
-    DepthClipEnable = true;
+    FillMode = Solid;
+    CullMode = Back; // 필요에 따라 None으로도 가능
+    FrontCounterClockwise = false;
+
+    DepthBias = 50; // 픽셀 단위 오프셋 (값은 GPU에 따라 조정 필요)
+    SlopeScaledDepthBias = 1.0f; // 기울기 따라 추가 오프셋
+    DepthBiasClamp = 0.0f; // 오프셋 최대 제한 (보통 0 = 무제한)
 };
-DepthStencilState DSS_Shadow
+
+SamplerComparisonState ShadowCmpSampler : register(s7)
 {
-    DepthEnable = true; // 깊이 테스트 켬
-    DepthWriteMask = all; // 깊이 기록함
-    DepthFunc = less_equal; // z-test
+    Filter = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    ComparisonFunc = LESS; 
 };
-BlendState BS_Shadow
-{
-    BlendEnable[0] = false; // 블렌딩 불필요
-};
+

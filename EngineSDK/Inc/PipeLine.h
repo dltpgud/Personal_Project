@@ -53,6 +53,11 @@ public:
         m_vCamfar = fFar;
     }
 
+    void Set_CamNear(_float fNear)
+    {
+        m_vCamNear = fNear;
+    }
+
     const _float* Get_Camfar()
     {
         return &m_vCamfar;
@@ -67,6 +72,14 @@ public:
     {
         return &m_vCamLook;
     }
+
+    
+    const _float* Get_CamNear()
+    {
+        return &m_vCamNear;
+    }
+
+
 
 public: /* Setter */
     void Set_TransformMatrix(TRANSFORM_STATE eState, _fmatrix TransformMatrix)
@@ -88,6 +101,7 @@ private:
     _float4 m_vCamPosition{};
     _float4 m_vCamLook{};
     _float m_vCamfar{};
+    _float m_vCamNear{};
     _float4x4 m_ShadowTransMatrix[D3DTS_END];
     _float4x4 m_ShadowTransMatrixInverse[D3DTS_END];
 

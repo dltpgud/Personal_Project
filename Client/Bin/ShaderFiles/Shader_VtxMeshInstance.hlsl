@@ -72,7 +72,7 @@ VS_OUTINST VSINST_MAIN(VS_INST In)
 
 struct PS_OUT_LIGHTDEPTH
 {
-    vector vLightDepth : SV_TARGET0;
+    float vLightDepth : SV_TARGET0;
 };
 
 struct PS_IN
@@ -115,11 +115,12 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     return Out;
 }
+
+
 PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
-	
-    Out.vLightDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / 1000.f, 1.f, 0.f);
+    Out.vLightDepth = (In.vProjPos.z / In.vProjPos.w);
 
     return Out;
 }

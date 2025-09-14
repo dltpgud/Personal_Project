@@ -131,7 +131,7 @@ void CShootEffect::Late_Update(_float fTimeDelta)
 
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, vHPos);
 
-	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLEND, this)))
+	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
 		return;
 }
 

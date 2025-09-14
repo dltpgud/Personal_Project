@@ -19,7 +19,6 @@ HRESULT CLevel_Manager::Open_Level(_uint iCurrentLevelID, CLevel* pNewLevel)
     Safe_Release(m_pCurrentLevel);
 
     m_pCurrentLevel = pNewLevel;
-    m_pGameInstance->Change_UI_Level(iCurrentLevelID);
     m_iCurrentLevelID = iCurrentLevelID;
 
     return S_OK;

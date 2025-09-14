@@ -13,7 +13,7 @@ float			g_RimPow =1.f;
 
 texture2D		g_DiffuseTexture;
 texture2D       g_EmissiveTexture;
-texture2D g_DiffTexture;
+texture2D       g_DiffTexture;
 float4			g_vMtrlAmbient	= float4(0.4f, 0.4f, 0.4f, 1.f);
 float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
@@ -158,23 +158,18 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     float rim = { 0.f };
     rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
     rim = pow(1 - rim, g_RimPow);
-      
-    Out.vRim = rim * g_RimColor; 
+     
+   vector vNormalDesc = g_NormalTexture.Sample(LinearSampler, In.vTexcoord);
+   vector vNormal = vector(vNormalDesc.xy * 2.f - 1.f, vNormalDesc.z, 0.f);
+   vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
+   float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
+   vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
     
-    if (true == g_bNomal)
-    {
-        vector vNormalDesc = g_NormalTexture.Sample(LinearSampler, In.vTexcoord);
-        vector vNormal = vector(vNormalDesc.xy * 2.f - 1.f, vNormalDesc.z, 0.f);
-        vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
-        float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
-        vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
-       Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
-    }
-    else 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vRim = rim * g_RimColor;
+    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     Out.vDiffuse = vMtrlDiffuse ;
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);;
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);;
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     return Out;
 }
@@ -209,7 +204,7 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
     Out.vEmissive =  vMtrlEmissive;
     Out.vDiffuse = vMtrlDiffuse;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
     Out.vRim = (rim * g_RimColor);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
@@ -278,15 +273,13 @@ PS_OUT PS_Door(PS_IN In)
 
 struct PS_OUT_LIGHTDEPTH
 {
-    vector vLightDepth : SV_TARGET0;
+    float vLightDepth : SV_TARGET0;
 };
 
 PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
     PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
-	
-    Out.vLightDepth = vector((In.vProjPos.z / In.vProjPos.w) * 0.5f + 0.5f,
-    In.vProjPos.w / 1000.f, 1.f, 0.f);
+    Out.vLightDepth = (In.vProjPos.z / In.vProjPos.w);
 
     return Out;
 }
@@ -314,7 +307,7 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
     
     Out.vDiffuse = vMtrlDiffuse;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
     Out.vRim = (rim * g_RimColor);
     Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);

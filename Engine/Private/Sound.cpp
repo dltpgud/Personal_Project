@@ -16,68 +16,68 @@ HRESULT CSound::Initialize()
 
 void CSound::Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop)
 {
- 	//map<TCHAR*, Sound*>::iterator iter;
- 	//
- 	//iter = find_if(m_mapSound.begin(), m_mapSound.end(),
- 	//	[&](auto& iter)->_bool
- 	//	{
- 	//		return !lstrcmp(pSoundKey, iter.first);
- 	//	});
- 	//
- 	//if (iter == m_mapSound.end())
- 	//	return;
-    //
-	// FMOD::Channel* m_pChannel = nullptr;
-    //
-	//if (nullptr != ppChannel)
-    //        m_pSystem->playSound(iter->second, m_pChannelGroupSE, false, ppChannel);
-    //else {
-    //    m_pSystem->playSound(iter->second, m_pChannelGroupSE, false, &m_pChannel);
-	//}
-	//if (bLoop)
-    //    {
-    //        if (nullptr != ppChannel)
-    //        (*ppChannel)->setMode(FMOD_LOOP_NORMAL);
-    //        else
-    //            m_pChannel->setMode(FMOD_LOOP_NORMAL);
-    //}
-    //
-	//if (nullptr != ppChannel)
-    //   (*ppChannel)->setVolume(fVolume);
-    //else
-    //    m_pChannel->setVolume(fVolume);
-    //
- 	//m_pSystem->update();
+ map<TCHAR*, Sound*>::iterator iter;
+ 
+ iter = find_if(m_mapSound.begin(), m_mapSound.end(),
+ 	[&](auto& iter)->_bool
+ 	{
+ 		return !lstrcmp(pSoundKey, iter.first);
+ 	});
+ 
+ if (iter == m_mapSound.end())
+ 	return;
+   
+ FMOD::Channel* m_pChannel = nullptr;
+   
+if (nullptr != ppChannel)
+           m_pSystem->playSound(iter->second, m_pChannelGroupSE, false, ppChannel);
+   else {
+       m_pSystem->playSound(iter->second, m_pChannelGroupSE, false, &m_pChannel);
+}
+if (bLoop)
+       {
+           if (nullptr != ppChannel)
+           (*ppChannel)->setMode(FMOD_LOOP_NORMAL);
+           else
+               m_pChannel->setMode(FMOD_LOOP_NORMAL);
+   }
+   
+if (nullptr != ppChannel)
+      (*ppChannel)->setVolume(fVolume);
+   else
+       m_pChannel->setVolume(fVolume);
+   
+ m_pSystem->update();
 }
 
 void CSound::PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume)
 {
-    //map<TCHAR*, Sound*>::iterator iter;
-    //
-    //iter = find_if(m_mapSound.begin(), m_mapSound.end(), [&](auto& iter)->_bool
-    //	{
-    //		return !lstrcmp(pSoundKey, iter.first);
-    //	});
-    //
-    //if (iter == m_mapSound.end())
-    //	return;
-    //FMOD::Channel* m_pChannel = nullptr;
-    //
-    //if (nullptr != ppChannel)
-    //    m_pSystem->playSound(iter->second, m_pChannelGroupBGM, false, ppChannel);
-    //else
-    //    m_pSystem->playSound(iter->second, m_pChannelGroupBGM, false, &m_pChannel);
-    //
-	//if (nullptr != ppChannel)
-    //{
-    //    (*ppChannel)->setMode(FMOD_LOOP_NORMAL);
-    //    (*ppChannel)->setVolume(fVolume);
-    //}
-    //else {
-    //
-    //    m_pChannel->setMode(FMOD_LOOP_NORMAL);
-    //    m_pChannel->setVolume(fVolume);
-    //}
+   map<TCHAR*, Sound*>::iterator iter;
+   
+   iter = find_if(m_mapSound.begin(), m_mapSound.end(), [&](auto& iter)->_bool
+   	{
+   		return !lstrcmp(pSoundKey, iter.first);
+   	});
+   
+   if (iter == m_mapSound.end())
+   	return;
+   FMOD::Channel* m_pChannel = nullptr;
+   
+   if (nullptr != ppChannel)
+       m_pSystem->playSound(iter->second, m_pChannelGroupBGM, false, ppChannel);
+   else
+       m_pSystem->playSound(iter->second, m_pChannelGroupBGM, false, &m_pChannel);
+   
+   if (nullptr != ppChannel)
+   {
+       (*ppChannel)->setMode(FMOD_LOOP_NORMAL);
+       (*ppChannel)->setVolume(fVolume);
+   }
+   else {
+   
+       m_pChannel->setMode(FMOD_LOOP_NORMAL);
+       m_pChannel->setVolume(fVolume);
+   }
 }
 
 void CSound::StopSound(FMOD::Channel** ppChannel)

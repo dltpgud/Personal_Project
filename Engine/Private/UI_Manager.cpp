@@ -100,20 +100,6 @@ void CUI_Manager::Delete()
    }
 }
 
-void CUI_Manager::Clear(_uint iClearLevelID)
-{
-  //for (auto iter = m_UIObj[UIOBJECT::UI_CLONE].begin(); iter != m_UIObj[UIOBJECT::UI_CLONE].end();)
-  //{
-  //    if ( true == (*iter).second->Check_Deleate(iClearLevelID-1))
-  //    {
-  //       Safe_Release((*iter).second);
-  //      iter = m_UIObj[UIOBJECT::UI_CLONE].erase(iter);
-  //    }
-  //    else
-  //        iter++;
-  //}
-}
-
 void CUI_Manager::ShakingEvent(_float fTimeDelta)
 {
    for (auto& iter : m_UIEeventList[EVENT_SHAKING]) 
@@ -156,8 +142,6 @@ HRESULT CUI_Manager::Set_OpenUI(_bool bOpen, const _wstring& strCloneTag, class 
         
    return S_OK;
 }
-
-
 
 HRESULT CUI_Manager::Set_UI_shaking(const _uint& uID, _float fShakingTime, _float fPowerX, _float fPowerY)
 {

@@ -68,8 +68,8 @@ void CBody_BoomBot::Late_Update(_float fTimeDelta)
 {
     __super::Late_Update(fTimeDelta);
 
-     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+            return;
 
     if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
     {
@@ -92,18 +92,8 @@ HRESULT CBody_BoomBot::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (i == 2)
-        {
-            bNormal = true;
-        
-            if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
+        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
                                                                  "g_NormalTexture")))
-                return E_FAIL;
-        }
-        else
-            bNormal = false;
-
-        if (FAILED(m_pShaderCom->Bind_RawValue("g_bNomal",&bNormal, sizeof(_bool))))
             return E_FAIL;
 
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
@@ -168,7 +158,16 @@ HRESULT CBody_BoomBot::Add_Components()
 
     if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 2,TEXT("../Bin/Resources/Models/Nomal/T_Tire_N.dds"))))
        return E_FAIL;
-
+    
+    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 1,TEXT("../Bin/Resources/Models/Nomal/T_BoomBot_N.dds"))))
+       return E_FAIL;
+    
+    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 3,TEXT("../Bin/Resources/Models/Nomal/T_BoomBot_N.dds"))))
+       return E_FAIL;
+    
+    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 0,TEXT("../Bin/Resources/Models/Nomal/T_BoomBot_N.dds"))))
+       return E_FAIL;
+    
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"), TEXT("Com_Texture_Mask"),
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;

@@ -44,9 +44,20 @@ void CPlayer_Shoot::State_Enter(_uint* pState, _uint* pPreState)
         break;
     default: break;
     }
-    m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
-
-    m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_SHOOT;
+    
+    // 점프 중이면 BODY 애니메이션을 변경하지 않고 WEAPON만 설정
+    if (*pState & CPlayer::MOV_JUMP)
+    {
+        // 점프 중에는 BODY 애니메이션을 건드리지 않음 (점프 애니메이션 유지)
+        m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_SHOOT;
+    }
+    else
+    {
+        // 일반 상태에서는 BODY와 WEAPON 모두 설정
+        m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CurMotion;
+        m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_SHOOT;
+    }
+    
     m_StateDesc.bLoop = m_bAutoFire;
 
     __super::State_Enter(pState, pPreState);
@@ -59,11 +70,19 @@ _bool CPlayer_Shoot::State_Processing(_float fTimedelta, _uint* pState, _uint* p
 
     if (false == m_bAutoFire) // 단발
     {
-        if (__super::State_Processing(fTimedelta, pState, pPreState))
+        // 점프 중이면 WEAPON만 애니메이션 처리
+        if (*pState & CPlayer::MOV_JUMP)
         {
-            return true;
+            return m_pParentObject->Set_PartObj_Play_Anim(CPlayer::PART_WEAPON, fTimedelta * m_StateDesc.fPlayTime);
         }
-        return false;
+        else
+        {
+            if (__super::State_Processing(fTimedelta, pState, pPreState))
+            {
+                return true;
+            }
+            return false;
+        }
     }
     
     if (m_bAutoFire) // 연사
@@ -86,7 +105,15 @@ _bool CPlayer_Shoot::State_Processing(_float fTimedelta, _uint* pState, _uint* p
                 __super::State_Enter(pState, pPreState);
             }
    
-            __super::State_Processing(fTimedelta, pState, pPreState);
+            // 점프 중이면 WEAPON만 애니메이션 처리
+            if (*pState & CPlayer::MOV_JUMP)
+            {
+                m_pParentObject->Set_PartObj_Play_Anim(CPlayer::PART_WEAPON, fTimedelta * m_StateDesc.fPlayTime);
+            }
+            else
+            {
+                __super::State_Processing(fTimedelta, pState, pPreState);
+            }
         }
     }
     

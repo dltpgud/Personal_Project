@@ -21,12 +21,7 @@ public:
     HRESULT Add_UI_To_CLone(const _wstring& strCloneTag,const _wstring& strProtoTag, void* pArg = nullptr);
     class CUI* Find_Proto_UIObj(const _wstring& strProtoUITag);
     class CUI* Find_Clone_UIObj(const _wstring& strCloneTag);
-    
-    HRESULT Change_UI_Level(const _uint& iCurLevel)
-    {
-        m_iCurLevel = iCurLevel;
-        return S_OK;
-    }
+   
     void Priority_Update(_float fTimeDelta);
     void Update(_float fTimeDelta);
     void Late_Update(_float fTimeDelta);
@@ -42,7 +37,7 @@ public:
 private:
     map<const _wstring, class CUI*> m_UIObj[UI_END];
     list<class CUI*> m_UIEeventList[EVENT_END];
-     _uint m_iCurLevel{};
+
    
     USE_LOCK;
 

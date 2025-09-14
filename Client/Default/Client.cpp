@@ -117,7 +117,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             /* TimeDelta : 1.f / 60.0 */
             pMainApp->Update(pGameInstance->Get_TimeDelta(TEXT("Timer_60")));
-            //pMainApp->Update(1.f / 60.0f);
             pMainApp->Render();
             pMainApp->Delete();
             fTimeAcc = 0.f;

@@ -72,6 +72,8 @@ HRESULT CMeshMaterial::InsertAiTexture(aiTextureType eTextureType, const _tchar*
     HRESULT hr{};
     if (false == lstrcmpW(szEXT, TEXT(".dds")))
       hr =   CreateDDSTextureFromFile(m_pDevice, szTextureFilePath, nullptr, &pSRV);
+    else
+        hr = CreateWICTextureFromFile(m_pDevice, szTextureFilePath, nullptr, &pSRV);
 
    if (hr != E_FAIL)
         m_Materials[eTextureType].push_back(pSRV);

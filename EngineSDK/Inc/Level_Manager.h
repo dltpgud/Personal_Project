@@ -13,9 +13,6 @@ public:
 	HRESULT Open_Level(_uint iCurrentLevelID, class CLevel* pNewLevel);
 	void	Update(_float fTimeDelta);
 	HRESULT Render();
-	
-
-	
 	_uint Get_iCurrentLevel();
 	_bool IsOpenStage() { return OpenLevel; }
 	void Set_Open_Bool(_bool NextStage);

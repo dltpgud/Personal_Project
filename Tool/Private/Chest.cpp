@@ -119,7 +119,7 @@ HRESULT CChest::Render_Shadow()
             if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
                 return E_FAIL;
 
-            if (FAILED(m_pShaderCom->Begin(6)))
+            if (FAILED(m_pShaderCom->Begin(2)))
                 return E_FAIL;
 
             m_pModelCom->Render(i);

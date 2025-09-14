@@ -26,7 +26,6 @@ namespace Engine
 
 	}LIGHT_DESC;
 
-
 	typedef struct RIM_LIGHT_DESC
 	{
 		enum STATE { STATE_NORIM, STATE_RIM }; // RimLight 상태.
@@ -35,8 +34,6 @@ namespace Engine
         XMFLOAT4 fcolor;     // RimLight 색상
         float iPower;      // RimLight 세기
 	}RIM_LIGHT_DESC;
-
-
 
 	typedef struct  ENGINE_DLL VTXPOS
 	{
@@ -56,7 +53,6 @@ namespace Engine
 
 	}MATERIAL;
 
-
 	typedef struct ENGINE_DLL VTXPOSTEX
 	{
 
@@ -70,8 +66,6 @@ namespace Engine
 		static const unsigned int		iNumElements = 2;  /*헤더에서 static전역 변수를 초기화하기 위해서 const 사용*/
 		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
 	}VTXPOSTEX;
-
-	
 
 	typedef struct ENGINE_DLL VTXPOINT
 	{
@@ -113,8 +107,6 @@ namespace Engine
 		XMFLOAT3		vPosition;
 		XMFLOAT3		vNormal;
 		XMFLOAT2		vTexcoord;
-
-
 		XMFLOAT3		vTangent;
 
 		static const unsigned int		iNumElements = 4;

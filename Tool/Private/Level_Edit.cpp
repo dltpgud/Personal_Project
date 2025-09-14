@@ -94,31 +94,43 @@ void CLevel_Edit::Update(_float fTimeDelta)
         if (m_pGameInstance->Get_DIKeyState(DIK_6))
             c -= 1;
         if (m_pGameInstance->Get_DIKeyState(DIK_7))
-            d+=0.1;
+            d+=0.01;
         if (m_pGameInstance->Get_DIKeyState(DIK_8))
-            d -= 0.1;
+            d -= 0.01;
         if (m_pGameInstance->Get_DIKeyState(DIK_9))
-            e+=0.1;
+            e+=0.01;
         if (m_pGameInstance->Get_DIKeyState(DIK_0))
-            e -=0.1;
+            e -=0.01;
         if (m_pGameInstance->Get_DIKeyState(DIK_V))
-            f += 0.1;
+            f += 0.01;
         if (m_pGameInstance->Get_DIKeyState(DIK_C))
-            f -= 0.1;
+            f -= 0.01;
         cout << a << " " << b << " " << c << " " << d << " " << e << " " << f << endl;
         //_vector m_Eye = XMVectorSet(143, 394, 432, 0.f);
         //_vector m_Dire = XMVectorSet(139, 17, 2, 0.f);
-     
-        _vector m_Eye = XMVectorSet(a, b, c, 0.f);
-        _vector m_Dire = XMVectorSet(d, e, f, 1.f);
+        
+       _float4 vDirection = _float4(0.3f, -1.f, 0.1f, 0.f);
 
-           XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye, m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
-        XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(120.f),
-                                                              (_float)g_iWinSizeX / g_iWinSizeY, Desc.fNearZ, 1000));
+           XMVECTOR vLightDir = XMVector3Normalize(XMLoadFloat4(&vDirection));
+       XMVECTOR vLightPos = XMVectorSet(a, b, c, 0.f); // 라이트 위치 (씬 위쪽)
+           XMVECTOR vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
 
-        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
+           XMMATRIX LightView = XMMatrixLookAtLH(vLightPos, vLightPos + vLightDir, vUp);
+           XMMATRIX LightProj = XMMatrixOrthographicLH(500, 500, 0.1f, 1000.f);
 
-        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ, XMLoadFloat4x4(&ProjMatrix));
+           m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_VIEW, LightView);
+           m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_PROJ, LightProj);
+
+      //  _vector m_Eye = XMVectorSet(a, b, c, 0.f);
+      //  _vector m_Dire = XMVectorSet(d, e, f, 1.f);
+      //
+      //     XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(m_Eye, m_Dire, XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+      //  XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(90.f),
+      //                                                        (_float)g_iWinSizeX / g_iWinSizeY, Desc.fNearZ, 1000));
+      //
+      //  m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW, XMLoadFloat4x4(&ViewMatrix));
+      //
+      //  m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ, XMLoadFloat4x4(&ProjMatrix));
 
 
         Key_input(fTimeDelta);
@@ -1004,18 +1016,16 @@ void CLevel_Edit::re_setting()
 
 HRESULT CLevel_Edit::Ready_Light()
 {
-   
-    LIGHT_DESC LightDesc{};
+        LIGHT_DESC LightDesc{};
 
-    LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
-    LightDesc.vDirection = _float4(0.f, -1.f, 0.f, 0.f);
-    LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-    LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
+        LightDesc.eType = LIGHT_DESC::TYPE_DIRECTIONAL;
+        LightDesc.vDirection = _float4(0.f, -1.f, 0.f, 0.f);
+        LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+        LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+        LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 0.5f);
 
-    if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
-        return E_FAIL;
-
+        if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
+            return E_FAIL;
        
     return S_OK;
 }
