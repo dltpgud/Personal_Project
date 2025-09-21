@@ -344,6 +344,18 @@ void CTransform::Rotation(_float fX, _float fY, _float fZ)
     Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
 }
 
+void CTransform::Update_Velocity(_float fTimeDelta)
+{
+    _vector vCurPos = Get_TRANSFORM(T_POSITION);
+
+    if (fTimeDelta > 0.f)
+        m_vVelocity = (vCurPos - m_vPrevPos) / fTimeDelta;
+    else
+        m_vVelocity = XMVectorZero();
+
+    m_vPrevPos = vCurPos;
+}
+
 HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstantName)
 {
     return pShader->Bind_Matrix(pConstantName, &m_WorldMatrix);

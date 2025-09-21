@@ -152,6 +152,12 @@ public:
         // 결과를 _fvector로 반환
         return euler; // 라디안 단위
     }
+    void Update_Velocity(_float fTimeDelta);
+
+    _vector Get_Velocity() const
+    {
+        return m_vVelocity;
+    }
 
 public:
     HRESULT Bind_ShaderResource(class CShader* pShader, const _char* pConstantName);
@@ -170,8 +176,11 @@ private:
     _float m_fJumpVelocity = 0.f;
     _float m_fVelocity = 0.f;
     _bool m_bIsLanding = false; // 착지 중인지 확인
-  
     _int m_CurrentPathIndex{0}; // 경로 인덱스 초기화
+
+    _vector m_vPrevPos = XMVectorZero();  // 이전 프레임 위치
+    _vector m_vVelocity = XMVectorZero(); // 속도 벡터
+
  public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;

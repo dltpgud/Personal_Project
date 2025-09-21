@@ -91,6 +91,11 @@ CStateMachine* CStateMachine::Create(void* pArg)
 void CStateMachine::Free()
 {
     __super::Free();
+    if (m_pChannel)
+    {
+        m_pChannel->stop();
+        m_pChannel = nullptr;
+    }
 
     Safe_Release(m_pGameInstance);
 

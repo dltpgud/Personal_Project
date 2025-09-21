@@ -30,8 +30,9 @@ HRESULT CShockWave::Initialize(void * pArg)
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY (m_vPos, 1.7f));
 	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.f;
-
-    m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg", nullptr, 1.f);
+    FMOD::Channel* pChannel{};
+    m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg",&pChannel, 1.f);
+    m_pGameInstance->UpdateSoundPosition(pChannel, m_pTransformCom);
     m_fColor = {0.95f, 0.95f, 0.f, 1.f};
 	return S_OK;
 }

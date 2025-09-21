@@ -74,6 +74,7 @@ public:
 
 	void Choose_Weapon(const _uint& WeaponNum);
     CWeapon::WEAPON_NODE_DESC Get_Weapon_Info() const;
+    void Set_Navigation();
 
 private:
 	HRESULT Add_Components();

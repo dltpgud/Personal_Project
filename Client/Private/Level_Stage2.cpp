@@ -233,8 +233,8 @@ HRESULT CLevel_Stage2::Ready_UI()
 
 HRESULT CLevel_Stage2::Ready_Layer_Player()
 {
+    static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_Navigation();
     static_cast<CPlayer*>(m_pGameInstance->Get_Player())->Set_State(CPlayer::FLAG_UPDATE, true);
-
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(5.f, 0.f, 6.f, 1.f));
 
 	return S_OK;

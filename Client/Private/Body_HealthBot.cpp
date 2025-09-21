@@ -187,7 +187,8 @@ HRESULT CBody_HealthBot::Init_CallBack()
 {
     m_pModelCom->Callback(ST_Interactive, 1, [this]()
                           {
-                              m_pGameInstance->Play_Sound(L"ST_Healbot_Use_09_15_2023.ogg", nullptr, 1.f);
+                              FMOD::Channel* pChannel{};
+                              m_pGameInstance->Play_Sound(L"ST_Healbot_Use_09_15_2023.ogg", &pChannel, 1.f);
                               m_RimDesc.fcolor = {0.f, 0.f, 0.f, 0.f};
                           });
 

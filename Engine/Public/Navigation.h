@@ -51,11 +51,11 @@ public:
 	void           Set_Taget(_vector Taget);
 	vector<_uint>  FindPath(_uint startIndex, _uint goalIndex);
     _vector        Get_TagetPos(_int index);
-        vector<_uint> Get_PathPoints()
-        {
+    vector<_uint>  Get_PathPoints()
+    {
             READ_LOCK;
            return m_PathPoints;
-        };
+    };
 
     _bool          Get_bFalling();
     _bool          Get_bDemage(_int& HP);
@@ -70,16 +70,13 @@ public:
 	void           Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
      
  private:
-	 int           Find_Cell_ByPosition(_vector vTargetPos);
+	 _int           Find_Cell_ByPosition(_vector vTargetPos);
 
  private:
-
      USE_LOCK;
-  
      vector<_uint>              m_PathPoints;
 	 _int					    m_iCurrentCellIndex = { -1 };
 	 vector<class CCell*>	    m_Cells;
-     vector<_uint>              m_vecNomoveType;
 	 static	const _float4x4*	m_WorldMatrix ;  
 	 _vector			        m_vSafePos{};
    

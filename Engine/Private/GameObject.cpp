@@ -90,6 +90,15 @@ HRESULT CGameObject::Add_Component(_uint iLevelIndex, const _wstring& strPrototy
     return S_OK;
 }
 
+HRESULT CGameObject::Delete_ComPonent(_uint iLevelIndex, const _wstring& strComponentTag)
+{
+    auto iter = m_Components.find(strComponentTag);
+
+    Safe_Release(iter->second);
+    m_Components.erase(iter);
+    return S_OK;
+}
+
 CComponent* CGameObject::Find_Component(const _wstring& strComponentTag)
 {
     auto iter = m_Components.find(strComponentTag);

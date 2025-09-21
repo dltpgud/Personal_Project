@@ -57,6 +57,7 @@ private:
 	DoorType m_iDoorType{};
 	CInteractiveUI* m_InteractiveUI = { nullptr };
      FMOD::Channel* m_pChannel = nullptr;
+        CNavigation* m_pNavigationCom{};
 	_uint  m_iState = { 0 }; // 현재 문 상태 체크
     _ubyte m_flags = 0;
 	_uint m_ChangeLevelDoor{};

@@ -61,18 +61,14 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta, R
         if (m_iCurIndex != m_iNextIndex)
         {
             if (m_iNextIndex == GO)
-                m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", &m_pChannel, 1.f, true);
+                m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", &m_pChannel, 1.f,true);
             if (m_iNextIndex == BACK)
                 m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll.ogg", &m_pChannel, 1.f, true);
 
             m_iCurIndex = m_iNextIndex;
             m_StateNodes[m_iCurIndex]->State_Enter();
         }
-
-        m_pGameInstance->SetChannelVolume(
-            &m_pChannel, 60.f,
-            m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) -
-                m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+        m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());
 
         _bool isFall = m_pParentObject->Get_Navigation()->Get_bFalling();
 
@@ -147,7 +143,7 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta, R
 
 void CMecanoBot_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(&m_pChannel);
+    m_pChannel->stop();
     __super::Reset_StateMachine(pRim);
 }
 

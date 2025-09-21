@@ -6,8 +6,8 @@
 #include "VIBuffer_Rect.h"
 #include "Shader.h"
 
-_uint g_iSizeX = 8192; // 그림자를 위한 변수
-_uint g_iSizeY = 8192;
+_uint g_iSizeX = 4096; // 그림자를 위한 변수
+_uint g_iSizeY = 4096;
 
 CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{pDevice}, m_pContext{pContext}, m_pGameInstance{CGameInstance::GetInstance()}
@@ -169,8 +169,8 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 
 #ifdef _DEBUG
-   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 50.f, 50.f, 150.f, 150.f)))
-   //     return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 50.f, 50.f, 150.f, 150.f)))
+         return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"),  50.f, 200.f, 150.f, 150.f)))
    //     return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"),   50.f, 350.f, 150.f, 150.f)))

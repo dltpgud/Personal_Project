@@ -61,15 +61,6 @@
     <Filter Include="02.GameObjects\04.UI\Cursor">
       <UniqueIdentifier>{c7717531-c94b-4f53-b4e1-c89c77310c34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor">
-      <UniqueIdentifier>{d8508f07-8951-45dc-a9d3-e7f94d4e9d9d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Player">
-      <UniqueIdentifier>{ca79e80a-f4cb-48b4-9198-3b373697e1a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster">
-      <UniqueIdentifier>{f7b301fe-14e2-4e27-a9fb-6547af681414}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.Level\01.GamePlay\Stage1">
       <UniqueIdentifier>{97a7f06e-cfc2-47a0-b47d-3e1b418352de}</UniqueIdentifier>
     </Filter>
@@ -81,12 +72,6 @@
     </Filter>
     <Filter Include="02.GameObjects\04.UI\InteractiveUI">
       <UniqueIdentifier>{78f16647-2133-4cc7-a390-87a5586c3dba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\NPC">
-      <UniqueIdentifier>{ae52ede4-97f4-4dae-89e2-f4ee211d33bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet">
-      <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
     </Filter>
     <Filter Include="01.Level\01.GamePlay\StageBoss">
       <UniqueIdentifier>{69b3a31f-376a-407e-a01a-91c101f2e151}</UniqueIdentifier>
@@ -109,24 +94,6 @@
     <Filter Include="02.GameObjects\05. Effect">
       <UniqueIdentifier>{ac2f6e33-6b24-4d72-bf50-da424bf00c76}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Player">
-      <UniqueIdentifier>{03aa1484-4972-4d10-954f-48035698f265}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\NomalMonster">
-      <UniqueIdentifier>{f0d97725-4843-467f-90b9-5178f39e1d73}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss">
-      <UniqueIdentifier>{e59b2bf2-f346-4bd0-a5e9-5c35e7fe2172}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Berrle">
-      <UniqueIdentifier>{8c196b0d-3930-43d4-a24c-84cf07d85e14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\ShockWave">
-      <UniqueIdentifier>{39c9ab58-c735-4170-a077-6cbdbe47c592}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Laser">
-      <UniqueIdentifier>{72444b90-6979-4007-ba25-d69d87c94671}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\05. Effect\Particle">
       <UniqueIdentifier>{8535d2e8-f356-460a-8ed5-82222297eb58}</UniqueIdentifier>
     </Filter>
@@ -145,35 +112,20 @@
     <Filter Include="97.ShaderFiles">
       <UniqueIdentifier>{e55fed78-457b-41b3-ab8f-bd256190d1a0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot">
-      <UniqueIdentifier>{da0b2d90-f0fe-4c2e-8947-dc98d01f1481}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI\00. State">
+      <UniqueIdentifier>{51d65165-e52e-4c40-b804-dc17a93fca79}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn">
-      <UniqueIdentifier>{38c4814b-355d-4a1a-a3e9-99db99392428}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\04.UI\PlayerUI\01.Weapon">
+      <UniqueIdentifier>{b5078865-5ecd-4c3a-823d-f0d94cd96945}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\State">
-      <UniqueIdentifier>{9ac50337-93a1-49a9-a1ff-550623ec7e55}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\01. Map\Trigger">
+      <UniqueIdentifier>{15cf0692-010a-4e87-a62c-e93757535a88}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly">
-      <UniqueIdentifier>{72c149fe-d61e-4db9-bda3-070b7a27b561}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor">
+      <UniqueIdentifier>{d8508f07-8951-45dc-a9d3-e7f94d4e9d9d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot">
-      <UniqueIdentifier>{bd243b8e-af26-4dab-a993-74e9e0845e54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss">
-      <UniqueIdentifier>{99d8ddec-d756-4a55-9528-fc55e0a5e88b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult">
-      <UniqueIdentifier>{f3ca7d39-20fe-4521-8768-6c634d6d504f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\MonsterHP">
-      <UniqueIdentifier>{4933a1e9-3351-425e-acf7-f5b4ba58b32b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\StateMachine">
-      <UniqueIdentifier>{f18303a1-d420-4926-b7c0-e84dfa504cfd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\StateMachine\Node">
-      <UniqueIdentifier>{10b44afc-99ed-4f2f-8c31-3e16a3702336}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Player">
+      <UniqueIdentifier>{ca79e80a-f4cb-48b4-9198-3b373697e1a7}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Player\01.Body">
       <UniqueIdentifier>{b3714dd1-c571-4890-bb9a-37830a175434}</UniqueIdentifier>
@@ -190,20 +142,62 @@
     <Filter Include="02.GameObjects\03.Actor\Player\03.State\00.Defult\Node">
       <UniqueIdentifier>{e1f9d1aa-87ee-45c2-8aba-c27ea9d7e37a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\04.UI\PlayerUI\00. State">
-      <UniqueIdentifier>{51d65165-e52e-4c40-b804-dc17a93fca79}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Player\00.Container">
       <UniqueIdentifier>{259e7f53-1433-4c8e-9401-2e2c648cd56b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot">
-      <UniqueIdentifier>{aea053b6-84c9-4a1f-bc0e-11df88b50f70}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster">
+      <UniqueIdentifier>{f7b301fe-14e2-4e27-a9fb-6547af681414}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot\01.Body">
-      <UniqueIdentifier>{776463e0-3f2d-404e-b3a9-648d7cac8a22}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot">
+      <UniqueIdentifier>{da0b2d90-f0fe-4c2e-8947-dc98d01f1481}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container">
-      <UniqueIdentifier>{4b921956-7ef1-498b-8912-b1a6130c2f94}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\00.Container">
+      <UniqueIdentifier>{fe2eac53-5791-4b3d-86c6-be74fbfaf043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\01.Body">
+      <UniqueIdentifier>{3734b442-2bbf-4f17-8bf5-793f60674080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State">
+      <UniqueIdentifier>{cb151bb3-3487-410c-8739-3e7fc2f07779}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn">
+      <UniqueIdentifier>{38c4814b-355d-4a1a-a3e9-99db99392428}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\State">
+      <UniqueIdentifier>{9ac50337-93a1-49a9-a1ff-550623ec7e55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\00.Container">
+      <UniqueIdentifier>{d6f8afe0-f83d-4ae7-ae5b-8fa97663d186}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\01.Body">
+      <UniqueIdentifier>{f985c137-4d68-46a0-9cf9-e696677d55ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly">
+      <UniqueIdentifier>{72c149fe-d61e-4db9-bda3-070b7a27b561}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\00.Container">
+      <UniqueIdentifier>{50bb5400-f0cf-4e10-a4cf-1263b2b6ec5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\01.Body">
+      <UniqueIdentifier>{68706e6c-4bc6-458e-a9be-36ef4f867cfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\02.State">
+      <UniqueIdentifier>{1728ee3c-40f2-4b35-bb3a-7c4ec6d6f0ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot">
+      <UniqueIdentifier>{bd243b8e-af26-4dab-a993-74e9e0845e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\00.Container">
+      <UniqueIdentifier>{a7b454c8-6ef0-4eb1-a24a-683becf69848}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\01.Body">
+      <UniqueIdentifier>{57a3b578-378c-4374-8b18-59d88a08d3fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\02.State">
+      <UniqueIdentifier>{af3122c3-4ce0-48a5-813c-619d644fc159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss">
+      <UniqueIdentifier>{99d8ddec-d756-4a55-9528-fc55e0a5e88b}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\00.Container">
       <UniqueIdentifier>{96b7131e-27d4-4248-9561-1055d0255ec4}</UniqueIdentifier>
@@ -217,44 +211,50 @@
     <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack">
       <UniqueIdentifier>{e2537ef3-9925-48f6-91e2-86010d590fff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\00.Container">
-      <UniqueIdentifier>{50bb5400-f0cf-4e10-a4cf-1263b2b6ec5e}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult">
+      <UniqueIdentifier>{f3ca7d39-20fe-4521-8768-6c634d6d504f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\01.Body">
-      <UniqueIdentifier>{68706e6c-4bc6-458e-a9be-36ef4f867cfb}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\MonsterHP">
+      <UniqueIdentifier>{4933a1e9-3351-425e-acf7-f5b4ba58b32b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\02.State">
-      <UniqueIdentifier>{1728ee3c-40f2-4b35-bb3a-7c4ec6d6f0ca}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\StateMachine">
+      <UniqueIdentifier>{f18303a1-d420-4926-b7c0-e84dfa504cfd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\00.Container">
-      <UniqueIdentifier>{d6f8afe0-f83d-4ae7-ae5b-8fa97663d186}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Monster\00.Defult\StateMachine\Node">
+      <UniqueIdentifier>{10b44afc-99ed-4f2f-8c31-3e16a3702336}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\03.GunPawn\01.Body">
-      <UniqueIdentifier>{f985c137-4d68-46a0-9cf9-e696677d55ba}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\NPC">
+      <UniqueIdentifier>{ae52ede4-97f4-4dae-89e2-f4ee211d33bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\00.Container">
-      <UniqueIdentifier>{fe2eac53-5791-4b3d-86c6-be74fbfaf043}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot">
+      <UniqueIdentifier>{aea053b6-84c9-4a1f-bc0e-11df88b50f70}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\01.Body">
-      <UniqueIdentifier>{3734b442-2bbf-4f17-8bf5-793f60674080}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot\01.Body">
+      <UniqueIdentifier>{776463e0-3f2d-404e-b3a9-648d7cac8a22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\02.MecanoBot\02.State">
-      <UniqueIdentifier>{cb151bb3-3487-410c-8739-3e7fc2f07779}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container">
+      <UniqueIdentifier>{4b921956-7ef1-498b-8912-b1a6130c2f94}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\00.Container">
-      <UniqueIdentifier>{a7b454c8-6ef0-4eb1-a24a-683becf69848}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Bullet">
+      <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\01.Body">
-      <UniqueIdentifier>{57a3b578-378c-4374-8b18-59d88a08d3fb}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Player">
+      <UniqueIdentifier>{03aa1484-4972-4d10-954f-48035698f265}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\01.BoomBot\02.State">
-      <UniqueIdentifier>{af3122c3-4ce0-48a5-813c-619d644fc159}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\NomalMonster">
+      <UniqueIdentifier>{f0d97725-4843-467f-90b9-5178f39e1d73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\04.UI\PlayerUI\01.Weapon">
-      <UniqueIdentifier>{b5078865-5ecd-4c3a-823d-f0d94cd96945}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss">
+      <UniqueIdentifier>{e59b2bf2-f346-4bd0-a5e9-5c35e7fe2172}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\01. Map\Trigger">
-      <UniqueIdentifier>{15cf0692-010a-4e87-a62c-e93757535a88}</UniqueIdentifier>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Berrle">
+      <UniqueIdentifier>{8c196b0d-3930-43d4-a24c-84cf07d85e14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\ShockWave">
+      <UniqueIdentifier>{39c9ab58-c735-4170-a077-6cbdbe47c592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Laser">
+      <UniqueIdentifier>{72444b90-6979-4007-ba25-d69d87c94671}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

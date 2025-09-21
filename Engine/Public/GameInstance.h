@@ -119,10 +119,10 @@ public: /* For.Component_Manager */
 public: /* For.Sound*/
     void    Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop = false);
     void    PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume);
-    void    StopSound(FMOD::Channel** ppChannel);
 	void	StopAll();
-    void    SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength);
-	void	LoadSoundFile	(const _char* soundFile);
+    void    Set3DListenerAttributes();
+    void    UpdateSoundPosition(FMOD::Channel* pChannel, CTransform* pTransform);
+    void    LoadSoundFile(const _char* soundFile, _bool isBGM = false);
 #pragma endregion
 
 #pragma region Renderer
@@ -142,9 +142,10 @@ public: /* For.PipeLine */
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
-        const _float* Get_CamNear();
+    const _float4* Get_CamUp();
+    const _float* Get_CamNear();
     void Set_Camfar(_float fFar);
-        void Set_CamNear(_float fNear);
+    void Set_CamNear(_float fNear);
     const float* Get_CamFar();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);

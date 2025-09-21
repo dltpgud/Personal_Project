@@ -10,11 +10,10 @@ CNavigation::CNavigation(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) :
 }
 
 CNavigation::CNavigation(const CNavigation& Prototype)
-    : CComponent{Prototype}, m_Cells{Prototype.m_Cells}, m_vecNomoveType{Prototype.m_vecNomoveType}
+    : CComponent{Prototype}, m_Cells{Prototype.m_Cells}
 
 #ifdef _DEBUG
-      ,
-      m_pShader{Prototype.m_pShader}
+      , m_pShader{Prototype.m_pShader}
 #endif
 {
     for (auto& pCell : m_Cells) Safe_AddRef(pCell);
@@ -422,9 +421,6 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
             Type = CCell::TYPE::NOMAL;
         }
 
-        if (Type == CCell::TYPE::NOMOVE)
-            m_vecNomoveType.push_back(static_cast<_uint>(m_Cells.size()));
-
         CCell* pCell = CCell::Create(m_pDevice, m_pContext, vPoints, static_cast<_uint>( m_Cells.size()), Type);
         if (nullptr == pCell)
             return E_FAIL;
@@ -445,10 +441,24 @@ HRESULT CNavigation::Load(const _tchar* tFPath)
 
 void CNavigation::Set_Type(_uint Type)
 {
-  for (auto& index : m_vecNomoveType)
-  {
-    m_Cells[index]->Set_Type(Type);
-  }
+    if (m_iCurrentCellIndex < 0 || m_iCurrentCellIndex >= static_cast<_int>(m_Cells.size()))
+        return;
+
+    CCell* pCurrentCell = m_Cells[m_iCurrentCellIndex];
+    pCurrentCell->Set_Type(Type);
+
+    for (int i = 0; i < CCell::LINE_END; ++i)
+    {
+        _int neighborIndex = pCurrentCell->Get_Neighbors(i);
+        if (neighborIndex < 0 || neighborIndex >= static_cast<_int>(m_Cells.size()))
+            continue;
+
+        CCell* pNeighbor = m_Cells[neighborIndex];
+        if (pNeighbor->Get_PreType() == CCell::TYPE::NOMOVE)
+        {
+            pNeighbor->Set_Type(Type);
+        }
+    }
 }
 
 HRESULT CNavigation::Delete_ALLCell()
@@ -457,9 +467,6 @@ HRESULT CNavigation::Delete_ALLCell()
     m_Cells.clear();
     m_Cells.shrink_to_fit();
     m_iCurrentCellIndex = -1;
-  
-    m_vecNomoveType.clear();
-    m_vecNomoveType.shrink_to_fit();
 
  #ifdef _DEBUG
     m_bRender = false;
@@ -602,9 +609,6 @@ CComponent* CNavigation::Clone(void* pArg)
 void CNavigation::Free()
 {
     __super::Free();
-
-    m_vecNomoveType.clear();
-    m_vecNomoveType.shrink_to_fit();
 
     for (auto& pCell : m_Cells) Safe_Release(pCell);
     m_Cells.clear();

@@ -35,6 +35,7 @@ HRESULT CDOOR::Initialize(void* pArg)
     Safe_AddRef(m_InteractiveUI);
     m_flags = 0;
 
+    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
     Add_StageDoorLight();
     Add_BossDoorLight();
     Init_CallBakc();
@@ -75,9 +76,7 @@ void CDOOR::Update(_float fTimeDelta)
         m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
     }
 
-       m_pGameInstance->SetChannelVolume(&m_pChannel, 60.f,
-      m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-
+   m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pTransformCom);
 
     if (m_pModelCom->Play_Animation(fTimeDelta * m_OpenTime))
     {
@@ -104,6 +103,8 @@ void CDOOR::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_Interctive(this)))
         return;
 
+    m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
+    
     __super::Late_Update(fTimeDelta);
 }
 
@@ -343,6 +344,11 @@ HRESULT CDOOR::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
 
+    CNavigation::NAVIGATION_DESC Desc{};
+    Desc.iCurrentCellIndex = -1;
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+                                      reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
+        return E_FAIL;
     return S_OK;
 }
 
@@ -380,13 +386,13 @@ HRESULT CDOOR::Init_CallBakc()
                                   m_pGameInstance->Play_Sound(L"ST_Door_Act1_Close.ogg", &m_pChannel, 0.5f);
                                   m_flags |= DOOR_SOUND;
                               });
-        m_pModelCom->Callback(State::ClOSE, 10, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(1); });
-        m_pModelCom->Callback(State::OPEN, 6, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(0); });
+        m_pModelCom->Callback( State::ClOSE, 10, [this]() { m_pNavigationCom->Set_Type(1); }); 
+        m_pModelCom->Callback( State::OPEN, 6, [this]() { m_pNavigationCom->Set_Type(0); }); 
     }
     else
     {
-        m_pModelCom->Callback(State2::ClOSE2, 10, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(1); });
-        m_pModelCom->Callback(State2::OPEN2, 6, [this]() { m_pGameInstance->Get_Player()->Get_Navigation()->Set_Type(0); });
+        m_pModelCom->Callback(State2::ClOSE2, 10, [this]() { m_pNavigationCom->Set_Type(1); });
+        m_pModelCom->Callback(State2::OPEN2, 6, [this]() { m_pNavigationCom->Set_Type(0); });
     }
 
     m_pColliderCom->SetTriggerCallback(
@@ -460,4 +466,5 @@ void CDOOR::Free()
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
     Safe_Release(m_InteractiveUI);
+    Safe_Release(m_pNavigationCom);
 }

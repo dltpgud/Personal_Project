@@ -33,10 +33,14 @@ public:
 	}
    _bool Find_TargetCell(_vector WorldPos);
 
-	_uint Get_Type(){
+	_uint Get_Type() const
+    {
 		return m_Type;
 	}
-
+    _uint Get_PreType() const
+    {
+         return m_iPreType;
+    }
     _vector GetCenter() const;
 
     public:
@@ -63,6 +67,7 @@ private:
 	_uint					m_iIndex = {};
 	_int					m_iNeighbors[LINE_END] = { -1, -1, -1 };
 	TYPE					m_Type = {};
+    TYPE                    m_iPreType = {};
 #ifdef _DEBUG
 private:
 	class CVIBuffer_Cell*		m_pVIBuffer = { nullptr };	

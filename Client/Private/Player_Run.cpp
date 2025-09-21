@@ -49,7 +49,11 @@ _bool CPlayer_Run::State_Exit(_uint* pState)
 void CPlayer_Run::Init_CallBack_Func()
 {
     for(_int i = 0; i <BODY_TYPE::T_END; i++){ m_pParentObject->BodyCallBack(i, CBody_Player::BODY_RUN, 0,
-            [this]() { m_pGameInstance->Play_Sound(L"ST_Player_Footstep_Scuff_Sand.ogg", &m_pChannel, 1.f); });
+                                      [this]()
+                                      {
+                                          m_pGameInstance->Play_Sound(L"ST_Player_Footstep_Scuff_Sand.ogg", &m_pChannel,
+                                                                      1.f);
+                                      });
     }
 }
 

@@ -63,14 +63,12 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta, RIM_
 
     if (m_iCurIndex != m_iNextIndex)
     {
-       m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", &m_pChannel, 1.f, true);
+       m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Fly_Loop.ogg", &m_pChannel, 1.f,true);
        m_iCurIndex = m_iNextIndex;
        m_StateNodes[m_iCurIndex]->State_Enter();
     }
-
-     m_pGameInstance->SetChannelVolume( &m_pChannel, 80.f,
-      m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-
+    m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());
+   
     if (*m_fLength > 20.f)
     {
         if (m_pGameInstance->Get_Player()->Get_onCell())
@@ -115,7 +113,7 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta, RIM_
 
 void CJetFly_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(&m_pChannel);
+    m_pChannel->stop();
     __super::Reset_StateMachine(pRim);
 }
 

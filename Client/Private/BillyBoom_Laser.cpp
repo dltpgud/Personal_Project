@@ -110,8 +110,9 @@ CStateMachine::Result CBillyBoom_Laser::StateMachine_Playing(_float fTimeDelta, 
 void CBillyBoom_Laser::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
     m_fRimTimeSum = 0.f;
-    m_pGameInstance->StopSound(&m_pChannel);
-    m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", nullptr, 1.f);
+    m_pChannel->stop();
+    FMOD::Channel* channel{};
+    m_pGameInstance->Play_Sound(L"ST_Enemy_Laser_Loop_Stop.ogg", &channel, 1.f);
     m_BeamY  = {-45.f};
     m_BeamZ  = {20.f};
     __super::Reset_StateMachine(pRim);

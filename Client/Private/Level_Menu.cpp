@@ -103,6 +103,6 @@ CLEVEL_MENU* CLEVEL_MENU::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 
 void CLEVEL_MENU::Free()
 {		
-	 m_pGameInstance->StopSound(&m_pChannel);
+	   m_pChannel->stop();
 	__super::Free();
 }

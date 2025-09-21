@@ -88,12 +88,6 @@ void CActor::Height_On_Cell(_float3* fPos)
 	m_fY = fPos->y + m_FixY;	
 }
 
-void CActor::Clear_CNavigation(_tchar* tFPath)
-{
-	m_pNavigationCom->Delete_ALLCell();
-	m_pNavigationCom->Load(tFPath);
-}
-
 void CActor::Set_HealthCurrentHP(_int Health) {
 	
 	if (IsFullHP())

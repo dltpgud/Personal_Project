@@ -39,7 +39,10 @@ HRESULT CBillyBoom::Initialize(void* pArg)
 
     if (FAILED(Add_PartObjects()))
         return E_FAIL;
-    m_pGameInstance->Play_Sound(L"ST_BillyBoom_Presence.ogg", nullptr, 1.f);
+
+    FMOD::Channel* pChannel{};
+    m_pGameInstance->Play_Sound(L"ST_BillyBoom_Presence.ogg", &pChannel, 1.f);
+    m_pGameInstance->UpdateSoundPosition(pChannel, m_pTransformCom);
     return S_OK;
 }
 

@@ -136,6 +136,7 @@ void CPlayer_StateMachine::progress_Move(_float fTimeDelta, _uint* pState)
         m_pParentObject->Get_Transform()->Go_Move(CTransform::BACK, fTimeDelta, m_pParentObject->Get_Navigation());
 
 
+    m_pParentObject->Get_Transform()->Update_Velocity(fTimeDelta);
 }
 
 void CPlayer_StateMachine::Check_UIState(_uint* pPreState) const

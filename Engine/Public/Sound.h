@@ -14,14 +14,14 @@ public:
     HRESULT Initialize();
 
 public:
-    void Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop = false);
+    void Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume ,_bool bLoop = false);
     void PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume);
-    void StopSound(FMOD::Channel** ppChannel);
 	void StopAll();
-    void SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength);
+    void Set3DListenerAttributes();
+    void UpdateSoundPosition(FMOD::Channel* pChannel,class CTransform* pTransform);
 
 public:
-	void LoadSoundFile(const _char* soundFile);
+    void LoadSoundFile(const _char* soundFile,_bool isBGM = false);
 
 
 private:	
@@ -31,6 +31,8 @@ private:
     ChannelGroup* m_pChannelGroupBGM{};
     ChannelGroup* m_pChannelGroupSE{};
 	System* m_pSystem = nullptr;
+
+    class CGameInstance* m_pGameInstance = {nullptr};
 
 public:
     static CSound* Create();

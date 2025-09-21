@@ -43,8 +43,7 @@ void CMecanoBot_Attack::Init_CallBack_Func()
 void CMecanoBot_Attack::Make_Bullet()
 {
     m_pGameInstance->Play_Sound(L"ST_MortarPod_Shoot.ogg", &m_pChannel, 1.f);
-       m_pGameInstance->SetChannelVolume( &m_pChannel, 60.f,
-     m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+    m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());
     _vector Hend_Local_Pos = {m_pParentBoneMat->_41, m_pParentBoneMat->_42, m_pParentBoneMat->_43,
                               m_pParentBoneMat->_44};
 

@@ -40,15 +40,13 @@ CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta, R
 
     if (m_iCurIndex != m_iNextIndex)
     {
-        m_pGameInstance->Play_Sound(L"ST_BillyBoom_FootStep.ogg", &m_pChannel, 1.f, true);
+        m_pGameInstance->Play_Sound(L"ST_BillyBoom_FootStep.ogg", &m_pChannel, 0.5f,true);
         static_cast<CBillyBoom*>(m_pParentObject)->Set_bSkill(false);
         m_iCurIndex = m_iNextIndex;
         m_StateNodes[m_iCurIndex]->State_Enter();
     }
 
-    m_pGameInstance->SetChannelVolume( &m_pChannel, 80.f,
-      m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-
+   m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
     m_pParentObject->Get_Transform()->Go_Move(CTransform::GO, fTimeDelta,m_pParentObject->Get_Navigation());
   
@@ -81,7 +79,7 @@ CStateMachine::Result CBillyBoom_Move::StateMachine_Playing(_float fTimeDelta, R
 
 void CBillyBoom_Move::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
-    m_pGameInstance->StopSound(&m_pChannel);
+    m_pChannel->stop();
     static_cast<CBillyBoom*>(m_pParentObject)->Set_bSkill(true);
     __super::Reset_StateMachine(pRim);
 }
