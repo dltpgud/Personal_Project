@@ -107,7 +107,7 @@ void CGameInstance::Update(_float fTimeDelta)
 	
 	m_pObject_Manager->Update(fTimeDelta);
 	m_pUI_Manager->Update(fTimeDelta);
-
+    Set3DListenerAttributes();
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	m_pUI_Manager->Late_Update(fTimeDelta);
 
@@ -533,11 +533,11 @@ CComponent* CGameInstance::Find_Prototype(_uint iLevelIndex, const _wstring& str
 #pragma endregion
 
 #pragma region Sound
-void CGameInstance::Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop)
+void CGameInstance::Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume,  _bool bLoop)
 {
 	if (m_pSound == nullptr)
 		return;
-   return m_pSound->Play_Sound(pSoundKey, ppChannel, fVolume, bLoop);
+        return m_pSound->Play_Sound(pSoundKey, ppChannel, fVolume, bLoop);
 }
 
 void CGameInstance::PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume)
@@ -547,13 +547,6 @@ void CGameInstance::PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float
 	return m_pSound->PlayBGM(ppChannel,pSoundKey, fVolume);
 }
 
-void CGameInstance::StopSound(FMOD::Channel** ppChannel)
-{
-	if (m_pSound == nullptr)
-		return;
-	return m_pSound->StopSound(ppChannel);
-}
-
 void CGameInstance::StopAll()
 {
 	if (m_pSound == nullptr)
@@ -561,18 +554,25 @@ void CGameInstance::StopAll()
 	return m_pSound->StopAll();
 }
 
-void CGameInstance::SetChannelVolume(FMOD::Channel** ppChannel, _float fDis, _vector vLength)
+void CGameInstance::Set3DListenerAttributes()
 {
-	if (m_pSound == nullptr)
-		return;
-	return m_pSound->SetChannelVolume(ppChannel, fDis, vLength);
+    if (m_pSound == nullptr)
+        return;
+    return m_pSound->Set3DListenerAttributes();
 }
 
-void CGameInstance::LoadSoundFile(const _char* soundFile)
+void CGameInstance::UpdateSoundPosition(FMOD::Channel* pChannel, CTransform* pTransform)
+{
+    if (m_pSound == nullptr)
+        return;
+    return m_pSound->UpdateSoundPosition(pChannel, pTransform);
+}
+
+void CGameInstance::LoadSoundFile(const _char* soundFile, _bool isBGM )
 {
 	if (m_pSound == nullptr)
 		return;
-	return m_pSound->LoadSoundFile(soundFile);
+    return m_pSound->LoadSoundFile(soundFile, isBGM);
 }
 
 #pragma endregion
@@ -648,6 +648,14 @@ const _float4* CGameInstance::Get_CamLook()
 		return nullptr;
 
 	return m_pPipeLine->Get_CamLook();
+}
+
+const _float4* CGameInstance::Get_CamUp()
+{
+    if (nullptr == m_pPipeLine)
+        return nullptr;
+
+    return m_pPipeLine->Get_CamUp();
 }
 
 const _float* CGameInstance::Get_CamNear()

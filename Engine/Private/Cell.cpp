@@ -13,6 +13,7 @@ HRESULT CCell::Initialize(const _float3 * pPoints, _uint iIndex, const _uint& Ty
 {
 	m_iIndex = iIndex;
 	m_Type = static_cast<TYPE> (Type);
+    m_iPreType = m_Type;
 	for (size_t i = 0; i < POINT_END; i++)	
 		m_vPoints[i] = pPoints[i];
 

@@ -52,18 +52,18 @@ void CLevel_Loading::Update(_float fTimeDelta)
             {
                 if (m_pFade)
                     m_pFade->Set_Fade(false);
-                m_pGameInstance->StopSound(&m_pChannel);
+                m_pChannel->stop();
                 m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage1::Create(m_pDevice, m_pContext));
             }
             break;
         case LEVEL_STAGE2:
             if (m_pFade)
             m_pFade->Set_Fade(false); 
-            m_pGameInstance->StopSound(&m_pChannel);
+             m_pChannel->stop();
             m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_Stage2::Create(m_pDevice, m_pContext));
             break;
         case LEVEL_BOSS:
-            m_pGameInstance->StopSound(&m_pChannel);
+            m_pChannel->stop();
             m_pGameInstance->Open_Level(m_eNextLevelID, CLevel_StageBoss::Create(m_pDevice, m_pContext));
             break;
         }
@@ -111,7 +111,7 @@ HRESULT CLevel_Loading::Render()
 
 HRESULT CLevel_Loading::Ready_UI()
 {
-    m_pGameInstance->Play_Sound(L"ST_Music_Credits.wav", &m_pChannel, 0.5f);
+    m_pGameInstance->Play_Sound(L"ST_Music_Credits.wav", &m_pChannel, 0.5f, nullptr);
 
     if (m_pGameInstance->Find_Clone_UIObj(L"Fade") != nullptr)
     {
@@ -286,7 +286,7 @@ CLevel_Loading* CLevel_Loading::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 void CLevel_Loading::Free()
 {
     __super::Free();
-    m_pGameInstance->StopSound(&m_pChannel);
+    m_pChannel->stop();
     Safe_Release(m_pLoader);
     Safe_Release(m_pFade);
 }

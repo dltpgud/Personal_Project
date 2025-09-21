@@ -198,7 +198,8 @@ HRESULT CCHEST::Init_CallBakc()
     m_pModelCom->Callback(OPEN, 0,[this](){
                               m_InteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
                               m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
-                              m_pGameInstance->Play_Sound(L"ST_Chest_Open.ogg", nullptr, 1.f);
+                              FMOD::Channel* pChannel{};
+                              m_pGameInstance->Play_Sound(L"ST_Chest_Open.ogg", &pChannel, 1.f);
                           });
 
 

@@ -58,7 +58,7 @@ public:
      void   Height_On_Cell(_float3* fPos);
      void   Set_onCell(_bool bonCell) { m_bOnCell = bonCell; }
      _bool  Get_onCell(){ return m_bOnCell;}
-     void   Clear_CNavigation(_tchar* tFPath);
+  
   
      CNavigation* Get_Navigation() { return m_pNavigationCom; }
      virtual void Set_CurrentHP(_int CurrentHp){m_iHP -= CurrentHp;}

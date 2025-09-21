@@ -138,10 +138,11 @@ void CPlayer_Shoot::Init_CallBack_Func()
 {
     m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_SHOOT, 3,[this]()
                                     {
-                                      m_pGameInstance->Play_Sound(L"ST_Handgun_PF_Shoot.ogg",  &m_pChannel, 1.f);
+                                        m_pGameInstance->Play_Sound(L"ST_Handgun_PF_Shoot.ogg", &m_pChannel, 1.f);
                                     });
     m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_SHOOT, 3, [this]()
-                                    { m_pGameInstance->Play_Sound(L"ST_AssaultRifle_PF_Shoot.ogg", &m_pChannel, 1.f);
+                                    {
+                                        m_pGameInstance->Play_Sound(L"ST_AssaultRifle_PF_Shoot.ogg", &m_pChannel, 1.f);
                                     });
     m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_SHOOT, 3, [this]()
                                     { 
@@ -149,7 +150,7 @@ void CPlayer_Shoot::Init_CallBack_Func()
                                     });
     m_pParentObject->WeaponCallBack(CWeapon::HeavyCrossbow, CWeapon::WS_SHOOT, 3, [this]()
                                     { 
-                                      m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_SF_Shoot_A.ogg", &m_pChannel, 1.f);
+                                      m_pGameInstance->Play_Sound(L"ST_HeavyCrossbow_SF_Shoot_A.ogg", &m_pChannel,1.f);
                                     });
 }
 

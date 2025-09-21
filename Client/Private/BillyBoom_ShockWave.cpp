@@ -58,7 +58,7 @@ CStateMachine::Result CBillyBoom_ShockWave::StateMachine_Playing(_float fTimeDel
 void CBillyBoom_ShockWave::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
     m_fRimTimeSum = 0.f;
-    m_pGameInstance->StopSound(&m_pChannel);
+    m_pChannel->stop();
     __super::Reset_StateMachine(pRim);
 }
 

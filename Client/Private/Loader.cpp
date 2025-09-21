@@ -298,11 +298,11 @@ HRESULT CLoader::Loading_For_ProtoObject()
 HRESULT CLoader::Loading_For_Sound()
 {
     /*LEVEL*/
-    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Ambient_Canyon.ogg"); });
-    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Ambient_Special.ogg"); });
-    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Ambient_EnergyCenter.ogg"); });
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Ambient_Canyon.ogg",true); });
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Ambient_Special.ogg",true); });
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Ambient_EnergyCenter.ogg",true); });
     /*Menu */
-    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("Menu.mp3"); });
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("Menu.mp3",true); });
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Button_Hover_In.ogg"); });
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->LoadSoundFile("ST_Button_Click.ogg"); });
     /*LODING*/
@@ -769,9 +769,6 @@ HRESULT CLoader::Loading_For_Stage2Level()
 
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
-	      m_pGameInstance->Get_Player()->Set_onCell(false);
-	      m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
-
           CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
 	      static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
 	      static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Stage2.dat");
@@ -952,8 +949,6 @@ HRESULT CLoader::Loading_For_BossLevel()
 		
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
-	      m_pGameInstance->Get_Player()->Set_onCell(false);
-	      m_pGameInstance->Get_Player()->Clear_CNavigation(L"../Bin/Data/Navigation/Navigation_Boss.dat");
 	      CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));
 	      static_cast<CNavigation*>(pComponent)->Delete_ALLCell();
 	      static_cast<CNavigation*>(pComponent)->Load(L"../Bin/Data/Navigation/Navigation_Boss.dat");

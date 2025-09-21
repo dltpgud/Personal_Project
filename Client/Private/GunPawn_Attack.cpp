@@ -37,9 +37,7 @@ HRESULT CGunPawn_Attack::Initialize(void* pArg)
 HRESULT CGunPawn_Attack::Make_Bullet()
 {
     m_pGameInstance->Play_Sound(L"ST_Enemy_Rocket_Shoot.ogg", &m_pChannel, 1.f);
-    m_pGameInstance->SetChannelVolume( &m_pChannel, 60.f,
-    m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-    
+    m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());
     _vector Hend_Local_Pos = {m_pParentBoneMat->_41-0.5f, m_pParentBoneMat->_42+0.1f, m_pParentBoneMat->_43,
                               m_pParentBoneMat->_44};
 
@@ -70,7 +68,7 @@ HRESULT CGunPawn_Attack::Make_Bullet()
 CStateMachine::Result CGunPawn_Attack::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
-
+    m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());
   return __super::StateMachine_Playing(fTimeDelta, pRim);
 }
 

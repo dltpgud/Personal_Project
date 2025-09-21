@@ -160,6 +160,18 @@ CWeapon::WEAPON_NODE_DESC CPlayer::Get_Weapon_Info() const
     return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_Weapon_Info();
 }
 
+void CPlayer::Set_Navigation()
+{
+    Set_onCell(false);
+    
+    Delete_ComPonent(LEVEL_STATIC, TEXT("Com_Navigation"));
+    Safe_Release(m_pNavigationCom);
+
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+                                          reinterpret_cast<CComponent**>(&m_pNavigationCom))))
+            return;        
+}
+
 void CPlayer::Set_PartObj_Set_Anim(_int Part,_int Index, _bool IsLoop)
 {
     switch (Part)

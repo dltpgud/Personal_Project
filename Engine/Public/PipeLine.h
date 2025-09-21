@@ -48,16 +48,6 @@ public:
         return XMLoadFloat4x4(&m_ShadowTransMatrix[eState]); // 연산용
     }
 
-    void Set_Camfar(_float fFar)
-    {
-        m_vCamfar = fFar;
-    }
-
-    void Set_CamNear(_float fNear)
-    {
-        m_vCamNear = fNear;
-    }
-
     const _float* Get_Camfar()
     {
         return &m_vCamfar;
@@ -73,13 +63,15 @@ public:
         return &m_vCamLook;
     }
 
+    const _float4* Get_CamUp()
+    {
+        return &m_vCamLook;
+    }
     
     const _float* Get_CamNear()
     {
         return &m_vCamNear;
     }
-
-
 
 public: /* Setter */
     void Set_TransformMatrix(TRANSFORM_STATE eState, _fmatrix TransformMatrix)
@@ -91,6 +83,15 @@ public: /* Setter */
     {
         XMStoreFloat4x4(&m_ShadowTransMatrix[eState], TransformMatrix);
     }
+    void Set_Camfar(_float fFar)
+    {
+        m_vCamfar = fFar;
+    }
+
+    void Set_CamNear(_float fNear)
+    {
+        m_vCamNear = fNear;
+    }
 
 public:
     HRESULT Update();
@@ -100,6 +101,7 @@ private:
     _float4x4 m_TransMatrixInverse[D3DTS_END];
     _float4 m_vCamPosition{};
     _float4 m_vCamLook{};
+    _float4 m_vCamUP{};
     _float m_vCamfar{};
     _float m_vCamNear{};
     _float4x4 m_ShadowTransMatrix[D3DTS_END];

@@ -58,7 +58,7 @@ CStateMachine::Result CBillyBoom_Barre::StateMachine_Playing(_float fTimeDelta, 
 void CBillyBoom_Barre::Reset_StateMachine(RIM_LIGHT_DESC* pRim)
 {
     m_fRimTimeSum = 0.f;
-    m_pGameInstance->StopSound(&m_pChannel);
+    m_pChannel->stop();
     __super::Reset_StateMachine(pRim);
 }
 

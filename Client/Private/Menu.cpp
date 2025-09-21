@@ -57,8 +57,9 @@ void CMenu::Update(_float fTimeDelta)
 				Desc[i].Update = true;
 	
 				if (m_pGameInstance->Get_DIMouseDown(DIM_LB))
-				{
-                        m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg",nullptr, 1.f); 
+                {
+                         FMOD::Channel* pChannel{};
+                    m_pGameInstance->Play_Sound(L"ST_Button_Click.ogg", &pChannel, 1.f); 
 						if (i == 1) {
 							m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVEL_STAGE1,true));
 						}

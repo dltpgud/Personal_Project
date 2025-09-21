@@ -13,7 +13,7 @@ HRESULT CPipeLine::Update()
     }
     XMStoreFloat4(&m_vCamPosition, XMLoadFloat4x4(&m_TransMatrixInverse[D3DTS_VIEW]).r[3]);
     XMStoreFloat4(&m_vCamLook, XMLoadFloat4x4(&m_TransMatrixInverse[D3DTS_VIEW]).r[2]);
-
+    XMStoreFloat4(&m_vCamUP, XMLoadFloat4x4(&m_TransMatrixInverse[D3DTS_VIEW]).r[1]);
     return S_OK;
 }
 

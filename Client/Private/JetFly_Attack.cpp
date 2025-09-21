@@ -47,7 +47,6 @@ CStateMachine::Result CJetFly_Attack::StateMachine_Playing(_float fTimeDelta, RI
     }
 
     m_pParentObject->Get_Transform()->Rotation_to_Player(fTimeDelta);
-   
     return __super::StateMachine_Playing(fTimeDelta,pRim);
 }
 
@@ -66,8 +65,7 @@ void CJetFly_Attack::Init_CallBack_Func()
 void CJetFly_Attack::Make_Bullet()
 {
     m_pGameInstance->Play_Sound(L"ST_FlashFly_Shoot_A.ogg", &m_pChannel, 1.f);
-    m_pGameInstance->SetChannelVolume( &m_pChannel, 60.f, m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION) - m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-   
+    m_pGameInstance->UpdateSoundPosition(m_pChannel, m_pParentObject->Get_Transform());   
     _vector Hend_Local_Pos = {m_pPerantPartBonMatrix->_41, m_pPerantPartBonMatrix->_42, m_pPerantPartBonMatrix->_43,
                               m_pPerantPartBonMatrix->_44};
 
