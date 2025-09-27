@@ -19,6 +19,8 @@ public:
         _vector pTagetPos{};
         _float2 fScale{};
         _float fRadius = 0.1f;
+        _float fTrailLength = 3.f;
+        _float fTrailWidth = 0.4f;
     }
     CBULLET_DESC;
 private:
@@ -41,11 +43,12 @@ private:
     HRESULT Bind_ShaderResources();
 private:
     _vector m_pTagetPos = {};
-    _vector m_vDir{};
     _bool m_bMoveStop{};
     CTexture* m_pTextureCom = { nullptr };
     CVIBuffer_Point* m_pVIBufferCom = { nullptr };
     _float2 m_pScale{};
+    _float3 m_fPrePos{};
+    _float3 m_fCurPos{};
 
 public:
     static CBullet* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

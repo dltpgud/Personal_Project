@@ -57,7 +57,7 @@ private:
 	HRESULT Render_Shadow();;
 	HRESULT Render_NonBlend(); /* MRT_GameObjects에 소속된 타겟들에게 객체들의 특정 정보(Diffuse + Normal)를 기록해준다. */
 	HRESULT Render_Bloom();
-
+    HRESULT Render_Decal();
 	HRESULT Render_Lights(); /* 빛들의 연산결과를 MRT_LightAcc에 소속된 타겟들에게 그려준다. */
 	HRESULT Render_Final();
 	HRESULT Render_NonLight();

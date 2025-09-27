@@ -3,7 +3,7 @@
 #include "GameInstance.h"
 #include "GameObject.h"
 #include "Weapon.h"
-
+#include "Trail.h"
 CPlayerBullet::CPlayerBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -22,8 +22,8 @@ HRESULT CPlayerBullet::Initialize(void* pArg)
     CPlayerBullet_DESC* pDesc = static_cast<CPlayerBullet_DESC*>(pArg);
         
         m_vTagetPos = pDesc->vTagetPos;
-        m_Local = pDesc->Local;
-        m_WorldPtr = pDesc->WorldPtr;
+        m_vLocalPos = pDesc->vLocalPos;
+        m_WorldPtr = pDesc->fWorldPtr;
         m_fScale = pDesc->fScale;
 
     if (FAILED(__super::Initialize(pDesc)))
@@ -40,10 +40,12 @@ HRESULT CPlayerBullet::Initialize(void* pArg)
 
 void CPlayerBullet::Priority_Update(_float fTimeDelta)
 {
+    XMStoreFloat3(&m_fPrePos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
     if (true == m_bStart)
-    {
-        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
+    { 
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);//ÃÑ¾Ë ÀÌµ¿
     }
+    XMStoreFloat3(&m_fCurPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
     __super::Priority_Update(fTimeDelta);
 
 }
@@ -56,7 +58,7 @@ void CPlayerBullet::Update(_float fTimeDelta)
 void CPlayerBullet::Late_Update(_float fTimeDelta)
 {
     if (false == m_bStart) {
-        _vector  vHPos = XMVector3TransformCoord(m_Local, XMLoadFloat4x4(m_WorldPtr));
+        _vector  vHPos = XMVector3TransformCoord(m_vLocalPos, XMLoadFloat4x4(m_WorldPtr));
         m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, vHPos);
         _vector Dir = m_vTagetPos - vHPos;
         Dir = XMVectorSetW(Dir, 0.f);
@@ -71,6 +73,7 @@ void CPlayerBullet::Late_Update(_float fTimeDelta)
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
             return;
     }
+   
     __super::Late_Update(fTimeDelta);
 }
 
@@ -84,7 +87,7 @@ HRESULT CPlayerBullet::Render()
     if (FAILED(Bind_ShaderResources()))
         return E_FAIL;
 
-    if (FAILED(m_pTextureCom[m_iTexNum]->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
+    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Begin(0)))
@@ -95,14 +98,14 @@ HRESULT CPlayerBullet::Render()
 
     if (FAILED(m_pVIBufferCom->Render()))
         return E_FAIL;
-
+  
     return S_OK;
 }
 
 HRESULT CPlayerBullet::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_PlayerBullet"),
-        TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom[0]))))
+        TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
@@ -113,14 +116,9 @@ HRESULT CPlayerBullet::Add_Components()
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
 
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_PlayerBulletBoom"),
-        TEXT("Com_Texture2"), reinterpret_cast<CComponent**>(&m_pTextureCom[1]))))
-        return E_FAIL;
-
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
         reinterpret_cast<CComponent**>(&m_pNavigationCom))))
         return E_FAIL;
-
     return S_OK;
 }
 
@@ -181,8 +179,8 @@ void CPlayerBullet::Free()
 {
     __super::Free();
  
-    for(_int i = 0 ; i <2; i++ )
-    Safe_Release(m_pTextureCom[i]);
+
+    Safe_Release(m_pTextureCom);
     Safe_Release(m_pVIBufferCom);
- 
+
 }

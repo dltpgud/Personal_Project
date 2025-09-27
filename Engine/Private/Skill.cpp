@@ -75,6 +75,12 @@ _uint CSkill::Get_ActorType()
 	return m_iActorType;
 }
 
+void CSkill::Get_Ray(OUT _vector* Pos, OUT _vector* Dir)
+{
+    *Pos = m_vPos;
+    *Dir = XMVector3Normalize(m_vDir);
+}
+
 void CSkill::Free()
 {
 	__super::Free();

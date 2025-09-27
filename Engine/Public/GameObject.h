@@ -35,7 +35,7 @@ public:
     virtual void Late_Update(_float fTimeDelta);
     virtual HRESULT Render();
     virtual HRESULT Render_Shadow() { return S_OK; }
-
+    virtual HRESULT CreateDecal(_vector RayPos,_vector RayDir) { return S_OK;};
     class CComponent* Find_Component(const _wstring& strComponentTag);
     CTransform* Get_Transform() {return m_pTransformCom;}
     CCollider*  Get_Collider()  {return m_pColliderCom; }
@@ -47,7 +47,7 @@ public:
     {
     }
     virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat){}
-     _int  Get_ObjectType()
+    _int  Get_ObjectType()
     {
         return m_iObjectType;
     }

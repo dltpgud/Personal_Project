@@ -46,6 +46,7 @@ HRESULT CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _
     m_pMouse->SetCooperativeLevel(hWnd, DISCL_BACKGROUND | DISCL_NONEXCLUSIVE);
     m_pMouse->Acquire();
 
+
     m_hWnd = hWnd;
     m_iWinSizeX = iWinSizeX;
     m_iWinSizeY = iWinSizeY;
@@ -55,16 +56,14 @@ HRESULT CInput_Device::Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _
 
 void CInput_Device::Update_InputDev()
 {
-    // 이전 상태 저장
     memcpy(m_PreKeyState, m_byKeyState, sizeof(m_PreKeyState));
     memcpy(m_PreMouseState, m_tMouseState.rgbButtons, sizeof(m_PreMouseState));
 
-    // 현재 상태 갱신
-    if (FAILED(m_pKeyBoard->GetDeviceState(sizeof(m_byKeyState), m_byKeyState)))
-        m_pKeyBoard->Acquire();
+    m_pKeyBoard->GetDeviceState(sizeof(m_byKeyState), m_byKeyState);   
+    m_pMouse->GetDeviceState(sizeof(m_tMouseState), &m_tMouseState);
 
-    if (FAILED(m_pMouse->GetDeviceState(sizeof(m_tMouseState), &m_tMouseState)))
-        m_pMouse->Acquire();
+    GetCursorPos(&m_tMouseCursur);
+    ScreenToClient(m_hWnd, &m_tMouseCursur);
 }
 
 CInput_Device* CInput_Device::Create(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY)

@@ -74,8 +74,12 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
 }
 
 _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
-                                       CTransform* Transform, _float* fDis)
+                                       CTransform* Transform, _float* fDis, _float3* vNormal)
 {
+    _float3 vPosition = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
+    _float3 fNormal = _float3(0.f, 1.f, 0.f); // 기본값 ↑
+    _float fDistance = FLT_MAX;
+
     _matrix matWorld = Transform->Get_WorldMatrix_Inverse();
     _vector RPos = XMVector3TransformCoord(RayPos, matWorld);
     _vector RDIR = XMVector3TransformNormal(RayDir, matWorld);
@@ -107,12 +111,22 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
             if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2),
                                                    fDist))
             {
-                _float3 Last_pos{};
-                _vector pos = RPos + RDIR * fDist;
                 *fDis = fDist;
-                XMStoreFloat3(&Last_pos, XMVector3TransformCoord(pos, Transform->Get_WorldMatrix()));
+                XMStoreFloat3(&vPosition,XMVector3TransformCoord(RPos + RDIR * fDist, Transform->Get_WorldMatrix()));
 
-                return Last_pos;
+                if (vNormal)
+                {
+                    _vector e0 = XMLoadFloat3(&v1) - XMLoadFloat3(&v0);
+                    _vector e1 = XMLoadFloat3(&v2) - XMLoadFloat3(&v0);
+                    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
+
+                    n = XMVector3TransformNormal(n, Transform->Get_WorldMatrix());
+                    n = XMVector3Normalize(n);
+                    XMStoreFloat3(&fNormal, n);
+
+                    *vNormal = fNormal;
+                }
+              return vPosition;
             }
 
             // 왼쪽 아래
@@ -124,21 +138,30 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
             v1 = pTerrainVtx[dwVtxIdx[1]];
             v2 = pTerrainVtx[dwVtxIdx[2]];
 
-             if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2),
-                                                   fDist))
+            if (DirectX::TriangleTests::Intersects(RPos, RDIR, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2), fDist))
             {
-                _float3 Last_pos{};
-                _vector pos = RPos + RDIR * fDist;
-                *fDis = fDist;
-                XMStoreFloat3(&Last_pos, XMVector3TransformCoord(pos, Transform->Get_WorldMatrix()));
+                 *fDis = fDist;
+                 XMStoreFloat3(&vPosition, XMVector3TransformCoord(RPos + RDIR * fDist, Transform->Get_WorldMatrix()));
+                 if (vNormal)
+                 {
+                     _vector e0 = XMLoadFloat3(&v1) - XMLoadFloat3(&v0);
+                     _vector e1 = XMLoadFloat3(&v2) - XMLoadFloat3(&v0);
+                     _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
 
-                return Last_pos;
+                     n = XMVector3TransformNormal(n, Transform->Get_WorldMatrix());
+                     n = XMVector3Normalize(n);
+                     XMStoreFloat3(&fNormal, n);
+
+                     *vNormal = fNormal;
+                 }
+                return vPosition;
             }
         }
     }
 
     return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
 }
+
 
 HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewportHeight)
 {

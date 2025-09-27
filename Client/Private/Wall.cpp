@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Wall.h"
 #include "GameInstance.h"
-
 CWall::CWall(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -31,12 +30,12 @@ HRESULT CWall::Initialize(void* pArg)
 
 void CWall::Priority_Update(_float fTimeDelta)
 {
-   
 
 }
 
 void CWall::Update(_float fTimeDelta)
 {
+    __super::Update(fTimeDelta);
 }
 
 void CWall::Late_Update(_float fTimeDelta)
@@ -50,6 +49,11 @@ void CWall::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
+        return;
+
+    __super::Late_Update(fTimeDelta);
 }
 HRESULT CWall::Render()
 {
@@ -128,6 +132,30 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
    
     _float3 fCenter{};
     m_pModelCom->Center_Ext(&fCenter, &m_fExtend);
+
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+    OBBDesc.vExtents = m_fExtend;
+    OBBDesc.vCenter = fCenter;
+    OBBDesc.vRotation = {};
+
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return;
+}
+
+HRESULT CWall::CreateDecal(_vector RayPos, _vector RayDir)
+{
+     _vector vPos{};
+     _vector vNormal{};
+     if (m_pModelCom->RayIntersect(RayPos, RayDir, m_pTransformCom, vPos, vNormal))
+     {
+          DECAL_DESC Desc{};
+          Desc.vHitNormal = vNormal;
+          Desc.vHitPoint = vPos;
+          Desc.fDepth = m_pModelName == TEXT("Proto Component Wall2 Model_Wall") ? 0.1f : 1.f;
+          m_pGameInstance->Add_Decal(TEXT("K"), Desc);
+     }
+    return S_OK;
 }
 
 HRESULT CWall::Add_Components()
@@ -135,6 +163,7 @@ HRESULT CWall::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
+
     return S_OK;
 }
 

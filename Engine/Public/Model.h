@@ -46,13 +46,15 @@ public:
 
     void Set_Animation(_uint index, _bool IsLoop = false);
 
-    _float Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform, _vector* vPos);
 
     void init_Loop();
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
     void Center_Ext(_float3* Center, _float3* extend);
 
     void Callback(_uint AnimIdx, _int Duration, function<void()> func);
+    _bool RayIntersect(_vector vRayPos, _vector vRayDir, CTransform* pTransform, OUT _vector& vPos,
+                       OUT _vector& vNormal);
+    _float3 GetVetexPos(_uint Mashinx, _int NumIndexices);
 
 public:
 

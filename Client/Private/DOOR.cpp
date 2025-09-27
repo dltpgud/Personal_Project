@@ -100,7 +100,10 @@ void CDOOR::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 
-    if (FAILED(m_pGameInstance->Add_Interctive(this)))
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
+        return;
+
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
         return;
 
     m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
@@ -208,6 +211,20 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_fDoorEmissiveColor = {1.f, 0.749f, 0.2156f, 1.f};
     else if (ILevel == LEVEL_STAGE2)
         m_fDoorEmissiveColor = {1.f, 0.f, 0.f, 1.f};
+}
+
+HRESULT CDOOR::CreateDecal(_vector RayPos, _vector RayDir)
+{
+    _vector vPos{};
+    _vector vNormal{};
+    if (m_pModelCom->RayIntersect(RayPos, RayDir, m_pTransformCom, vPos, vNormal))
+    {
+        DECAL_DESC Desc{};
+        Desc.vHitNormal = vNormal;
+        Desc.vHitPoint = vPos;
+        m_pGameInstance->Add_Decal(TEXT("K"), Desc);
+    }
+    return S_OK;
 }
 
 HRESULT CDOOR::Add_StageDoorLight()
@@ -337,7 +354,7 @@ HRESULT CDOOR::Add_Components()
         return E_FAIL;
 
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = _float3(5.f, 1.f, 5.f);
+    OBBDesc.vExtents = _float3(5.f, 6.f, 5.f);
     OBBDesc.vCenter = _float3(0.f, 1.f, 0.f);
     OBBDesc.vRotation = _float3(0.f, 0.f, 0.f);
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),

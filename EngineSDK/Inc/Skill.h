@@ -40,6 +40,7 @@ public:
     _int Get_Damage();
     _uint Get_SkillType();
     _uint Get_ActorType();
+    void Get_Ray(OUT _vector* Pos, OUT _vector* Dir);
 
 protected:
     _uint        m_iActorType{ 0 };
@@ -51,6 +52,7 @@ protected:
     _float       m_fTimeSum{0.f};
     _uint        m_iSkillType = { STYPE_NOMAL };
     _float4      m_Clolor[COLOR_END]{};
+    _vector      m_vDir{};
 
 public:
         virtual CGameObject* Clone(void* pArg) = 0;

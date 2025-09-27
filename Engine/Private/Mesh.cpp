@@ -9,10 +9,11 @@ CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex}
 {
     strcpy_s(m_szName, Prototype.m_szName);
-
+    m_pAnimVertices = new VTXANIMMESH[m_iNumVertices];
     m_pPos = new _float3[m_iNumVertices];
     m_pIndices = new _uint[m_iNumIndexices];
 
+    memcpy(m_pAnimVertices, Prototype.m_pAnimVertices, sizeof(VTXANIMMESH) * m_iNumVertices);
     memcpy(m_pPos, Prototype.m_pPos, sizeof(_float3) * m_iNumVertices);
     memcpy(m_pIndices, Prototype.m_pIndices, sizeof(_uint) * m_iNumIndexices);
 }
@@ -73,15 +74,18 @@ HRESULT CMesh::Initialize(void* pArg)
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName)
 {
     _float4x4 BoneMatrices[512];
-
+    m_FinalBoneMatrices.clear();
+    m_FinalBoneMatrices.reserve(m_Bones.size());
     _uint iNumBones = {0};
 
     for (auto& iBoneIndex : m_Bones) /*뼈의 인덱스 만큼 돌면서 행렬을 곱해라*/
     {
         _matrix CombinedMatrix = Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
         _matrix OffsetMatrix = XMLoadFloat4x4(&m_OffsetMatrices[iNumBones]);
+        _matrix finalMat = OffsetMatrix * CombinedMatrix;
+        XMStoreFloat4x4(&BoneMatrices[iNumBones++], finalMat);
+        m_FinalBoneMatrices.push_back(finalMat); // CPU에도 저장
 
-        XMStoreFloat4x4(&BoneMatrices[iNumBones++], OffsetMatrix * CombinedMatrix);
     }
 
     return pShader->Bind_Matrices(pConstantName, BoneMatrices, 512);
@@ -102,6 +106,38 @@ HRESULT CMesh::Render()
 _float3* CMesh::Get_pPos(_int i)
 {
     return &m_pPos[i];
+}
+
+_float3 CMesh::GetVetexPosAnim(_int NumIndexices)
+{
+     const VTXANIMMESH& vtx = m_pAnimVertices[NumIndexices]; 
+
+    XMVECTOR finalPos = XMVectorZero();
+    XMVECTOR basePos = XMLoadFloat3(&vtx.vPosition);
+
+    for (int i = 0; i < 4; i++) // 최대 4개의 본 영향
+    {
+        int boneIndex = 0;
+        float weight = 0.f;
+
+        switch (i)
+        {
+            case 0: boneIndex = vtx.vBlendIndex.x; weight = vtx.vBlendWeight.x; break;
+            case 1: boneIndex = vtx.vBlendIndex.y; weight = vtx.vBlendWeight.y; break;
+            case 2: boneIndex = vtx.vBlendIndex.z; weight = vtx.vBlendWeight.z; break;
+            case 3: boneIndex = vtx.vBlendIndex.w; weight = vtx.vBlendWeight.w; break;
+        }
+
+        if (weight > 0.0f)
+        {
+            XMMATRIX boneMat = m_FinalBoneMatrices[boneIndex];
+            finalPos += XMVector3TransformCoord(basePos, boneMat) * weight;
+        }
+    }
+
+    _float3 result;
+    XMStoreFloat3(&result, finalPos);
+    return result;
 }
 
 _uint CMesh::Get_pIndices(_int i)
@@ -202,11 +238,11 @@ HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
     DWORD dwByte{};
     _bool bReadFile{};
 
-    VTXANIMMESH* pVertices = new VTXANIMMESH[m_iNumVertices];
+    m_pAnimVertices = new VTXANIMMESH[m_iNumVertices];
 
-    bReadFile = ReadFile(hFile, pVertices, sizeof(VTXANIMMESH) * m_iNumVertices, &dwByte, nullptr);
+    bReadFile = ReadFile(hFile, m_pAnimVertices, sizeof(VTXANIMMESH) * m_iNumVertices, &dwByte, nullptr);
     m_pPos = new _float3[m_iNumVertices];
-    for (size_t i = 0; i < m_iNumVertices; i++) { m_pPos[i] = pVertices[i].vPosition; }
+    for (size_t i = 0; i < m_iNumVertices; i++) { m_pPos[i] = m_pAnimVertices[i].vPosition; }
 
     m_iVertexStride = sizeof(VTXANIMMESH);
 
@@ -236,12 +272,11 @@ HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
     m_BufferDesc.StructureByteStride = m_iVertexStride;
 
     ZeroMemory(&m_InitialDesc, sizeof m_InitialDesc);
-    m_InitialDesc.pSysMem = pVertices;
+    m_InitialDesc.pSysMem = m_pAnimVertices;
 
     if (FAILED(__super::Create_Buffer(&m_pVB)))
         return E_FAIL;
 
-    Safe_Delete_Array(pVertices);
     return S_OK;
 }
 
@@ -337,15 +372,9 @@ CComponent* CMesh::Clone(void* pArg)
 void CMesh::Free()
 {
     __super::Free();
-
+    Safe_Delete_Array(m_pAnimVertices);
     Safe_Delete_Array(m_pPos);
     Safe_Delete_Array(m_pIndices);
-
-    if (m_bClone)
-    {
-        Safe_Delete_Array(m_pPos);
-        Safe_Delete_Array(m_pIndices);
-    }
     Safe_Release(m_pInst_Buffer);
     Safe_Delete(m_pInst_BufferData);
 }

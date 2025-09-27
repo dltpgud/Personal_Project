@@ -163,21 +163,21 @@ HRESULT CWeapon::Make_Bullet()
     pDesc.iWeaponType = m_iWeapon;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_ShootEffect", &pDesc);
- 
-    CPlayerBullet::CPlayerBullet_DESC Desc{};
-    Desc.fSpeedPerSec = 150.f;
-    Desc.vTagetPos = vTagetPos;
-    Desc.vPos = vHPos;
-    Desc.iSkillType = CSkill :: STYPE_NOMAL;
-    Desc.iActorType = CSkill ::PLAYER;
-    Desc.fClolor[CSkill::COLOR::CSTART] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CSTART];
-    Desc.fClolor[CSkill::COLOR::CEND] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CEND];
-    Desc.iDamage = m_vecWeaPone[m_iWeapon].Damage;
-    Desc.Local = Hend_Local_Pos;
-    Desc.WorldPtr = &m_WorldMatrix;
-    Desc.fScale = m_vecWeaPone[m_iWeapon].BulletScale;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                             L"Prototype GameObject_PlayerBullet", &Desc);
+
+   CPlayerBullet::CPlayerBullet_DESC Desc{};
+   Desc.fSpeedPerSec = 150.f;
+   Desc.vTagetPos = vTagetPos;
+   Desc.vPos = vHPos;
+   Desc.iSkillType = CSkill :: STYPE_NOMAL;
+   Desc.iActorType = CSkill ::PLAYER;
+   Desc.fClolor[CSkill::COLOR::CSTART] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CSTART];
+   Desc.fClolor[CSkill::COLOR::CEND] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CEND];
+   Desc.iDamage = m_vecWeaPone[m_iWeapon].Damage;
+   Desc.vLocalPos = Hend_Local_Pos;
+   Desc.fWorldPtr = &m_WorldMatrix;
+   Desc.fScale = m_vecWeaPone[m_iWeapon].BulletScale;
+   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                            L"Prototype GameObject_PlayerBullet", &Desc);
     return S_OK;
 }
 

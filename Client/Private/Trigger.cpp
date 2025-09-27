@@ -18,7 +18,6 @@ HRESULT CTrigger::Initialize_Prototype()
 HRESULT CTrigger::Initialize(void* pArg)
 {
     CTrigger_DESC* pDesc = static_cast<CTrigger_DESC*>(pArg);
-    m_iLEVEL = pDesc->CuriLevelIndex;
     m_iCoType = pDesc->iColType;
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
@@ -43,7 +42,7 @@ void CTrigger::Update(_float fTimeDelta)
 
 void CTrigger::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_Interctive(this)))
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
         return;
 
     __super::Late_Update(fTimeDelta);
@@ -115,7 +114,7 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
              
                   m_bTriggered = true;
              
-                  list<CGameObject*> Monster = m_pGameInstance->Get_ALL_GameObject(m_iLEVEL, TEXT("Layer_Monster"));
+                  list<CGameObject*> Monster = m_pGameInstance->Get_ALL_GameObject(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Monster"));
              
                   _float3 fPos{};
                   for (auto& monster :Monster)
@@ -134,7 +133,8 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
               {
                   m_bTriggered = false;
              
-                  list<CGameObject*> Monster = m_pGameInstance->Get_ALL_GameObject(m_iLEVEL, TEXT("Layer_Monster"));
+                  list<CGameObject*> Monster =
+                      m_pGameInstance->Get_ALL_GameObject(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Monster"));
              
                   _float3 fPos{};
                   for (auto& monster : Monster)

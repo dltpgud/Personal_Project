@@ -14,6 +14,18 @@ float4 g_RgbEnd;
 bool g_Hit;
 float g_hp, g_hp_pluse;
 float threshold;
+float2 g_textureSize;
+float2 g_frameSize;
+int g_framesPerRow;
+int g_currentFrame;
+cbuffer TrailParam : register(b1)
+{
+    float3 g_StartPos;
+    float3 g_EndPos;
+    int g_TrailSegments; // 꼬리 세그먼트 개수
+    float g_TrailLength; // 꼬리 길이
+    float g_TrailWidth; // 꼬리 폭
+}
 
 struct VS_IN  
 {
@@ -88,6 +100,47 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Triangles)
     Triangles.RestartStrip();
 }
 
+[maxvertexcount(128)] // 세그먼트 * 4 정점
+void GS_Trail(point GS_IN In[1], inout TriangleStream<GS_OUT> triStream)
+{
+    float3 p0 = g_StartPos;
+    float3 p1 = g_EndPos;
+
+    float3 dir = normalize(p0 - p1);
+    float3 camDir = normalize(g_vCamPosition.xyz - p0);
+    float3 side = normalize(cross(camDir, dir)) * g_TrailWidth;
+
+    matrix VP = mul(g_ViewMatrix, g_ProjMatrix);
+
+    for (int i = 0; i < g_TrailSegments; ++i)
+    {
+        float t0 = (float) i / g_TrailSegments;
+        float t1 = (float) (i + 1) / g_TrailSegments;
+
+        float3 segP0 = p0 - dir * (g_TrailLength * t0);
+        float3 segP1 = p0 - dir * (g_TrailLength * t1);
+
+        GS_OUT v;
+
+        v.vPosition = mul(float4(segP0 - side, 1), VP);
+        v.vTexcoord = float2(1, 1 - t0); 
+        triStream.Append(v);
+
+        v.vPosition = mul(float4(segP0 + side, 1), VP);
+        v.vTexcoord = float2(0, 1 - t0); 
+        triStream.Append(v);
+
+        v.vPosition = mul(float4(segP1 - side, 1), VP);
+        v.vTexcoord = float2(1, 1 - t1); 
+        triStream.Append(v);
+
+        v.vPosition = mul(float4(segP1 + side, 1), VP);
+        v.vTexcoord = float2(0, 1 - t1); 
+        triStream.Append(v);
+
+        triStream.RestartStrip();
+    }
+}
 
 
 struct PS_IN
@@ -105,7 +158,6 @@ struct PS_OUT
     vector vEmissive : SV_TARGET4;
     vector vOutLine : SV_TARGET5;
 };
-
 
 PS_OUT PS_MAIN(PS_IN In)
 {
@@ -283,6 +335,43 @@ PS_OUT PS_MAIN_Dissolve(PS_IN In)
     }
 }
 
+
+PS_OUT PS_MAIN_TRAIL(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    // ----- 애니메이션 프레임 샘플링 -----
+    float2 frameUVSize = g_frameSize / g_textureSize;
+    int frameX = g_currentFrame % g_framesPerRow;
+    int frameY = g_currentFrame / g_framesPerRow;
+    float2 frameStartUV = float2(frameX, frameY) * frameUVSize;
+    float2 finalUV = frameStartUV + In.vTexcoord * frameUVSize;
+
+    vector texColor = g_Texture.Sample(LinearSampler, finalUV);
+    if (texColor.a <= 0.1f)
+        discard;
+
+    float v = saturate(In.vTexcoord.y);
+    float3 baseColor = lerp(g_RgbStart.rgb, g_RgbEnd.rgb, v);
+
+    // 픽셀 밝기 계산 (luminance)
+    float luminance = dot(texColor.rgb, float3(0.299, 0.587, 0.114));
+
+    // 흰 부분(밝은 부분)은 더 밝게, 어두운 부분은 더 어둡게
+    float3 enhanced = ((texColor.rgb - 0.5f) + 0.5f);
+    float3 finalColor = baseColor * enhanced;
+    
+    float4 FinalColor = float4(finalColor, texColor.a);
+    Out.vDiffuse = FinalColor;
+    Out.vNormal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+    Out.vDepth = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    Out.vRim = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vEmissive = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    Out.vOutLine = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    return Out;
+}
+
 technique11 DefaultTechnique
 { 
     pass DefaultPass
@@ -350,5 +439,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_MAIN_Dissolve();
+    }
+
+    pass DefaultPass6
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_Trail();
+        PixelShader = compile ps_5_0 PS_MAIN_TRAIL();
     }
 }

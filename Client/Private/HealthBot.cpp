@@ -89,8 +89,9 @@ void CHealthBot::Late_Update(_float fTimeDelta)
         m_iState |= ST_DEAD;
     }
 
-    if (FAILED(m_pGameInstance->Add_Interctive(this)))
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
         return;
+
 
     __super::Late_Update(fTimeDelta);
 }

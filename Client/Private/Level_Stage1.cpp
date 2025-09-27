@@ -75,10 +75,10 @@ HRESULT CLevel_Stage1::Ready_Layer_Monster(const _wstring& pLayerTag)
                                         L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
   	  return E_FAIL;
   
-  if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
-                                        L"Proto Component JetFly_Monster",
-                                        L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
-      return E_FAIL;
+  //if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
+  //                                     L"Proto Component JetFly_Monster",
+  //                                     L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+  //   return E_FAIL;
 
   if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_BoomBot",
                                       L"Proto Component BoomBot_Monster",
@@ -150,7 +150,7 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _wstring& pLayerTag)
    
     if (FAILED(Load_to_Next_Map_Trigger(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_Trigger",
                                             L"../Bin/Data/Map/Stage1_Trigger.dat", &TriggerDesc)))
-		return E_FAIL;
+    	return E_FAIL;
 
     if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, pLayerTag,TEXT("Prototype_GameObject_Sky"),&SkyDesc)))
 		return E_FAIL;
@@ -238,7 +238,7 @@ HRESULT CLevel_Stage1::Ready_Light()
         }
 
         // Ortho 크기 세팅 (타이트하게)
-        _float nearZ = minZ - 5.f;
+        _float nearZ = max(minZ, 0.1f) - 5.f;
         _float farZ = maxZ + 20.f;
 
         _matrix LightProj = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, nearZ, farZ);

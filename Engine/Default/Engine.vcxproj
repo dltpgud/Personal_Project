@@ -196,8 +196,12 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\Component_Manager.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\ComputeShader.h" />
     <ClInclude Include="..\Public\ContainerObject.h" />
+    <ClInclude Include="..\Public\Decal.h" />
+    <ClInclude Include="..\Public\Decal_Manager.h" />
     <ClInclude Include="..\Public\Frustum.h" />
+    <ClInclude Include="..\Public\ObjectPool.h" />
     <ClInclude Include="..\Public\QuadTree.h" />
     <ClInclude Include="..\Public\Skill.h" />
     <ClInclude Include="..\Public\CustomFont.h" />
@@ -255,6 +259,7 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\VIBuffer_Terrain.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Trail.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Actor.cpp" />
@@ -278,7 +283,10 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\Component_Manager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\ComputeShader.cpp" />
     <ClCompile Include="..\Private\ContainerObject.cpp" />
+    <ClCompile Include="..\Private\Decal.cpp" />
+    <ClCompile Include="..\Private\Decal_Manager.cpp" />
     <ClCompile Include="..\Private\Frustum.cpp" />
     <ClCompile Include="..\Private\QuadTree.cpp" />
     <ClCompile Include="..\Private\Skill.cpp" />
@@ -334,6 +342,7 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\VIBuffer_Terrain.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Trail.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl" />

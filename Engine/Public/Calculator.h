@@ -19,7 +19,7 @@ public:
     void    Make_Ray( _matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir, _bool forPlayer = false);
 
     _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RaDir,
-                              CTransform* Transform, _float* fDis);
+                              CTransform* Transform, OUT _float* fDis, OUT _float3* vNormal);
 
     HRESULT Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewportHeight);
 

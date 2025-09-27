@@ -21,7 +21,7 @@ void CPlayer_Health::State_Enter(_uint* pState, _uint* pPreState)
     m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_GENERIC_STAP;
     m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
     m_StateDesc.bLoop = false;
-
+    m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK, true);
     m_pGameInstance->Set_OpenUI(true, TEXT("PlayerState"));
     __super::State_Enter(pState, pPreState);
 }
@@ -36,6 +36,7 @@ _bool CPlayer_Health::State_Processing(_float fTimedelta, _uint* pState, _uint* 
 
 _bool CPlayer_Health::State_Exit(_uint* pState)
 {
+    m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK, false);
     return true;
 }
 
