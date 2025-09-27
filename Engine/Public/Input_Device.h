@@ -15,26 +15,10 @@ public:
     _byte Get_DIKeyState(_ubyte byKeyID) const
     {
         return m_byKeyState[byKeyID];
-    }
-
-    _byte Get_DIMouseState(MOUSEKEYSTATE eMouse) const
-    {
-        return m_tMouseState.rgbButtons[eMouse];
-    }
-
-    _bool Get_DIMouseDown(MOUSEKEYSTATE eMouse) const
-    {
-        return (m_tMouseState.rgbButtons[eMouse] & 0x80) && !(m_PreMouseState[eMouse] & 0x80);
-    }
-
+    }    
     _bool Get_DIKeyDown(_ubyte byKeyID) const
     {
         return !(m_PreKeyState[byKeyID] & 0x80) && (m_byKeyState[byKeyID] & 0x80);
-    }
-
-    _byte Get_DIMouseUp(MOUSEKEYSTATE eMouse)
-    {
-        return !m_tMouseState.rgbButtons[eMouse] && m_PreMouseState[eMouse];
     }
 
     _bool Get_DIAnyKey() const
@@ -45,6 +29,28 @@ public:
                 return true;
         }
         return false;
+    }
+
+    _byte Get_DIMouseState(MOUSEKEYSTATE eMouse) const
+    {
+        if (IsCursorInClient() == false)
+            return false;
+        return m_tMouseState.rgbButtons[eMouse];
+    }
+
+    _bool Get_DIMouseDown(MOUSEKEYSTATE eMouse) const
+    {
+        if (IsCursorInClient() == false)
+            return false;
+        return (m_tMouseState.rgbButtons[eMouse] & 0x80) && !(m_PreMouseState[eMouse] & 0x80);
+    }
+
+    _byte Get_DIMouseUp(MOUSEKEYSTATE eMouse)
+    {
+  
+        if (IsCursorInClient() == false)
+            return false;
+        return !m_tMouseState.rgbButtons[eMouse] && m_PreMouseState[eMouse];
     }
 
     _long Get_DIMouseMove(MOUSEMOVESTATE eMouseState) const
@@ -59,6 +65,16 @@ public:
     }
 
     _bool Mouse_Fix(_bool Fix);
+
+private:
+    _bool IsCursorInClient() const
+    {
+        if (m_tMouseCursur.x < 0 || m_tMouseCursur.x > m_iWinSizeX || m_tMouseCursur.y < 0 ||
+            m_tMouseCursur.y > m_iWinSizeY)
+            return false;
+        else
+            return true;
+    }
 
 public:
     HRESULT Initialize(HINSTANCE hInst, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
@@ -85,6 +101,7 @@ private:
     _uint m_iWinSizeX = 0;
     _uint m_iWinSizeY = 0;
 
+    POINT m_tMouseCursur{};
     // 마우스 고정 여부
     _bool m_bMouseFixed = false;
 };

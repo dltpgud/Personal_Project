@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Renderer.h"
+#include "Collider_Manager.h"
 #include "Sound.h"
 #include "Component_Manager.h"
 #include "GameObject.h"
@@ -9,6 +10,7 @@
 #include "Actor.h"
 #include "ThreadPool.h"
 #include "Frustum.h"
+
 /* CGameInstance : */
 /* 내 Engine에 유일하게 존재하는 싱글톤클래스다. */
 /* Client사용자가 엔진의 기능을 이용하고자한다면 CGameInstance를 통해서 기능을 수행할 수 있도록 하겠다. */
@@ -48,6 +50,7 @@ public: /* For.Input_Device */
 	_byte   Get_DIKeyDown(_ubyte byKeyID);
 	_byte   Get_DIAnyKey();
     _bool   MouseFix(_bool Fix= false);
+
 #pragma endregion
 
 #pragma region Timer_Manager
@@ -88,10 +91,8 @@ public: /* For.Object_Manager*/
 
 #pragma region Collider_Manager
     public: /* For.Collider_Manager */
-	HRESULT Add_Monster( class CGameObject* Monster);
-	HRESULT Add_MonsterBullet( class CGameObject* MonsterBUllet);
     HRESULT Add_Collider(class CCollider* Collider, _int Damage = 0);
-    HRESULT Add_Interctive(class CGameObject* interect);
+    HRESULT Add_GameObject_To_ColGroup(class CGameObject* Obj, const _uint& Type);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
 	HRESULT Find_Cell();
 #pragma endregion
@@ -120,7 +121,6 @@ public: /* For.Sound*/
     void    Play_Sound(_tchar* pSoundKey, FMOD::Channel** ppChannel, _float fVolume, _bool bLoop = false);
     void    PlayBGM(FMOD::Channel** ppChannel, _tchar* pSoundKey, _float fVolume);
 	void	StopAll();
-    void    Set3DListenerAttributes();
     void    UpdateSoundPosition(FMOD::Channel* pChannel, CTransform* pTransform);
     void    LoadSoundFile(const _char* soundFile, _bool isBGM = false);
 #pragma endregion
@@ -161,7 +161,8 @@ public: /* For.Light_Manager */
 
 #pragma region Calculator
 public: /* For.Calculator */
-	_float3	Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis);
+     _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
+                                  CTransform* Transform, _float* fDis, _float3* vNormal = nullptr);
     void Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir ,_bool forPlayer = false);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
@@ -194,7 +195,7 @@ public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
     _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
     void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
-
+#pragma endregion
 
 
 #pragma region ThreadPool
@@ -204,6 +205,12 @@ public: /* For.ThreadPool */
     _bool AllJobCompleted();
 #pragma endregion
 
+#pragma region Decal
+    HRESULT Add_DecalProto(const wstring& Key, const _tchar* FilePath, const _uint& TexNum =1);
+    HRESULT Add_Decal(const wstring& Key, const DECAL_DESC& DecalDesc);
+    HRESULT Render_Decal(class CShader* pShader);
+    HRESULT Decal_Clear();
+#pragma endregion
 private:
 	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
@@ -221,7 +228,8 @@ private:
 	class CFont_Manager*			m_pFont_Manager		 = { nullptr };
 	class CTarget_Manager*			m_pTarget_Manager	 = { nullptr };
 	class CFrustum*					m_pFrustum		     = { nullptr };
-    class CThreadPool*              m_pThreadPool        = { nullptr };    
+    class CThreadPool*              m_pThreadPool        = { nullptr };
+    class CDecal_Manager*           m_pDecal_Manager     = {nullptr}; 
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;

@@ -59,8 +59,9 @@ HRESULT CGunPawn_Attack::Make_Bullet()
     Desc.fScale = _float2{0.2f, 0.2f};
     Desc.fClolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
     Desc.fClolor[CSkill::COLOR::CEND] = _float4(1.f, 0.f, 0.f, 1.f);
-    CGameObject* pGameObject = m_pGameInstance->Clone_Prototype(L"Prototype GameObject_Bullet", &Desc);
-    m_pGameInstance->Add_Clon_to_Layers(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"), pGameObject);
+    Desc.fTrailLength = 6.f;
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                             TEXT("Prototype GameObject_Bullet"), &Desc);
 
     return S_OK;
 }

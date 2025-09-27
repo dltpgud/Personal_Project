@@ -24,6 +24,7 @@ public:
     HRESULT Bind_BoneMatrices(class CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName);
     HRESULT Render();
     _float3* Get_pPos(_int i);
+    _float3 GetVetexPosAnim(_int NumIndexices);
     _uint Get_pIndices(_int i);
 
     _uint Get_iNumIndexices();
@@ -47,6 +48,9 @@ public:
     VTXMATRIX_INSTANCE* m_pInst_BufferData{};
     _float3* m_pPos{};
     _uint* m_pIndices{};
+    VTXANIMMESH* m_pAnimVertices = nullptr; // 애니메이션 정점 데이터
+    vector<XMMATRIX> m_FinalBoneMatrices;
+
 public:
     static CMesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix);
 

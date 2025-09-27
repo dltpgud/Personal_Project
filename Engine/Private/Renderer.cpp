@@ -26,10 +26,12 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Diffuse"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_B8G8R8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
+    
     /* For.Target_Normal */
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Normal"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
+
     /* For.Target_Depth */
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Depth"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
@@ -66,6 +68,16 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     /* For.Target_OutLine */
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_OutLine"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+        return E_FAIL;
+
+    /* For.Target_Decal */
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Decal"), m_iWinSizeX, m_iWinSizeY,
+                                                 DXGI_FORMAT_B8G8R8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+        return E_FAIL;
+
+    /* For.Target_DecalNormal */
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_DecalNormal"), m_iWinSizeX, m_iWinSizeY,
+                                                 DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0, 0, 0, 0))))
         return E_FAIL;
 
     /* For.Target_Final */
@@ -148,7 +160,10 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
     /* For.MRT_Shadow */
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("Target_LightDepth"))))
         return E_FAIL;
-
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Decal"), TEXT("Target_Decal"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Decal"), TEXT("Target_DecalNormal"))))
+        return E_FAIL;
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
     m_WorldMatrix._11 = static_cast<_float>(m_iWinSizeX);
     m_WorldMatrix._22 = static_cast<_float>(m_iWinSizeY);
@@ -169,12 +184,12 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 
 #ifdef _DEBUG
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"), 50.f, 50.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
          return E_FAIL;
-   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"),  50.f, 200.f, 150.f, 150.f)))
-   //     return E_FAIL;
-   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Shade"),   50.f, 350.f, 150.f, 150.f)))
-   //     return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Decal"),  50.f, 200.f, 150.f, 150.f)))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"),   50.f, 350.f, 150.f, 150.f)))
+        return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Specular"), 200.f, 50.f, 150.f, 150.f)))
    //     return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Rim"),     200.f, 200.f, 150.f, 150.f)))
@@ -254,6 +269,8 @@ HRESULT CRenderer::Draw()
     if (FAILED(Render_Priority()))
         return E_FAIL;
     if (FAILED(Render_NonBlend()))
+        return E_FAIL;
+    if (FAILED(Render_Decal()))
         return E_FAIL;
     if (FAILED(Render_Shadow()))
         return E_FAIL;
@@ -568,6 +585,34 @@ HRESULT CRenderer::Render_Bloom()
     return S_OK;
 }
 
+HRESULT CRenderer::Render_Decal()
+{
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Decal"))))
+        return E_FAIL;
+
+    if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
+        return E_FAIL;
+    if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+        return E_FAIL;
+    if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+        return E_FAIL;
+    if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+    if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
+        return E_FAIL;
+
+    _float2 WindowSize = {(_float)m_iWinSizeX, (_float)m_iWinSizeY};
+    m_pShader->Bind_RawValue("g_WinDowSize", &WindowSize, sizeof(_float2));
+    m_pGameInstance->Render_Decal(m_pShader);
+
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Decal"))))
+        return E_FAIL;
+
+    return S_OK;
+}
+
 HRESULT CRenderer::Render_Lights()
 {
     /* Shade */
@@ -594,6 +639,10 @@ HRESULT CRenderer::Render_Lights()
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_vMtrlAmbient", TEXT("Target_MtrlAmbient"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DecalNormalTexture", TEXT("Target_DecalNormal"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DecalTexture", TEXT("Target_Decal"))))
         return E_FAIL;
 
     m_pGameInstance->Render_Lights(m_pShader, m_pVIBuffer);
@@ -644,6 +693,8 @@ HRESULT CRenderer::Render_Final()
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_NormalTexture", TEXT("Target_Normal"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DecalTexture", TEXT("Target_Decal"))))
         return E_FAIL;
 
     m_pShader->Begin(3);
@@ -715,7 +766,7 @@ HRESULT CRenderer::Render_Debug()
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_44"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_444"), m_pShader, m_pVIBuffer);
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom"), m_pShader, m_pVIBuffer);
  ;

@@ -41,7 +41,7 @@ public:
 	virtual HRESULT Render() override;	
 	virtual HRESULT Render_Shadow() override;
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-
+    virtual HRESULT CreateDecal(_vector RayPos, _vector RayDir) override;
 	HRESULT Add_StageDoorLight();
 	HRESULT Add_BossDoorLight();
 
@@ -56,8 +56,8 @@ private:
 private:
 	DoorType m_iDoorType{};
 	CInteractiveUI* m_InteractiveUI = { nullptr };
-     FMOD::Channel* m_pChannel = nullptr;
-        CNavigation* m_pNavigationCom{};
+    FMOD::Channel* m_pChannel = nullptr;
+    CNavigation* m_pNavigationCom{};
 	_uint  m_iState = { 0 }; // 현재 문 상태 체크
     _ubyte m_flags = 0;
 	_uint m_ChangeLevelDoor{};

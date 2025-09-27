@@ -90,6 +90,8 @@ HRESULT CBillyBoom_ShockWave::Make_ShockWave()
     Desc.fClolor[CSkill::COLOR::CSTART] = _float4(1.f, 1.f, 0.f, 0.f);
     Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.f, 0.f, 1.f);
     Desc.fRadius = 0.5f;
+    Desc.fTrailLength = 4.f;
+    Desc.fTrailWidth = 0.5f;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_Bullet", &Desc);
     return S_OK;

@@ -193,6 +193,18 @@
     <Filter Include="01.Utility\04.Component\Model\Channel">
       <UniqueIdentifier>{af517dd5-d5f0-431c-8b7f-a0adcfcba9cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Utility\04.Component\VIBuffer\Trail">
+      <UniqueIdentifier>{6df30c50-29b5-4cd3-bf90-c98c79accdab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\10.Decal">
+      <UniqueIdentifier>{0fde9f5d-9873-459d-9908-d4ba750122bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\10.Decal\Manager">
+      <UniqueIdentifier>{2cab3dc6-7b89-4386-b679-86dbde782253}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Utility\04.Component\Shader\ComputeShader">
+      <UniqueIdentifier>{0e8033fe-073c-46cc-8e1c-4a3087eebad2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -393,6 +405,21 @@
     <ClInclude Include="..\Public\Actor.h">
       <Filter>01.Utility\02.GameObjects\Actor</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Trail.h">
+      <Filter>01.Utility\04.Component\VIBuffer\Trail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Decal.h">
+      <Filter>01.Utility\10.Decal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Decal_Manager.h">
+      <Filter>01.Utility\10.Decal\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ObjectPool.h">
+      <Filter>99.Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ComputeShader.h">
+      <Filter>01.Utility\04.Component\Shader\ComputeShader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -580,6 +607,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\TLS.cpp">
       <Filter>99.Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Trail.cpp">
+      <Filter>01.Utility\04.Component\VIBuffer\Trail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Decal.cpp">
+      <Filter>01.Utility\10.Decal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Decal_Manager.cpp">
+      <Filter>01.Utility\10.Decal\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ComputeShader.cpp">
+      <Filter>01.Utility\04.Component\Shader\ComputeShader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

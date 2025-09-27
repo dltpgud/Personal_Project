@@ -25,8 +25,7 @@ HRESULT CMonster::Initialize(void* pArg)
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-
-   if (FAILED(m_pGameInstance->Add_Monster(this)))
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER)))
         return E_FAIL;
 
     m_pTransformCom->Set_Rotation_to_Player();
@@ -47,8 +46,9 @@ void CMonster::Update(_float fTimeDelta)
 
 void CMonster::Late_Update(_float fTimeDelta)
 {
-     if (FAILED(m_pGameInstance->Add_Monster(this)))
-           return;
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER)))
+        return;
+
     
     __super::Late_Update(fTimeDelta);
 }

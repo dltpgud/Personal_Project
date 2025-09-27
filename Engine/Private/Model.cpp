@@ -4,7 +4,7 @@
 #include "Transform.h"
 #include "Bone.h"
 #include "Animation.h"
-
+#include "GameInstance.h"
 CModel::CModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CComponent{pDevice, pContext}
 {
 }
@@ -139,41 +139,6 @@ void CModel::Set_Animation(_uint index, _bool IsLoop)
     m_Animations[m_iCurrentAnimIndex]->init_Loop(m_Bones);
 }
 
-
-
-_float CModel::Check_Pick(_vector RayPos, _vector RayDir, CTransform* pTransform, _vector* vPos)
-{
-    _matrix matWorld = pTransform->Get_WorldMatrix_Inverse();
-
-    _vector CurRayPos = XMVector3TransformCoord(RayPos, matWorld);
-    _vector CurRayDir = XMVector3TransformNormal(RayDir, matWorld);
-
-    CurRayDir = XMVector3Normalize(CurRayDir);
-
-    for (_uint i = 0; i < m_iNumMeshes; i++)
-    {
-        _uint NumIndexices = m_Meshes[i]->Get_iNumIndexices();
-        for (_uint j = 0; j < NumIndexices; j++)
-        {
-            _float3 v0 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(j++)]; 
-            _float3 v1 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(j++)];
-            _float3 v2 = m_Meshes[i]->Get_pPos(i)[m_Meshes[i]->Get_pIndices(j)];
-
-            _float fDist{};
-
-            if (DirectX::TriangleTests::Intersects(CurRayPos, CurRayDir, XMLoadFloat3(&v0), XMLoadFloat3(&v1),
-                                                   XMLoadFloat3(&v2), fDist))
-            {
-                _vector LoclPos = CurRayPos + CurRayDir * fDist;
-                *vPos = XMVector3TransformCoord(LoclPos, pTransform->Get_WorldMatrix());
-                return fDist;
-            }
-        }
-    }
-
-    return _float(0xffff);
-}
-
 void CModel::init_Loop()
 {
     m_Animations[m_iCurrentAnimIndex]->init_Loop(m_Bones);
@@ -198,12 +163,12 @@ void CModel::Center_Ext(_float3* Center, _float3* extend)
         _uint NumIndexces = m_Meshes[i]->Get_iNumVertices();
         for (_uint j = 0; j < NumIndexces; j++)
         {
-            // ÃÖ¼Ò°ª °»½Å
+            // ï¿½Ö¼Ò°ï¿½ ï¿½ï¿½ï¿½ï¿½
             minPoint.x = min(minPoint.x, m_Meshes[i]->Get_pPos(j)->x);
             minPoint.y = min(minPoint.y, m_Meshes[i]->Get_pPos(j)->y);
             minPoint.z = min(minPoint.z, m_Meshes[i]->Get_pPos(j)->z);
 
-            // ÃÖ´ë°ª °»½Å
+            // ï¿½Ö´ë°ª ï¿½ï¿½ï¿½ï¿½
             maxPoint.x = max(maxPoint.x, m_Meshes[i]->Get_pPos(j)->x);
             maxPoint.y = max(maxPoint.y, m_Meshes[i]->Get_pPos(j)->y);
             maxPoint.z = max(maxPoint.z, m_Meshes[i]->Get_pPos(j)->z);
@@ -226,6 +191,83 @@ void CModel::Center_Ext(_float3* Center, _float3* extend)
 void CModel::Callback(_uint AnimIdx, _int Duration, function<void()> func)
 {
     m_Animations[AnimIdx]->Callback(Duration, func);
+}
+
+_bool CModel::RayIntersect(_vector vRayPos, _vector vRayDir,CTransform* pTransform, OUT _vector& vPos,OUT _vector& vNormal)
+{
+    _matrix matWorld = pTransform->Get_WorldMatrix_Inverse();
+    _vector PreRayDir = vRayDir;
+    _vector CurRayPos = XMVector3TransformCoord(vRayPos, matWorld);
+    _vector CurRayDir = XMVector3TransformNormal(vRayDir, matWorld);
+
+    CurRayDir = XMVector3Normalize(CurRayDir);
+    _bool bHit = false;
+    _float closestDist = FLT_MAX;
+    _vector bestPos, bestNormal;
+    for (_uint i = 0; i < m_iNumMeshes; i++)
+    {
+        _uint NumIndexices = m_Meshes[i]->Get_iNumIndexices();
+        _float3* pPositions = m_Meshes[i]->Get_pPos(0);
+        for (_uint j = 0; j < NumIndexices; j+=3)
+        {
+            _uint idx0 = m_Meshes[i]->Get_pIndices(j);
+            _uint idx1 = m_Meshes[i]->Get_pIndices(j + 1);
+            _uint idx2 = m_Meshes[i]->Get_pIndices(j + 2);
+           
+            _float3 v0 = GetVetexPos(i, idx0);
+            _float3 v1 = GetVetexPos(i, idx1);
+            _float3 v2 = GetVetexPos(i, idx2);
+
+            _float fDist{};
+
+            if (DirectX::TriangleTests::Intersects(CurRayPos, CurRayDir, XMLoadFloat3(&v0), XMLoadFloat3(&v1),
+                                                   XMLoadFloat3(&v2), fDist))
+            {
+                 _vector LoclPos = CurRayPos + CurRayDir * fDist;
+                 _vector WorldPos =  XMVector3TransformCoord(LoclPos, pTransform->Get_WorldMatrix());
+                 vPos = WorldPos;
+                 _vector e0 = XMLoadFloat3(&v1) - XMLoadFloat3(&v0);
+                 _vector e1 = XMLoadFloat3(&v2) - XMLoadFloat3(&v0);
+
+                 _vector localNormal = XMVector3Normalize(XMVector3Cross(e0, e1));
+
+                 _vector Normal = XMVector3TransformNormal(localNormal, pTransform->Get_WorldMatrix());
+                 _vector WorldNormal = XMVector3Normalize(Normal);
+
+                if (XMVectorGetX(XMVector3Dot(WorldNormal, CurRayDir)) > 0.f)
+                     WorldNormal = -WorldNormal;
+
+                if (fDist < closestDist)
+                {
+                    closestDist = fDist;
+                    bestPos = WorldPos;
+                    bestNormal = WorldNormal;
+                    bHit = true;
+                }
+            }
+        }
+    }
+
+    if (bHit)
+    {
+        vPos = bestPos;
+        vNormal = bestNormal;
+        return true;
+    }
+
+    return false;
+}
+
+_float3 CModel::GetVetexPos(_uint Mashinx, _int NumIndexices)
+{
+    if (m_eModelType == TYPE_NONANIM)
+    {
+        _float3* pPositions = m_Meshes[Mashinx]->Get_pPos(0);
+        return pPositions[NumIndexices];
+    }
+    else 
+     
+    return m_Meshes[Mashinx]->GetVetexPosAnim(NumIndexices);
 }
 
 HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)

@@ -1,24 +1,14 @@
- #include "Engine_Shader_Defines.hlsli"
+#include "Engine_Shader_Defines.hlsli"
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-
 float g_hp, g_hp_pluse;
 texture2D g_Texture, g_Texture0, g_Texture1, g_Texture2;
-
-
 int g_Discard;
 float4 g_Alpha;
 float4 g_RGB;
 float4 g_RGBEnd;
 float g_TimeSum;
 float3 g_StateColor;
-
-struct VS_IN_SAMPLE
-{
-    float3 vPosition : POSITION;
-    float2 vTexcoord : TEXCOORD0;
-};
-
 
 struct VS_IN  
 {
@@ -276,6 +266,7 @@ PS_OUT PS_MAIN_Pade(PS_IN In)
     
     return Out;
 }
+
 technique11 DefaultTechnique
 {
     pass DefaultPass
@@ -291,7 +282,7 @@ technique11 DefaultTechnique
     pass DefaultPass1
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f,0.f, 0.f, 0.f), 0xffffffff);
 
 		VertexShader = compile vs_5_0 VS_MAIN();
@@ -302,7 +293,7 @@ technique11 DefaultTechnique
     pass DefaultPass2
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -313,7 +304,7 @@ technique11 DefaultTechnique
     pass DefaultPass3
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -324,7 +315,7 @@ technique11 DefaultTechnique
     pass DefaultPass4
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -334,7 +325,7 @@ technique11 DefaultTechnique
     pass DefaultPass5
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -363,3 +354,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_Pade();
     }
 }
+
+
+
+

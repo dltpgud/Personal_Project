@@ -4,12 +4,13 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 matrix g_LightViewMatrix, g_LightProjMatrix;
 matrix g_LightViewMatrixInv, g_LightProjMatrixInv;
-matrix g_ViewMatrixInv, g_ProjMatrixInv;
+matrix g_ViewMatrixInv, g_ProjMatrixInv, g_WorldInvMatrix;
+
 texture2D g_Texture;
 texture2D g_OutLineTexture;
 
 vector g_vLightDir;
-vector g_vLightDirS = {-0.2f, -1.f, -0.5f, 0.f};
+//vector g_vLightDirS = {-0.2f, -1.f, -0.5f, 0.f};
 
 vector g_vLightPos;
 float g_fLightRange;
@@ -20,10 +21,17 @@ vector g_vLightSpecular;
 texture2D g_NormalTexture;
 texture2D g_DepthTexture;
 texture2D g_SpecularTexture;
-
 texture2D g_ShadeTexture;
 texture2D g_DiffuseTexture;
 texture2D g_LightDepthTexture;
+texture2D g_DecalNormalTexture;
+
+texture2D g_DecalTexture;
+texture2D g_DecalAtlas;
+texture2D g_DecalNormalAtlas;
+float3 g_fDecalTangent;
+float3 g_fDecalBinormal;
+float3 g_fDecalNormal;
 
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
@@ -39,7 +47,8 @@ vector g_vCamPosition;
 
 float2 g_WinDowSize;
 float g_fCamFar;
-
+float g_DecalFade;
+float g_fDecalTime;
 // 텍스쳐에서 한 픽셀의 간격
 float dX;
 float dY;
@@ -122,10 +131,19 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
 {
    PS_OUT_LIGHT Out;
   
-  /* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴한다. */
-   vector vNormalDesc = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
-   vector vNormal = float4(vNormalDesc.xyz * 2.f - 1.f, 0.f);
+   /* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴한다. */
+   // 기본 노멀
+   float3 baseNormal = normalize(g_NormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2 - 1);
+   
+   // 데칼 노멀
+   float3 decalNormal = normalize(g_DecalNormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2 - 1);
 
+   // 가중치 (데칼 알파)
+   float decalWeight = g_DecalTexture.Sample(PointSampler, In.vTexcoord).a;
+   
+   // 최종 노멀
+   float3 finalNormal = normalize(lerp(baseNormal, decalNormal, decalWeight));
+   float4 vNormal = float4(finalNormal, 0.0f);
    // 빛이 오는 방향과 법선을 내적해 빛이 표면에 얼마나 닿는지 수치화해 음영을 구함.
    // 음수 값이 나오면 음영이 반대로 들어감으로 최소값은 0으로 설정
    float fShade = max(dot(normalize(g_vLightDir) * -1.f, vNormal), 0.f);
@@ -207,7 +225,7 @@ float Compute_OutLine(float2 vTexcoord)
     bool isEdge = (depthDiffH > depthThreshold) || (depthDiffV > depthThreshold) || (depthDiffD1 > depthThreshold) || (depthDiffD2 > depthThreshold);
 
     float OutLine = 1.f;
-    if (isEdge)
+    if (isEdge && 1.f != g_OutLineTexture.Sample(LinearSampler, vTexcoord).w)
     {
         // 평균 (8방향 모두 포함)
         float avgNeighbor = (depthLeft + depthRight + depthUp + depthDown + depthUL + depthUR + depthDL + depthDR) /8;
@@ -215,6 +233,8 @@ float Compute_OutLine(float2 vTexcoord)
         if (abs(depthMid - avgNeighbor) >= depthThreshold)
             OutLine = 0.f; // 외곽선 그리기
     }
+    
+   
 
     return OutLine;
 }
@@ -242,9 +262,9 @@ void ProjectToLight(float4 worldPos, out float2 uv, out float depth, out bool va
 float ComputeReceiverBias(float3 n, float3 l, float3 v)
 {
     // 기저 편향 + 경사 기반(슬로프) 편향
-    const float baseBias = 0.0004f; // 필요시 0.0003~0.002 범위에서 튜닝
-    const float slopeBias = (1.0f - saturate(dot(n, -l))) * 0.0040f;
-    const float viewBias = (1.0f - abs(dot(n, v))) * 0.0020f; // 뷰 방향 기반 추가 보정
+    const float baseBias = 0.0005f; // 필요시 0.0003~0.002 범위에서 튜닝
+    const float slopeBias = (1.0f - saturate(dot(n, -l))) * 0.001f;
+    const float viewBias = (1.0f - abs(dot(n, v))) * 0.001f; // 뷰 방향 기반 추가 보정
     return baseBias + slopeBias + viewBias;
 }
 
@@ -289,6 +309,8 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
      if (fCurIsSpecular == 0.f)
          vSpecular = 0.f;
    
+    vector vDecal = g_DecalTexture.Sample(LinearSampler, In.vTexcoord);
+    vDiffuse.rgb = lerp(vDiffuse.rgb, vDecal.rgb, vDecal.a);
     
     vector vPositionWS = Compute_WorldPos_byCamera(In.vTexcoord);
 
@@ -306,11 +328,11 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
     {
     // 노멀/라이트로 수신면 편향 계산
         float3 n = normalize(g_NormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2.0f - 1.0f);
-        float3 l = normalize(g_vLightDirS.xyz);
+        float3 l = normalize(g_vLightDir.xyz);
         float3 v = normalize(g_vCamPosition.xyz - vPositionWS.xyz);
 
-    // 편향은 비교 깊이에 "마이너스"로 적용 (그림자가 너무 뜨는 현상 방지)
-        float depthWithBias = saturate(lightDepth - ComputeReceiverBias(n, l,v));
+    // 편향은 비교 깊이에 " 마이너스"로 적용 (그림자가 너무 뜨는 현상 방지)
+        float depthWithBias = lightDepth - ComputeReceiverBias(n, l,v);
 
     // SampleCmp 기반 3x3 PCF (반환값: 1=밝음, 0=어두움)
         float pcf = PCF_Shadow(lightUV, depthWithBias, g_shadowMapSize);
@@ -373,9 +395,63 @@ PS_OUT PS_MAIN_BLUR_Y(PS_IN In)
     return Out;
 }
 
+
+struct PS_OUT_Decal
+{
+    vector vDecal : SV_TARGET0;
+    vector vNormal : SV_TARGET1;
+};
+
+PS_OUT_Decal PS_MAIN_Decal(PS_IN In)
+{
+    PS_OUT_Decal Out = (PS_OUT_Decal) 0;
+
+    float2 screenUV = In.vPosition.xy / g_WinDowSize;
+  
+    float4 worldPos = Compute_WorldPos_byCamera(screenUV);
+
+    float4 localPos = mul(worldPos, g_WorldInvMatrix);
+
+    if (any(abs(localPos.xyz) > 1.0f))
+        discard;
+
+    float2 uv = localPos.xy * 0.5f + 0.5f;
+
+    float4 decal = g_DecalAtlas.Sample(PointSamplerClamp, uv);
+    if (decal.a < 0.01f)
+        discard;
+
+    float4 decalNormal = g_DecalNormalAtlas.Sample(PointSamplerClamp, uv);
+    
+    decalNormal.z = sqrt(saturate(1 - dot(decalNormal.xy, decalNormal.xy)));
+
+    float3 N = normalize(g_fDecalNormal);
+    float3 T = normalize(g_fDecalTangent);
+    float3 B = normalize(g_fDecalBinormal);
+    float3x3 TBN = float3x3(T, B, N);
+    float3 worldNormal = normalize(mul(decalNormal.xyz, TBN));
+    
+    Out.vNormal = vector(worldNormal.xyz * 0.5f + 0.5f, 0.f);
+    
+    float  glowPhase = saturate(1.0 - g_fDecalTime * 1.f);
+    float3 glowColor = decal.rgb * 3.0;
+    float3 colorWithGlow = lerp(decal.rgb, glowColor, glowPhase);
+
+    float3 grayColor = float3(0.25, 0.25, 0.25);
+    float3 finalColor = (glowPhase > 0.01f) ? colorWithGlow : grayColor;
+
+    float fade = saturate(g_DecalFade);
+
+    Out.vDecal = float4(finalColor, decal.a * fade);
+	
+    return Out;
+}
+
+
+
 technique11 DefaultTechnique
 {
-    pass DefaultPass
+    pass DefaultPass //0
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -386,7 +462,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_DEBUG();
     }
 
-    pass Light_Directional
+    pass Light_Directional //1
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -397,7 +473,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_LIGHT_DIRECTIONAL();
     }
 
-    pass Light_Point
+    pass Light_Point//2
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -408,7 +484,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_LIGHT_POINT();
     }
 
-    pass Final
+    pass Final//3
     {
         SetRasterizerState(RS_Shadow);
         SetDepthStencilState(DSS_None, 0);
@@ -419,7 +495,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_FINAL();
     }
 
-    pass Pure
+    pass Pure //4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -430,7 +506,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_PURE();
     }
    
-    pass BLUR_X 
+    pass BLUR_X //5
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -441,7 +517,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_BLUR_X();
     }
 
-    pass BLUR_Y 
+    pass BLUR_Y //6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -450,5 +526,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_BLUR_Y();
+    }
+
+    pass Decal_Cube //7
+    {
+        SetRasterizerState(RS_Decal);
+        SetDepthStencilState(DSS_Decal, 0);
+        SetBlendState(BS_Decal, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+    
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_Decal();
     }
 }

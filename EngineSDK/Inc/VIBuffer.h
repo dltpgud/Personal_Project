@@ -34,14 +34,6 @@ protected:
     DXGI_FORMAT m_eIndexFormat = {};
     D3D_PRIMITIVE_TOPOLOGY m_ePrimitiveTopology = {};
  
-    /*D3D11_BUFFER_DESC : 생성할 버퍼를 서술하는 구조체
-      D3D11_SUBRESOURCE_DATA : 버퍼 초가화에 사용할 자료를 서술하는 구조체
-      이 두 구조체를 채운 뒤, 다바이스에서 버퍼생성함 수를 호출하면 정점 버퍼가 생성됨
-
-      D3D_PRIMITIVE_TOPOLOGY : 파이프라인이 입력 어셈블러 단계에 바인딩된 정점 데이터를 해석하는 방식입니다.
-                                                       이러한 기본 토폴로지 값은 정점 데이터가 화면에 렌더링되는 방식을
-      결정합니다.
-    */
 protected:
     HRESULT Create_Buffer(ID3D11Buffer** ppOut);
 

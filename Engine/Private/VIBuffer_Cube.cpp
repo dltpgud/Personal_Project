@@ -21,14 +21,9 @@ HRESULT CVIBuffer_Cube::Initialize_Prototype()
 	m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 #pragma region VERTEX_BUFFER
-	/* dx9 : 정점버퍼를 할당하고 -> 락언락해서 정점버퍼에 초기값을 채운다. */
-	/* dx9 : 정점버퍼에 초기값을 채우면서 정점버퍼를 할당한다*/
+
 	ZeroMemory(&m_BufferDesc, sizeof m_BufferDesc);
-
-	/* 할당하고자하는 메모리공간의 크기(Byte)*/
 	m_BufferDesc.ByteWidth = m_iVertexStride * m_iNumVertices;
-
-	/* 버퍼의 속성 (정적, 동적) */
 	m_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	m_BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	m_BufferDesc.CPUAccessFlags = 0;
@@ -37,8 +32,6 @@ HRESULT CVIBuffer_Cube::Initialize_Prototype()
 
 	ZeroMemory(&m_InitialDesc, sizeof m_InitialDesc);
 	VTXCUBE*		pVertices = new VTXCUBE[m_iNumVertices];
-
-
 
 	pVertices[0].vPosition = _float3(-0.5f, 0.5f, -0.5f);
 	pVertices[0].vTexcoord = pVertices[0].vPosition;

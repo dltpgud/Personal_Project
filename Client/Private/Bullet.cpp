@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "ShockWave.h"
 #include "BillyBoom.h"
-#
+#include "Trail.h"
 CBullet::CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -33,35 +33,43 @@ HRESULT CBullet::Initialize(void* pArg)
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
 
     _vector Dir = m_pTagetPos - m_vPos;
-    Dir = XMVectorSetW(Dir, 0.f);
-    m_vDir = XMVector3Normalize(Dir);
+    m_vDir = XMVectorSetW(Dir, 0.f);
 
-    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+    m_fLifeTime = 20.f;
 
-    if (0.f == m_fLifeTime)
-        m_fLifeTime = 1.f;
-
+    CTrail::CTrail_DESC Desc{};
+    Desc.fstartPoint    = &m_fCurPos;
+    Desc.fendPoint      = &m_fPrePos;
+    Desc.fTrailLength   = pDesc->fTrailLength;
+    Desc.fTrailWidth    = pDesc->fTrailWidth;
+    Desc.iTrailSegments = 32;
+    Desc.fClolor[CSkill::COLOR::CSTART] = m_Clolor[CSkill::COLOR::CSTART];
+    Desc.fClolor[CSkill::COLOR::CEND]   = m_Clolor[CSkill::COLOR::CEND];
+    Desc.bState = &m_bDead;
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Effect"),
+                                             TEXT("Prototype_GameObject_Trail"), &Desc);
     return S_OK;
 }
 
 void CBullet::Priority_Update(_float fTimeDelta)
 {
     __super::Priority_Update(fTimeDelta);
-    
+
+    XMStoreFloat3(&m_fPrePos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+
+      _vector Dir = XMVector3Normalize(m_vDir);
     if (m_iSkillType == STYPE_SHOCKWAVE)
     {
-        m_pTransformCom->Go_jump_Dir(fTimeDelta, m_vDir, 1.f, m_pNavigationCom, &m_bMoveStop);
-      
+        m_pTransformCom->Go_jump_Dir(fTimeDelta, Dir, 1.f);      
     }
     else
-        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir, m_pNavigationCom, &m_bMoveStop);
+        m_pTransformCom->GO_Dir(fTimeDelta, Dir);
+
+   XMStoreFloat3(&m_fCurPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 }
 
 void CBullet::Update(_float fTimeDelta)
 {  
-    if (true == m_bMoveStop)
-            Dead_Rutine();
-
     __super::Update(fTimeDelta);
 }
 
@@ -76,7 +84,7 @@ void CBullet::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
         return;
     
-    if (FAILED(m_pGameInstance->Add_MonsterBullet(this)))
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
         return;
 
     __super::Late_Update(fTimeDelta);
@@ -111,7 +119,8 @@ void CBullet::Dead_Rutine()
         Desc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
         Desc.iActorType = CSkill::BOSS_MONSTER;
         Desc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STATIC, TEXT("Layer_Skill"), L"Prototype_GameObject_ShockWave",&Desc);
+        m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                                 L"Prototype_GameObject_ShockWave", &Desc);
     }
 
     m_bDead = true;
@@ -130,10 +139,6 @@ HRESULT CBullet::Add_Components(void* pArg)
         TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
         return E_FAIL;
     
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
-        reinterpret_cast<CComponent**>(&m_pNavigationCom))))
-        return E_FAIL;
-    
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_MonsterBullet"),
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
@@ -144,7 +149,7 @@ HRESULT CBullet::Add_Components(void* pArg)
     
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferPoint"),
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
-        return E_FAIL;
+        return E_FAIL; 
 
   return S_OK;
 }
@@ -206,4 +211,5 @@ void CBullet::Free()
     __super::Free();
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pVIBufferCom);
+
 }

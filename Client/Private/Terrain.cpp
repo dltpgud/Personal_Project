@@ -67,6 +67,9 @@ void CTerrain::Late_Update(_float fTimeDelta)
         m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
     }
 
+     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_DECAL)))
+        return;
+
     __super::Late_Update(fTimeDelta);
 }
 
@@ -105,6 +108,20 @@ void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
              return;
 }
 
+HRESULT CTerrain::CreateDecal(_vector RayPos, _vector RayDir)
+{
+    _float fDis{};
+    _float3 fHitNormal{};
+    _float3 fHitPos = m_pGameInstance->Picking_OnTerrain(g_hWnd, m_pVIBufferCom, RayPos, RayDir, m_pTransformCom, &fDis, &fHitNormal);
+
+    DECAL_DESC Desc{};
+    Desc.vHitNormal = XMLoadFloat3(&fHitNormal);
+    Desc.vHitPoint = XMLoadFloat3(&fHitPos);
+    m_pGameInstance->Add_Decal(TEXT("K"), Desc);
+
+    return S_OK;
+}
+
 void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
 {
     m_pSize[0] = BufferX;
@@ -119,6 +136,14 @@ void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
     {
         m_pVIBufferCom->Set_Buffer(m_pSize[0], m_pSize[1]);
     }
+
+    CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
+    AABBDesc.vExtents = _float3(m_pSize[0], 0.f, m_pSize[1]);
+    AABBDesc.vCenter = _float3(0.f, 0.f, 0.f);
+
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
+        return;
 }
 
 HRESULT CTerrain::Render_Shadow()

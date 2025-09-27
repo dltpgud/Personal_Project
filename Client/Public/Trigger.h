@@ -40,7 +40,6 @@ private:
 
 private:
     _bool m_bTriggered = false;
-    _int m_iLEVEL{};
     _int m_iCoType{};
     _float m_fRadius{1.f};
     _float3 m_fRot{0.f, 0.f, 0.f};

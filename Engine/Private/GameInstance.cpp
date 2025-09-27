@@ -7,11 +7,10 @@
 #include "PipeLine.h"
 #include "Input_Device.h"
 #include "Light_Manager.h"
-#include "Collider_Manager.h"
 #include "Font_Manager.h"
 #include "Target_Manager.h"
 #include "Frustum.h"
-
+#include "Decal_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -88,8 +87,12 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 		return E_FAIL;
 
     m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency());
-        if (nullptr == m_pThreadPool)
-            return E_FAIL;
+    if (nullptr == m_pThreadPool)
+        return E_FAIL;
+
+    m_pDecal_Manager = CDecal_Manager::Create(*ppDevice, *ppContext);
+    if (nullptr == m_pDecal_Manager)
+        return E_FAIL;
 
 	return S_OK;
 }
@@ -107,10 +110,11 @@ void CGameInstance::Update(_float fTimeDelta)
 	
 	m_pObject_Manager->Update(fTimeDelta);
 	m_pUI_Manager->Update(fTimeDelta);
-    Set3DListenerAttributes();
+    m_pDecal_Manager->Update(fTimeDelta);
+
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	m_pUI_Manager->Late_Update(fTimeDelta);
-
+    m_pSound->Set3DListenerAttributes();
     m_pCollider_Manager->All_Collison_check();
 	m_pLevel_Manager->Update(fTimeDelta);
 
@@ -123,18 +127,18 @@ void CGameInstance::Draw()
 
 	/* 할일이 없어. 디버그모드에서만 디버그내용만 출력하는 용도 .*/
 	m_pLevel_Manager->Render();
-   
 }
 
 void CGameInstance::Delete()
 {
     m_pObject_Manager->Delete();
     m_pUI_Manager->Delete();
+    m_pDecal_Manager->Delete();
 }
 
 void CGameInstance::Clear(_uint iClearLevelID)
 {
-	/*iClearLevelID에 해당하는 자원들을 정리한다.*/	
+    m_pDecal_Manager->Clear();
 	m_pObject_Manager->Clear(iClearLevelID);
 	m_pComponent_Manager->Clear(iClearLevelID);
 	m_pCollider_Manager->Clear();
@@ -151,9 +155,8 @@ HRESULT CGameInstance::Render_Begin(_float4 Color)
 {
 	if (nullptr == m_pGraphic_Device)
 		return E_FAIL;
-	/* 백버퍼를 내가 지정한 색으로 클리어(초기화)한다. */
+
 	m_pGraphic_Device->Clear_BackBuffer_View(Color);
-	/* 깊이버퍼와 스텐실버퍼를 내가 지정한 값으로 클리어(초기화)한다.*/
 	m_pGraphic_Device->Clear_DepthStencil_View();
 	return S_OK;
 }
@@ -398,21 +401,6 @@ CGameObject* CGameInstance::Find_CloneGameObject(_uint iLevelIndex, const _wstri
 #pragma endregion
 
 #pragma region Collider_Manager
-HRESULT CGameInstance::Add_Monster( CGameObject* Monster)
-{
-	if (nullptr == m_pCollider_Manager)
-		return E_FAIL;
-
-	return m_pCollider_Manager->Add_Monster(Monster);
-}
-
-HRESULT CGameInstance::Add_MonsterBullet( CGameObject* MonsterBUllet)
-{
-	if (nullptr == m_pCollider_Manager)
-		return E_FAIL;
-
-	return m_pCollider_Manager ->Add_MonsterBullet( MonsterBUllet);
-}
 
 HRESULT CGameInstance::Add_Collider(CCollider* Collider, _int Damage)
 {
@@ -422,14 +410,13 @@ HRESULT CGameInstance::Add_Collider(CCollider* Collider, _int Damage)
 	return m_pCollider_Manager->Add_Collider(Damage,Collider);
 }
 
-HRESULT CGameInstance::Add_Interctive(CGameObject* interect)
+HRESULT CGameInstance::Add_GameObject_To_ColGroup(CGameObject* Obj, const _uint& Type)
 {
     if (nullptr == m_pCollider_Manager)
         return E_FAIL;
 
-    return m_pCollider_Manager->Add_Interctive(interect);
+    return m_pCollider_Manager->Add_GameObject_To_ColGroup(Obj, Type);
 }
-
 
 HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
 {
@@ -552,13 +539,6 @@ void CGameInstance::StopAll()
 	if (m_pSound == nullptr)
 		return;
 	return m_pSound->StopAll();
-}
-
-void CGameInstance::Set3DListenerAttributes()
-{
-    if (m_pSound == nullptr)
-        return;
-    return m_pSound->Set3DListenerAttributes();
 }
 
 void CGameInstance::UpdateSoundPosition(FMOD::Channel* pChannel, CTransform* pTransform)
@@ -734,12 +714,12 @@ HRESULT CGameInstance::Light_Clear()
 #pragma endregion
 
 #pragma region Calculator
-_float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis)
+_float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis, _float3* vNormal)
 {
 	if (nullptr == m_pCalculator)
 		return _float3(0.f,0.f,0.f);
 
-	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom,  RayPos,  RayDir, Transform, fDis);
+	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom, RayPos, RayDir, Transform, fDis, vNormal);
 }
 
 void CGameInstance::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir , _bool forPlayer)
@@ -886,9 +866,30 @@ _bool CGameInstance::AllJobCompleted()
     return m_pThreadPool->Finish_Job();
 }
 
+HRESULT CGameInstance::Add_DecalProto(const wstring& Key, const _tchar* FilePath, const _uint& TexNum)
+{
+    return m_pDecal_Manager->Add_DecalProto(Key, FilePath, TexNum);
+}
+
+HRESULT CGameInstance::Add_Decal(const wstring& Key, const DECAL_DESC& DecalDesc)
+{
+    return m_pDecal_Manager->Add_Decal(Key, DecalDesc);
+}
+
+HRESULT CGameInstance::Render_Decal(CShader* pShader)
+{
+    return m_pDecal_Manager->Render(pShader);
+}
+
+HRESULT CGameInstance::Decal_Clear()
+{
+    return m_pDecal_Manager->Clear();
+}
+
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
+    Safe_Release(m_pDecal_Manager);
     Safe_Release(m_pThreadPool);
 	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);

@@ -68,11 +68,17 @@ DepthStencilState DSS_Default
     DepthWriteMask = all;
     DepthFunc = less_equal;
 };
+
 DepthStencilState DSS_DefaultNoWrite
 {
     DepthEnable = true;
     DepthWriteMask = zero;
     DepthFunc = less_equal;
+};
+DepthStencilState DSS_DepthRead
+{
+    DepthEnable = true;
+    DepthWriteMask = zero;
 };
 
 DepthStencilState DSS_None
@@ -109,7 +115,7 @@ RasterizerState RS_Shadow
     CullMode = Back; // 필요에 따라 None으로도 가능
     FrontCounterClockwise = false;
 
-    DepthBias = 50; // 픽셀 단위 오프셋 (값은 GPU에 따라 조정 필요)
+    DepthBias = 100; // 픽셀 단위 오프셋 (값은 GPU에 따라 조정 필요)
     SlopeScaledDepthBias = 1.0f; // 기울기 따라 추가 오프셋
     DepthBiasClamp = 0.0f; // 오프셋 최대 제한 (보통 0 = 무제한)
 };
@@ -119,6 +125,41 @@ SamplerComparisonState ShadowCmpSampler : register(s7)
     Filter = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
     AddressU = CLAMP;
     AddressV = CLAMP;
-    ComparisonFunc = LESS; 
+    ComparisonFunc = LESS_EQUAL;
+};
+
+
+// ?? 데칼 전용 래스터라이저 (Front Cull)
+// - Forward/Deferred 둘 다 자주 사용됨
+// - 카메라가 데칼 볼륨 안에 들어왔을 때도 안정적으로 보이도록
+RasterizerState RS_Decal
+{
+    FillMode = Solid;
+    CullMode = front; 
+    FrontCounterClockwise = false;
+    DepthBias = 10;
+    SlopeScaledDepthBias = 1.0;
+    DepthBiasClamp = 0.0;
+};
+
+
+DepthStencilState DSS_Decal
+{
+    DepthEnable = true;
+    DepthWriteMask = zero;
+    DepthFunc = less_equal;
+};
+
+
+BlendState BS_Decal
+{
+    BlendEnable[0] = true;
+    SrcBlend[0] = Src_Alpha;
+    DestBlend[0] = Inv_Src_Alpha;
+    BlendOp[0] = Add;
+
+    SrcBlendAlpha[0] = One; // 알파 채널 유지
+    DestBlendAlpha[0] = Inv_Src_Alpha;
+    BlendOpAlpha[0] = Add;
 };
 

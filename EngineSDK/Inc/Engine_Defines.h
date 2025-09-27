@@ -52,6 +52,7 @@ using namespace std;
 #include "Engine_Struct.h"
 #include "SPinLock.h"
 #include "TLS.h"
+#include "ObjectPool.h"
 using namespace Engine;
 
 namespace Engine

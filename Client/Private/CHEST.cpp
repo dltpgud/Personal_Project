@@ -71,8 +71,8 @@ void CCHEST::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
        return;
 
-    if (FAILED(m_pGameInstance->Add_Interctive(this)))
-        return;
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
+       return;
 
     __super::Late_Update(fTimeDelta);
 }

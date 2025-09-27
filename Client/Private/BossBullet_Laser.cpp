@@ -65,7 +65,7 @@ void CBossBullet_Laser::Late_Update(_float fTimeDelta)
         return;
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
         return;
-    if (FAILED(m_pGameInstance->Add_MonsterBullet(this)))
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
         return;
 
     _matrix		SocketMatrix = XMLoadFloat4x4(m_pSocketMatrix);

@@ -35,6 +35,16 @@ namespace Engine
         float iPower;      // RimLight 세기
 	}RIM_LIGHT_DESC;
 
+	
+    typedef struct ENGINE_DLL TrailVertex
+    {
+        XMFLOAT3 vPosition;
+        XMFLOAT2 vTexcoord;
+		  
+        static const unsigned int iNumElements = 3;
+        static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElements];
+    }TrailVertex;
+
 	typedef struct  ENGINE_DLL VTXPOS
 	{
 		/* 정점의 위치 (Position)*/
@@ -101,6 +111,15 @@ namespace Engine
 		static const D3D11_INPUT_ELEMENT_DESC	Elements[iNumElements];
 	}VTXNORTEX;
 
+	typedef struct DECAL_DESC
+    {
+        XMVECTOR vHitPoint{};
+        XMVECTOR vHitDIR{};
+        XMVECTOR vHitNormal{};
+        float fSize = 1.f;
+        float fDepth = 1.f;
+        float fLifeTime = 3.f;
+    } DECAL_DESC;
 
 	typedef struct ENGINE_DLL VTXMESH
 	{

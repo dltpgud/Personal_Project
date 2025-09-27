@@ -49,6 +49,9 @@
 #include "Particle_Explosion.h"
 #include "Fade.h"
 #include "Trigger.h"
+#include "Trail.h"
+#include "Decal.h"
+
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -151,7 +154,7 @@ HRESULT CLoader::Loading_For_ProtoObject()
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Sky"),CSky::Create(m_pDevice, m_pContext));});
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_Trigger"),CTrigger::Create(m_pDevice, m_pContext));});
-  
+    
 #pragma endregion
 
 #pragma region Camera
@@ -245,7 +248,9 @@ HRESULT CLoader::Loading_For_ProtoObject()
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_ShootEffect"),CShootEffect::Create(m_pDevice, m_pContext));});
    
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Particle_Explosion"),CParticle_Explosion::Create(m_pDevice, m_pContext));});
-
+    
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Trail"),CTrail::Create(m_pDevice, m_pContext));});
+    
 #pragma endregion
 
 #pragma region UI
@@ -391,6 +396,10 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
                           CShader::Create(m_pDevice, m_pContext,TEXT("../Bin/ShaderFiles/Shader_VtxPoint.hlsl"),VTXPOSTEX::Elements, VTXPOSTEX::iNumElements));});
+    
+    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Trail"),
+                          CShader::Create(m_pDevice, m_pContext,TEXT("../Bin/ShaderFiles/Shader_VtxTrail.hlsl"),TrailVertex::Elements, TrailVertex::iNumElements));});
+
 #pragma endregion
 
 #pragma region Buffer
@@ -403,6 +412,8 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Terrain"),CVIBuffer_Terrain::Create(m_pDevice, m_pContext));});
    
+    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferTrail"),CVIBuffer_Trail::Create(m_pDevice, m_pContext));});
+    
 #pragma endregion
 
 #pragma region Collider
@@ -496,9 +507,6 @@ HRESULT CLoader::Loading_For_Static_Texture()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Player_Aim"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/PlayerUI/Aim0.png")));});
-	
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Pade"),
-                    CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Pade.png")));});
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Loading_Canyon"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Loading/Canyon%d.png"), 6));});
@@ -565,6 +573,10 @@ HRESULT CLoader::Loading_For_Static_Texture()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Mask/T_Noise_Liquid.dds")));});
+    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Flash_output"),
+                    CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Flash_output.dds")));});
+
+    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_DecalProto(TEXT("K"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),2); });
 
     return S_OK;
 }
