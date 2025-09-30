@@ -25,9 +25,6 @@ HRESULT CCHEST::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
 
     m_pWeaPonType = pDesc->Object_Type;

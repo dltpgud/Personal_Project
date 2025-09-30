@@ -51,9 +51,14 @@ void CLayer::Delete()
 {
   for (auto iter = m_GameObjects.begin(); iter != m_GameObjects.end();)
   {
-      if ((*iter)&& true == (*iter)->Get_Dead())
+      if ((*iter)&& OBJ_DEAD == (*iter)->Get_LifeState())
       {
           Safe_Release(*iter);
+          iter = m_GameObjects.erase(iter);
+      }
+      else if ((*iter) && OBJ_POOL == (*iter)->Get_LifeState())
+      {
+          ObjectPool<CGameObject>::Push(*iter);
           iter = m_GameObjects.erase(iter);
       }
       else
@@ -124,6 +129,7 @@ CLayer* CLayer::Create()
 void CLayer::Free()
 {
     __super::Free();
+
         for (auto& pGameObject : m_GameObjects) Safe_Release(pGameObject);
         m_GameObjects.clear();
 }

@@ -34,9 +34,6 @@ HRESULT CPlayer_StateUI::Initialize(void* pArg)
     m_pTransformCom->Set_Scaling(pDesc->fSizeX, pDesc->fSizeY, 1.f);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     m_fShakingTime = 0.45f;
     m_alpha = {0.1f, 0.2f, 0.3f};
 

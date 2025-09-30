@@ -35,12 +35,6 @@ HRESULT CPlayer::Initialize(void* pArg)
     if (FAILED(__super::Initialize(&Desc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
-    if (FAILED(Add_PartObjects()))
-        return E_FAIL;
-
     CPlayer_StateMachine::PLAYER_STATEMACHINE_DESC pDesc{};
     pDesc.pParentObject = this;
     pDesc.pCurWeapon = static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_Weapon();
@@ -164,7 +158,7 @@ void CPlayer::Set_Navigation()
 {
     Set_onCell(false);
     
-    Delete_ComPonent(LEVEL_STATIC, TEXT("Com_Navigation"));
+    Delete_Component(LEVEL_STATIC, TEXT("Com_Navigation"));
     Safe_Release(m_pNavigationCom);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),

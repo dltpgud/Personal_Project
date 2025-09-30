@@ -25,9 +25,6 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
             return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     m_pTransformCom->Set_Scaling(0.1f, 0.1f, 0.1f);
    
     if (m_bRightLeft == true) {
@@ -80,7 +77,7 @@ void CBossBullet_Laser::Late_Update(_float fTimeDelta)
 
 void CBossBullet_Laser::Dead_Rutine()
 {
-    m_bDead = true;
+    m_iLifeState = OBJ_POOL;
 }
 
 HRESULT CBossBullet_Laser::Render()

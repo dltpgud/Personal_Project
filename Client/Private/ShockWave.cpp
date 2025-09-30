@@ -24,9 +24,6 @@ HRESULT CShockWave::Initialize(void * pArg)
 	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY (m_vPos, 1.7f));
 	m_fScaleSpeed = 20.f;
 	m_fCurrentScale = 1.f;
@@ -68,7 +65,7 @@ void CShockWave::Late_Update(_float fTimeDelta)
 
 void CShockWave::Dead_Rutine()
 {
-	m_bDead = true;
+	m_iLifeState = true;
 }
 
 HRESULT CShockWave::Render()

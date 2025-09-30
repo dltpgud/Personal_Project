@@ -342,6 +342,78 @@ HRESULT CMesh::Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix)
     return S_OK;
 }
 
+HRESULT CMesh::Create_RaycastSRV()
+{
+    // 1. Positions SRV
+    {
+        D3D11_BUFFER_DESC desc = {};
+        desc.ByteWidth = sizeof(_float3) * m_iNumVertices;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.CPUAccessFlags = 0;
+        desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+        desc.StructureByteStride = sizeof(_float3);
+
+        D3D11_SUBRESOURCE_DATA init = {};
+        init.pSysMem = m_pPos;
+
+        ID3D11Buffer* pBuffer = nullptr;
+        if (FAILED(m_pDevice->CreateBuffer(&desc, &init, &pBuffer)))
+            return E_FAIL;
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+        srvDesc.Format = DXGI_FORMAT_UNKNOWN; // structured buffer °Ê UNKNOWN
+        srvDesc.Buffer.FirstElement = 0;
+        srvDesc.Buffer.NumElements = m_iNumVertices;
+
+        HRESULT hr = m_pDevice->CreateShaderResourceView(pBuffer, &srvDesc, &m_pPositionsSRV);
+        Safe_Release(pBuffer);
+        if (FAILED(hr))
+            return hr;
+    }
+
+    // 2. Indices SRV (uint3 ¥‹¿ß∑Œ π≠±‚)
+    {
+        UINT numTris = m_iNumIndexices / 3;
+        std::vector<XMUINT3> triIndices(numTris);
+        for (UINT i = 0; i < numTris; i++)
+        {
+            triIndices[i].x = m_pIndices[i * 3 + 0];
+            triIndices[i].y = m_pIndices[i * 3 + 1];
+            triIndices[i].z = m_pIndices[i * 3 + 2];
+        }
+
+        D3D11_BUFFER_DESC desc = {};
+        desc.ByteWidth = sizeof(XMUINT3) * numTris;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.CPUAccessFlags = 0;
+        desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+        desc.StructureByteStride = sizeof(XMUINT3);
+
+        D3D11_SUBRESOURCE_DATA init = {};
+        init.pSysMem = triIndices.data();
+
+        ID3D11Buffer* pBuffer = nullptr;
+        if (FAILED(m_pDevice->CreateBuffer(&desc, &init, &pBuffer)))
+            return E_FAIL;
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+        srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+        srvDesc.Buffer.FirstElement = 0;
+        srvDesc.Buffer.NumElements = numTris;
+
+        HRESULT hr = m_pDevice->CreateShaderResourceView(pBuffer, &srvDesc, &m_pIndicesSRV);
+        Safe_Release(pBuffer);
+        if (FAILED(hr))
+            return hr;
+    }
+
+    return S_OK;
+}
+
 CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile,
                      _fmatrix PreTransformMatrix)
 {
@@ -377,4 +449,6 @@ void CMesh::Free()
     Safe_Delete_Array(m_pIndices);
     Safe_Release(m_pInst_Buffer);
     Safe_Delete(m_pInst_BufferData);
+    Safe_Release(m_pPositionsSRV);
+    Safe_Release(m_pIndicesSRV);
 }

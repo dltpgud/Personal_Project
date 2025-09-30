@@ -29,12 +29,6 @@ HRESULT CHealthBot::Initialize(void* pArg)
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
-    if (FAILED(Add_PartObjects()))
-        return E_FAIL;
-
     m_pInteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
     Safe_AddRef(m_pInteractiveUI);
 

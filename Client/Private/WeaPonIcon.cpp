@@ -26,9 +26,6 @@ HRESULT CWeaPonIcon::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     if (FAILED(Init_MSG()))
         return E_FAIL;
 
@@ -49,7 +46,7 @@ void CWeaPonIcon::Update(_float fTimeDelta)
     if (true == m_InteractiveUI->Get_Interactive(this))
     {
         static_cast<CWeaponUI*>(m_pGameInstance->Find_Clone_UIObj(L"WeaponUI"))->Set_ScecondWeapon(m_weaPon);
-        m_bDead = true;
+        m_iLifeState = OBJ_DEAD;
         m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
         m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);
     }
@@ -145,7 +142,7 @@ HRESULT CWeaPonIcon::Init_CallBack()
         {
             if (bColliding && bPlayer)
             {
-                if (false == m_bDead)
+                if (OBJ_DEAD != m_iLifeState)
                 {
                     m_InteractiveUI->Set_Text(m_pWeaPonNumName);
                     m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);

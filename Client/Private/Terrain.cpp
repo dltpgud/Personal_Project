@@ -25,9 +25,8 @@ HRESULT CTerrain::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
        return E_FAIL;
 
-    if (FAILED(Add_Components(pDesc)))
-        return E_FAIL;
-
+     
+    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
     Set_Buffer(pDesc->Buffer[0], pDesc->Buffer[1]);
 
     return S_OK;
@@ -110,14 +109,10 @@ void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 
 HRESULT CTerrain::CreateDecal(_vector RayPos, _vector RayDir)
 {
-    _float fDis{};
-    _float3 fHitNormal{};
-    _float3 fHitPos = m_pGameInstance->Picking_OnTerrain(g_hWnd, m_pVIBufferCom, RayPos, RayDir, m_pTransformCom, &fDis, &fHitNormal);
-
     DECAL_DESC Desc{};
-    Desc.vHitNormal = XMLoadFloat3(&fHitNormal);
-    Desc.vHitPoint = XMLoadFloat3(&fHitPos);
-    m_pGameInstance->Add_Decal(TEXT("K"), Desc);
+    Desc.vHitDIR = RayDir;
+    Desc.vHitPoint = RayPos;
+    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
 
     return S_OK;
 }
@@ -138,7 +133,7 @@ void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
     }
 
     CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
-    AABBDesc.vExtents = _float3(m_pSize[0], 0.f, m_pSize[1]);
+    AABBDesc.vExtents = _float3(static_cast<_float>(m_pSize[0]), 0.f, static_cast<_float> (m_pSize[1]));
     AABBDesc.vCenter = _float3(0.f, 0.f, 0.f);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider"),
@@ -179,11 +174,8 @@ HRESULT CTerrain::Render_Shadow()
 }
 
 
-HRESULT CTerrain::Add_Components(void* pArg)
+HRESULT CTerrain::Add_Components()
 {
-    CGameObject::GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
-    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
-
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxNorTex"), TEXT("Com_Shader"),
         reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;

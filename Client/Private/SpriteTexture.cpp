@@ -32,8 +32,6 @@ HRESULT CSpriteTexture::Initialize(void* pArg)
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 	m_index = 0;
-	if (FAILED(Add_Components()))
-		return E_FAIL;
 
 	return S_OK;
 }

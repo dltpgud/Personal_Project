@@ -26,9 +26,6 @@ HRESULT CMenu::Initialize(void* pArg)
 	if (FAILED(__super::Initialize(pDesc)))
 		 return E_FAIL;
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
 	if (FAILED(Set_MenuPos()))
 		return E_FAIL;
 

@@ -30,10 +30,7 @@ HRESULT CBody_GunPawn::Initialize(void* pArg)
     m_RimDesc.eState  = pDesc->pRimState;
 
     if (FAILED(__super::Initialize(pDesc)))
-        return E_FAIL;
-
-    if (FAILED(Add_Components()))
-        return E_FAIL;
+        return E_FAIL;;
 
     m_pSocketMatrix = Get_SocketMatrix("L_Clavicle");
 
@@ -207,6 +204,9 @@ HRESULT CBody_GunPawn::Bind_ShaderResources()
 
 HRESULT CBody_GunPawn::Set_StateMachine()
 {
+    if (OBJ_POOL == m_iLifeState)
+        return S_OK;
+
     m_pStateMachine.resize(CGunPawn::ST_END);
 
 #pragma region IDLE

@@ -42,7 +42,7 @@ private:
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
     CAim_DESC       m_AimDesc[4];
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Set_Desc();
 public:
 	static CAim*	 Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

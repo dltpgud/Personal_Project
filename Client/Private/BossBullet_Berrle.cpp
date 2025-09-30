@@ -27,9 +27,6 @@ HRESULT CBossBullet_Berrle::Initialize(void* pArg)
 
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
-      
-    if (FAILED(Add_Components()))
-        return E_FAIL;
 
     if (FAILED(Initialize_SkillType()))
         return E_FAIL;
@@ -53,7 +50,7 @@ void CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
       lDesc.fLifeTime = 4.5f;
       m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                                L"Prototype GameObject_BossBullet_Laser", &lDesc);
-        m_bDead = true;
+        m_iLifeState = OBJ_POOL;
     }
 
     if(CSkill::SKill::STYPE_BERRLE == m_iSkillType)
@@ -123,7 +120,7 @@ HRESULT CBossBullet_Berrle::Render()
 
 void CBossBullet_Berrle::Dead_Rutine()
 {
-    m_bDead = true;
+    m_iLifeState = OBJ_POOL;
 }
 
 HRESULT CBossBullet_Berrle::Initialize_SkillType()
@@ -165,12 +162,10 @@ HRESULT CBossBullet_Berrle::Initialize_SkillType()
 
 HRESULT CBossBullet_Berrle::Add_Components()
 {
-    if (CSkill::SKill::STYPE_BERRLE) {
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
-            reinterpret_cast<CComponent**>(&m_pNavigationCom))))
-            return E_FAIL;
-    }
-
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+        reinterpret_cast<CComponent**>(&m_pNavigationCom))))
+        return E_FAIL;
+    
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
         reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;

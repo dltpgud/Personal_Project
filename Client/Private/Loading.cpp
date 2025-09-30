@@ -31,9 +31,6 @@ HRESULT CLoading::Initialize(void* pArg)
 
 	m_fFirstX = m_fX;
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
 	if (FAILED(Set_LoadPos(Desc)))
 		return E_FAIL;
 

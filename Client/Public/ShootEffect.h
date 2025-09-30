@@ -44,7 +44,7 @@ private:
 	CVIBuffer_Rect*				m_pVIBufferCom = { nullptr };
 
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
 
 	_float						m_fFrame = { 0.f };

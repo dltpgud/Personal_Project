@@ -115,10 +115,15 @@ namespace Engine
     {
         XMVECTOR vHitPoint{};
         XMVECTOR vHitDIR{};
-        XMVECTOR vHitNormal{};
         float fSize = 1.f;
         float fDepth = 1.f;
         float fLifeTime = 3.f;
+
+        // 메쉬 데이터 (정적/스킨드 공용) : 이미 "월드 좌표 포지션 SRV" 를 보유한다고 가정
+        ID3D11ShaderResourceView* pPositionsSRV = nullptr; // g_Positions
+        ID3D11ShaderResourceView* pIndicesSRV = nullptr;   // g_Indices(uint3)
+        _uint numIndices = 0;                              // Dispatch 계산용
+
     } DECAL_DESC;
 
 	typedef struct ENGINE_DLL VTXMESH

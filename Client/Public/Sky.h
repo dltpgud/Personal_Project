@@ -32,7 +32,7 @@ private:
 	CTexture*						m_pTextureCom = { nullptr };
 
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
 
 

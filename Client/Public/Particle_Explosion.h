@@ -39,7 +39,7 @@ private:
 	CVIBuffer_Particle_Point*	m_pVIBufferCom = { nullptr };
 
 private:
-	HRESULT Add_Components();
+  virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
     _float4x4 m_NewWordMatrix{};
     _matrix m_pParentMatrix{};

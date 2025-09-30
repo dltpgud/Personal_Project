@@ -37,13 +37,11 @@ public:
     virtual HRESULT Render() override;
     virtual void Dead_Rutine() override;
 
-
 private:
-    HRESULT Add_Components(void* pArg);
+    virtual HRESULT Add_Components() override;
     HRESULT Bind_ShaderResources();
 private:
     _vector m_pTagetPos = {};
-    _bool m_bMoveStop{};
     CTexture* m_pTextureCom = { nullptr };
     CVIBuffer_Point* m_pVIBufferCom = { nullptr };
     _float2 m_pScale{};

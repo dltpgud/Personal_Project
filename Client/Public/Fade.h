@@ -36,7 +36,7 @@ private:
 	_bool m_bSetFade{ true };
     _bool m_bSetLoadingFade{};
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	
 public:
 	static CFade*	 Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

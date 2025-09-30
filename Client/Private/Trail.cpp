@@ -27,11 +27,8 @@ HRESULT CTrail::Initialize(void* pArg)
     m_iTrailSegments = pDesc->iTrailSegments;
     m_fClolor[CSkill::COLOR::CSTART] = pDesc->fClolor[CSkill::COLOR::CSTART];
     m_fClolor[CSkill::COLOR::CEND]   = pDesc->fClolor[CSkill::COLOR::CEND];
-    m_bState = pDesc->bState;
+    m_bState = pDesc->pParantObject;
     if (FAILED(__super::Initialize(pDesc)))
-        return E_FAIL;
-
-    if (FAILED(Add_Components()))
         return E_FAIL;
 
     return S_OK;
@@ -39,11 +36,13 @@ HRESULT CTrail::Initialize(void* pArg)
 
 void CTrail::Priority_Update(_float fTimeDelta)
 {
-    m_bDead = *m_bState;
+    
 }
 
 void CTrail::Update(_float fTimeDelta)
 {
+    m_iLifeState = *m_bState;
+
     m_fTimeSum += fTimeDelta;
 
     if (m_fTimeSum >= 0.5f) 

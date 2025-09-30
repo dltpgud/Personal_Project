@@ -573,11 +573,15 @@ HRESULT CLoader::Loading_For_Static_Texture()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Mask/T_Noise_Liquid.dds")));});
+
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Flash_output"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Flash_output.dds")));});
 
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_DecalProto(TEXT("K"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),2); });
+    //m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Angle_Blur"),
+    //                CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/T_Mask_Angle_Blur.dds")));});
 
+    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_DecalProto(TEXT("K"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),2); });
+    
     return S_OK;
 }
 

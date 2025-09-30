@@ -32,7 +32,7 @@ public:
     void            Set_OnwerPos(const _vector& Pos);
 
 private:
-	HRESULT				Add_Components();
+    virtual HRESULT Add_Components() override;
     _bool               IsLookingAtObject();
 
 private:

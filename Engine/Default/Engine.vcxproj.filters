@@ -205,6 +205,9 @@
     <Filter Include="01.Utility\04.Component\Shader\ComputeShader">
       <UniqueIdentifier>{0e8033fe-073c-46cc-8e1c-4a3087eebad2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.Utility\04.Component\Shader\ComputeShader\CS_RayCastDecal">
+      <UniqueIdentifier>{fb794a74-25fa-4875-a73d-a54e7befc6ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -420,6 +423,9 @@
     <ClInclude Include="..\Public\ComputeShader.h">
       <Filter>01.Utility\04.Component\Shader\ComputeShader</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\CS_RayCastingDecal.h">
+      <Filter>01.Utility\04.Component\Shader\ComputeShader\CS_RayCastDecal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -620,12 +626,21 @@
     <ClCompile Include="..\Private\ComputeShader.cpp">
       <Filter>01.Utility\04.Component\Shader\ComputeShader</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\CS_RayCastingDecal.cpp">
+      <Filter>01.Utility\04.Component\Shader\ComputeShader\CS_RayCastDecal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl">
       <Filter>02.ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Deferred.hlsl">
+      <Filter>02.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_RaycastDecal.hlsl">
+      <Filter>02.ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_Skinning.hlsl">
       <Filter>02.ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

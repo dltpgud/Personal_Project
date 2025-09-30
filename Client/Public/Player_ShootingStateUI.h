@@ -51,7 +51,7 @@ private:
 	_int m_iPass{-1};
 	_float4 m_RGB{};
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 
 public:
 	static CPlayer_ShootingStateUI*	 Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

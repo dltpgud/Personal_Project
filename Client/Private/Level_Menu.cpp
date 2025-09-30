@@ -4,8 +4,6 @@
 #include "Aim.h"
 #include "Player.h"
 
-
-
 CLEVEL_MENU::CLEVEL_MENU(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {

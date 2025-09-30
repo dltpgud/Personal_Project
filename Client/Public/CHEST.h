@@ -35,8 +35,9 @@ public:
 	virtual HRESULT Render() override;
 	virtual HRESULT Render_Shadow() override;
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-	
-private:
+       
+
+ private:
 	CShader*					m_pShaderCom = {nullptr};
 	CModel*						m_pModelCom = {nullptr};
     _ubyte                      m_flags = 0; 
@@ -45,7 +46,7 @@ private:
 	CInteractiveUI* m_InteractiveUI{};
 
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
     HRESULT Init_CallBakc();
 public:

@@ -23,7 +23,7 @@ public:
 	virtual HRESULT Initialize(const BOUND_DESC* pBoundDesc);
 	virtual void Update(_fmatrix WorldMatrix) {} // 충돌을 위한 데이터(로컬)를 월드로 변환한다. 
 	virtual _bool Intersect(CCollider::TYPE eType, CBounding* pTargetBounding) = 0;
-	virtual _bool RayIntersect(_vector RayPos, _vector RayDir, _float& fDis) = 0;
+    virtual _bool RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos) = 0;
 	virtual _float Get_iCurRadius() { return 0.f; }
 	virtual _float3 Get_iCurCenter() { return _float3(); }
     virtual void Set_Info(BOUND_DESC* pBoundDesc) = 0;

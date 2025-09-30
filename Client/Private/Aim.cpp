@@ -23,9 +23,6 @@ HRESULT CAim::Initialize(void* pArg)
 	if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
     if (FAILED(Set_Desc()))
         return E_FAIL;
        

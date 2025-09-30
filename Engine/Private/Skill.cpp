@@ -26,9 +26,11 @@ HRESULT CSkill::Initialize(void* pArg)
        m_Clolor[CSkill::COLOR::CEND] = pDesc->fClolor[CSkill::COLOR::CEND];
     if (FAILED(__super::Initialize(pDesc)))
 		   return E_FAIL;
-	
+
+    m_fTimeSum = 0.f;
+
 	if (0.f == m_fLifeTime)
-		m_fLifeTime = 10.f;
+		m_fLifeTime = 3.f;
 
 	return S_OK;
 }

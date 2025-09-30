@@ -54,7 +54,7 @@ public:
 	};
 
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	
 private:
     CTexture* m_pTextureCom_HpBar = {nullptr};

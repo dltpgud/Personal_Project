@@ -35,7 +35,7 @@ public:
     HRESULT Set_TriggerZone(_int Type);
 
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Set_Coll_Info();
 
 private:

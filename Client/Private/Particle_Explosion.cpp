@@ -23,14 +23,9 @@ HRESULT CParticle_Explosion::Initialize(void * pArg)
 	if (FAILED(__super::Initialize(pArg)))
 		return E_FAIL;
 
-
 	CParticle_Explosion_Desc* pDesc = static_cast<CParticle_Explosion_Desc*>(pArg);
 
 	m_pParentMatrix = pDesc->pParentMatrix;
-
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
 
 	m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
 	return S_OK;
@@ -84,7 +79,6 @@ HRESULT CParticle_Explosion::Render()
 
 HRESULT CParticle_Explosion::Add_Components()
 {
-
 	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto Component Fire_Explostion"),
 		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
 		return E_FAIL;
@@ -102,12 +96,12 @@ HRESULT CParticle_Explosion::Add_Components()
 
 HRESULT CParticle_Explosion::Bind_ShaderResources()
 {
-
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_NewWordMatrix)))
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
 		return E_FAIL;
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
 		return E_FAIL;
 

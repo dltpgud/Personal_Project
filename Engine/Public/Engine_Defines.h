@@ -44,6 +44,7 @@ using namespace DirectX;
 #include <list>
 #include <algorithm>
 #include <set>
+
 using namespace std;
 
 #include "Engine_Typedef.h"

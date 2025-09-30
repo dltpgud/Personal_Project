@@ -22,9 +22,6 @@ HRESULT CTrigger::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     if (FAILED(Set_TriggerZone(pDesc->iTriggerType)))
         return E_FAIL;
     

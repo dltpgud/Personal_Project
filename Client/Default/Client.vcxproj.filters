@@ -244,19 +244,19 @@
     <Filter Include="02.GameObjects\05. Effect\Trail">
       <UniqueIdentifier>{3f6aeeba-fac8-4c5f-bbec-a626a91e7bb1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss">
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss">
       <UniqueIdentifier>{99d8ddec-d756-4a55-9528-fc55e0a5e88b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\00.Container">
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\00.Container">
       <UniqueIdentifier>{96b7131e-27d4-4248-9561-1055d0255ec4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\01.Body">
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\01.Body">
       <UniqueIdentifier>{f2fd4784-5a7b-49c6-bb25-587d96ebf4ad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State">
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\02.State">
       <UniqueIdentifier>{86109062-672c-4181-ab0a-8299cbdaa565}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack">
+    <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack">
       <UniqueIdentifier>{e2537ef3-9925-48f6-91e2-86010d590fff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -358,7 +358,7 @@
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Body_BillyBoom.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\01.Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\01.Body</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Camera_Free.h">
       <Filter>02.GameObjects\99 Camera\FPV</Filter>
@@ -466,19 +466,19 @@
       <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Idle.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Hit.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Dead.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Intro.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Move.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Player_StateMachine.h">
       <Filter>02.GameObjects\03.Actor\Player\03.State\00.Defult</Filter>
@@ -532,19 +532,19 @@
       <Filter>02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\00.Container</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\00.Container</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Barre.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Bash.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_Laser.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BillyBoom_ShockWave.h">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\JetFly.h">
       <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\00.Container</Filter>
@@ -666,7 +666,7 @@
       <Filter>01.Level\01.GamePlay\StageBoss</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Body_BillyBoom.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\01.Body</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\01.Body</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Camera_Free.cpp">
       <Filter>02.GameObjects\99 Camera\FPV</Filter>
@@ -688,9 +688,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\ShockWave.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
-      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BossBullet_Laser.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\Laser</Filter>
@@ -771,19 +768,19 @@
       <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Idle.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Hit.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Dead.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Intro.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Move.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player_StateMachine.cpp">
       <Filter>02.GameObjects\03.Actor\Player\03.State\00.Defult</Filter>
@@ -837,19 +834,19 @@
       <Filter>02.GameObjects\03.Actor\NPC\00.HealthBot\00.Container</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\00.Container</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\00.Container</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Barre.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Bash.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_Laser.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BillyBoom_ShockWave.cpp">
-      <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\05.Boss\02.State\00.Attack</Filter>
+      <Filter>02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\JetFly.cpp">
       <Filter>02.GameObjects\03.Actor\Monster\04.JetFly\00.Container</Filter>
@@ -880,6 +877,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Trail.cpp">
       <Filter>02.GameObjects\05. Effect\Trail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

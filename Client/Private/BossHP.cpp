@@ -37,8 +37,7 @@ HRESULT CBossHPUI::Initialize(void* pArg)
                                    XMVectorSet(Desc->fX - g_iWinSizeX * 0.5f, -Desc->fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
     m_fPrXPos = Desc->fX;
     m_fPrYPos = Desc->fY;
-    if (FAILED(Add_Components()))
-        return E_FAIL;
+
 
     m_fHP_Pluse = static_cast<_float>(m_iHP)  / static_cast<_float>(m_imaxHP);
     m_fRatio = static_cast<_float>(m_iHP) * 0.001f / static_cast<_float>(m_imaxHP);

@@ -51,7 +51,7 @@ private:
 	CShader*        m_pShaderCom = { nullptr };
 	CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
 private:
-	HRESULT Add_Components();
+	virtual HRESULT Add_Components()override;
 private:
 
 	_int m_iHP{};

@@ -32,9 +32,6 @@ HRESULT CCursor::Initialize(void* pArg)
     m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     return S_OK;
 }
 

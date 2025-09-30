@@ -19,24 +19,22 @@ protected:
 public:
 	virtual class CComponent* Find_PartObj_Component(const _wstring& strComponentTag, _uint iPartObjID = 0) ;
 public:
-	/* 원형생성시 호출 : 생성시 필요한 상당히 무거운 작업들을 수행한다.(패킷, 파일 입출력) */
-	virtual HRESULT Initialize_Prototype();
 
-	/* 패킷이나 파일 입출력을 통해서 받아오지 못하는 정보들도 분명히 존재한다. */
-	/* 원형에게 존재하는 않는 추가적인 초기화가 필요한 경우 호출한ㄴ다. */
+	virtual HRESULT Initialize_Prototype();
 	virtual HRESULT Initialize(void* pArg);
 	virtual void Priority_Update(_float fTimeDelta);
 	virtual void Update(_float fTimeDelta);
 	virtual void Late_Update(_float fTimeDelta);
 	virtual HRESULT Render();
-
-	void Erase_PartObj(_uint Part);
+    virtual HRESULT Add_PartObjects() {return S_OK;};
+	
 protected:
 	_uint								m_iNumPartObjects = { 0 };
 	vector<class CPartObject*>			m_PartObjects;
 
 protected:
 	HRESULT Add_PartObject( const _wstring& strPrototypeTag, _uint iPartObjectIndex, void* pArg = nullptr);
+    void Erase_PartObj(_uint Part);
 
 public:
 	virtual CGameObject* Clone(void* pArg) = 0;

@@ -32,7 +32,7 @@ private:
 	CUI_DESC		Desc[3]{};
 	_bool           m_bHoverSound = { false };
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Set_MenuPos();
 
 public:

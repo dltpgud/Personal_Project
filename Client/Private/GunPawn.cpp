@@ -31,12 +31,6 @@ HRESULT CGunPawn::Initialize(void* pArg)
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
-    if (FAILED(Add_PartObjects()))
-        return E_FAIL;
-
     static_cast<CMonsterHP*>(m_PartObjects[PART_HP])
     ->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 3.f, 0.f, 1.f));
 

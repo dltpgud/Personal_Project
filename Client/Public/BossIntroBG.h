@@ -43,7 +43,7 @@ private:
 	_float         m_TimeSum = { 0.f };
 
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Set_Pos();
     void Set_IntroPos(void* pArg);
 

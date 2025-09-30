@@ -25,16 +25,13 @@ HRESULT CWeapon::Initialize(void* pArg)
     WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
     m_pParentMatrix = pDesc->pParentMatrix;
     m_pSocketMatrix = pDesc->pSocketMatrix;
-
-    if (FAILED(__super::Initialize(pDesc)))
-        return E_FAIL;
-  
+    
     if (FAILED(Init_Weapon()))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
+    if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
-
+ 
     if (FAILED(Init_CallBack()))
         return E_FAIL;
 
@@ -163,6 +160,7 @@ HRESULT CWeapon::Make_Bullet()
     pDesc.iWeaponType = m_iWeapon;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_ShootEffect", &pDesc);
+
 
    CPlayerBullet::CPlayerBullet_DESC Desc{};
    Desc.fSpeedPerSec = 150.f;

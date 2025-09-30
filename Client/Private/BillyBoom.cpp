@@ -33,12 +33,6 @@ HRESULT CBillyBoom::Initialize(void* pArg)
 
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
-    
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
-    if (FAILED(Add_PartObjects()))
-        return E_FAIL;
 
     FMOD::Channel* pChannel{};
     m_pGameInstance->Play_Sound(L"ST_BillyBoom_Presence.ogg", &pChannel, 1.f);

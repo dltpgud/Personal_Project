@@ -50,7 +50,7 @@ private:
 	CModel*						m_pModelCom = { nullptr };
 	_float						m_OpenTime = { 1.f };
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
     HRESULT Init_CallBakc();
 private:

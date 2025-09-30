@@ -38,16 +38,6 @@ public:
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
     virtual HRESULT CreateDecal(_vector RayPos, _vector RayDir) override;
     void Set_Buffer(_int BufferX, _int BufferY);
-    _bool isPowerOfTwoPlusOne(_int num)
-    {
-        if (num <= 1)
-            return false; 
-        int x = num - 1;  // num - 1이 2의 거듭제곱인지 확인
-        if((x & (x - 1)) == 0)
-            return true;
-
-        return false;
-    }
 
 private:
     CTexture* m_pTextureCom = {nullptr};
@@ -61,7 +51,17 @@ private:
     _float m_fTimeSum{ 0.f };
 
 private:
-    HRESULT Add_Components(void* pArg);
+    virtual HRESULT Add_Components() override;
+    _bool isPowerOfTwoPlusOne(_int num)
+    {
+        if (num <= 1)
+            return false;
+        int x = num - 1; // num - 1이 2의 거듭제곱인지 확인
+        if ((x & (x - 1)) == 0)
+            return true;
+
+        return false;
+    }
 
 public:
     static CTerrain* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

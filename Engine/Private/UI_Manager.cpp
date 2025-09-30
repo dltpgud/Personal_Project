@@ -90,7 +90,7 @@ void CUI_Manager::Delete()
 {
    for (auto& iter  = m_UIObj[UIOBJECT::UI_CLONE].begin(); iter != m_UIObj[UIOBJECT::UI_CLONE].end();)
    {
-       if ((*iter).second && true == (*iter).second->Get_Dead())
+       if ((*iter).second && OBJ_DEAD == (*iter).second->Get_LifeState())
        {
           Safe_Release((*iter).second);
           iter = m_UIObj[UIOBJECT::UI_CLONE].erase(iter);
