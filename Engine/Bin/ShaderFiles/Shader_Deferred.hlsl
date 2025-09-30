@@ -29,9 +29,9 @@ texture2D g_DecalNormalTexture;
 texture2D g_DecalTexture;
 texture2D g_DecalAtlas;
 texture2D g_DecalNormalAtlas;
-float3 g_fDecalTangent;
-float3 g_fDecalBinormal;
-float3 g_fDecalNormal;
+float3 g_fRayPos;
+float3 g_fRayDir;
+
 
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
@@ -40,7 +40,7 @@ texture2D g_FinalTexture;
 texture2D g_BlurTexture;
 texture2D g_BrightnessTexTure;
 
-texture2D g_vMtrlAmbient; 
+texture2D g_vMtrlAmbient;
 vector g_vMtrlSpecular = { 1.f, 1.f, 1.f, 1.f };
 
 vector g_vCamPosition;
@@ -52,7 +52,7 @@ float g_fDecalTime;
 // 텍스쳐에서 한 픽셀의 간격
 float dX;
 float dY;
-float Bloom_Weights[5] = { 0.0545, 0.2442, 0.4026, 0.2442 , 0.0545 };
+float Bloom_Weights[5] = { 0.0545, 0.2442, 0.4026, 0.2442, 0.0545 };
 float2 g_shadowMapSize;
 
 float4 Compute_WorldPos_byCamera(float2 vTexcoord)
@@ -129,41 +129,41 @@ struct PS_OUT_LIGHT
 
 PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
 {
-   PS_OUT_LIGHT Out;
+    PS_OUT_LIGHT Out;
   
    /* 빛 정보와 노말 정보를 이용해서 명암을 계산하여 리턴한다. */
    // 기본 노멀
-   float3 baseNormal = normalize(g_NormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2 - 1);
+    float3 baseNormal = normalize(g_NormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2 - 1);
    
    // 데칼 노멀
-   float3 decalNormal = normalize(g_DecalNormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2 - 1);
+    float3 decalNormal = normalize(g_DecalNormalTexture.Sample(PointSampler, In.vTexcoord).xyz * 2 - 1);
 
    // 가중치 (데칼 알파)
-   float decalWeight = g_DecalTexture.Sample(PointSampler, In.vTexcoord).a;
+    float decalWeight = g_DecalTexture.Sample(PointSampler, In.vTexcoord).a;
    
    // 최종 노멀
-   float3 finalNormal = normalize(lerp(baseNormal, decalNormal, decalWeight));
-   float4 vNormal = float4(finalNormal, 0.0f);
+    float3 finalNormal = normalize(lerp(baseNormal, decalNormal, decalWeight));
+    float4 vNormal = float4(finalNormal, 0.0f);
    // 빛이 오는 방향과 법선을 내적해 빛이 표면에 얼마나 닿는지 수치화해 음영을 구함.
    // 음수 값이 나오면 음영이 반대로 들어감으로 최소값은 0으로 설정
-   float fShade = max(dot(normalize(g_vLightDir) * -1.f, vNormal), 0.f);
+    float fShade = max(dot(normalize(g_vLightDir) * -1.f, vNormal), 0.f);
   
    // Diffuse 와 Ambient 조명을 고려한 최종 조도를 구한다.
-   vector vAmbiet = g_vMtrlAmbient.Sample(PointSampler, In.vTexcoord);
-   Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * vAmbiet));
+    vector vAmbiet = g_vMtrlAmbient.Sample(PointSampler, In.vTexcoord);
+    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * vAmbiet));
     
    // 픽셀들의 월드 좌표를 복원한다.
-   float4 vWorldPos = Compute_WorldPos_byCamera(In.vTexcoord);
+    float4 vWorldPos = Compute_WorldPos_byCamera(In.vTexcoord);
     
-   float4 vLook = vWorldPos - g_vCamPosition;
+    float4 vLook = vWorldPos - g_vCamPosition;
    
    //광원 방향을 기준으로 표면 법선에 반사된 방향
-   float4 vReflect = reflect(normalize(g_vLightDir), vNormal);
+    float4 vReflect = reflect(normalize(g_vLightDir), vNormal);
    //정반사 계수 계산
    // 내적 값이 1에 가까우면 하이라이트가 강해짐  
-   float fSpecular = pow(max(dot(normalize(vLook) * -1.f, normalize(vReflect)), 0.f), 30.f);
+    float fSpecular = pow(max(dot(normalize(vLook) * -1.f, normalize(vReflect)), 0.f), 30.f);
    //광원의 스펙큘러 색과 머티리얼의 스펙큘러 반응도를 곱해 반사광 색상을 정한다.
-   Out.vSpecular = (g_vLightSpecular * g_vMtrlSpecular) * fSpecular * 0.8f;
+    Out.vSpecular = (g_vLightSpecular * g_vMtrlSpecular) * fSpecular * 0.8f;
     return Out;
 }
 
@@ -194,7 +194,7 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_POINT(PS_IN In)
 
     float fSpecular = (pow(max(dot(normalize(vLook) * -1.f, normalize(vReflect)), 0.f), 30.f)) * fAtt;
     
-    Out.vSpecular = (g_vLightSpecular * g_vMtrlSpecular) * fSpecular *0.8f;
+    Out.vSpecular = (g_vLightSpecular * g_vMtrlSpecular) * fSpecular * 0.8f;
 
     return Out;
 }
@@ -202,19 +202,19 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_POINT(PS_IN In)
 float Compute_OutLine(float2 vTexcoord)
 {
     // 화면에서 좌,좌위,좌아래,우,우위,우아래,위,아래로 한 픽셀식 움직이고, Projpos.w / g_fCamFar 저장된 값을 g_fCamFar 와 곱해 실제 카메라 거리로 복원
-    float depthMid    = g_OutLineTexture.Sample(LinearSampler, vTexcoord).y * g_fCamFar;
-    float depthLeft   = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(-1.f / g_WinDowSize.x, 0.f)).y * g_fCamFar;
-    float depthRight  = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(1.f / g_WinDowSize.x, 0.f)).y * g_fCamFar;
-    float depthUp     = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(0.f, -1.f / g_WinDowSize.y)).y * g_fCamFar;
-    float depthDown   = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(0.f, 1.f / g_WinDowSize.y)).y * g_fCamFar;
-    float depthUL     = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(-1.f / g_WinDowSize.x, -1.f / g_WinDowSize.y)).y * g_fCamFar;
-    float depthUR     = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(1.f / g_WinDowSize.x, -1.f / g_WinDowSize.y)).y * g_fCamFar;
-    float depthDL     = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(-1.f / g_WinDowSize.x, 1.f / g_WinDowSize.y)).y * g_fCamFar;
-    float depthDR     = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(1.f / g_WinDowSize.x, 1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthMid = g_OutLineTexture.Sample(LinearSampler, vTexcoord).y * g_fCamFar;
+    float depthLeft = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(-1.f / g_WinDowSize.x, 0.f)).y * g_fCamFar;
+    float depthRight = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(1.f / g_WinDowSize.x, 0.f)).y * g_fCamFar;
+    float depthUp = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(0.f, -1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthDown = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(0.f, 1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthUL = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(-1.f / g_WinDowSize.x, -1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthUR = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(1.f / g_WinDowSize.x, -1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthDL = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(-1.f / g_WinDowSize.x, 1.f / g_WinDowSize.y)).y * g_fCamFar;
+    float depthDR = g_OutLineTexture.Sample(LinearSampler, vTexcoord + float2(1.f / g_WinDowSize.x, 1.f / g_WinDowSize.y)).y * g_fCamFar;
 
     // 차이 계산
-    float depthDiffH  = abs(depthLeft - depthRight);
-    float depthDiffV  = abs(depthUp - depthDown);
+    float depthDiffH = abs(depthLeft - depthRight);
+    float depthDiffV = abs(depthUp - depthDown);
     float depthDiffD1 = abs(depthUL - depthDR);
     float depthDiffD2 = abs(depthUR - depthDL);
 
@@ -228,7 +228,7 @@ float Compute_OutLine(float2 vTexcoord)
     if (isEdge && 1.f != g_OutLineTexture.Sample(LinearSampler, vTexcoord).w)
     {
         // 평균 (8방향 모두 포함)
-        float avgNeighbor = (depthLeft + depthRight + depthUp + depthDown + depthUL + depthUR + depthDL + depthDR) /8;
+        float avgNeighbor = (depthLeft + depthRight + depthUp + depthDown + depthUL + depthUR + depthDL + depthDR) / 8;
 
         if (abs(depthMid - avgNeighbor) >= depthThreshold)
             OutLine = 0.f; // 외곽선 그리기
@@ -293,21 +293,21 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    vector vDiffuse  = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-    vector vShade    = g_ShadeTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vShade = g_ShadeTexture.Sample(LinearSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(LinearSampler, In.vTexcoord);
-    vector vRim      = g_RimTexture.Sample(LinearSampler, In.vTexcoord);
-    vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);    
-    float fOutLine   = Compute_OutLine(In.vTexcoord);
+    vector vRim = g_RimTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
+    float fOutLine = Compute_OutLine(In.vTexcoord);
   
     if (vDiffuse.a == 0.f)
         discard;
 
-     vector vDepthDesc = g_DepthTexture.Sample(PointSampler, In.vTexcoord);
-     float fCurIsSpecular = vDepthDesc.z;
+    vector vDepthDesc = g_DepthTexture.Sample(PointSampler, In.vTexcoord);
+    float fCurIsSpecular = vDepthDesc.z;
      
-     if (fCurIsSpecular == 0.f)
-         vSpecular = 0.f;
+    if (fCurIsSpecular == 0.f)
+        vSpecular = 0.f;
    
     vector vDecal = g_DecalTexture.Sample(LinearSampler, In.vTexcoord);
     vDiffuse.rgb = lerp(vDiffuse.rgb, vDecal.rgb, vDecal.a);
@@ -332,7 +332,7 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
         float3 v = normalize(g_vCamPosition.xyz - vPositionWS.xyz);
 
     // 편향은 비교 깊이에 " 마이너스"로 적용 (그림자가 너무 뜨는 현상 방지)
-        float depthWithBias = lightDepth - ComputeReceiverBias(n, l,v);
+        float depthWithBias = lightDepth - ComputeReceiverBias(n, l, v);
 
     // SampleCmp 기반 3x3 PCF (반환값: 1=밝음, 0=어두움)
         float pcf = PCF_Shadow(lightUV, depthWithBias, g_shadowMapSize);
@@ -343,13 +343,13 @@ PS_OUT PS_MAIN_FINAL(PS_IN In)
 
     Out.vColor = vDiffuse * vShade * fOutLine + vRim + vSpecular + vEmissive;
 
-    Out.vColor.rgb *= lerp(0.8f, 1.0f, shadowFactor);  
+    Out.vColor.rgb *= lerp(0.8f, 1.0f, shadowFactor);
   
     return Out;
 }
 
 PS_OUT PS_MAIN_PURE(PS_IN In)
-{ 
+{
     PS_OUT Out = (PS_OUT) 0;
     
     vector vDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
@@ -407,45 +407,78 @@ PS_OUT_Decal PS_MAIN_Decal(PS_IN In)
     PS_OUT_Decal Out = (PS_OUT_Decal) 0;
 
     float2 screenUV = In.vPosition.xy / g_WinDowSize;
-  
     float4 worldPos = Compute_WorldPos_byCamera(screenUV);
 
-    float4 localPos = mul(worldPos, g_WorldInvMatrix);
+    // 데칼 크기 (Half Size)
+    float3 halfSize = float3(1.0f, 1.0f, 1.0f);
 
-    if (any(abs(localPos.xyz) > 1.0f))
+    // ----------------------------------------
+    // 1. 픽셀 노멀 (GBuffer)
+    // ----------------------------------------
+    float3 surfNormal = normalize(g_NormalTexture.Sample(PointSamplerClamp, screenUV).xyz * 2.0f - 1.0f);
+
+    // 2. 데칼 투사 방향과 비교해서 너무 어긋난 표면은 제외
+    if (dot(surfNormal, g_fRayDir) > -0.3f)   // -1이면 정면, 0이면 수직
         discard;
 
-    float2 uv = localPos.xy * 0.5f + 0.5f;
+    //2.5 몬스터와 플레이어는 데칼 안그리게하기
+    float EXDeapth = g_DepthTexture.Sample(PointSamplerClamp, screenUV).w;
+    if (EXDeapth > 0.5)
+        discard;
+    
+    // ----------------------------------------
+    // 3. TBN 생성 (투사 기준 좌표계)
+    // ----------------------------------------
+    float3 N = normalize(g_fRayDir); // 데칼 방향을 기준 노멀로
+    float3 up = abs(N.y) < 0.999f ? float3(0, 1, 0) : float3(1, 0, 0);
+    float3 T = normalize(cross(up, N));
+    float3 B = normalize(cross(N, T));
+    float3x3 TBN = float3x3(T, B, N);
 
+    // ----------------------------------------
+    // 4. 월드 좌표 → 로컬 좌표
+    // ----------------------------------------
+    float3 rel = (worldPos.xyz - g_fRayPos) / halfSize;
+    float3 localPos = mul(rel, transpose(TBN));
+
+    // 박스 클리핑 (±1 범위)
+    if (any(abs(localPos.xy) > 1.0f))
+        discard;
+
+    // ----------------------------------------
+    // 5. UV 계산
+    // ----------------------------------------
+    float2 uv = localPos.xy * 0.5f + 0.5f;
     float4 decal = g_DecalAtlas.Sample(PointSamplerClamp, uv);
     if (decal.a < 0.01f)
         discard;
 
-    float4 decalNormal = g_DecalNormalAtlas.Sample(PointSamplerClamp, uv);
-    
-    decalNormal.z = sqrt(saturate(1 - dot(decalNormal.xy, decalNormal.xy)));
+    // ----------------------------------------
+    // 6. 데칼 노멀맵
+    // ----------------------------------------
+    float3 nTS = g_DecalNormalAtlas.Sample(PointSamplerClamp, uv).xyz * 2 - 1;
+    nTS.z = sqrt(saturate(1 - dot(nTS.xy, nTS.xy)));
+    float3 decalNormal = normalize(mul(nTS, TBN));
 
-    float3 N = normalize(g_fDecalNormal);
-    float3 T = normalize(g_fDecalTangent);
-    float3 B = normalize(g_fDecalBinormal);
-    float3x3 TBN = float3x3(T, B, N);
-    float3 worldNormal = normalize(mul(decalNormal.xyz, TBN));
-    
-    Out.vNormal = vector(worldNormal.xyz * 0.5f + 0.5f, 0.f);
-    
-    float  glowPhase = saturate(1.0 - g_fDecalTime * 1.f);
+    // GBuffer 노멀과 데칼 노멀을 알파 기반으로 블렌딩
+    float3 blendedNormal = normalize(lerp(surfNormal, decalNormal, decal.a));
+    Out.vNormal = float4(blendedNormal * 0.5f + 0.5f, 0.f);
+
+    // ----------------------------------------
+    // 7. 색상 + Glow
+    // ----------------------------------------
+    float glowPhase = saturate(1.0 - g_fDecalTime);
     float3 glowColor = decal.rgb * 3.0;
     float3 colorWithGlow = lerp(decal.rgb, glowColor, glowPhase);
-
     float3 grayColor = float3(0.25, 0.25, 0.25);
     float3 finalColor = (glowPhase > 0.01f) ? colorWithGlow : grayColor;
 
     float fade = saturate(g_DecalFade);
-
     Out.vDecal = float4(finalColor, decal.a * fade);
-	
+
     return Out;
 }
+
 
 
 
@@ -473,7 +506,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_LIGHT_DIRECTIONAL();
     }
 
-    pass Light_Point//2
+    pass Light_Point //2
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -484,7 +517,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_LIGHT_POINT();
     }
 
-    pass Final//3
+    pass Final //3
     {
         SetRasterizerState(RS_Shadow);
         SetDepthStencilState(DSS_None, 0);

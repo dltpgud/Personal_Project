@@ -25,8 +25,13 @@ HRESULT CGameObject::Initialize_Prototype()
     return S_OK;
 }
 
+
 HRESULT CGameObject::Initialize(void* pArg)
 {
+    if (m_iLifeState == OBJ_POOL) { 
+       m_iLifeState = OBJ_NOEVENT;
+        return S_OK;
+    }
     GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
      m_iObjectType   = pDesc->Object_Type;
      m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
@@ -37,6 +42,12 @@ HRESULT CGameObject::Initialize(void* pArg)
     m_Components.emplace(TEXT("Trans_Com"), m_pTransformCom);
 
     Safe_AddRef(m_pTransformCom);
+
+    if (FAILED(Add_Components()))
+    {
+        MSG_BOX("Failed_Component");
+        return S_OK;
+    }
 
     return S_OK;
 }
@@ -90,7 +101,7 @@ HRESULT CGameObject::Add_Component(_uint iLevelIndex, const _wstring& strPrototy
     return S_OK;
 }
 
-HRESULT CGameObject::Delete_ComPonent(_uint iLevelIndex, const _wstring& strComponentTag)
+HRESULT CGameObject::Delete_Component(_uint iLevelIndex, const _wstring& strComponentTag)
 {
     auto iter = m_Components.find(strComponentTag);
 

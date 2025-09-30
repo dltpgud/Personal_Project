@@ -56,6 +56,8 @@ public:
                        OUT _vector& vNormal);
     _float3 GetVetexPos(_uint Mashinx, _int NumIndexices);
 
+  class CMesh* Get_Mash(_uint Mashinx);
+
 public:
 
     HRESULT Ready_AniModel(const _tchar* pModelFilePath);
@@ -77,6 +79,13 @@ private:
     vector<class CAnimation*> m_Animations;
     
 
+private:
+    ID3D11Buffer* m_pPositionsBuffer;
+    ID3D11ShaderResourceView* m_pPositionsSRV;
+    ID3D11Buffer* m_pIndicesBuffer;
+    ID3D11ShaderResourceView* m_pIndicesSRV;
+    UINT m_TotalIndices = 0;
+    UINT m_TotalVertices = 0;
 
 
 public:

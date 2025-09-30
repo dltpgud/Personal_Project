@@ -36,9 +36,6 @@ HRESULT CBody_BillyBoom::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     m_pFindAttBonMatrix[BM_LEFT_TOP] = Get_SocketMatrix("L_TopArm_04"); // ¿ÞÂÊ À§ ÆÈ
     m_pFindAttBonMatrix[BM_RIGHT_TOP] = Get_SocketMatrix("R_TopArm_04"); // ¿À¸¥ ÂÊ À§ ÆÈ
     m_pFindAttBonMatrix[BM_HAND] = Get_SocketMatrix("R_Arm_04");     // ÅÂ¾ç³¯¸®±â
@@ -239,6 +236,9 @@ HRESULT CBody_BillyBoom::Bind_ShaderResources()
 
 HRESULT CBody_BillyBoom::Set_StateMachine()
 {
+    if (OBJ_POOL == m_iLifeState)
+        return S_OK;
+
     m_pStateMachine.resize(CBillyBoom::ST_END);
 
 #pragma region IDLE

@@ -54,11 +54,16 @@ void CBounding_AABB::Set_Info(BOUND_DESC* pBoundDesc)
     m_pBoundDesc_Original->Center = pDesc->vCenter;
     m_pBoundDesc_Original->Extents = pDesc->vExtents;
 }
-_bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis )
+_bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos)
 {
 	_bool		isColl = { false };
 
     isColl = m_pBoundDesc->Intersects(RayPos, RayDir, fDis);
+
+	if (true == isColl && nullptr != hitPos)
+	{
+       *hitPos = RayPos + RayDir * fDis;
+	}
 
 	return isColl;
 }

@@ -52,9 +52,9 @@ private:
     _float m_fCurRatio = {0.f};
     _float2 m_fPsize{1.2f, 0.1f};
  
-    private:
-	HRESULT Add_Components();
-	
+private:
+    virtual HRESULT Add_Components() override;
+
 
 public:
 	static CMonsterHP*	 Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -32,7 +32,7 @@ public:
     void ChangeState(_int nextState);
 
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Bind_ShaderResources();
     HRESULT Set_StateMachine();
 

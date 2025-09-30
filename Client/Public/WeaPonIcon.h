@@ -37,7 +37,7 @@ private:
     _tchar* m_pWeaPonNumName = {};
     class CInteractiveUI* m_InteractiveUI = {nullptr};
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Bind_ShaderResources();
     HRESULT Init_CallBack();
     HRESULT Init_MSG();

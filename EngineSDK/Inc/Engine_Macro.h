@@ -89,6 +89,11 @@ namespace Engine
 				}													\
 				return iRefCnt;										\
 			}
+
+
+#define  OBJ_NOEVENT       0
+#define  OBJ_DEAD          1
+#define  OBJ_POOL          2
 }
 
 #endif // Engine_Macro_h__

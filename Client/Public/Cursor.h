@@ -25,7 +25,7 @@ public:
 	virtual void	Late_Update(_float fTimeDelta) override;
 	virtual HRESULT Render() override;
 private:
-	HRESULT			Add_Components();
+	virtual HRESULT Add_Components() override;
 
 private:
 	CTexture* m_pTextureCom = { nullptr };

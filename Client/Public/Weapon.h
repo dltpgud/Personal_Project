@@ -65,7 +65,7 @@ private:
 	vector<WEAPON_NODE_DESC> m_vecWeaPone;
 
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
     void    ResetEmissive(){m_vecWeaPone[m_iWeapon].fEmissvePower = m_vecWeaPone[m_iWeapon].fPreEmissvePower;}
     void    ResetBullet()  {m_vecWeaPone[m_iWeapon].iCurBullet = m_vecWeaPone[m_iWeapon].iMaxBullet;}

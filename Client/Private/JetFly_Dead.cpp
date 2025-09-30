@@ -48,7 +48,7 @@ CStateMachine::Result CJetFly_Dead::StateMachine_Playing(_float fTimeDelta, RIM_
     }
     
     if (1.f == m_pParentPartObject->Get_threshold())
-        m_pParentObject->Set_Dead(true);
+        m_pParentObject->Set_LifeState(true);
 
      return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      

@@ -195,7 +195,7 @@ HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison() {
                   pPlayer->Check_Coll();
 
                  if (dynamic_cast<CSkill*>(pMonsterBullet)->Get_ActorType() != CSkill::BOSS_MONSTER)
-                  pMonsterBullet->Set_Dead(true);
+                  pMonsterBullet->Set_LifeState(OBJ_POOL);
               }
           }
       }
@@ -210,13 +210,14 @@ HRESULT Collider_Manager::Player_To_Mash_Collison_for_Decal()
     _float fNewDist = {0xffff};
     _float fDist = 0.f;
     _vector RayPos{}, RayDir{};
-    _vector NewRayPos{}, NewRayDir{};
+    _vector NewHitPos{}, NewRayDir{};
+    _vector HitPos{};
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
 
     for (auto& Decal : m_GameObjeList[COL_DECAL])
     {
-        if (true == Decal->Get_Collider()->RayIntersects(RayPos, RayDir, fDist))
+        if (true == Decal->Get_Collider()->RayIntersects(RayPos, RayDir, fDist, &HitPos))
         {
             if (fDist < fNewDist)
             {
@@ -224,7 +225,7 @@ HRESULT Collider_Manager::Player_To_Mash_Collison_for_Decal()
                 {
                     fNewDist = fDist;
                     Obj = Decal;
-                    NewRayPos = RayPos;
+                    NewHitPos = HitPos;
                     NewRayDir = RayDir;
                 }
             }
@@ -232,9 +233,13 @@ HRESULT Collider_Manager::Player_To_Mash_Collison_for_Decal()
     }
     if (Obj)
     {
-        Obj->CreateDecal(NewRayPos, NewRayDir);
+        Obj->CreateDecal(NewHitPos, NewRayDir);
     }
 
+    DECAL_DESC Desc{};
+    Desc.vHitDIR = RayDir;
+    Desc.vHitPoint = RayPos;
+    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
     return S_OK;
 }
 
@@ -244,7 +249,8 @@ HRESULT Collider_Manager::MonsterBullet_To_Mash_Collison_for_Decal()
  
     _float fDist = 0.f;
     _vector RayPos{}, RayDir{};
-    _vector NewRayPos{}, NewRayDir{};
+    _vector NewHitPos{}, NewRayDir{};
+    CGameObject* pBullet{};
     for (auto& Bullet : m_GameObjeList[COL_MONSTER_SKILL]) 
     {  
       for (auto& Decal : m_GameObjeList[COL_DECAL])
@@ -253,24 +259,30 @@ HRESULT Collider_Manager::MonsterBullet_To_Mash_Collison_for_Decal()
           {
               static_cast<CSkill*>(Bullet)->Get_Ray(&RayPos, &RayDir);
               _float fDist{};
-              //cout << XMVectorGetX(RayDir) << " " << XMVectorGetY(RayDir) << " " << XMVectorGetZ(RayDir) << endl;
-              if (true == Bullet->Get_Collider()->RayIntersects(RayPos,RayDir,fDist))
+              _vector vPos{};
+              if (true == Bullet->Get_Collider()->RayIntersects(RayPos, RayDir, fDist, &vPos))
               {
                   Obj = Decal;
+                  NewHitPos = vPos;
+                  NewRayDir = RayDir;
+                  pBullet = Bullet;
+                  Bullet->Set_LifeState(OBJ_POOL);
               }
-
-              Bullet->Set_Dead(true);
           }
       }
+
         Safe_Release(Bullet);
     }
     m_GameObjeList[COL_MONSTER_SKILL].clear();
 
     if (Obj)
     {
-        Obj->CreateDecal(RayPos, RayDir);
+        Obj->CreateDecal(NewHitPos, NewRayDir);
     }
-
+    DECAL_DESC Desc{};
+    Desc.vHitDIR = RayDir;
+    Desc.vHitPoint = RayPos;
+    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
 
     return S_OK;
 }

@@ -89,7 +89,7 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta, R
         }
     }    
      if (XMVectorGetY(m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)) <-20)
-        m_pParentObject->Set_Dead(true);
+        m_pParentObject->Set_LifeState(true);
 
      return Result::Running;
 }      

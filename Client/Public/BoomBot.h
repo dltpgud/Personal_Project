@@ -26,8 +26,8 @@ public:
  
 
 private:
-    HRESULT Add_Components();
-    HRESULT Add_PartObjects();
+    virtual HRESULT Add_Components() override;
+    virtual HRESULT Add_PartObjects() override;
 
 public:
     static CBoomBot* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

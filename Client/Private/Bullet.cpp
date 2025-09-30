@@ -27,8 +27,6 @@ HRESULT CBullet::Initialize(void* pArg)
    if (FAILED(__super::Initialize(pDesc)))
        return E_FAIL; 
 
-   if (FAILED(Add_Components(pDesc)))
-        return E_FAIL;
 
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
 
@@ -37,17 +35,19 @@ HRESULT CBullet::Initialize(void* pArg)
 
     m_fLifeTime = 20.f;
 
-    CTrail::CTrail_DESC Desc{};
-    Desc.fstartPoint    = &m_fCurPos;
-    Desc.fendPoint      = &m_fPrePos;
-    Desc.fTrailLength   = pDesc->fTrailLength;
-    Desc.fTrailWidth    = pDesc->fTrailWidth;
-    Desc.iTrailSegments = 32;
-    Desc.fClolor[CSkill::COLOR::CSTART] = m_Clolor[CSkill::COLOR::CSTART];
-    Desc.fClolor[CSkill::COLOR::CEND]   = m_Clolor[CSkill::COLOR::CEND];
-    Desc.bState = &m_bDead;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Effect"),
-                                             TEXT("Prototype_GameObject_Trail"), &Desc);
+ 
+       CTrail::CTrail_DESC Desc{};
+       Desc.fstartPoint = &m_fCurPos;
+       Desc.fendPoint = &m_fPrePos;
+       Desc.fTrailLength = pDesc->fTrailLength;
+       Desc.fTrailWidth = pDesc->fTrailWidth;
+       Desc.iTrailSegments = 32;
+       Desc.fClolor[CSkill::COLOR::CSTART] = m_Clolor[CSkill::COLOR::CSTART];
+       Desc.fClolor[CSkill::COLOR::CEND] = m_Clolor[CSkill::COLOR::CEND];
+       Desc.pParantObject = &m_iLifeState;
+       m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Effect"),
+                                                TEXT("Prototype_GameObject_Trail"), &Desc);
+    
     return S_OK;
 }
 
@@ -123,22 +123,20 @@ void CBullet::Dead_Rutine()
                                                  L"Prototype_GameObject_ShockWave", &Desc);
     }
 
-    m_bDead = true;
+    m_iLifeState = OBJ_POOL;
 }
 
-HRESULT CBullet::Add_Components(void* pArg)
+HRESULT CBullet::Add_Components()
 {
-    CBULLET_DESC* pDesc = static_cast<CBULLET_DESC*>(pArg);
-
-    CBounding_Sphere::BOUND_SPHERE_DESC	 CBounding_Sphere{};
+    CBounding_Sphere::BOUND_SPHERE_DESC CBounding_Sphere{};
     _float3 Center{}, Extents{};
-    CBounding_Sphere.fRadius = pDesc->fRadius;
+    CBounding_Sphere.fRadius = 0.3;
     CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
-    
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"),
-        TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
+
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
         return E_FAIL;
-    
+
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_MonsterBullet"),
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;

@@ -53,8 +53,8 @@ public:
     }
 
 private:
-    HRESULT Add_Components();
-    HRESULT Add_PartObjects();
+    virtual HRESULT Add_Components() override;
+    virtual HRESULT Add_PartObjects() override;
     void    Change_Pattern();
 
 private:

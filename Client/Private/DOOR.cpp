@@ -25,14 +25,9 @@ HRESULT CDOOR::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
     m_ChangeLevelDoor = pDesc->Object_Type;
 
-    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
-    Safe_AddRef(m_InteractiveUI);
     m_flags = 0;
 
     m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
@@ -215,15 +210,10 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
 
 HRESULT CDOOR::CreateDecal(_vector RayPos, _vector RayDir)
 {
-    _vector vPos{};
-    _vector vNormal{};
-    if (m_pModelCom->RayIntersect(RayPos, RayDir, m_pTransformCom, vPos, vNormal))
-    {
-        DECAL_DESC Desc{};
-        Desc.vHitNormal = vNormal;
-        Desc.vHitPoint = vPos;
-        m_pGameInstance->Add_Decal(TEXT("K"), Desc);
-    }
+    DECAL_DESC Desc{};
+    Desc.vHitDIR = RayDir;
+    Desc.vHitPoint = RayPos;
+    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
     return S_OK;
 }
 
@@ -354,7 +344,7 @@ HRESULT CDOOR::Add_Components()
         return E_FAIL;
 
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = _float3(5.f, 6.f, 5.f);
+    OBBDesc.vExtents = _float3(5.f, 8.f, 5.f);
     OBBDesc.vCenter = _float3(0.f, 1.f, 0.f);
     OBBDesc.vRotation = _float3(0.f, 0.f, 0.f);
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
@@ -366,6 +356,12 @@ HRESULT CDOOR::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
                                       reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
         return E_FAIL;
+
+    m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
+    Safe_AddRef(m_InteractiveUI);
+
+
+
     return S_OK;
 }
 

@@ -270,6 +270,11 @@ _float3 CModel::GetVetexPos(_uint Mashinx, _int NumIndexices)
     return m_Meshes[Mashinx]->GetVetexPosAnim(NumIndexices);
 }
 
+CMesh* CModel::Get_Mash(_uint Mashinx)
+{
+    return m_Meshes[Mashinx];
+}
+
 HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)
 {
     HANDLE hFile = CreateFile(pModelFilePath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);

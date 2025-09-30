@@ -85,7 +85,8 @@ public:
     void BodyCallBack(_int Body, _uint AnimIdx, _int Duration, function<void()> func);
 
 private:
-	HRESULT Add_Components();
+	virtual HRESULT Add_Components() override;
+
 	HRESULT Bind_ShaderResources();
     _int BodyMotion(_int Body, _int Motion);
 

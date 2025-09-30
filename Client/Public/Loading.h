@@ -40,7 +40,7 @@ private:
 	_float          m_fFirstX{};
 	CLoading_DESC   Desc{};
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Set_LoadPos(CLoading_DESC* pArg);
 
 public:

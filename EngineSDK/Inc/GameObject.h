@@ -40,8 +40,8 @@ public:
     CTransform* Get_Transform() {return m_pTransformCom;}
     CCollider*  Get_Collider()  {return m_pColliderCom; }
 
-    void Set_Dead(_bool Dead){m_bDead = Dead;}
-    _bool Get_Dead(){return  m_bDead;}
+    void Set_LifeState(const _uint& Dead){m_iLifeState = Dead;}
+    const _uint& Get_LifeState(){return  m_iLifeState;}
 
     virtual void Set_Model(const _wstring& protoModel, _uint iLevel = 0)
     {
@@ -51,13 +51,14 @@ public:
     {
         return m_iObjectType;
     }
- 
+    virtual HRESULT Add_Components() {return S_OK;};
+
 protected:
     class CGameInstance* m_pGameInstance = {nullptr};
     ID3D11Device* m_pDevice = {nullptr};
     ID3D11DeviceContext* m_pContext = {nullptr};
 
-    _bool m_bDead{};
+   _uint m_iLifeState{};
     _int m_iObjectType{-1};
     _bool m_bClone{};
   
@@ -67,9 +68,8 @@ protected:
     CTransform* m_pTransformCom = {nullptr};
 
 protected:
-    HRESULT Add_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, const _wstring& strComponentTag,
-                          CComponent** ppOut, void* pArg = nullptr);
-    HRESULT Delete_ComPonent(_uint iLevelIndex, const _wstring& strComponentTag);
+    HRESULT Add_Component(_uint iLevelIndex, const _wstring& strPrototypeTag, const _wstring& strComponentTag,CComponent** ppOut, void* pArg = nullptr);
+    HRESULT Delete_Component(_uint iLevelIndex, const _wstring& strComponentTag);
 
 public:
     virtual CGameObject* Clone(void* pArg) = 0;

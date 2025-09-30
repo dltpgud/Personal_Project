@@ -43,10 +43,10 @@ public:
     virtual void    Update(_float fTimeDelta) override;
     virtual void    Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
-
+ 
 private:
-    HRESULT Add_Components();
-    HRESULT Add_PartObjects();
+    virtual HRESULT Add_Components() override;
+    virtual HRESULT Add_PartObjects() override;
     HRESULT Init_CallBack();
     void SetState(_uint flag, bool value)
     {

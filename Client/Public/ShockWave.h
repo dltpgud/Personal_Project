@@ -24,7 +24,7 @@ private:
 	virtual ~CShockWave() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype() override;
+    virtual HRESULT Initialize_Prototype() override;
 	virtual HRESULT Initialize(void* pArg) override;
     virtual void Priority_Update(_float fTimeDelta) override;
 	virtual void Update(_float fTimeDelta) override;
@@ -32,7 +32,7 @@ public:
 	virtual void Dead_Rutine() override;
 	virtual HRESULT Render() override;	
 	virtual _bool Comput_SafeZone(_fvector vPlayerPos) override;
-
+  
 private:
 	CModel*   m_pModelCom     = {};
     _float    m_fScaleSpeed   = {};
@@ -41,7 +41,7 @@ private:
     _float    m_fTimeSum      = {};
 
 private:
-	HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();
 
 public:

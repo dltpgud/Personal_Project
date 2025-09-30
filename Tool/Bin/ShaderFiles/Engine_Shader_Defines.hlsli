@@ -137,11 +137,7 @@ RasterizerState RS_Decal
     FillMode = Solid;
     CullMode = front; 
     FrontCounterClockwise = false;
-    DepthBias = 10;
-    SlopeScaledDepthBias = 1.0;
-    DepthBiasClamp = 0.0;
 };
-
 
 DepthStencilState DSS_Decal
 {
@@ -149,7 +145,6 @@ DepthStencilState DSS_Decal
     DepthWriteMask = zero;
     DepthFunc = less_equal;
 };
-
 
 BlendState BS_Decal
 {

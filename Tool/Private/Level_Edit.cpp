@@ -1106,7 +1106,7 @@ void CLevel_Edit::Msg_Del_Box()
         if (ImGui::Button("Delete OK"))
         {
             m_pGameInstance->Recent_GameObject(LEVEL_EDIT, TEXT("Layer_Map"))
-                ->Set_Dead(true); // 가장 최근에 추가한 마지막 오브젝트를 삭제한다.
+                ->Set_LifeState(true); // 가장 최근에 추가한 마지막 오브젝트를 삭제한다.
 
             if (false == m_pGameInstance->IsGameObject(LEVEL_EDIT, TEXT("Layer_Map")))
             {
@@ -2103,7 +2103,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
 
             if (Desc.pPickedObj)
             {
-                Desc.pPickedObj->Set_Dead(true);
+                Desc.pPickedObj->Set_LifeState(true);
             }
         }
 
@@ -2138,7 +2138,7 @@ void CLevel_Edit::Key_input(_float ftimedelta)
                 else
                     continue;
             }
-            m_vTerrain[index]->Set_Dead(true);
+            m_vTerrain[index]->Set_LifeState(true);
             m_vTerrain.erase(m_vTerrain.begin() + index);
         }
     }

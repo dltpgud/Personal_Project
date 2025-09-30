@@ -29,9 +29,6 @@ HRESULT CFade::Initialize(void* pArg)
 
     if (FAILED(__super::Initialize(pDesc)))
 		 return E_FAIL;
-       
-	if (FAILED(Add_Components()))
-		return E_FAIL;
 
 	m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
         m_pTransformCom->Set_TRANSFORM(

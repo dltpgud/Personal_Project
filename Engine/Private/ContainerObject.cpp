@@ -33,6 +33,13 @@ HRESULT CContainerObject::Initialize(void * pArg)
 	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
 
+	if (m_iLifeState == OBJ_NOEVENT)
+    {
+      if (FAILED(Add_PartObjects()))
+          return E_FAIL;
+    }
+
+
 	return S_OK;
 }
 

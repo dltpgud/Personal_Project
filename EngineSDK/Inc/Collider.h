@@ -22,7 +22,7 @@ public:
  public:
     _bool   IsColl();
 	_bool   Intersect(CCollider* pTargetCollider);
-	_bool   RayIntersects(_vector RayPos, _vector RayDir, _float& fDis);
+    _bool   RayIntersects(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos = nullptr);
 	_float  Get_iCurRadius() ;
     _float3 Get_iCurCenter();
     

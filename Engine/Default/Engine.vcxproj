@@ -198,6 +198,7 @@ call UpdateLib.bat</Command>
     </ClInclude>
     <ClInclude Include="..\Public\ComputeShader.h" />
     <ClInclude Include="..\Public\ContainerObject.h" />
+    <ClInclude Include="..\Public\CS_RayCastingDecal.h" />
     <ClInclude Include="..\Public\Decal.h" />
     <ClInclude Include="..\Public\Decal_Manager.h" />
     <ClInclude Include="..\Public\Frustum.h" />
@@ -285,6 +286,7 @@ call UpdateLib.bat</Command>
     </ClCompile>
     <ClCompile Include="..\Private\ComputeShader.cpp" />
     <ClCompile Include="..\Private\ContainerObject.cpp" />
+    <ClCompile Include="..\Private\CS_RayCastingDecal.cpp" />
     <ClCompile Include="..\Private\Decal.cpp" />
     <ClCompile Include="..\Private\Decal_Manager.cpp" />
     <ClCompile Include="..\Private\Frustum.cpp" />
@@ -345,6 +347,8 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\VIBuffer_Trail.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_RaycastDecal.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\CS_Skinning.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Deferred.hlsl" />
   </ItemGroup>

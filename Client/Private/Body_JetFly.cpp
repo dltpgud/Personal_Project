@@ -28,10 +28,8 @@ HRESULT CBody_JetFly::Initialize(void* pArg)
     m_pParentObj = pDesc->pParentObj;
     m_pParentState = pDesc->pParentState;
     m_RimDesc.eState = pDesc->pRimState;
-    if (FAILED(__super::Initialize(pArg)))
-        return E_FAIL;
 
-    if (FAILED(Add_Components()))
+    if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
     m_fDeadTime = 2.5f;
@@ -194,6 +192,9 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
 
 HRESULT CBody_JetFly::Set_StateMachine()
 {
+    if (OBJ_POOL == m_iLifeState)
+        return S_OK;
+
     m_pStateMachine.resize(CJetFly::ST_END);
 
 #pragma region IDLE

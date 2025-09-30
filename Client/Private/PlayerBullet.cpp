@@ -17,20 +17,19 @@ HRESULT CPlayerBullet::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CPlayerBullet::Initialize(void* pArg)
+HRESULT CPlayerBullet::Initialize(void* pArg) 
 {
     CPlayerBullet_DESC* pDesc = static_cast<CPlayerBullet_DESC*>(pArg);
-        
         m_vTagetPos = pDesc->vTagetPos;
         m_vLocalPos = pDesc->vLocalPos;
         m_WorldPtr = pDesc->fWorldPtr;
         m_fScale = pDesc->fScale;
+    
+   if (FAILED(__super::Initialize(pDesc)))
+          return E_FAIL;
+     
 
-    if (FAILED(__super::Initialize(pDesc)))
-        return E_FAIL;
-
-    if (FAILED(Add_Components()))
-        return E_FAIL;
+    m_bStart = false;
 
     if (0.f == m_fLifeTime)
         m_fLifeTime = 1.f;
@@ -79,7 +78,7 @@ void CPlayerBullet::Late_Update(_float fTimeDelta)
 
 void CPlayerBullet::Dead_Rutine()
 {
-        m_bDead = true;
+    m_iLifeState = OBJ_POOL;
 }
 
 HRESULT CPlayerBullet::Render()

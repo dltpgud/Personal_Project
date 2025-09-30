@@ -184,14 +184,14 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 
 #ifdef _DEBUG
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"), 50.f, 50.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Depth"), 50.f, 50.f, 150.f, 150.f)))
          return E_FAIL;
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Decal"),  50.f, 200.f, 150.f, 150.f)))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_LightDepth"),   50.f, 350.f, 150.f, 150.f)))
         return E_FAIL;
-   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Specular"), 200.f, 50.f, 150.f, 150.f)))
-   //     return E_FAIL;
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"), 200.f, 50.f, 150.f, 150.f)))
+        return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Rim"),     200.f, 200.f, 150.f, 150.f)))
    //     return E_FAIL;
    // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_OutLine"), 200.f, 350.f, 150.f, 150.f)))
@@ -601,6 +601,8 @@ HRESULT CRenderer::Render_Decal()
     if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformFloat4x4_Inverse(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DepthTexture", TEXT("Target_Depth"))))
+        return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_NormalTexture", TEXT("Target_Normal"))))
         return E_FAIL;
 
     _float2 WindowSize = {(_float)m_iWinSizeX, (_float)m_iWinSizeY};

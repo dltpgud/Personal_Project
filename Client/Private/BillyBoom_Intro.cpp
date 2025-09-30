@@ -118,7 +118,7 @@ void CBillyBoom_Intro::Set_Setting()
         ->Set_Update(true);
 
     dynamic_cast<CSceneCamera*>(m_pGameInstance->Find_CloneGameObject(LEVEL_BOSS, TEXT("Layer_Camera"), GAMEOBJ_TYPE::CAMERA))
-        ->Set_Dead(true);
+        ->Set_LifeState(true);
 
     dynamic_cast<CFade*>(m_pGameInstance->Find_Clone_UIObj(L"Fade"))->Set_Fade(false);
 }

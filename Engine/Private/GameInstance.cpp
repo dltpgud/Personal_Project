@@ -11,8 +11,13 @@
 #include "Target_Manager.h"
 #include "Frustum.h"
 #include "Decal_Manager.h"
-
+#include "Decal.h"
 IMPLEMENT_SINGLETON(CGameInstance)
+
+template <>  std::unordered_map<std::type_index, std::vector<void*>> ObjectPool<Engine::CGameObject>::s_pools;
+
+// CDecal 계열 풀 정의
+template <> std::unordered_map<std::type_index, std::vector<void*>> ObjectPool<Engine::CDecal>::s_pools;
 
 CGameInstance::CGameInstance()
 {
@@ -355,14 +360,7 @@ HRESULT CGameInstance::Add_GameObject_To_Layer(_uint iLevelIndex, const _wstring
 	if (nullptr == m_pObject_Manager)
 		return E_FAIL;
 
- 	CGameObject* pPrototype = m_pObject_Manager->Find_Prototype(strPrototypeTag);
-	if (nullptr == pPrototype)
-		return E_FAIL;
-
-	CGameObject* pGameObject = pPrototype->Clone(pArg);
-    if (nullptr == pGameObject)
-       return E_FAIL; 
-
+   CGameObject* pGameObject = m_pObject_Manager->Clone_Prototype(strPrototypeTag, pArg);
    m_pObject_Manager->Add_Clon_to_Layers(iLevelIndex, strLayerTag, pGameObject);
 	
 	return S_OK;
@@ -871,7 +869,7 @@ HRESULT CGameInstance::Add_DecalProto(const wstring& Key, const _tchar* FilePath
     return m_pDecal_Manager->Add_DecalProto(Key, FilePath, TexNum);
 }
 
-HRESULT CGameInstance::Add_Decal(const wstring& Key, const DECAL_DESC& DecalDesc)
+HRESULT CGameInstance::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc)
 {
     return m_pDecal_Manager->Add_Decal(Key, DecalDesc);
 }

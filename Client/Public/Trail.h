@@ -20,7 +20,7 @@ public:
         _float   fTrailLength; // 部府 辨捞
         _float   fTrailWidth ; // 部府 气
         _float4  fClolor[CSkill::COLOR::COLOR_END];
-        _bool* bState{};
+        _uint* pParantObject{};
     }CTrail_DESC;
 
 private:
@@ -38,7 +38,7 @@ public:
 
 
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Bind_ShaderResources();
 
 private:
@@ -57,7 +57,8 @@ private:
     _int     m_iTrailSegments{};       // 部府 技弊刚飘 俺荐
     _float   m_fTrailLength{};     // 部府 辨捞
     _float   m_fTrailWidth{};        // 部府 气
-    _bool* m_bState{};
+    _uint* m_bState{};
+
 
 public:
     static CTrail* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -48,6 +48,23 @@ public:
     VTXMATRIX_INSTANCE* m_pInst_BufferData{};
     _float3* m_pPos{};
     _uint* m_pIndices{};
+    HRESULT Create_RaycastSRV();
+    ID3D11ShaderResourceView* CMesh::Get_PositionsSRV() const
+    {
+        return m_pPositionsSRV;
+    }
+    ID3D11ShaderResourceView* CMesh::Get_IndicesSRV() const
+    {
+        return m_pIndicesSRV;
+    }
+    UINT CMesh::Get_NumIndices() const
+    {
+        return m_iNumIndexices;
+    }
+
+private:
+    ID3D11ShaderResourceView* m_pPositionsSRV = nullptr;
+    ID3D11ShaderResourceView* m_pIndicesSRV = nullptr;
     VTXANIMMESH* m_pAnimVertices = nullptr; // 애니메이션 정점 데이터
     vector<XMMATRIX> m_FinalBoneMatrices;
 

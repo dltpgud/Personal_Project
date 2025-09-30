@@ -32,12 +32,6 @@ HRESULT CJetFly::Initialize(void* pArg)
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
-    if (FAILED(Add_PartObjects()))
-        return E_FAIL;
-
     return S_OK;
 }
 

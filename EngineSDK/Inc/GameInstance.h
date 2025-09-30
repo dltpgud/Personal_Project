@@ -207,7 +207,7 @@ public: /* For.ThreadPool */
 
 #pragma region Decal
     HRESULT Add_DecalProto(const wstring& Key, const _tchar* FilePath, const _uint& TexNum =1);
-    HRESULT Add_Decal(const wstring& Key, const DECAL_DESC& DecalDesc);
+    HRESULT Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc);
     HRESULT Render_Decal(class CShader* pShader);
     HRESULT Decal_Clear();
 #pragma endregion

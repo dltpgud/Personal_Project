@@ -34,7 +34,7 @@ public:
     virtual void Dead_Rutine() override;
 
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Bind_ShaderResources();
     HRESULT Initialize_SkillType();
 

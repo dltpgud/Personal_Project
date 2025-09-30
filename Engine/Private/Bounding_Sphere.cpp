@@ -50,12 +50,17 @@ _bool CBounding_Sphere::IsInside(const _float3& pos)
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
 }
 
-_bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis)
+_bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos)
 {
 	_bool		isColl = { false };
 	
 
 	isColl = m_pBoundDesc->Intersects(RayPos, RayDir,fDis);
+
+    if (true == isColl && nullptr != hitPos)
+	{
+       *hitPos = RayPos + RayDir * fDis;
+	}
 
 	return isColl;
 }

@@ -3,6 +3,9 @@
 #include "Layer.h"
 #include "GameObject.h"
 #include "UI_Manager.h"
+
+
+
 CObject_Manager::CObject_Manager() 
 {
 	
@@ -119,6 +122,7 @@ HRESULT CObject_Manager::Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& s
 			return E_FAIL;
 
 		pLayer->Add_GameObject(clone);
+
 		m_pLayers[iLevelIndex].emplace(strLayerTag, pLayer);
 	}
 	else 
@@ -150,12 +154,14 @@ CGameObject* CObject_Manager::Find_CloneGameObject(_uint iLevelIndex, const _wst
 CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, void* pArg)
 {
 	CGameObject* pPrototype = Find_Prototype(strPrototypeTag);
+
 	if (nullptr == pPrototype)
 		return nullptr;
-
-	CGameObject* pGameObject = pPrototype->Clone(pArg);
+        
+	CGameObject* pGameObject = ObjectPool<CGameObject>::Pop(*pPrototype, pArg);
+        
 	if (nullptr == pGameObject)
-		return nullptr;
+            MSG_BOX("pGameObject_Empty");
 
 	return pGameObject;
 }
@@ -236,14 +242,17 @@ void CObject_Manager::Free()
 {
 	__super::Free();
 
-    Safe_Release(m_pPlayer);
+	ObjectPool<CGameObject>::ClearAll();
 
+    Safe_Release(m_pPlayer);
+	
 	for (size_t i = 0; i < m_iNumLevels; i++)
     {
 		for (auto& Pair : m_pLayers[i])
 				Safe_Release(Pair.second);
 		m_pLayers[i].clear();
 	}
+
 	Safe_Delete_Array(m_pLayers);
 	
 	for (auto& Pair : m_Prototypes)

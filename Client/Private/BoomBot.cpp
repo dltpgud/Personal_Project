@@ -32,12 +32,6 @@ HRESULT CBoomBot::Initialize(void* pArg)
    if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-   if (FAILED(Add_Components()))
-        return E_FAIL;
-
-   if (FAILED(Add_PartObjects()))
-        return E_FAIL;
-
     return S_OK;
 }
 
@@ -98,7 +92,7 @@ HRESULT CBoomBot::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
         TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
         return E_FAIL;
-
+    
     return S_OK;
 }
 

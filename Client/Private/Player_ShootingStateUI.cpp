@@ -31,9 +31,6 @@ HRESULT CPlayer_ShootingStateUI::Initialize(void* pArg)
 		CTransform::T_POSITION,
 		XMVectorSet(m_fX - ViewportDesc.Width * 0.5f, -m_fY + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
 	return S_OK;
 }
 

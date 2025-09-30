@@ -26,9 +26,6 @@ HRESULT CMonsterHP::Initialize(void* pArg)
 	if (FAILED(__super::Initialize(Desc)))
 		return E_FAIL;
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(0.f, 2.f, 0.f, 1.f));
     m_fHP_Pluse = static_cast<_float>(m_iHP) * 1.3f / static_cast<_float> (m_iMaxHP);
     m_fRatio =static_cast<_float>( m_iHP) * 0.01f / static_cast<_float>(m_iMaxHP);

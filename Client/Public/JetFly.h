@@ -25,8 +25,8 @@ public:
     virtual void Set_State(_uint State) override;
 
 private:
-    HRESULT Add_Components();
-    HRESULT Add_PartObjects();
+    virtual HRESULT Add_Components() override;
+    virtual HRESULT Add_PartObjects() override;
 
 public:
     static CJetFly* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

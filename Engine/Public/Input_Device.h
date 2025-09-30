@@ -69,8 +69,9 @@ public:
 private:
     _bool IsCursorInClient() const
     {
-        if (m_tMouseCursur.x < 0 || m_tMouseCursur.x > m_iWinSizeX || m_tMouseCursur.y < 0 ||
-            m_tMouseCursur.y > m_iWinSizeY)
+        _uint mouseX = static_cast<_uint> (m_tMouseCursur.x);
+        _uint mouseY = static_cast<_uint>(m_tMouseCursur.y);
+        if (mouseX < 0 || mouseX > m_iWinSizeX || mouseY < 0 || mouseY > m_iWinSizeY)
             return false;
         else
             return true;

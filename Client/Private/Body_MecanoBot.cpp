@@ -32,10 +32,7 @@ HRESULT CBody_MecanoBot::Initialize(void* pArg)
 
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
-
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-    
+   
     m_pSocketMatrix = Get_SocketMatrix("R_Canon_02");
 
     if (FAILED(Set_StateMachine()))
@@ -212,6 +209,9 @@ HRESULT CBody_MecanoBot::Bind_ShaderResources()
 
 HRESULT CBody_MecanoBot::Set_StateMachine()
 {
+    if (OBJ_POOL == m_iLifeState)
+        return S_OK;
+
     m_pStateMachine.resize(CMecanoBot::ST_END);
 
 #pragma region IDLE

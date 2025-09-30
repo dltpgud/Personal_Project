@@ -37,9 +37,6 @@ HRESULT CWeaponUI::Initialize(void* pArg)
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,
         XMVectorSet(pDesc->fX - g_iWinSizeX * 0.5f, -pDesc->fY + g_iWinSizeY * 0.5f, 0.5f, 1.f));
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     if (FAILED(Set_WeaponUI_Pos()))
         return E_FAIL;
 

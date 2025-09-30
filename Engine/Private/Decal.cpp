@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "GameInstance.h"
+
 CDecal::CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : m_pDevice{pDevice}, m_pContext{pContext}
 {
     Safe_AddRef(m_pDevice);
@@ -25,94 +26,78 @@ HRESULT CDecal::Initialize_Proto(const _tchar* FilePath, const _uint& TexNum)
     return S_OK;
 }
 
-HRESULT CDecal::Initialize_PoolObj(const DECAL_DESC& DecalDesc)
+HRESULT CDecal::Initialize(void* pArg)
 {
-    m_fDecalTime = 0.f;
-    m_bDead = false;
-    _vector n = XMVector3Normalize(DecalDesc.vHitNormal);
-    _vector t = XMVector3Normalize(XMVector3Orthogonal(n));
-    _vector b = XMVector3Normalize(XMVector3Cross(n, t));
-    _matrix TBN = _matrix(t, b, n, XMVectorSet(0, 0, 0, 1));
-    _matrix S = XMMatrixScaling(DecalDesc.fSize, DecalDesc.fSize, DecalDesc.fDepth);
-    _matrix T = XMMatrixTranslationFromVector(DecalDesc.vHitPoint + n * 0.001f);
-    _matrix world = S * TBN * T;
-    _matrix invWorld = XMMatrixInverse(nullptr, world);
-    XMStoreFloat4x4(&m_WorldMatInv, invWorld);
+    if (m_bDead == OBJ_POOL)
+    {
+        m_bDead = OBJ_NOEVENT;
+        m_fDecalTime = 0.f;
+    }
 
-    m_fLifeTime = DecalDesc.fLifeTime;
+    DECAL_DESC* pDecalDesc = static_cast<DECAL_DESC*>(pArg);
 
-    // 셰이더로 넘겨줄 값
-    XMStoreFloat3(&m_Tangent, t);
-    XMStoreFloat3(&m_Binormal, b);
-    XMStoreFloat3(&m_Normal, n);
-    return S_OK;
-   // return Initialize(DecalDesc);
-}
+    XMStoreFloat3(&m_fDecalPos, pDecalDesc->vHitPoint);
+    XMStoreFloat3(&m_fDecalDir, pDecalDesc->vHitDIR);
+    m_fLifeTime = pDecalDesc->fLifeTime;
 
-HRESULT CDecal::Initialize(const DECAL_DESC& DecalDesc)
-{
-    _vector n = XMVector3Normalize(DecalDesc.vHitNormal); 
-    _vector t = XMVector3Normalize(XMVector3Orthogonal(n));
-    _vector b = XMVector3Normalize(XMVector3Cross(n, t));
-    _matrix TBN = _matrix(t, b, n, XMVectorSet(0, 0, 0, 1));
-    _matrix S = XMMatrixScaling(DecalDesc.fSize, DecalDesc.fSize, DecalDesc.fDepth);
-    _matrix T = XMMatrixTranslationFromVector(DecalDesc.vHitPoint + n * 0.001f);
-    _matrix world = S * TBN * T;
-    _matrix invWorld = XMMatrixInverse(nullptr, world);
-    XMStoreFloat4x4(&m_WorldMatInv, invWorld);
-
-    m_fLifeTime = DecalDesc.fLifeTime;
- 
-    // 셰이더로 넘겨줄 값
-    XMStoreFloat3(&m_Tangent, t);
-    XMStoreFloat3(&m_Binormal, b);
-    XMStoreFloat3(&m_Normal, n);
     return S_OK;
 }
 
 void CDecal::Update(_float fTimeDelta)
 {
-   m_fDecalTime += fTimeDelta;
-   m_fLifeTime -= fTimeDelta;
-   if (m_fLifeTime <= 0.f)
-        m_bDead = true;
+    m_fDecalTime += fTimeDelta;
+    m_fLifeTime -= fTimeDelta;
+    if (m_fLifeTime <= 0.f)
+        m_bDead = OBJ_POOL;
 }
 
 HRESULT CDecal::Render(CShader* pShader)
 {
-    if (FAILED(pShader->Bind_Matrix("g_WorldInvMatrix", &m_WorldMatInv)))
-        return E_FAIL;
-
     if (FAILED(m_pTextureCom->Bind_ShaderResource(pShader, "g_DecalNormalAtlas", 0)))
         return E_FAIL;
+
     if (FAILED(m_pTextureCom->Bind_ShaderResource(pShader, "g_DecalAtlas", 1)))
         return E_FAIL;
 
     if (FAILED(pShader->Bind_RawValue("g_DecalFade", &m_fLifeTime, sizeof(_float))))
         return E_FAIL;
+
     if (FAILED(pShader->Bind_RawValue("g_fDecalTime", &m_fDecalTime, sizeof(_float))))
         return E_FAIL;
-    if (FAILED(pShader->Bind_RawValue("g_fDecalTangent", &m_Tangent, sizeof(_float3))))
+
+    if (FAILED(pShader->Bind_RawValue("g_fRayPos", &m_fDecalPos, sizeof(_float3))))
         return E_FAIL;
-    if (FAILED(pShader->Bind_RawValue("g_fDecalBinormal", &m_Binormal, sizeof(_float3))))
+
+    if (FAILED(pShader->Bind_RawValue("g_fRayDir", &m_fDecalDir, sizeof(_float3))))
         return E_FAIL;
-    if (FAILED(pShader->Bind_RawValue("g_fDecalNormal", &m_Normal, sizeof(_float3))))
-        return E_FAIL;
-    
+
     pShader->Begin(7);
 
     m_pVIBufferCom->Bind_Buffers();
-    
+
     m_pVIBufferCom->Render();
-    
+
     return S_OK;
 }
 
-CDecal* CDecal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* FilePath,const _uint& TexNum)
+CDecal* CDecal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* FilePath,
+                       const _uint& TexNum)
 {
     CDecal* pInstance = new CDecal(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Proto(FilePath, TexNum)))
+    {
+        MSG_BOX("Failed to Created : CDecal");
+        Safe_Release(pInstance);
+    }
+
+    return pInstance;
+}
+CDecal* CDecal::Clone(void* pArg)
+{
+    CDecal* pInstance = new CDecal(*this);
+
+    if (FAILED(pInstance->Initialize(pArg)))
     {
         MSG_BOX("Failed to Created : CDecal");
         Safe_Release(pInstance);

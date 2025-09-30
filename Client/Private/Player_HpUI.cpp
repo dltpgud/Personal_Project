@@ -37,9 +37,6 @@ HRESULT CPlayer_HpUI::Initialize(void* pArg)
     m_fPrXPos = pDesc->fX;
     m_fPrYPos = pDesc->fY;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     m_iHealthHP = 1;
     return S_OK;
 }

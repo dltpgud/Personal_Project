@@ -18,6 +18,7 @@ HRESULT CShootEffect::Initialize_Prototype()
 	return S_OK;
 }
 
+
 HRESULT CShootEffect::Initialize(void * pArg)
 {
 	CShootEffect_DESC* pDesc = static_cast<CShootEffect_DESC*>(pArg);
@@ -33,9 +34,8 @@ HRESULT CShootEffect::Initialize(void * pArg)
 	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
 
-	if (FAILED(Add_Components()))
-		return E_FAIL;
-
+	m_fFrame = {0.f};
+    m_iPass  = {};
 
 	switch (m_iWeaponType)
 	{
@@ -80,7 +80,7 @@ void CShootEffect::Update(_float fTimeDelta)
 		m_fFrame += 50.f * fTimeDelta;
 
 		if (m_fFrame >= 5.f)
-			m_bDead = true;
+			m_iLifeState = OBJ_POOL;
 
 	}
 
@@ -93,7 +93,7 @@ void CShootEffect::Update(_float fTimeDelta)
 		m_fFrame += 50.f * fTimeDelta;
 
 		if (m_fFrame >= 5.f)
-			m_bDead = true;
+			m_iLifeState = OBJ_POOL;
 
 	}
 
@@ -106,7 +106,7 @@ void CShootEffect::Update(_float fTimeDelta)
 		m_fFrame += 50.f * fTimeDelta;
 
 		if (m_fFrame >= 5.f)
-			m_bDead = true;
+			m_iLifeState = OBJ_POOL;
 
 	}
 	
@@ -119,7 +119,7 @@ void CShootEffect::Update(_float fTimeDelta)
 		m_fFrame += 50.f * fTimeDelta;
 
 		if (m_fFrame >= 5.f)
-			m_bDead = true;
+			m_iLifeState = OBJ_POOL;
 	}
 }
 

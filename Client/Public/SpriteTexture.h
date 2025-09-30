@@ -48,7 +48,7 @@ private:
 	_float m_interver{};
 
 private:
-	HRESULT Add_Components();
+	  virtual HRESULT Add_Components() override;
 	
 
 public:

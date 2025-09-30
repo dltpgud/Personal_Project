@@ -64,7 +64,7 @@ public:
 	virtual void Stun_Routine()override;
 
     virtual void Set_State(_uint flag, _bool value) override;
- 
+ 	
 public:
 	const _float4x4* Get_CameraBone();
     void WeaponCallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
@@ -77,8 +77,8 @@ public:
     void Set_Navigation();
 
 private:
-	HRESULT Add_Components();
-	HRESULT Add_PartObjects();
+    virtual HRESULT Add_Components() override;
+    virtual HRESULT Add_PartObjects() override;
 
 private:
     class CPlayer_StateMachine* m_pStateMachine = {nullptr};

@@ -60,7 +60,7 @@ private:
     _vector         m_vColar         {};
 
 private:
-    HRESULT Add_Components();
+    virtual HRESULT Add_Components() override;
     HRESULT Set_WeaponUI_Pos();
     HRESULT Set_WeaponUI_Pos2();
 
