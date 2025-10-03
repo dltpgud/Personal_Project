@@ -131,6 +131,11 @@ HRESULT CObject_Manager::Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& s
 	return S_OK;
 }
 
+void CObject_Manager::Preallocate(_wstring ProtoTag,  size_t count, void* desc)
+{
+    ObjectPool<CGameObject>::Preallocate(*Find_Prototype(ProtoTag), count, desc);
+}
+
 CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)
 {
 	auto iter = m_Prototypes.find(strPrototypeTag);
@@ -158,7 +163,7 @@ CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, v
 	if (nullptr == pPrototype)
 		return nullptr;
         
-	CGameObject* pGameObject = ObjectPool<CGameObject>::Pop(*pPrototype, pArg);
+	CGameObject* pGameObject = ObjectPool<Engine::CGameObject>::Pop(*pPrototype, pArg);
         
 	if (nullptr == pGameObject)
             MSG_BOX("pGameObject_Empty");
@@ -242,7 +247,7 @@ void CObject_Manager::Free()
 {
 	__super::Free();
 
-	ObjectPool<CGameObject>::ClearAll();
+	ObjectPool<Engine::CGameObject>::ClearAll();
 
     Safe_Release(m_pPlayer);
 	

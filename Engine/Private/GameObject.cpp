@@ -2,7 +2,7 @@
 #include "GameInstance.h"
 
 CGameObject::CGameObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : m_pDevice{ pDevice }, m_pContext{ pContext }, m_pGameInstance{ CGameInstance::GetInstance() }, m_bClone(false)
+    : m_pDevice{pDevice}, m_pContext{pContext}, m_pGameInstance{CGameInstance::GetInstance()}, m_iCloneCount(0)
 {
     Safe_AddRef(m_pGameInstance);
     Safe_AddRef(m_pContext);
@@ -11,7 +11,7 @@ CGameObject::CGameObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CGameObject::CGameObject(const CGameObject& Prototype) 
     : m_pDevice{Prototype.m_pDevice}, m_pContext{Prototype.m_pContext}, m_pGameInstance{Prototype.m_pGameInstance},
-      m_pTransformCom{Prototype.m_pTransformCom}, m_pColliderCom{ Prototype.m_pColliderCom }, m_bClone(true)
+      m_pTransformCom{Prototype.m_pTransformCom}, m_pColliderCom{Prototype.m_pColliderCom},m_iCloneCount(1)
 {
     Safe_AddRef(m_pColliderCom);
     Safe_AddRef(m_pTransformCom);
@@ -32,9 +32,17 @@ HRESULT CGameObject::Initialize(void* pArg)
        m_iLifeState = OBJ_NOEVENT;
         return S_OK;
     }
+
     GAMEOBJ_DESC* pDesc = static_cast<GAMEOBJ_DESC*>(pArg);
      m_iObjectType   = pDesc->Object_Type;
-     m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
+     
+     if (m_iCloneCount > 1)
+     {
+         m_pTransformCom->Initialize_Prototype(pDesc);
+         return S_OK;
+     }
+   
+    m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
 
     if (nullptr == m_pTransformCom)
         return E_FAIL;
@@ -49,6 +57,7 @@ HRESULT CGameObject::Initialize(void* pArg)
         return S_OK;
     }
 
+    m_iCloneCount++;
     return S_OK;
 }
 

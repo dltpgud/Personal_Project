@@ -4,7 +4,7 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 matrix g_LightViewMatrix, g_LightProjMatrix;
 matrix g_LightViewMatrixInv, g_LightProjMatrixInv;
-matrix g_ViewMatrixInv, g_ProjMatrixInv, g_WorldInvMatrix;
+matrix g_ViewMatrixInv, g_ProjMatrixInv, g_WorldMatrixInv;
 
 texture2D g_Texture;
 texture2D g_OutLineTexture;
@@ -29,9 +29,13 @@ texture2D g_DecalNormalTexture;
 texture2D g_DecalTexture;
 texture2D g_DecalAtlas;
 texture2D g_DecalNormalAtlas;
-float3 g_fRayPos;
-float3 g_fRayDir;
-
+float3 g_fDecalPos;
+float3 g_fDecalDir;
+float3 g_fDecalNormal;
+float3 g_fDecalTangent;
+float3 g_fDecalBinormal;
+bool g_bDecalNormal;
+float3 g_DecalhalfSize;
 
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
@@ -402,84 +406,140 @@ struct PS_OUT_Decal
     vector vNormal : SV_TARGET1;
 };
 
-PS_OUT_Decal PS_MAIN_Decal(PS_IN In)
+float4 ComputeDecalEffect(float3 decal)
+{
+    float glowPhase = saturate(1.0 - g_fDecalTime * 1.f);
+    float3 glowColor = decal.rgb * 4.0;
+    float3 colorWithGlow = lerp(decal.rgb, glowColor, glowPhase);
+
+    float3 grayColor = float3(0.25, 0.25, 0.25);
+    float3 Color = (glowPhase > 0.01f) ? colorWithGlow : grayColor;
+    float fade = saturate(g_DecalFade);
+    
+    return float4(Color, fade);
+}
+
+PS_OUT_Decal PS_MAIN_SSD(PS_IN In)
 {
     PS_OUT_Decal Out = (PS_OUT_Decal) 0;
 
     float2 screenUV = In.vPosition.xy / g_WinDowSize;
     float4 worldPos = Compute_WorldPos_byCamera(screenUV);
-
-    // 데칼 크기 (Half Size)
-    float3 halfSize = float3(1.0f, 1.0f, 1.0f);
-
-    // ----------------------------------------
-    // 1. 픽셀 노멀 (GBuffer)
-    // ----------------------------------------
+   
     float3 surfNormal = normalize(g_NormalTexture.Sample(PointSamplerClamp, screenUV).xyz * 2.0f - 1.0f);
 
-    // 2. 데칼 투사 방향과 비교해서 너무 어긋난 표면은 제외
-    if (dot(surfNormal, g_fRayDir) > -0.3f)   // -1이면 정면, 0이면 수직
+    if (dot(surfNormal, g_fDecalDir) > -0.3f)   // -1이면 정면, 0이면 수직
         discard;
-
-    //2.5 몬스터와 플레이어는 데칼 안그리게하기
+    
     float EXDeapth = g_DepthTexture.Sample(PointSamplerClamp, screenUV).w;
     if (EXDeapth > 0.5)
         discard;
     
-    // ----------------------------------------
-    // 3. TBN 생성 (투사 기준 좌표계)
-    // ----------------------------------------
-    float3 N = normalize(g_fRayDir); // 데칼 방향을 기준 노멀로
+    float3 N = normalize(g_fDecalDir); // 데칼 방향을 기준 노멀로
     float3 up = abs(N.y) < 0.999f ? float3(0, 1, 0) : float3(1, 0, 0);
     float3 T = normalize(cross(up, N));
     float3 B = normalize(cross(N, T));
     float3x3 TBN = float3x3(T, B, N);
 
-    // ----------------------------------------
-    // 4. 월드 좌표 → 로컬 좌표
-    // ----------------------------------------
-    float3 rel = (worldPos.xyz - g_fRayPos) / halfSize;
+    float3 rel = (worldPos.xyz - g_fDecalPos) / g_DecalhalfSize;
     float3 localPos = mul(rel, transpose(TBN));
 
-    // 박스 클리핑 (±1 범위)
     if (any(abs(localPos.xy) > 1.0f))
         discard;
 
-    // ----------------------------------------
-    // 5. UV 계산
-    // ----------------------------------------
     float2 uv = localPos.xy * 0.5f + 0.5f;
     float4 decal = g_DecalAtlas.Sample(PointSamplerClamp, uv);
     if (decal.a < 0.01f)
         discard;
+    
+    if (true == g_bDecalNormal)
+    {
+        float3 nTS = g_DecalNormalAtlas.Sample(PointSamplerClamp, uv).xyz * 2 - 1;
+        nTS.z = sqrt(saturate(1 - dot(nTS.xy, nTS.xy)));
+        float3 decalNormal = normalize(mul(nTS, TBN));
 
-    // ----------------------------------------
-    // 6. 데칼 노멀맵
-    // ----------------------------------------
-    float3 nTS = g_DecalNormalAtlas.Sample(PointSamplerClamp, uv).xyz * 2 - 1;
-    nTS.z = sqrt(saturate(1 - dot(nTS.xy, nTS.xy)));
-    float3 decalNormal = normalize(mul(nTS, TBN));
+        float3 blendedNormal = normalize(lerp(surfNormal, decalNormal, decal.a));
+        Out.vNormal = float4(blendedNormal * 0.5f + 0.5f, 0.f);
+    }
+    else 
+        Out.vNormal = vector(0.f,0.f,0.f, 0.f);
+    
+    float4 finalColor = ComputeDecalEffect(decal.rgb);
 
-    // GBuffer 노멀과 데칼 노멀을 알파 기반으로 블렌딩
-    float3 blendedNormal = normalize(lerp(surfNormal, decalNormal, decal.a));
-    Out.vNormal = float4(blendedNormal * 0.5f + 0.5f, 0.f);
-
-    // ----------------------------------------
-    // 7. 색상 + Glow
-    // ----------------------------------------
-    float glowPhase = saturate(1.0 - g_fDecalTime);
-    float3 glowColor = decal.rgb * 3.0;
-    float3 colorWithGlow = lerp(decal.rgb, glowColor, glowPhase);
-    float3 grayColor = float3(0.25, 0.25, 0.25);
-    float3 finalColor = (glowPhase > 0.01f) ? colorWithGlow : grayColor;
-
-    float fade = saturate(g_DecalFade);
-    Out.vDecal = float4(finalColor, decal.a * fade);
+    Out.vDecal = float4(finalColor.rgb, decal.a * finalColor.a);
 
     return Out;
 }
 
+PS_OUT_Decal PS_MAIN_Decal_Cube(PS_IN In)
+{
+    PS_OUT_Decal Out = (PS_OUT_Decal) 0;
 
+    float2 screenUV = In.vPosition.xy / g_WinDowSize;
+  
+    float4 worldPos = Compute_WorldPos_byCamera(screenUV);
+
+    float4 localPos = mul(worldPos, g_WorldMatrixInv);
+
+    if (any(abs(localPos.xyz) > 1.0f))
+        discard;
+    
+    float EXDeapth = g_DepthTexture.Sample(PointSamplerClamp, screenUV).w;
+    if (EXDeapth > 0.5)
+        discard;
+    
+    float2 uv = localPos.xy * 0.5f + 0.5f;
+
+    float4 decal = g_DecalAtlas.Sample(PointSamplerClamp, uv);
+    if (decal.a < 0.01f)
+        discard;
+
+    if (true == g_bDecalNormal)
+    {
+        float4 decalNormal = g_DecalNormalAtlas.Sample(PointSamplerClamp, uv);
+    
+        decalNormal.z = sqrt(saturate(1 - dot(decalNormal.xy, decalNormal.xy)));
+
+        float3 N = normalize(g_fDecalNormal);
+        float3 T = normalize(g_fDecalTangent);
+        float3 B = normalize(g_fDecalBinormal);
+        float3x3 TBN = float3x3(T, B, N);
+        float3 worldNormal = normalize(mul(decalNormal.xyz, TBN));
+    
+        Out.vNormal = vector(worldNormal.xyz * 0.5f + 0.5f, 0.f);
+    }
+    else 
+        Out.vNormal = vector(0.f,0.f,0.f, 0.f);
+    
+    
+    
+    float4 finalColor = ComputeDecalEffect(decal.rgb);
+    
+    float2 center = float2(0.5f, 0.5f);
+    float dist = distance(uv, center);
+    float fadeMask = saturate((0.5f - dist) / 0.3f);
+
+
+// 최종 알파에 곱하기
+    decal.a *= fadeMask;
+    if (decal.a < 0.01f)
+        discard;
+    
+    Out.vDecal = float4(finalColor.rgb, decal.a * finalColor.a);
+	
+    return Out;
+}
+
+
+
+PS_OUT PS_MAIN_PureDecal(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vColor  = g_DecalTexture.Sample(LinearSampler, In.vTexcoord);
+    return Out;
+    
+}
 
 
 technique11 DefaultTechnique
@@ -561,7 +621,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_BLUR_Y();
     }
 
-    pass Decal_Cube //7
+    pass Decal_SSD //7
     {
         SetRasterizerState(RS_Decal);
         SetDepthStencilState(DSS_Decal, 0);
@@ -569,6 +629,28 @@ technique11 DefaultTechnique
     
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN_Decal();
+        PixelShader = compile ps_5_0 PS_MAIN_SSD();
+    }
+
+    pass Decal_BoXProj //8  
+    {
+        SetRasterizerState(RS_Decal);
+        SetDepthStencilState(DSS_Decal, 0);
+        SetBlendState(BS_Decal, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+    
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_Decal_Cube();
+    }
+
+    pass PureDecal //9
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_PureDecal();
     }
 }

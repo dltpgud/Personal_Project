@@ -2,6 +2,7 @@
 #include "BillyBoom_ShockWave.h"
 #include "GameInstance.h"
 #include "Bullet.h"
+#include "ShockWave.h"
 #include "Body_BillyBoom.h"
 CBillyBoom_ShockWave::CBillyBoom_ShockWave()
 {
@@ -94,6 +95,15 @@ HRESULT CBillyBoom_ShockWave::Make_ShockWave()
     Desc.fTrailWidth = 0.5f;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_Bullet", &Desc);
+
+
+      CShockWave::CShockWave_DESC esc{};
+    esc.iDamage = 1;
+    esc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
+    esc.iActorType = CSkill::BOSS_MONSTER;
+    esc.vPos = m_pParentObject->Get_Transform()-> Get_TRANSFORM(CTransform::T_POSITION);
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                             L"Prototype_GameObject_ShockWave", &esc);
     return S_OK;
 }
 

@@ -5,6 +5,7 @@
 #include "Player_HpUI.h"
 #include "Player_StateUI.h"
 #include "Player_StateMachine.h"
+
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CActor{ pDevice, pContext }
 {
 }

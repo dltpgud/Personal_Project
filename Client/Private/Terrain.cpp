@@ -42,7 +42,6 @@ void CTerrain::Update(_float fTimeDelta)
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
         m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
         
-    __super::Update(fTimeDelta);
 }
 
 void CTerrain::Late_Update(_float fTimeDelta)
@@ -66,10 +65,11 @@ void CTerrain::Late_Update(_float fTimeDelta)
         m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
     }
 
-     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_DECAL)))
-        return;
+ //    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_DECAL)))
+  //      return;
 
-    __super::Late_Update(fTimeDelta);
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
+		return;
 }
 
 HRESULT CTerrain::Render()
@@ -109,10 +109,39 @@ void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 
 HRESULT CTerrain::CreateDecal(_vector RayPos, _vector RayDir)
 {
+    _float fDist{};
+    _vector vPos{};
+    _float3 fNormal{};
+        _float3 fPos = m_pGameInstance->Picking_OnTerrain(g_hWnd, m_pVIBufferCom, RayPos, XMVector3Normalize(RayDir), m_pTransformCom, &fDist, &fNormal);
+
     DECAL_DESC Desc{};
-    Desc.vHitDIR = RayDir;
-    Desc.vHitPoint = RayPos;
-    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
+    Desc.vNormal = XMVectorSet(fNormal.x, fNormal.y, fNormal.z, 0.f);
+    Desc.vPos = XMVectorSet(fPos.x, fPos.y, fPos.z, 0.f);
+    Desc.iType = DECAL_DESC::TYPE_BOX;
+    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
+
+    return S_OK;
+}
+
+HRESULT CTerrain::Render_Height()
+{
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Begin(3)))
+        return E_FAIL;
+
+    if (FAILED(m_pVIBufferCom->Bind_Buffers()))
+        return E_FAIL;
+
+    if (FAILED(m_pVIBufferCom->Render()))
+        return E_FAIL;
 
     return S_OK;
 }
@@ -131,14 +160,12 @@ void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
     {
         m_pVIBufferCom->Set_Buffer(m_pSize[0], m_pSize[1]);
     }
-
-    CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
-    AABBDesc.vExtents = _float3(static_cast<_float>(m_pSize[0]), 0.f, static_cast<_float> (m_pSize[1]));
-    AABBDesc.vCenter = _float3(0.f, 0.f, 0.f);
-
+    CBounding_AABB::BOUND_AABB_DESC AABB{};
+    AABB.vExtents = {static_cast<_float> (m_pSize[0]), 0.f, static_cast<_float> (m_pSize[1])};
+    AABB.vCenter = _float3{0.f,0.f,0.f};
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider"),
-                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
-        return;
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &AABB)))
+    return;
 }
 
 HRESULT CTerrain::Render_Shadow()

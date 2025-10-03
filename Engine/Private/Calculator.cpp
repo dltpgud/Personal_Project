@@ -172,10 +172,10 @@ HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewport
     m_iViewportWidth = iViewportWidth;
     m_iViewportHeight = iViewportHeight;
 
-    D3D11_TEXTURE2D_DESC			TextureDesc{};
+    D3D11_TEXTURE2D_DESC TextureDesc{};
 
-    TextureDesc.Width = iViewportWidth;
-    TextureDesc.Height = iViewportHeight;
+    TextureDesc.Width = m_iViewportWidth;
+    TextureDesc.Height = m_iViewportHeight;
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
     TextureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -191,6 +191,7 @@ HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewport
     if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
         return E_FAIL;
 
+
     return S_OK;
 }
 
@@ -202,12 +203,11 @@ HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, 
     _float fY{0.f};
    
 
-    
-  //      _float3 nPos{};
-   // isComputeHeight(Transform->Get_TRANSFORM(CTransform::TRANSFORM_POSITION), &nPos);
-    //    fY = nPos.y;
 
-         fY = pNavigation->Compute_HeightOnCell(&fPos);
+  // isComputeHeight(Transform->Get_TRANSFORM(CTransform::T_POSITION), &fPos);
+   //     fY = fPos.y;
+
+        fY = pNavigation->Compute_HeightOnCell(&fPos);
     
     *Pos = { fPos.x, fY, fPos.z };
 
@@ -216,25 +216,11 @@ HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, 
 }
 
 _bool CCalculator::isComputeHeight(_fvector vTargetPos, _float3* pOut)
-{ /* 받아온 객체의 월드위치를 직교투영한 상태대로 투영공간상의 위치로 변환하고. */
-    /* 그 투영공간상의 좌표를 텍스쳐 상의 좌표로 변환한다. */
-
+{ 
     _float4x4 ViewMatrix, ProjMatrix;
 
-    // XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(64.5f, 20.f, 64.5f, 1.f), XMVectorSet(64.5f,
-    // 0.f, 64.5f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
-
-    _matrix matView = XMMatrixIdentity();
-    matView.r[0] = XMVectorSet(1.f, 0.f, 0.f, 0.f);
-    matView.r[1] = XMVectorSet(0.f, 0.f, 1.f, 0.f);
-    matView.r[2] = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-    matView.r[3] = XMVectorSet(64.5f, 20.f, 64.5f, 1.f);
-
-    XMStoreFloat4x4(&ViewMatrix, XMMatrixInverse(nullptr, matView));
-    XMStoreFloat4x4(&ProjMatrix, XMMatrixOrthographicLH(513.f, 513.f, 0.f, 30.f));
-
-    _vector vProjPos = XMVector3TransformCoord(vTargetPos, XMLoadFloat4x4(&ViewMatrix));
-    vProjPos = XMVector3TransformCoord(vProjPos, XMLoadFloat4x4(&ProjMatrix));
+    _vector vProjPos = XMVector3TransformCoord(vTargetPos, XMLoadFloat4x4(m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW)));
+    vProjPos = XMVector3TransformCoord(vProjPos, XMLoadFloat4x4(m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ)));
 
     _float2 vTexcoord;
     vTexcoord.x = XMVectorGetX(vProjPos) * m_iViewportWidth * 0.5f + m_iViewportWidth * 0.5f;
@@ -255,7 +241,6 @@ _bool CCalculator::isComputeHeight(_fvector vTargetPos, _float3* pOut)
     XMStoreFloat3(pOut, XMVectorSetY(vTargetPos, pPixel->x));
 
     return _bool(pPixel->w);
-    ;
 }
 
 _vector CCalculator::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)

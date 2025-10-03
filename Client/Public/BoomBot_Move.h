@@ -34,6 +34,8 @@ private:
 
 private:
     const _float* m_fLength{};
+    _float m_fTimeSum{};
+
 public:
     static CBoomBot_Move* Create(void* pArg);
 	virtual void Free();

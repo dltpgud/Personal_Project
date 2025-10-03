@@ -139,6 +139,7 @@ public: /* For.PipeLine */
 	_matrix Get_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState);
 	const _float4x4* Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
     const _float4x4* Get_ShadowTransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
+    const _float4x4* Get_HeightTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
@@ -149,6 +150,7 @@ public: /* For.PipeLine */
     const float* Get_CamFar();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
 	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
+	void Set_HeighTransformMatrix(_vector CamPos, _float ViewWidth, _float ViewHeight, _float FarZ = 0, _float NearZ = 0);
 #pragma endregion
 
 #pragma region Light_Manager 
@@ -210,7 +212,16 @@ public: /* For.ThreadPool */
     HRESULT Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc);
     HRESULT Render_Decal(class CShader* pShader);
     HRESULT Decal_Clear();
+    class CDecal* Find_Prototype_Decal(const _wstring& strPrototypeTag);
 #pragma endregion
+
+	void Preallocate_GameObject(_wstring ProtoTag, size_t count, void* desc);
+  
+
+    void Preallocate_Decal(_wstring ProtoTag, size_t count, void* desc);
+  
+
+
 private:
 	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
@@ -242,3 +253,6 @@ template <class T, class... Args>
 {
     return CGameInstance::m_pThreadPool->Add_Job(f, args...);
 }
+
+	
+	

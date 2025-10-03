@@ -36,6 +36,7 @@ public:
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
     virtual void Dead_Rutine() override;
+    virtual HRESULT CreateDecal(_vector RayPos, _vector RayDir) override;
 
 private:
     virtual HRESULT Add_Components() override;

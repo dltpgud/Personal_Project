@@ -48,7 +48,7 @@ void CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
       lDesc.pParentMatrix = m_LaserpParentMatrix;
       lDesc.pSocketMatrix = m_LaserpSocketMatrix;
       lDesc.fLifeTime = 4.5f;
-      m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+          m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                                L"Prototype GameObject_BossBullet_Laser", &lDesc);
         m_iLifeState = OBJ_POOL;
     }

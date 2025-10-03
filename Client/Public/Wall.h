@@ -28,7 +28,7 @@ public:
     virtual HRESULT Render_Shadow() override;
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
     virtual HRESULT CreateDecal(_vector RayPos, _vector RayDir) override;
-
+    virtual HRESULT Render_Height() override;
 
 private:
     CShader* m_pShaderCom = { nullptr };

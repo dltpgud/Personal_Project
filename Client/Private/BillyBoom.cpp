@@ -28,7 +28,7 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     Desc->JumpPower = 0.f;
     Desc->iHP = 1000;
     Desc->bOnCell = true;
-    Desc->fFixY = 0.5f;
+    Desc->fFixY = 0.f;
     Desc->iState = ST_IDLE;
 
     if (FAILED(__super::Initialize(Desc)))

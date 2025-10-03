@@ -33,7 +33,7 @@ void CWall::Priority_Update(_float fTimeDelta)
 
 void CWall::Update(_float fTimeDelta)
 {
-    //__super::Update(fTimeDelta);
+    __super::Update(fTimeDelta);
 }
 
 void CWall::Late_Update(_float fTimeDelta)
@@ -42,14 +42,17 @@ void CWall::Late_Update(_float fTimeDelta)
         return;
     
     if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION),
-                                                          m_fExtend.x* m_fExtend.y))
+                                                          m_fExtend.x* m_fExtend.y/2))
         return;
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 
-   // if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
+    //if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
     //    return;
+
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
+        return;
 
     __super::Late_Update(fTimeDelta);
 }
@@ -131,24 +134,50 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
     _float3 fCenter{};
     m_pModelCom->Center_Ext(&fCenter, &m_fExtend);
 
-    //CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    //OBBDesc.vExtents = m_fExtend;
-    //OBBDesc.vCenter = fCenter;
-    //OBBDesc.vRotation = {};
-    //
-    //if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
-    //                                  reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
-    //    return;
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+    OBBDesc.vExtents = m_fExtend;
+    OBBDesc.vCenter = fCenter;
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+
+        return;
 }
 
 HRESULT CWall::CreateDecal(_vector RayPos, _vector RayDir)
 {
     DECAL_DESC Desc{};
-    Desc.vHitDIR = RayDir;
-    Desc.vHitPoint = RayPos;
-    Desc.fDepth = m_pModelName == TEXT("Proto Component Wall2 Model_Wall") ? 0.1f : 1.f;
-    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
+    Desc.vDir = RayDir;
+    Desc.vPos = RayPos;
+    Desc.iTexIndex = 0;
+    Desc.iType = DECAL_DESC::TYPE_SSD;
+    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
     return S_OK;
+}
+
+HRESULT CWall::Render_Height()
+{
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+        return E_FAIL;
+
+    _uint iNumMesh = m_pModelCom->Get_NumMeshes();
+
+    for (_uint i = 0; i < iNumMesh; i++)
+    {
+        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
+                                                             "g_DiffuseTexture")))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Begin(3)))
+            return E_FAIL;
+
+        m_pModelCom->Render(i);
+    }
 }
 
 HRESULT CWall::Add_Components()

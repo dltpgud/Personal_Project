@@ -211,9 +211,10 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
 HRESULT CDOOR::CreateDecal(_vector RayPos, _vector RayDir)
 {
     DECAL_DESC Desc{};
-    Desc.vHitDIR = RayDir;
-    Desc.vHitPoint = RayPos;
-    m_pGameInstance->Add_Decal(TEXT("K"), &Desc);
+    Desc.vDir = RayDir;
+    Desc.vPos = RayPos;
+    Desc.iType = DECAL_DESC::TYPE_SSD;
+    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
     return S_OK;
 }
 

@@ -41,7 +41,8 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
     m_Clolor[CSkill::COLOR::CEND] = { 1.f, 0.f, 0.f,1.f };
 
     m_pTransformCom->Set_Scaling(0.5f, 0.5f, 10.f);
-
+    m_vPos;
+    m_vDir;
     return S_OK;
 }
 
@@ -54,24 +55,29 @@ void CBossBullet_Laser::Priority_Update(_float fTimeDelta)
 void CBossBullet_Laser::Update(_float fTimeDelta)
 {
     m_pColliderCom->Update(XMLoadFloat4x4(&m_WorldMatrix));
+
 }
 
 void CBossBullet_Laser::Late_Update(_float fTimeDelta)
 {
+    _matrix SocketMatrix = XMLoadFloat4x4(m_pSocketMatrix);
+
+    for (size_t i = 0; i < 3; i++) SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]);
+
+    XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * SocketMatrix * XMLoadFloat4x4(m_pParentMatrix));
+ 
+    m_vPos = XMVector3TransformCoord(XMVectorZero(), SocketMatrix * XMLoadFloat4x4(m_pParentMatrix)); // 발사 위치
+    m_vDir = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(1, 0, 0, 0), SocketMatrix * XMLoadFloat4x4(m_pParentMatrix))); // 발사 방향
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
         return;
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
         return;
+
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
         return;
-
-    _matrix		SocketMatrix = XMLoadFloat4x4(m_pSocketMatrix);
-
-    for (size_t i = 0; i < 3; i++)
-        SocketMatrix.r[i] = XMVector3Normalize(SocketMatrix.r[i]);
-
-    XMStoreFloat4x4(&m_WorldMatrix,m_pTransformCom->Get_WorldMatrix()* SocketMatrix *XMLoadFloat4x4(m_pParentMatrix));
-
+  
     __super::Late_Update(fTimeDelta);
 }
 

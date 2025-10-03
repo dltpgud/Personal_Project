@@ -14,10 +14,6 @@
 #include "Decal.h"
 IMPLEMENT_SINGLETON(CGameInstance)
 
-template <>  std::unordered_map<std::type_index, std::vector<void*>> ObjectPool<Engine::CGameObject>::s_pools;
-
-// CDecal 계열 풀 정의
-template <> std::unordered_map<std::type_index, std::vector<void*>> ObjectPool<Engine::CDecal>::s_pools;
 
 CGameInstance::CGameInstance()
 {
@@ -607,6 +603,11 @@ const _float4x4* CGameInstance::Get_ShadowTransformFloat4x4_Inverse(CPipeLine::T
     return m_pPipeLine->Get_ShadowTransformFloat4x4_Inverse(eState);
 }
 
+const _float4x4* CGameInstance::Get_HeightTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState)
+{
+    return m_pPipeLine->Get_HeightTransformFloat4x4(eState);
+}
+
 _matrix CGameInstance::Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState)
 {
 	return m_pPipeLine->Get_TransformMatrix_Inverse(eState);
@@ -681,6 +682,13 @@ void CGameInstance::Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState,
 	return m_pPipeLine->Set_ShadowTransformMatrix(eState, TransformMatrix);
 }
 
+void CGameInstance::Set_HeighTransformMatrix(_vector CamPos, _float ViewWidth, _float ViewHeight, _float FarZ,_float NearZ)
+{
+    if (nullptr == m_pPipeLine)
+        return;
+    return m_pPipeLine->Set_HeighTransformMatrix(CamPos, ViewWidth, ViewHeight, FarZ, NearZ);
+}
+
 #pragma endregion
 
 #pragma region Light_Manager
@@ -714,8 +722,8 @@ HRESULT CGameInstance::Light_Clear()
 #pragma region Calculator
 _float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis, _float3* vNormal)
 {
-	if (nullptr == m_pCalculator)
-		return _float3(0.f,0.f,0.f);
+    if (nullptr == m_pCalculator)
+        return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
 
 	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom, RayPos, RayDir, Transform, fDis, vNormal);
 }
@@ -884,6 +892,19 @@ HRESULT CGameInstance::Decal_Clear()
     return m_pDecal_Manager->Clear();
 }
 
+CDecal* CGameInstance::Find_Prototype_Decal(const _wstring& strPrototypeTag)
+{
+    return m_pDecal_Manager->Find_Prototype(strPrototypeTag);
+}
+
+void CGameInstance::Preallocate_GameObject(_wstring ProtoTag, size_t count, void* desc)
+{
+    m_pObject_Manager->Preallocate(ProtoTag, count, desc);
+}
+void CGameInstance::Preallocate_Decal(_wstring ProtoTag, size_t count, void* desc)
+{
+    m_pDecal_Manager->Preallocate(ProtoTag, count, desc);
+}
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로

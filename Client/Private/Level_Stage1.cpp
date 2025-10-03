@@ -11,6 +11,7 @@
 #include "HealthBot.h"
 #include "Terrain.h"
 #include "Trigger.h"
+#include "Bullet.h"
 CLevel_Stage1::CLevel_Stage1(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -26,10 +27,10 @@ HRESULT CLevel_Stage1::Initialize()
 
 	if (FAILED(Ready_Layer_Monster(TEXT("Layer_Monster"))))
 		return E_FAIL;
-
+    
 	if (FAILED(Ready_Layer_Camera(TEXT("Layer_Camera"))))
 		return E_FAIL;
-
+    
 	if (FAILED(Ready_Layer_NPC(TEXT("Layer_NPC"))))
 		return E_FAIL;
 
@@ -43,17 +44,37 @@ HRESULT CLevel_Stage1::Initialize()
 	if (FAILED(Ready_Find_cell()))
 		return E_FAIL;
 
+
+      _float4x4 ViewMatrix, ProjMatrix;
+
+        // XMStoreFloat4x4(&ViewMatrix, XMMatrixLookAtLH(XMVectorSet(64.5f, 20.f, 64.5f, 1.f), XMVectorSet(64.5f,
+        // 0.f, 64.5f, 1.f), XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+
+        _matrix matView = XMMatrixIdentity();
+        // 카메라 위치: 맵 중앙 위
+        matView.r[0] = XMVectorSet(1.f, 0.f, 0.f, 0.f);       // Right
+        matView.r[1] = XMVectorSet(0.f, 0.f, 1.f, 0.f);       // Up (Z축을 위로)
+        matView.r[2] = XMVectorSet(0.f, -1.f, 0.f, 0.f);      // Forward (-Y로 내려다봄)
+        matView.r[3] = XMVectorSet(250.f, 200.f, 250.f, 1.f); // 맵 중심 위 (250, 200, 250)
+
+        XMStoreFloat4x4(&ViewMatrix, XMMatrixInverse(nullptr, matView));
+        XMStoreFloat4x4(&ProjMatrix, XMMatrixOrthographicLH(513.f, 500.f, 0.f, 513.f));
+
+   //    m_pGameInstance->Set_HeighTransformMatrix(XMVectorSet(250.f, 200.f, 250.f, 1.f), 513, 513, 513);
 	return S_OK;
 }
 
+
 void CLevel_Stage1::Update(_float fTimeDelta)
 {
+  
 	if (m_pGameInstance->IsOpenStage() && m_pFade->FinishPade())
 	{
 		m_pGameInstance->Set_Open_Bool(false);
 		m_pGameInstance->Open_Level(LEVEL_LOADING, CLevel_Loading::Create(m_pDevice, m_pContext, LEVELID::LEVEL_STAGE2));
 	}
 	__super::Update(fTimeDelta);
+
 }
 
 HRESULT CLevel_Stage1::Render()
@@ -75,10 +96,10 @@ HRESULT CLevel_Stage1::Ready_Layer_Monster(const _wstring& pLayerTag)
                                         L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
   	  return E_FAIL;
   
-  //if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
-  //                                     L"Proto Component JetFly_Monster",
-  //                                     L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
-  //   return E_FAIL;
+  if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
+                                       L"Proto Component JetFly_Monster",
+                                       L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+     return E_FAIL;
 
   if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_BoomBot",
                                       L"Proto Component BoomBot_Monster",
@@ -273,6 +294,7 @@ HRESULT CLevel_Stage1::Ready_UI()
     m_pGameInstance->Set_OpenUI(false, TEXT("LoadingBar"));
 	return S_OK;
 }
+
 
 HRESULT CLevel_Stage1::Ready_Player()
 {

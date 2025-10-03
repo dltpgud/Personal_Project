@@ -45,7 +45,32 @@ void CShockWave::Update(_float fTimeDelta)
 	m_fTimeSum += fTimeDelta*1.2f;
 	m_fCurrentScale += m_fScaleSpeed * fTimeDelta;
 	m_pTransformCom->Set_Scaling(m_fCurrentScale, 10.f, m_fCurrentScale);
+   
+		vector<_vector> flameEdgePoints;
 
+        _float radius = m_pColliderCom->Get_iCurRadius(); // 시간에 따라 변하는 반지름
+        _vector center = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION); // 불꽃 중심
+
+      int segments = 32; // 외곽 점 개수 (많을수록 정밀)
+      for (int i = 0; i < segments; ++i)
+      {
+          float theta = XM_2PI * i / segments; // 각도
+          float x = XMVectorGetX(center) + cosf(theta) * radius;
+          float z = XMVectorGetZ(center) + sinf(theta) * radius;
+          float y = XMVectorGetY(center); // 바닥 높이 (필요시 조정)
+          //XMVECTOR dir = XMVector3Normalize(flameEdgePoints[i] - center);
+          flameEdgePoints.push_back(XMVectorSet(x, y, z,1));
+      }
+   
+	for (_int i = 0 ; i < flameEdgePoints.size(); i++)
+      {
+          DECAL_DESC Desc{};
+          Desc.vDir = XMVector3Normalize(flameEdgePoints[i] - center);
+          Desc.vPos = flameEdgePoints[i];
+          Desc.iType = DECAL_DESC::TYPE_SSD;
+          m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
+      }
+   
 	__super::Update(fTimeDelta);
 }
 

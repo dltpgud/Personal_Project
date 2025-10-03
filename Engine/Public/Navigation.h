@@ -48,6 +48,7 @@ public:
 
     _bool          isMove(_fvector vAfterMoveWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide =nullptr);
     _float         Compute_HeightOnCell(_float3* fPos);
+    _vector        Compute_NormalOnCell();
 	void           Set_Taget(_vector Taget);
 	vector<_uint>  FindPath(_uint startIndex, _uint goalIndex);
     _vector        Get_TagetPos(_int index);

@@ -12,6 +12,7 @@ public:
         RG_SHADOW,
 		RG_NONBLEND,
         RG_BLOOM,
+        RG_HEIGHT,
         RG_NONLIGHT,
         RG_UI,
         RG_END
@@ -34,6 +35,7 @@ private:
 	ID3D11DepthStencilView* m_pLightDepthStencilView = { nullptr };    
 	class CVIBuffer_Rect* m_pVIBuffer = { nullptr };
 	class CShader* m_pShader = { nullptr };
+    class CShader* m_pDecalShader = {nullptr};
 	class CGameInstance* m_pGameInstance = { nullptr };
   
     _float4x4 m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
@@ -57,6 +59,7 @@ private:
 	HRESULT Render_Shadow();;
 	HRESULT Render_NonBlend(); /* MRT_GameObjects에 소속된 타겟들에게 객체들의 특정 정보(Diffuse + Normal)를 기록해준다. */
 	HRESULT Render_Bloom();
+    HRESULT Render_Height();
     HRESULT Render_Decal();
 	HRESULT Render_Lights(); /* 빛들의 연산결과를 MRT_LightAcc에 소속된 타겟들에게 그려준다. */
 	HRESULT Render_Final();

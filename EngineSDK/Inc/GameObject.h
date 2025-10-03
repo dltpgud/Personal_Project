@@ -35,6 +35,8 @@ public:
     virtual void Late_Update(_float fTimeDelta);
     virtual HRESULT Render();
     virtual HRESULT Render_Shadow() { return S_OK; }
+     virtual HRESULT Render_Height() { return S_OK; }
+    
     virtual HRESULT CreateDecal(_vector RayPos,_vector RayDir) { return S_OK;};
     class CComponent* Find_Component(const _wstring& strComponentTag);
     CTransform* Get_Transform() {return m_pTransformCom;}
@@ -60,7 +62,8 @@ protected:
 
    _uint m_iLifeState{};
     _int m_iObjectType{-1};
-    _bool m_bClone{};
+   _int m_iCloneCount{};
+
   
 protected:
     map<const _wstring, class CComponent*> m_Components;

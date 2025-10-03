@@ -38,7 +38,7 @@ public:
 protected:
 	D3D11_BUFFER_DESC		m_InstanceBufferDesc = {};
 	D3D11_SUBRESOURCE_DATA	m_InstanceInitialDesc = {};
-
+        
 	ID3D11Buffer*			m_pVBInstance = { nullptr };
 	VTXMATRIX*				m_pInstanceVertices = { nullptr };
 
