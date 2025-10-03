@@ -106,9 +106,11 @@ HRESULT CLoader::Loading()
 	switch (m_eNextLevelID)
 	{
     case LEVEL_MENU:
+  
 		hr = Loading_For_MenuLevel();
 		break;
-	case LEVEL_STAGE1:	
+	case LEVEL_STAGE1:
+        Loading_For_Preallocate();
 		hr = Loading_For_Stage1Level();
 		break;
 	case LEVEL_STAGE2:
@@ -580,8 +582,25 @@ HRESULT CLoader::Loading_For_Static_Texture()
     //m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Angle_Blur"),
     //                CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/T_Mask_Angle_Blur.dds")));});
 
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_DecalProto(TEXT("K"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),2); });
-    
+    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_DecalProto(TEXT("Base"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),1);});
+
+    return S_OK;
+}
+
+HRESULT CLoader::Loading_For_Preallocate()
+{  
+    CTrail::CTrail_DESC pTrail{};
+    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype_GameObject_Trail"), 200, &pTrail);
+
+    CBullet::CBULLET_DESC Bullet{};
+    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 200, &Bullet);
+  
+    CPlayerBullet::CPlayerBullet_DESC pBullet{};
+    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_PlayerBullet"), 200, &pBullet);
+   
+    DECAL_DESC DecalDesc{};
+    m_pGameInstance->Preallocate_Decal(TEXT("Base"), 200, &DecalDesc);
+
     return S_OK;
 }
 
@@ -607,7 +626,7 @@ HRESULT CLoader::Loading_For_MenuLevel()
 HRESULT CLoader::Loading_For_Stage1Level()
 {
 	m_strLoadingText = TEXT("텍스쳐 로딩중입니다.");
-
+    
 	    if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component Texture1_Terrain"),
 	        CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Terrain/Tile0.dds")))))
 		    return E_FAIL;

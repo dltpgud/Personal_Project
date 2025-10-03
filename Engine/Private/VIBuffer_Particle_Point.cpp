@@ -70,7 +70,7 @@ HRESULT CVIBuffer_Particle_Point::Initialize_Prototype(const CVIBuffer_Instancin
 
 	if (FAILED(__super::Create_Buffer(&m_pIB)))
 		return E_FAIL;
-
+        
 #pragma endregion
 	
 #pragma region INSTANCE_BUFFER

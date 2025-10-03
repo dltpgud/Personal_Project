@@ -34,20 +34,23 @@ HRESULT CBullet::Initialize(void* pArg)
     m_vDir = XMVectorSetW(Dir, 0.f);
 
     m_fLifeTime = 20.f;
-
- 
-       CTrail::CTrail_DESC Desc{};
-       Desc.fstartPoint = &m_fCurPos;
-       Desc.fendPoint = &m_fPrePos;
-       Desc.fTrailLength = pDesc->fTrailLength;
-       Desc.fTrailWidth = pDesc->fTrailWidth;
-       Desc.iTrailSegments = 32;
-       Desc.fClolor[CSkill::COLOR::CSTART] = m_Clolor[CSkill::COLOR::CSTART];
-       Desc.fClolor[CSkill::COLOR::CEND] = m_Clolor[CSkill::COLOR::CEND];
-       Desc.pParantObject = &m_iLifeState;
-       m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Effect"),
-                                                TEXT("Prototype_GameObject_Trail"), &Desc);
+    m_fPrePos = {0.f, 0.f, 0.f};
+    m_fCurPos = {0.f, 0.f, 0.f};
     
+    if (m_iCloneCount  >=2)
+    {
+        CTrail::CTrail_DESC Desc{};
+        Desc.fstartPoint = &m_fCurPos;
+        Desc.fendPoint = &m_fPrePos;
+        Desc.fTrailLength = pDesc->fTrailLength;
+        Desc.fTrailWidth = pDesc->fTrailWidth;
+        Desc.iTrailSegments = 32;
+        Desc.fClolor[CSkill::COLOR::CSTART] = m_Clolor[CSkill::COLOR::CSTART];
+        Desc.fClolor[CSkill::COLOR::CEND] = m_Clolor[CSkill::COLOR::CEND];
+        Desc.pParantObject = &m_iLifeState;
+        m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Effect"),
+                                                 TEXT("Prototype_GameObject_Trail"), &Desc);
+    }
     return S_OK;
 }
 
@@ -126,6 +129,18 @@ void CBullet::Dead_Rutine()
     m_iLifeState = OBJ_POOL;
 }
 
+HRESULT CBullet::CreateDecal(_vector RayPos, _vector RayDir)
+{
+
+    DECAL_DESC Desc{};
+    Desc.vDir = RayDir;
+    Desc.vPos = RayPos;
+    Desc.iType = DECAL_DESC::TYPE_SSD;
+    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
+
+    return S_OK;
+}
+
 HRESULT CBullet::Add_Components()
 {
     CBounding_Sphere::BOUND_SPHERE_DESC CBounding_Sphere{};
@@ -194,7 +209,7 @@ CBullet* CBullet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CGameObject* CBullet::Clone(void* pArg)
 {
     CBullet* pInstance = new CBullet(*this);
-
+   
     if (FAILED(pInstance->Initialize(pArg)))
     {
         MSG_BOX("Failed to Created : CBullet");

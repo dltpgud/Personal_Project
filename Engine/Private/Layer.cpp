@@ -51,14 +51,18 @@ void CLayer::Delete()
 {
   for (auto iter = m_GameObjects.begin(); iter != m_GameObjects.end();)
   {
-      if ((*iter)&& OBJ_DEAD == (*iter)->Get_LifeState())
+      const auto state = (*iter)->Get_LifeState();
+
+      if ((*iter) && OBJ_DEAD == state)
       {
+      
           Safe_Release(*iter);
           iter = m_GameObjects.erase(iter);
       }
-      else if ((*iter) && OBJ_POOL == (*iter)->Get_LifeState())
+      else if ((*iter) && OBJ_POOL == state)
       {
-          ObjectPool<CGameObject>::Push(*iter);
+     
+          ObjectPool<Engine::CGameObject>::Push(*iter);
           iter = m_GameObjects.erase(iter);
       }
       else

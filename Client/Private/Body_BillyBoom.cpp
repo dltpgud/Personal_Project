@@ -265,6 +265,7 @@ HRESULT CBody_BillyBoom::Set_StateMachine()
 #pragma region ShockWave
     CBillyBoom_ShockWave::ATTACK_DESC pShockWaveDesc{};
     pShockWaveDesc.pParentModel = m_pModelCom;
+    pShockWaveDesc.pParentObject = m_pParentObj;
     pShockWaveDesc.pPerantPartBonMatrix = m_pFindAttBonMatrix[BM_RIGHT_TOP];
     pShockWaveDesc.pPerantWorldMat = &m_WorldMatrix;
     pShockWaveDesc.pParentPartObject = this;

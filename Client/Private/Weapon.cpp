@@ -51,7 +51,7 @@ void CWeapon::Priority_Update(_float fTimeDelta)
 
 void CWeapon::Update(_float fTimeDelta)
 {
-   
+
 }
 
 void CWeapon::Late_Update(_float fTimeDelta)
@@ -163,7 +163,7 @@ HRESULT CWeapon::Make_Bullet()
 
 
    CPlayerBullet::CPlayerBullet_DESC Desc{};
-   Desc.fSpeedPerSec = 150.f;
+   Desc.fSpeedPerSec = 200.f;
    Desc.vTagetPos = vTagetPos;
    Desc.vPos = vHPos;
    Desc.iSkillType = CSkill :: STYPE_NOMAL;

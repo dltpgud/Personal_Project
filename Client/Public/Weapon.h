@@ -63,7 +63,7 @@ private:
 	const _float4x4*         m_pSocketMatrix = { nullptr };
 	_uint                    m_iWeapon{};
 	vector<WEAPON_NODE_DESC> m_vecWeaPone;
-
+        _bool m_bc{};
 private:
     virtual HRESULT Add_Components() override;
 	HRESULT Bind_ShaderResources();

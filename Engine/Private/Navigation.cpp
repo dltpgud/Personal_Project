@@ -377,6 +377,31 @@ _float CNavigation::Compute_HeightOnCell(_float3* fPos)
     return (-fPlane.x * fPos->x - fPlane.z * fPos->z - fPlane.w) / fPlane.y;
 }
 
+_vector CNavigation::Compute_NormalOnCell()
+{
+    if (m_iCurrentCellIndex >= m_Cells.size())
+        return XMVectorSet(0.f, 1.f, 0.f, 0.f); // 잘못된 인덱스면 위쪽 노말 반환
+
+    _vector v1 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_A);
+    _vector v2 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_B);
+    _vector v3 = m_Cells[m_iCurrentCellIndex]->Get_Point(CCell::POINT_C);
+
+    // 월드 좌표계로 변환
+    v1 = XMVector3TransformCoord(v1, XMLoadFloat4x4(m_WorldMatrix));
+    v2 = XMVector3TransformCoord(v2, XMLoadFloat4x4(m_WorldMatrix));
+    v3 = XMVector3TransformCoord(v3, XMLoadFloat4x4(m_WorldMatrix));
+
+    // 두 에지 벡터
+    _vector edge1 = v2 - v1;
+    _vector edge2 = v3 - v1;
+
+    // 외적으로 노말 구함
+    _vector vNormal = XMVector3Normalize(XMVector3Cross(edge1, edge2));
+
+    return vNormal;
+}
+
+
 HRESULT CNavigation::Save(const _tchar* tFPath)
 {
     _ulong dwByte = {0};

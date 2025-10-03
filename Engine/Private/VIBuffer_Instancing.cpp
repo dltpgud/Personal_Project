@@ -30,7 +30,7 @@ HRESULT CVIBuffer_Instancing::Initialize(void * pArg)
 {
 	if (FAILED(m_pDevice->CreateBuffer(&m_InstanceBufferDesc, &m_InstanceInitialDesc, &m_pVBInstance)))
 		return E_FAIL;
-
+        
 	return S_OK;
 }
 
