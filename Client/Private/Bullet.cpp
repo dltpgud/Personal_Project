@@ -2,9 +2,8 @@
 #include "Bullet.h"
 #include "GameInstance.h"
 #include "GameObject.h"
-#include "ShockWave.h"
 #include "BillyBoom.h"
-#include "Trail.h"
+
 CBullet::CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -27,30 +26,14 @@ HRESULT CBullet::Initialize(void* pArg)
    if (FAILED(__super::Initialize(pDesc)))
        return E_FAIL; 
 
-
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
 
-    _vector Dir = m_pTagetPos - m_vPos;
-    m_vDir = XMVectorSetW(Dir, 0.f);
-
+    m_vDir = m_pTagetPos - m_vPos;
+    m_vDir = XMVector3Normalize(m_vDir);
     m_fLifeTime = 20.f;
-    m_fPrePos = {0.f, 0.f, 0.f};
-    m_fCurPos = {0.f, 0.f, 0.f};
-    
-    if (m_iCloneCount  >=2)
-    {
-        CTrail::CTrail_DESC Desc{};
-        Desc.fstartPoint = &m_fCurPos;
-        Desc.fendPoint = &m_fPrePos;
-        Desc.fTrailLength = pDesc->fTrailLength;
-        Desc.fTrailWidth = pDesc->fTrailWidth;
-        Desc.iTrailSegments = 32;
-        Desc.fClolor[CSkill::COLOR::CSTART] = m_Clolor[CSkill::COLOR::CSTART];
-        Desc.fClolor[CSkill::COLOR::CEND] = m_Clolor[CSkill::COLOR::CEND];
-        Desc.pParantObject = &m_iLifeState;
-        m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Effect"),
-                                                 TEXT("Prototype_GameObject_Trail"), &Desc);
-    }
+  
+    m_iTrailIndex = static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"SpriteTexTrail"))->AllocateTrail();
+
     return S_OK;
 }
 
@@ -58,38 +41,38 @@ void CBullet::Priority_Update(_float fTimeDelta)
 {
     __super::Priority_Update(fTimeDelta);
 
-    XMStoreFloat3(&m_fPrePos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
-
-      _vector Dir = XMVector3Normalize(m_vDir);
-    if (m_iSkillType == STYPE_SHOCKWAVE)
-    {
-        m_pTransformCom->Go_jump_Dir(fTimeDelta, Dir, 1.f);      
-    }
-    else
-        m_pTransformCom->GO_Dir(fTimeDelta, Dir);
-
-   XMStoreFloat3(&m_fCurPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+        m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
 }
 
 void CBullet::Update(_float fTimeDelta)
-{  
+{
+        _float3 fPos;
+        XMStoreFloat3(&fPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+        CEffect_TrailStream::SPAWN_REQUEST req{};
+        req.valid = m_iLifeState == OBJ_POOL ? 0 : 1;
+        req.trailIndex = m_iTrailIndex;
+        req.headPos = fPos;
+        req.addLife = 1.0f;
+        req.width = 0.9f;
+        req.color = m_Color[CSkill::COLOR::CEND];
+        req.frameIndex = 1;
+        req.isSegment = 0;
+        m_pGameInstance->Trigger_Effect(L"SpriteTexTrail", &req);
+
     __super::Update(fTimeDelta);
 }
 
 void CBullet::Late_Update(_float fTimeDelta)
 {
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
+        return;
+
     if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 1.5f))
         return;
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
-        return;
     
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
-        return;
-
     __super::Late_Update(fTimeDelta);
 }
 
@@ -115,37 +98,16 @@ HRESULT CBullet::Render()
 
 void CBullet::Dead_Rutine()
 {
-    if (m_iSkillType == STYPE_SHOCKWAVE)
-    {
-        CShockWave::CShockWave_DESC Desc{};
-        Desc.iDamage = m_iDamage;
-        Desc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
-        Desc.iActorType = CSkill::BOSS_MONSTER;
-        Desc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
-        m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                                 L"Prototype_GameObject_ShockWave", &Desc);
-    }
-
+   static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"SpriteTexTrail"))->ReleaseTrail(m_iTrailIndex);
     m_iLifeState = OBJ_POOL;
-}
 
-HRESULT CBullet::CreateDecal(_vector RayPos, _vector RayDir)
-{
-
-    DECAL_DESC Desc{};
-    Desc.vDir = RayDir;
-    Desc.vPos = RayPos;
-    Desc.iType = DECAL_DESC::TYPE_SSD;
-    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
-
-    return S_OK;
 }
 
 HRESULT CBullet::Add_Components()
 {
     CBounding_Sphere::BOUND_SPHERE_DESC CBounding_Sphere{};
     _float3 Center{}, Extents{};
-    CBounding_Sphere.fRadius = 0.3;
+    CBounding_Sphere.fRadius = 0.3f;
     CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"), TEXT("Com_Collider"),
@@ -184,10 +146,10 @@ HRESULT CBullet::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_PSize", &m_pScale, sizeof(_float2))))
         return E_FAIL;
     
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbStart", &m_Clolor[CSkill::COLOR::CSTART], sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbStart", &m_Color[CSkill::COLOR::CSTART], sizeof(_float4))))
         return E_FAIL;
     
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbEnd", &m_Clolor[CSkill::COLOR::CEND], sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbEnd", &m_Color[CSkill::COLOR::CEND], sizeof(_float4))))
         return E_FAIL;
 
   return S_OK;
@@ -224,5 +186,5 @@ void CBullet::Free()
     __super::Free();
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pVIBufferCom);
-
+    Safe_Release(m_pTrailTextureCom);
 }

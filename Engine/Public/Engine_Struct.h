@@ -34,19 +34,39 @@ namespace Engine
     struct DecalInstanceData
     {
         XMFLOAT4X4 WorldInv;
-        XMFLOAT3 Tangent;
-        XMFLOAT3 Binormal;
-        XMFLOAT3 Normal;
-        XMFLOAT3 DecalPos; // SSD 용
+        XMFLOAT3 DecalPos; 
         XMFLOAT3 DecalDir; // SSD 용
-        XMFLOAT3 HalfSize; // SSD 용
+        XMFLOAT3 HalfSize; 
         float LifeTime;
         float DecalTime;
-        int TexIndex;
+        int TexIndex ;
         int bNormal;
         int DecalType; // SSD or Box
-        int _pding; // SSD or Box
+        int ProtoIndex; 
     };
+
+    typedef struct DISSOLVE_DESC
+    {
+        float fDissolve_threshold{0.f};
+        float fDissolveTimeSum = {0.f};
+        bool bDissolveState = {false};
+
+        void Check_DisslveSt(float fTimeDelta)
+        {
+
+            if (true == bDissolveState)
+            {
+                fDissolveTimeSum += fTimeDelta;
+
+                fDissolve_threshold += fTimeDelta;
+                if (fDissolve_threshold > 1.f)
+                {
+                    fDissolve_threshold = 1.0f;
+                }
+            }
+        }
+
+    } DISSOLVE_DESC;
 
     typedef struct RIM_LIGHT_DESC
     {
@@ -61,14 +81,6 @@ namespace Engine
         float iPower;           // RimLight 세기
     } RIM_LIGHT_DESC;
 
-    typedef struct ENGINE_DLL TrailVertex
-    {
-        XMFLOAT3 vPosition;
-        XMFLOAT2 vTexcoord;
-
-        static const unsigned int iNumElements = 3;
-        static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElements];
-    } TrailVertex;
 
     typedef struct ENGINE_DLL VTXPOS
     {
@@ -151,7 +163,22 @@ namespace Engine
         bool bNormal{true};
         int iType{};
         int iTexIndex{1};
+        bool bOnce{};
+        bool bActive{};
+        bool bColActive{};
+        float DeltaScaling{};
+        wstring Key{};
     } DECAL_DESC;
+
+   typedef struct VTXTRAIL
+    {
+        _float4 vHead;     // 트레일 시작점
+        _float4 vTail;     // 트레일 끝점
+        _float4 vColor;    // 색상
+        _float2 vLifeTime; // x:총수명, y:경과
+        _float2 vPad;
+    } VTXTRAIL_DESC;
+
 
     typedef struct ENGINE_DLL VTXMESH
     {
@@ -232,7 +259,17 @@ namespace Engine
         XMFLOAT3 vPosition;
         XMFLOAT3 vTexcoord;
 
-        static const unsigned int iNumElements = 17;
+        static const unsigned int iNumElements = 15;
         static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElements];
     } VTXDECAL;
+
+    typedef struct TRAIL_POINT
+    {
+        XMFLOAT3 vPosition;
+        XMFLOAT2 vTexcoord;
+
+            static const unsigned int iNumElements = 4;
+        static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElements];
+
+    } TRAIL_POINT;
 }

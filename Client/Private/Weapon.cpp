@@ -35,6 +35,10 @@ HRESULT CWeapon::Initialize(void* pArg)
     if (FAILED(Init_CallBack()))
         return E_FAIL;
 
+    if (FAILED(Init_WeaponDecal()))
+        return E_FAIL;
+
+    
     m_pTransformCom->Set_Scaling(0.01f, 0.01f, 0.01f);
 
     m_iWeapon = CWeapon::HendGun;
@@ -99,12 +103,80 @@ HRESULT CWeapon::Render()
     return S_OK;
 }
 
+HRESULT CWeapon::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEndPos, _vector vNomal, void* pArg)
+{
+    _matrix BoneWorld = XMLoadFloat4x4(m_vecWeaPone[m_iWeapon].pBoneMatrix) * XMLoadFloat4x4(&m_WorldMatrix);
+
+    _vector LocalOffset = XMVectorSet(m_vecWeaPone[m_iWeapon].iBulletOffset.x, m_vecWeaPone[m_iWeapon].iBulletOffset.y,
+                                      m_vecWeaPone[m_iWeapon].iBulletOffset.z, 1.0f);
+
+    _vector Local_Pos = {m_vecWeaPone[m_iWeapon].pBoneMatrix->_41 * m_vecWeaPone[m_iWeapon].iBulletOffset.x,
+                         m_vecWeaPone[m_iWeapon].pBoneMatrix->_42 * m_vecWeaPone[m_iWeapon].iBulletOffset.y,
+                         m_vecWeaPone[m_iWeapon].pBoneMatrix->_43 * m_vecWeaPone[m_iWeapon].iBulletOffset.z,
+                         m_vecWeaPone[m_iWeapon].pBoneMatrix->_44};
+
+
+    m_WeaPonPos = XMVector3TransformCoord(Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
+
+    _float3 fStartPos;
+    XMStoreFloat3(&fStartPos, m_WeaPonPos);
+    
+    _float3 fEndPos;
+    XMStoreFloat3(&fEndPos, RayEndPos);
+
+    CEffect_TrailStream::SPAWN_REQUEST req{};
+    req.valid = 1;
+    req.trailIndex = -1;
+    req.headPos = fStartPos;
+    req.tailPos = fEndPos;
+    req.width = 0.09f;
+    req.color = m_vecWeaPone[m_iWeapon].BulletColor[1];
+    req.isSegment = 1; 
+    m_pGameInstance->Trigger_Effect(L"TexTrail", &req);
+
+
+ 
+
+    CShootEffect::CShootEffect_DESC pDesc{};
+    pDesc.vPos = m_WeaPonPos;
+    pDesc.vTgetPos = {m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44};
+    pDesc.Local = Local_Pos;
+    pDesc.WorldPtr = &m_WorldMatrix;
+    pDesc.iWeaponType = m_iWeapon;
+    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                             L"Prototype GameObject_ShootEffect", &pDesc);
+
+    //CPlayerBullet::CPlayerBullet_DESC Desc{};
+    //Desc.fSpeedPerSec = 200.f;
+    //Desc.vTagetPos = RayEndPos;
+    //Desc.vPos = m_WeaPonPos;
+    //Desc.iSkillType = CSkill ::STYPE_NOMAL;
+    //Desc.iActorType = CSkill ::PLAYER;
+    //Desc.fClolor[CSkill::COLOR::CSTART] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CSTART];
+    //Desc.fClolor[CSkill::COLOR::CEND] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CEND];
+    //Desc.iDamage = m_vecWeaPone[m_iWeapon].Damage;
+    //Desc.vLocalPos = LocalOffset;
+    //Desc.fWorldPtr = &m_WorldMatrix;
+    //Desc.fScale = m_vecWeaPone[m_iWeapon].BulletScale;
+    //m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+    //                                         L"Prototype GameObject_PlayerBullet", &Desc);
+
+
+
+    return S_OK;
+}
+
 void CWeapon::Choose_Weapon(const _uint& WeaponNum)
 {
     m_iWeapon = WeaponNum;
     m_vecWeaPone[m_iWeapon].pModelCom->Set_Animation(WS_IDLE, false);
 }
 
+
+DECAL_DESC* CWeapon::Get_WeaponDecal_Info() 
+{
+    return &m_vecWeaPoneDecal[m_iWeapon]; 
+}
 
 void CWeapon::Weapon_CallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func)
 {
@@ -137,45 +209,8 @@ HRESULT CWeapon::Make_Bullet()
     m_vecWeaPone[m_iWeapon].iCurBullet -= iCount;
 
     m_pGameInstance->Player_To_Monster_Ray_Collison_Check();
-   
-   _vector vTagetPos =  XMLoadFloat4(m_pGameInstance->Get_CamPosition()) + XMLoadFloat4(m_pGameInstance->Get_CamLook()) * 100.f;
-
-    _vector Hend_Local_Pos = {m_vecWeaPone[m_iWeapon].pBoneMatrix->_41 * m_vecWeaPone[m_iWeapon].iBulletOffset.x,
-                              m_vecWeaPone[m_iWeapon].pBoneMatrix->_42 * m_vecWeaPone[m_iWeapon].iBulletOffset.y,
-                              m_vecWeaPone[m_iWeapon].pBoneMatrix->_43 * m_vecWeaPone[m_iWeapon].iBulletOffset.z,
-                              m_vecWeaPone[m_iWeapon].pBoneMatrix->_44};
-
-    _vector vHPos = XMVector3TransformCoord(Hend_Local_Pos, XMLoadFloat4x4(&m_WorldMatrix));
-
-    _vector Local_Pos = {m_vecWeaPone[m_iWeapon].pBoneMatrix->_41 * m_vecWeaPone[m_iWeapon].iBulletOffset.x,
-                         m_vecWeaPone[m_iWeapon].pBoneMatrix->_42 * m_vecWeaPone[m_iWeapon].iBulletOffset.y + 5.f,
-                         m_vecWeaPone[m_iWeapon].pBoneMatrix->_43 * m_vecWeaPone[m_iWeapon].iBulletOffset.z,
-                         m_vecWeaPone[m_iWeapon].pBoneMatrix->_44};
-
-   CShootEffect::CShootEffect_DESC pDesc{};
-    pDesc.vPos = vHPos;
-    pDesc.vTgetPos = { m_WorldMatrix._41, m_WorldMatrix._42,  m_WorldMatrix._43,  m_WorldMatrix._44 };
-    pDesc.Local = Local_Pos;
-    pDesc.WorldPtr = &m_WorldMatrix;
-    pDesc.iWeaponType = m_iWeapon;
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                             L"Prototype GameObject_ShootEffect", &pDesc);
-
-
-   CPlayerBullet::CPlayerBullet_DESC Desc{};
-   Desc.fSpeedPerSec = 200.f;
-   Desc.vTagetPos = vTagetPos;
-   Desc.vPos = vHPos;
-   Desc.iSkillType = CSkill :: STYPE_NOMAL;
-   Desc.iActorType = CSkill ::PLAYER;
-   Desc.fClolor[CSkill::COLOR::CSTART] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CSTART];
-   Desc.fClolor[CSkill::COLOR::CEND] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CEND];
-   Desc.iDamage = m_vecWeaPone[m_iWeapon].Damage;
-   Desc.vLocalPos = Hend_Local_Pos;
-   Desc.fWorldPtr = &m_WorldMatrix;
-   Desc.fScale = m_vecWeaPone[m_iWeapon].BulletScale;
-   m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                            L"Prototype GameObject_PlayerBullet", &Desc);
+  
+    
     return S_OK;
 }
 
@@ -188,7 +223,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.iMaxBullet = 15;
     pWDesc.iCurBullet = pWDesc.iMaxBullet;
     pWDesc.fEmissvePower = 1.f;
-    pWDesc.iBulletOffset = {1.7f, 2.0f, 3.0f};
+    pWDesc.iBulletOffset = {1.7f, 1.5f, 3.0f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
     pWDesc.fFireRate = 0.7f;
     pWDesc.Damage = 3;
@@ -201,7 +236,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.iMaxBullet = 30;
     pWDesc.iCurBullet = pWDesc.iMaxBullet;
     pWDesc.fEmissvePower = 1.f;
-    pWDesc.iBulletOffset = {1.1f, 0.8f, 1.2f};
+    pWDesc.iBulletOffset = {1.1f, 1.f, 1.2f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
     pWDesc.fFireRate = 0.3f;
     pWDesc.Damage = 10;
@@ -227,7 +262,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.iMaxBullet = 7;
     pWDesc.iCurBullet = pWDesc.iMaxBullet;
     pWDesc.fEmissvePower = 1.f;
-    pWDesc.iBulletOffset = {1.f, 1.f, 1.5f};
+    pWDesc.iBulletOffset = {1.f, 1.3f, 1.2f};
     pWDesc.fPreEmissvePower = pWDesc.fEmissvePower;
     pWDesc.fFireRate = 0.5f;
     pWDesc.Damage = 30;
@@ -235,6 +270,47 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
     pWDesc.BulletScale = {0.16f, 0.16f};
     m_vecWeaPone[CWeapon::HeavyCrossbow] = pWDesc;
+
+    return S_OK;
+}
+
+HRESULT CWeapon::Init_WeaponDecal()
+{
+    m_vecWeaPoneDecal.resize(WeaPoneType::WeaPoneType_END);
+
+    DECAL_DESC pWDesc{};
+  
+    pWDesc.bNormal = true;
+    pWDesc.fDepth = 0.2f;
+    pWDesc.fSize = 0.2f;
+    pWDesc.fLifeTime = 3.f;
+    pWDesc.iTexIndex = 1;
+    pWDesc.Key = TEXT("Base");
+    m_vecWeaPoneDecal[CWeapon::HendGun] = pWDesc;
+
+    pWDesc.bNormal = true;
+    pWDesc.fDepth = 0.25f;
+    pWDesc.fSize = 0.25f;
+    pWDesc.fLifeTime = 3.f;
+    pWDesc.iTexIndex = 1.f;
+    pWDesc.Key = TEXT("Base");
+    m_vecWeaPoneDecal[CWeapon::AssaultRifle] = pWDesc;
+
+    pWDesc.bNormal = true;
+    pWDesc.fDepth = 0.6f;
+    pWDesc.fSize = 0.6f;
+    pWDesc.fLifeTime = 3.f;
+    pWDesc.iTexIndex = 2.f;
+    pWDesc.Key = TEXT("Base");
+    m_vecWeaPoneDecal[CWeapon::MissileGatling] = pWDesc;
+
+    pWDesc.bNormal = false;
+    pWDesc.fDepth = 0.5f;
+    pWDesc.fSize = 0.5f;
+    pWDesc.fLifeTime = 3.f;
+    pWDesc.iTexIndex = 6.f;
+    pWDesc.Key = TEXT("Base");
+    m_vecWeaPoneDecal[CWeapon::HeavyCrossbow] = pWDesc;
 
     return S_OK;
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "DOOR.h"
 #include "InteractiveUI.h"
 #include "GameInstance.h"
@@ -29,7 +29,6 @@ HRESULT CDOOR::Initialize(void* pArg)
     m_ChangeLevelDoor = pDesc->Object_Type;
 
     m_flags = 0;
-
     m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
     Add_StageDoorLight();
     Add_BossDoorLight();
@@ -49,18 +48,17 @@ void CDOOR::Update(_float fTimeDelta)
         {
         case DoorType::STAGE:
             m_pGameInstance->Play_Sound(L"ST_Door_Act1_Open.ogg", &m_pChannel, 1.f);
-            m_iState = State::OPEN;
             break;
         case DoorType::ITEM:
             m_pGameInstance->Play_Sound(L"ST_Door_Special_Airlock_Open.ogg", &m_pChannel, 1.f);
-            m_iState = State2::OPEN2;
             break;
         case DoorType::BOSS:
             m_pGameInstance->Play_Sound(L"ST_Door_Boss_Act1_Open.ogg", &m_pChannel, 1.f);
-            m_iState = State::OPEN;
+
             break;
         }
-        m_iState == State::OPEN ? m_OpenTime = 0.3f : m_OpenTime = 0.6f;
+        m_iState = State::OPEN;
+        m_OpenTime = 0.3f;
         m_pModelCom->Set_Animation(m_iState, false);
 
         m_flags |= DOOR_OPEN;      
@@ -83,22 +81,25 @@ void CDOOR::Update(_float fTimeDelta)
             m_flags |= DOOR_INTERACT;
         }
     }
-
+    
     __super::Update(fTimeDelta);
 }
 
 void CDOOR::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
-
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
         return;
 
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
+        return;
+    
+    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 8.f))
+        return;
+
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+        return;
+
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 
     m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
@@ -115,23 +116,34 @@ HRESULT CDOOR::Render()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (i != 0 && m_iDoorType != DoorType::ITEM)
+        if (i == 0 && m_iDoorType != DoorType::ITEM)
         {
-            if (FAILED(m_pShaderCom->Bind_RawValue("g_DoorRimColor", &m_RimColor, sizeof(_float4))))
+            if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
+                                                                 "g_NormalTexture")))
                 return E_FAIL;
         }
+        
         _bool bEmissive{false};
         if (m_iDoorType == DoorType::ITEM)
         {
             if (i == 1)
             {
                 bEmissive = true;
-                if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
-                                                                     "g_EmissiveTexture")))
-                    return E_FAIL;
             }
             else
                 bEmissive = false;
+        }
+
+        if (m_iDoorType != DoorType::ITEM)
+        {
+        
+            if (i != 0 && m_flags & DOOR_INTERACT)
+            {
+                bEmissive = true;
+            }
+            else
+                bEmissive = false;
+        
         }
 
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
@@ -140,7 +152,7 @@ HRESULT CDOOR::Render()
 
         if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &bEmissive, sizeof(_bool))))
             return E_FAIL;
-
+     
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -155,23 +167,22 @@ HRESULT CDOOR::Render()
 
 HRESULT CDOOR::Render_Shadow()
 {
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
-        return E_FAIL;
-
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix(
-            "g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+    
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
+        if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
+            return E_FAIL;
+
         if (FAILED(m_pShaderCom->Begin(5)))
             return E_FAIL;
 
@@ -193,31 +204,27 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
     if (protoModel == L"Proto Component ItemDoor Model_aniObj")
         m_iDoorType = DoorType::ITEM;
     if (protoModel == L"Proto Component StageDoor Model_aniObj")
+    {
         m_iDoorType = DoorType::STAGE;
-
+    }
     if (protoModel == L"Proto Component BossDoor Model_aniObj")
         m_iDoorType = DoorType::BOSS;
-         
-    m_iDoorType == DoorType::ITEM ? m_iState = State2::ClOSE2 : m_iState = State::ClOSE;
 
+    m_iState = State::ClOSE;
     m_pModelCom->Set_Animation(m_iState, false);
 
     if (ILevel == LEVEL_STAGE1)
-        m_fDoorEmissiveColor = {1.f, 0.749f, 0.2156f, 1.f};
+        m_fDoorEmissiveColor = {1.f, 1.749f, 0.2156f, 1.f};
     else if (ILevel == LEVEL_STAGE2)
-        m_fDoorEmissiveColor = {1.f, 0.f, 0.f, 1.f};
+    {
+        if (m_iDoorType == DoorType::ITEM)
+            m_fDoorEmissiveColor = {1.f, 0.f, 0.f, 1.f};
+        else
+        {
+            m_fDoorEmissiveColor = {0.f, 1.f, 0.f, 1.f};
+        }
+    }
 }
-
-HRESULT CDOOR::CreateDecal(_vector RayPos, _vector RayDir)
-{
-    DECAL_DESC Desc{};
-    Desc.vDir = RayDir;
-    Desc.vPos = RayPos;
-    Desc.iType = DECAL_DESC::TYPE_SSD;
-    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
-    return S_OK;
-}
-
 HRESULT CDOOR::Add_StageDoorLight()
 {
     if (m_iDoorType != DoorType::STAGE)
@@ -237,10 +244,10 @@ HRESULT CDOOR::Add_StageDoorLight()
     ZeroMemory(&LightDesc, sizeof LightDesc);
     LightDesc.eType = LIGHT_DESC::TYPE_POINT;
     LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
-    LightDesc.fRange = 3.f;
-    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
-    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
-    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+    LightDesc.fRange = 2.f;
+    LightDesc.vDiffuse = _float4(0.3f, 2.f, 0.3f, 1.f);
+    LightDesc.vAmbient = _float4(0.1f, 0.2f, 0.1f, 1.f);
+    LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 1.f);
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
@@ -252,10 +259,10 @@ HRESULT CDOOR::Add_StageDoorLight()
     ZeroMemory(&LightDesc, sizeof LightDesc);
     LightDesc.eType = LIGHT_DESC::TYPE_POINT;
     LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
-    LightDesc.fRange = 3.f;
-    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
-    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
-    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+    LightDesc.fRange = 2.f;
+    LightDesc.vDiffuse = _float4(0.3f, 2.f, 0.3f, 1.f);
+    LightDesc.vAmbient = _float4(0.1f, 0.2f, 0.1f, 1.f);
+    LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 1.f);
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
@@ -267,10 +274,10 @@ HRESULT CDOOR::Add_StageDoorLight()
     ZeroMemory(&LightDesc, sizeof LightDesc);
     LightDesc.eType = LIGHT_DESC::TYPE_POINT;
     LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
-    LightDesc.fRange = 3.f;
-    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
-    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
-    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+    LightDesc.fRange = 2.f;
+    LightDesc.vDiffuse = _float4(0.3f, 2.f, 0.3f, 1.f);
+    LightDesc.vAmbient = _float4(0.1f, 0.2f, 0.1f, 1.f);
+    LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 1.f);
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
@@ -282,10 +289,10 @@ HRESULT CDOOR::Add_StageDoorLight()
     ZeroMemory(&LightDesc, sizeof LightDesc);
     LightDesc.eType = LIGHT_DESC::TYPE_POINT;
     LightDesc.vPosition = _float4(fWoldPos.x, fWoldPos.y, fWoldPos.z, 1.f);
-    LightDesc.fRange = 3.f;
-    LightDesc.vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
-    LightDesc.vAmbient = _float4(0.0f, 0.0f, 0.0f, 1.f);
-    LightDesc.vSpecular = _float4(0.f, 0.f, 0.f, 1.f);
+    LightDesc.fRange = 2.f;
+    LightDesc.vDiffuse = _float4(0.3f, 2.f, 0.3f, 1.f);
+    LightDesc.vAmbient = _float4(0.1f, 0.2f, 0.1f, 1.f);
+    LightDesc.vSpecular = _float4(0.5f, 0.5f, 0.5f, 1.f);
 
     if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
         return E_FAIL;
@@ -361,8 +368,6 @@ HRESULT CDOOR::Add_Components()
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
     Safe_AddRef(m_InteractiveUI);
 
-
-
     return S_OK;
 }
 
@@ -400,14 +405,10 @@ HRESULT CDOOR::Init_CallBakc()
                                   m_pGameInstance->Play_Sound(L"ST_Door_Act1_Close.ogg", &m_pChannel, 0.5f);
                                   m_flags |= DOOR_SOUND;
                               });
-        m_pModelCom->Callback( State::ClOSE, 10, [this]() { m_pNavigationCom->Set_Type(1); }); 
-        m_pModelCom->Callback( State::OPEN, 6, [this]() { m_pNavigationCom->Set_Type(0); }); 
     }
-    else
-    {
-        m_pModelCom->Callback(State2::ClOSE2, 10, [this]() { m_pNavigationCom->Set_Type(1); });
-        m_pModelCom->Callback(State2::OPEN2, 6, [this]() { m_pNavigationCom->Set_Type(0); });
-    }
+    
+    m_pModelCom->Callback( State::ClOSE, 10, [this]() { m_pNavigationCom->Set_Type(1); }); 
+    m_pModelCom->Callback( State::OPEN, 6, [this]() { m_pNavigationCom->Set_Type(0); }); 
 
     m_pColliderCom->SetTriggerCallback(
         [this](CActor* other, _bool bColliding,_bool bPlayer)
@@ -419,7 +420,8 @@ HRESULT CDOOR::Init_CallBakc()
                     m_RimColor = {0.f, 1.f, 0.f, 1.f};
                     m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
                     m_InteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
-                    m_InteractiveUI->Set_Text(L"¹® ¿­±â");
+                    m_InteractiveUI->Set_Text(L"ë¬¸ ì—´ê¸°");
+                    m_InteractiveUI->Set_Radians(60.f);
                     m_flags |= DOOR_INTERACT;
                 }
             }
@@ -436,7 +438,7 @@ HRESULT CDOOR::Init_CallBakc()
                 if(m_flags & DOOR_OPEN)
                 {
                     m_flags &= ~DOOR_OPEN;
-                    m_iDoorType == DoorType::ITEM ? m_iState = State2::ClOSE2 : m_iState = State::ClOSE;
+                    m_iState = State::ClOSE;
                     m_pModelCom->Set_Animation(m_iState, false);
                     m_pGameInstance->Set_OpenUI(true, TEXT("WeaPon_Aim"));
                     m_pGameInstance->Set_OpenUI(false, TEXT("Interactive"), this);

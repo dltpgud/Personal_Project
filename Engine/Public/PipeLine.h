@@ -48,13 +48,6 @@ public:
         return XMLoadFloat4x4(&m_ShadowTransMatrix[eState]); // 연산용
     }
 
-    const _float4x4* Get_HeightTransformFloat4x4(TRANSFORM_STATE eState)
-    {
-        return &m_HeightTransMatrix[eState]; // 저장용
-    }
-
-
-
     const _float* Get_Camfar()
     {
         return &m_vCamfar;
@@ -80,6 +73,7 @@ public:
         return &m_vCamNear;
     }
 
+
 public: /* Setter */
     void Set_TransformMatrix(TRANSFORM_STATE eState, _fmatrix TransformMatrix)
     {
@@ -100,26 +94,13 @@ public: /* Setter */
         m_vCamNear = fNear;
     }
 
-    void Set_HeighTransformMatrix(_vector CamPos, _float ViewWidth, _float ViewHeight, _float FarZ = 0, _float NearZ = 0)
-    {
-        _matrix matView = XMMatrixIdentity();
-        // 카메라 위치: 맵 중앙 위
-        matView.r[0] = XMVectorSet(1.f, 0.f, 0.f, 0.f);  // Right
-        matView.r[1] = XMVectorSet(0.f, 0.f, 1.f, 0.f);  // Up (Z축을 위로)
-        matView.r[2] = XMVectorSet(0.f, -1.f, 0.f, 0.f); // Forward (-Y로 내려다봄)
-        matView.r[3] = CamPos; // XMVectorSet(250.f, 200.f, 250.f, 1.f); // 맵 중심 위 (250, 200, 250)
-
-        XMStoreFloat4x4(&m_HeightTransMatrix[D3DTS_VIEW], XMMatrixInverse(nullptr, matView));
-        XMStoreFloat4x4(&m_HeightTransMatrix[D3DTS_PROJ], XMMatrixOrthographicLH(ViewWidth, ViewHeight, NearZ, FarZ));
-    };
-
 public:
     HRESULT Update();
 
 private:
     _float4x4 m_TransMatrix[D3DTS_END];
     _float4x4 m_TransMatrixInverse[D3DTS_END];
-    _float4x4 m_HeightTransMatrix[D3DTS_END];
+  
     _float4 m_vCamPosition{};
     _float4 m_vCamLook{};
     _float4 m_vCamUP{};

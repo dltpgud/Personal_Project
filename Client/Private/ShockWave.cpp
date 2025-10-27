@@ -20,6 +20,7 @@ HRESULT CShockWave::Initialize_Prototype()
 HRESULT CShockWave::Initialize(void * pArg)
 {
 	 CShockWave_DESC* pDesc = static_cast<CShockWave_DESC*>(pArg);
+    pDesc->iSkillType = CSkill::STYPE_SHOCKWAVE;
 	 pDesc->fLifeTime = 10.f;
 	if (FAILED(__super::Initialize(pDesc)))
 		return E_FAIL;
@@ -31,6 +32,17 @@ HRESULT CShockWave::Initialize(void * pArg)
     m_pGameInstance->Play_Sound(L"ST_DiggyMole_Shockwave.ogg",&pChannel, 1.f);
     m_pGameInstance->UpdateSoundPosition(pChannel, m_pTransformCom);
     m_fColor = {0.95f, 0.95f, 0.f, 1.f};
+
+	m_DecalDesc.bNormal = false;
+    m_DecalDesc.iTexIndex = 8;
+    m_DecalDesc.fLifeTime =6.f;
+    m_DecalDesc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);  
+	m_DecalDesc.vDir = XMVectorSet(0.f, -1,0.f,0.f);
+    m_DecalDesc.bOnce = true;
+    m_DecalDesc.DeltaScaling = 10.f;
+    m_DecalDesc.fSize = 1.f;
+    m_DecalDesc.fSize = 1.f;
+    m_DecalDesc.Key = TEXT("Base");
 	return S_OK;
 }
 
@@ -45,52 +57,21 @@ void CShockWave::Update(_float fTimeDelta)
 	m_fTimeSum += fTimeDelta*1.2f;
 	m_fCurrentScale += m_fScaleSpeed * fTimeDelta;
 	m_pTransformCom->Set_Scaling(m_fCurrentScale, 10.f, m_fCurrentScale);
-   
-		vector<_vector> flameEdgePoints;
-
-        _float radius = m_pColliderCom->Get_iCurRadius(); // 시간에 따라 변하는 반지름
-        _vector center = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION); // 불꽃 중심
-
-      int segments = 32; // 외곽 점 개수 (많을수록 정밀)
-      for (int i = 0; i < segments; ++i)
-      {
-          float theta = XM_2PI * i / segments; // 각도
-          float x = XMVectorGetX(center) + cosf(theta) * radius;
-          float z = XMVectorGetZ(center) + sinf(theta) * radius;
-          float y = XMVectorGetY(center); // 바닥 높이 (필요시 조정)
-          //XMVECTOR dir = XMVector3Normalize(flameEdgePoints[i] - center);
-          flameEdgePoints.push_back(XMVectorSet(x, y, z,1));
-      }
-   
-	for (_int i = 0 ; i < flameEdgePoints.size(); i++)
-      {
-          DECAL_DESC Desc{};
-          Desc.vDir = XMVector3Normalize(flameEdgePoints[i] - center);
-          Desc.vPos = flameEdgePoints[i];
-          Desc.iType = DECAL_DESC::TYPE_SSD;
-          m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
-      }
-   
+ 
+	if (m_fCurrentScale >=130.f)
+            m_iLifeState = OBJ_POOL;
 	__super::Update(fTimeDelta);
 }
 
 void CShockWave::Late_Update(_float fTimeDelta)
 {
-	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
-		return;
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 
-	    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
+	if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
         return;
-
+ 
     __super::Late_Update(fTimeDelta);
-}
-
-void CShockWave::Dead_Rutine()
-{
-	m_iLifeState = true;
 }
 
 HRESULT CShockWave::Render()
@@ -168,7 +149,8 @@ HRESULT CShockWave::Bind_ShaderResources()
 
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
 		return E_FAIL;
-	
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+            return E_FAIL;
 	return S_OK;
 }
 

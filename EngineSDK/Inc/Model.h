@@ -13,7 +13,7 @@ public:
         TYPE_ANIM,
         TYPE_END
     };
-
+    
 private:
     CModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CModel(const CModel& Prototype);
@@ -52,15 +52,16 @@ public:
     void Center_Ext(_float3* Center, _float3* extend);
 
     void Callback(_uint AnimIdx, _int Duration, function<void()> func);
-    _bool RayIntersect(_vector vRayPos, _vector vRayDir, CTransform* pTransform, OUT _vector& vPos,
-                       OUT _vector& vNormal);
-    _float3 GetVetexPos(_uint Mashinx, _int NumIndexices);
+
+    _bool RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* pTransform, OUT _vector& vHitPos_WS, OUT _vector& vHitN_WS, OUT _float* fDist = nullptr);
+   
+    _float3 GetVetexPos(class CMesh* Mash, _int Pos);
 
   class CMesh* Get_Mash(_uint Mashinx);
 
 public:
 
-    HRESULT Ready_AniModel(const _tchar* pModelFilePath);
+    HRESULT Ready_Model(const _tchar* pModelFilePath);
 
 private:
     TYPE m_eModelType = {TYPE_END};

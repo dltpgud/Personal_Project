@@ -28,7 +28,7 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     Desc->JumpPower = 0.f;
     Desc->iHP = 1000;
     Desc->bOnCell = true;
-    Desc->fFixY = 0.f;
+    Desc->fFixY = 0.5f;
     Desc->iState = ST_IDLE;
 
     if (FAILED(__super::Initialize(Desc)))
@@ -44,8 +44,8 @@ void CBillyBoom::Priority_Update(_float fTimeDelta)
 {
     Compute_Length();
 
-   if (m_bFinishIntro)
-       Change_Pattern(); 
+    if (m_bFinishIntro)
+      Change_Pattern(); 
 
     __super::Priority_Update(fTimeDelta);
 }
@@ -212,38 +212,38 @@ void CBillyBoom::Free()
 ///////////////////////////////////////MODEL_ANIM_DATA//////////////////////////////////////////////////
 /* enum MODEL_ANIM
 {
-   ST_AIM_Left,
-   ST_Idle,
-   ST_AIM_Left45,
-   ST_AIM_Middle,
-   ST_AIM_Right,
-   ST_AIM_Right45,
-   ST_AIM_Antenne_In,
-   ST_AIM_Antenne_Out,
-   ST_Barre_In,
-   ST_Barre_PreShoot,
-   ST_Barre_Shoot,
-   ST_Bash_PreShoot,
-   ST_Bash_Shoot,
-   ST_HIT_Front,
-   ST_Intro,
-   ST_Laser_In,
-   ST_Laser_PreShoot,
-   ST_Laser_ShootLoop,
-   ST_Lever_Activate,
-   ST_Lever_In,
-   ST_Lever_Out,
-   ST_Run_Front,
-   ST_ShockWave_In,
-   ST_ShockWave_Out,
-   ST_ShockWave_PreShoot,
-   ST_ShockWave_Shoot,
-   ST_Stun_Pose,
-   ST_Stun_Recover,
-   ST_Stun_Start,
-   ST_Comp_Idle,
-   ST_Comp_Poke_Back,
-   ST_Comp_Poke_Front,
-   ST_Comp_Poke_Left,
-   ST_Comp_Poke_Right
+   ST_AIM_Left, 0
+   ST_Idle,      1
+   ST_AIM_Left45, 2
+   ST_AIM_Middle, 3
+   ST_AIM_Right,  4
+   ST_AIM_Right45, 5
+   ST_AIM_Antenne_In, 6
+   ST_AIM_Antenne_Out, 7
+   ST_Barre_In, 8
+   ST_Barre_PreShoot, 9
+   ST_Barre_Shoot, 10
+   ST_Bash_PreShoot, 11
+   ST_Bash_Shoot, 12
+   ST_HIT_Front, 13
+   ST_Intro,  14
+   ST_Laser_In, 15
+   ST_Laser_PreShoot, 16
+   ST_Laser_ShootLoop, 17
+   ST_Lever_Activate, 18
+   ST_Lever_In, 19
+   ST_Lever_Out, 20
+   ST_Run_Front, 21
+   ST_ShockWave_In, 22
+   ST_ShockWave_Out, 23
+   ST_ShockWave_PreShoot, 24
+   ST_ShockWave_Shoot, 25
+   ST_Stun_Pose, 26
+   ST_Stun_Recover, 27
+   ST_Stun_Start, 28
+   ST_Comp_Idle, 29
+   ST_Comp_Poke_Back, 30
+   ST_Comp_Poke_Front, 31
+   ST_Comp_Poke_Left, 32
+   ST_Comp_Poke_Right 33
  };*/

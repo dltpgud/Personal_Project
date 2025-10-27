@@ -30,6 +30,7 @@ public:
 	void            Set_Text(const _tchar* pText){m_pText = pText;}
     _bool           Get_Interactive(class CGameObject* Owner);
     void            Set_OnwerPos(const _vector& Pos);
+    void Set_Radians(_float Rad = 30.f);
 
 private:
     virtual HRESULT Add_Components() override;
@@ -45,6 +46,7 @@ private:
 	_bool m_bColor = false;
 	_float m_ColorTime = { 0.f };
 	_bool m_bInteractive = {false};
+	_float m_Radians{};
 public:
 	static CInteractiveUI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;

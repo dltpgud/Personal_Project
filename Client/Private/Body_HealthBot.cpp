@@ -39,11 +39,6 @@ void CBody_HealthBot::Update(_float fTimeDelta)
 {
     _bool bMotionChange = {false}, bLoop = {false};
 
-    if ((*m_pParentState & CHealthBot::ST_DEAD))
-    {
-        m_bDeadState = true;
-    }
-
     if ((*m_pParentState & CHealthBot::ST_INTERACT) && m_iCurMotion != ST_Interactive)
     {
        m_iCurMotion = ST_Interactive;
@@ -103,6 +98,23 @@ HRESULT CBody_HealthBot::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
+        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
+                                                             "g_NormalTexture")))
+            return E_FAIL;
+        _bool bEmissive{};
+        if (i ==  2)
+        {
+            bEmissive = true;
+            if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_EMISSIVE, 0,
+                                                                 "g_EmissiveTexture")))
+                return E_FAIL;
+        }
+        else
+            bEmissive = false;
+
+        if (FAILED(m_pShaderCom->Bind_RawValue("g_bEmissive", &bEmissive, sizeof(_bool))))
+            return E_FAIL;
+
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
 
@@ -117,7 +129,7 @@ HRESULT CBody_HealthBot::Render()
 
 HRESULT CBody_HealthBot::Render_Shadow()
 {
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
@@ -130,6 +142,9 @@ HRESULT CBody_HealthBot::Render_Shadow()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
+        if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
+            return E_FAIL;
+
         if (FAILED(m_pShaderCom->Begin(5)))
             return E_FAIL;
 
@@ -143,6 +158,7 @@ HRESULT CBody_HealthBot::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"),
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
+
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto Component HealthBot_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
@@ -174,7 +190,8 @@ HRESULT CBody_HealthBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
+    _bool IsDead = (*m_pParentState & CHealthBot::ST_DEAD);
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &IsDead, sizeof(_bool))))
         return E_FAIL;
 
   return S_OK;

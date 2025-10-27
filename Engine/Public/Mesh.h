@@ -24,14 +24,29 @@ public:
     HRESULT Bind_BoneMatrices(class CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName);
     HRESULT Render();
     _float3* Get_pPos(_int i);
-    _float3 GetVetexPosAnim(_int NumIndexices);
+    _float3 GetVetexPosAnim(_int vertexIndex);
     _uint Get_pIndices(_int i);
-
     _uint Get_iNumIndexices();
     _uint Get_iNumVertices();
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
     HRESULT Bind_Buffers();
-    private:
+
+    UINT CMesh::Get_NumIndices() const
+    {
+        return m_iNumIndexices;
+    }
+
+    const _float3& GetAABBMinLocal() const
+    {
+        return m_AABBMinLocal;
+    }
+    const _float3& GetAABBMaxLocal() const
+    {
+        return m_AABBMaxLocal;
+    }
+    void Build_MeshAABB_Local();
+
+private:
     HRESULT Load_AnimMesh(HANDLE hFile);
     HRESULT Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix);
 
@@ -48,25 +63,14 @@ public:
     VTXMATRIX_INSTANCE* m_pInst_BufferData{};
     _float3* m_pPos{};
     _uint* m_pIndices{};
-    HRESULT Create_RaycastSRV();
-    ID3D11ShaderResourceView* CMesh::Get_PositionsSRV() const
-    {
-        return m_pPositionsSRV;
-    }
-    ID3D11ShaderResourceView* CMesh::Get_IndicesSRV() const
-    {
-        return m_pIndicesSRV;
-    }
-    UINT CMesh::Get_NumIndices() const
-    {
-        return m_iNumIndexices;
-    }
+    _int m_eModelType{};
 
 private:
-    ID3D11ShaderResourceView* m_pPositionsSRV = nullptr;
-    ID3D11ShaderResourceView* m_pIndicesSRV = nullptr;
     VTXANIMMESH* m_pAnimVertices = nullptr; // 애니메이션 정점 데이터
     vector<XMMATRIX> m_FinalBoneMatrices;
+
+    _float3 m_AABBMinLocal = {_float(FLT_MAX), _float(FLT_MAX), _float(FLT_MAX)};
+    _float3 m_AABBMaxLocal = {_float(-FLT_MAX), _float(-FLT_MAX), _float(-FLT_MAX)};
 
 public:
     static CMesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix);

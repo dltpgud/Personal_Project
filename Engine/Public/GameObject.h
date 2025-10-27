@@ -35,9 +35,8 @@ public:
     virtual void Late_Update(_float fTimeDelta);
     virtual HRESULT Render();
     virtual HRESULT Render_Shadow() { return S_OK; }
-     virtual HRESULT Render_Height() { return S_OK; }
-    
-    virtual HRESULT CreateDecal(_vector RayPos,_vector RayDir) { return S_OK;};
+    virtual HRESULT CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEndPos, _vector vNomal = XMVectorZero(),void* pArg = nullptr) { return S_OK; };
+
     class CComponent* Find_Component(const _wstring& strComponentTag);
     CTransform* Get_Transform() {return m_pTransformCom;}
     CCollider*  Get_Collider()  {return m_pColliderCom; }

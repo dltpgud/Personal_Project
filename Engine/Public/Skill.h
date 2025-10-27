@@ -35,12 +35,15 @@ public:
     virtual void Update(_float fTimeDelta);
     virtual void Late_Update(_float fTimeDelta);
     virtual HRESULT Render();
-    virtual void Dead_Rutine() {}
+    virtual void Dead_Rutine() {};
     virtual _bool Comput_SafeZone(_fvector vPlayerPos) {return false;}
     _int Get_Damage();
     _uint Get_SkillType();
     _uint Get_ActorType();
-    void Get_Ray(OUT _vector* Pos, OUT _vector* Dir);
+  
+    DECAL_DESC* Get_DecalDesc()  { return &m_DecalDesc; }
+
+ 
 
 protected:
     _uint        m_iActorType{ 0 };
@@ -51,8 +54,10 @@ protected:
     _vector      m_vPos{};
     _float       m_fTimeSum{0.f};
     _uint        m_iSkillType = { STYPE_NOMAL };
-    _float4      m_Clolor[COLOR_END]{};
+    _float4      m_Color[COLOR_END]{};
     _vector      m_vDir{};
+
+    DECAL_DESC   m_DecalDesc;
 
 public:
         virtual CGameObject* Clone(void* pArg) = 0;

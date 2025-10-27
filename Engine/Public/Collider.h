@@ -20,13 +20,13 @@ public:
 	virtual HRESULT Initialize(void* pArg) override;
 
  public:
-    _bool   IsColl();
+    _bool   IsColl() const;
 	_bool   Intersect(CCollider* pTargetCollider);
     _bool   RayIntersects(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos = nullptr);
-	_float  Get_iCurRadius() ;
-    _float3 Get_iCurCenter();
-    
-   
+    _float Get_iCurRadius() const;
+    _float3 Get_iCurCenter() const;
+     CCollider::TYPE Get_Type() const;
+    class CBounding* Get_Bounding() const;
     void SetTriggerCallback(function<void(CActor* other, _bool bColliding, _bool bPlayer)> cb)
     {
         m_Callback = std::move(cb);

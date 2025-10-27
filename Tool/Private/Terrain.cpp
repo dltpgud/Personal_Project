@@ -27,8 +27,7 @@ HRESULT CTerrain::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
+
      pFloat = reinterpret_cast<float*>(&m_iUVoffset);
     return S_OK;
 }
@@ -209,7 +208,8 @@ void CTerrain::Free()
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);
 
-    if(m_bClone)
+
+    if (m_iCloneCount == 1) 
         Safe_Delete_Array(m_Proto);
 }
 

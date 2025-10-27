@@ -22,8 +22,8 @@ HRESULT CSkill::Initialize(void* pArg)
 	   m_iDamage = pDesc->iDamage;
 	   m_iActorType = pDesc->iActorType;
 	   m_iSkillType = pDesc->iSkillType;
-       m_Clolor[CSkill::COLOR::CSTART] = pDesc->fClolor[CSkill::COLOR::CSTART];
-       m_Clolor[CSkill::COLOR::CEND] = pDesc->fClolor[CSkill::COLOR::CEND];
+       m_Color[CSkill::COLOR::CSTART] = pDesc->fClolor[CSkill::COLOR::CSTART];
+       m_Color[CSkill::COLOR::CEND] = pDesc->fClolor[CSkill::COLOR::CEND];
     if (FAILED(__super::Initialize(pDesc)))
 		   return E_FAIL;
 
@@ -40,7 +40,7 @@ void CSkill::Priority_Update(_float fTimeDelta)
 	m_fTimeSum += fTimeDelta;
 	if (m_fTimeSum > m_fLifeTime)
 	{
-		Dead_Rutine();
+       m_iLifeState = OBJ_POOL;
 	}
 }
 
@@ -77,11 +77,6 @@ _uint CSkill::Get_ActorType()
 	return m_iActorType;
 }
 
-void CSkill::Get_Ray(OUT _vector* Pos, OUT _vector* Dir)
-{
-    *Pos = m_vPos;
-    *Dir = XMVector3Normalize(m_vDir);
-}
 
 void CSkill::Free()
 {

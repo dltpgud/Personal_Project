@@ -241,9 +241,6 @@
     <Filter Include="02.GameObjects\03.Actor\Bullet\Boss\Laser">
       <UniqueIdentifier>{72444b90-6979-4007-ba25-d69d87c94671}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\05. Effect\Trail">
-      <UniqueIdentifier>{3f6aeeba-fac8-4c5f-bbec-a626a91e7bb1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss">
       <UniqueIdentifier>{99d8ddec-d756-4a55-9528-fc55e0a5e88b}</UniqueIdentifier>
     </Filter>
@@ -258,6 +255,9 @@
     </Filter>
     <Filter Include="02.GameObjects\03.Actor\Monster\05.Boss\02.State\00.Attack">
       <UniqueIdentifier>{e2537ef3-9925-48f6-91e2-86010d590fff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\02.Item\HealthBall">
+      <UniqueIdentifier>{87f92224-8313-417a-89d5-e1e4de5e9548}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -573,8 +573,11 @@
     <ClInclude Include="..\Public\Trigger.h">
       <Filter>02.GameObjects\01. Map\Trigger</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Trail.h">
-      <Filter>02.GameObjects\05. Effect\Trail</Filter>
+    <ClInclude Include="..\Public\HealthBall.h">
+      <Filter>02.GameObjects\02.Item\HealthBall</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ShockWave_Bullet.h">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -875,11 +878,14 @@
     <ClCompile Include="..\Private\Trigger.cpp">
       <Filter>02.GameObjects\01. Map\Trigger</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Trail.cpp">
-      <Filter>02.GameObjects\05. Effect\Trail</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\BossBullet_Berrle.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\Berrle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\HealthBall.cpp">
+      <Filter>02.GameObjects\02.Item\HealthBall</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShockWave_Bullet.cpp">
+      <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

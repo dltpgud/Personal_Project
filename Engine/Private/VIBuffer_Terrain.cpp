@@ -1,6 +1,7 @@
 ﻿#include "VIBuffer_Terrain.h"
 #include "GameInstance.h"
 #include "QuadTree.h"
+#include "Collider.h"
 CVIBuffer_Terrain::CVIBuffer_Terrain(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CVIBuffer{pDevice, pContext}, m_pPos(nullptr)
 {
@@ -8,9 +9,9 @@ CVIBuffer_Terrain::CVIBuffer_Terrain(ID3D11Device* pDevice, ID3D11DeviceContext*
 
 CVIBuffer_Terrain::CVIBuffer_Terrain(const CVIBuffer_Terrain& Prototype)
     : CVIBuffer{Prototype}, m_iNumVerticesX{Prototype.m_iNumVerticesX}, m_iNumVerticesZ{Prototype.m_iNumVerticesZ},
-      m_pPos{Prototype.m_pPos}//, m_pQuadTree{Prototype.m_pQuadTree}
+      m_pPos{Prototype.m_pPos}, m_pIndices{Prototype.m_pIndices} 
 {
-//    Safe_AddRef(m_pQuadTree);
+
 }
 
 HRESULT CVIBuffer_Terrain::Initialize_Prototype()
@@ -311,7 +312,7 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
 #pragma endregion
 
 #pragma region INDEX_BUFFER
-    _uint* pIndices = new _uint[m_iNumIndexices];
+    m_pIndices = new _uint[m_iNumIndexices];
     _uint iNumIndices = {0};
 
     for (_uint i = 0; i < m_iNumVerticesZ - 1; i++)
@@ -322,9 +323,9 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
 
             _uint iIndices[4] = {iIndex + m_iNumVerticesX, iIndex + m_iNumVerticesX + 1, iIndex + 1, iIndex};
 
-            pIndices[iNumIndices++] = iIndices[0];
-            pIndices[iNumIndices++] = iIndices[1];
-            pIndices[iNumIndices++] = iIndices[2];
+            m_pIndices[iNumIndices++] = iIndices[0];
+            m_pIndices[iNumIndices++] = iIndices[1];
+            m_pIndices[iNumIndices++] = iIndices[2];
 
             /*법선 벡터 구하기*/
             _vector vSour, vDest, vNormal;
@@ -337,9 +338,9 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
             XMStoreFloat3(&pVertices[iIndices[1]].vNormal, XMLoadFloat3(&pVertices[iIndices[1]].vNormal) + vNormal);
             XMStoreFloat3(&pVertices[iIndices[2]].vNormal, XMLoadFloat3(&pVertices[iIndices[2]].vNormal) + vNormal);
 
-            pIndices[iNumIndices++] = iIndices[0];
-            pIndices[iNumIndices++] = iIndices[2];
-            pIndices[iNumIndices++] = iIndices[3];
+            m_pIndices[iNumIndices++] = iIndices[0];
+            m_pIndices[iNumIndices++] = iIndices[2];
+            m_pIndices[iNumIndices++] = iIndices[3];
 
             vSour = XMLoadFloat3(&pVertices[iIndices[2]].vPosition) - XMLoadFloat3(&pVertices[iIndices[0]].vPosition);
             vDest = XMLoadFloat3(&pVertices[iIndices[3]].vPosition) - XMLoadFloat3(&pVertices[iIndices[2]].vPosition);
@@ -381,22 +382,140 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
     m_BufferDesc.StructureByteStride = 0;
 
     ZeroMemory(&m_InitialDesc, sizeof m_InitialDesc);
-    m_InitialDesc.pSysMem = pIndices;
+    m_InitialDesc.pSysMem = m_pIndices;
 
     if (FAILED(__super::Create_Buffer(&m_pIB)))
         return;
 
     Safe_Delete_Array(pVertices);
-    Safe_Delete_Array(pIndices);
 }
 
 void CVIBuffer_Terrain::Set_QuadTree()
 {
-    /// m_iNumVerticesX : Terrain의 X개수
-    // m_iNumVerticesZ : Terrain의 Z개수
     m_pQuadTree = CQuadTree::Create(m_iNumVerticesX * m_iNumVerticesZ - m_iNumVerticesX,
                                     m_iNumVerticesX * m_iNumVerticesZ -1, m_iNumVerticesX - 1, 0);
 }
+
+_float3 CVIBuffer_Terrain::Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, CTransform* pTransform,
+                                                      OUT _float* fDist, OUT _float3* vNormal)
+{
+    if (!m_pQuadTree)
+        return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
+
+
+    _matrix invWorld = pTransform->Get_WorldMatrix_Inverse();
+    _vector localRayPos = XMVector3TransformCoord(RayPos, invWorld);
+    _vector localRayDir = XMVector3Normalize(XMVector3TransformNormal(RayDir, invWorld));
+
+    _float fBestDist = FLT_MAX;
+    _float3 vLocalHit{}, vLocalNormal{};
+
+    
+    m_pQuadTree->Picking_Ray(m_pVertexPositions, localRayPos, localRayDir, fBestDist, vLocalHit, vLocalNormal);
+
+    if (fBestDist == FLT_MAX)
+        return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
+    
+    _vector worldHit = XMVector3TransformCoord(XMLoadFloat3(&vLocalHit), pTransform->Get_WorldMatrix());
+    _vector worldNormal = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&vLocalNormal), pTransform->Get_WorldMatrix()));
+
+    if (fDist)
+        *fDist = fBestDist;
+    if (vNormal)
+        XMStoreFloat3(vNormal, worldNormal);
+
+    _float3 vResult;
+    XMStoreFloat3(&vResult, worldHit);
+    return vResult;
+}
+
+_bool CVIBuffer_Terrain::Intersect_OnTerrain_QuadTree(CCollider* pColliderWorldSpace, CTransform* pTerrainTransform, OUT _vector* pWorldNormal, OUT _vector* pWorldHitPos)
+{
+    if (!m_pQuadTree || !pColliderWorldSpace)
+        return false;
+
+    // 월드->로컬
+    _matrix invWorld = pTerrainTransform->Get_WorldMatrix_Inverse();
+
+    CCollider::TYPE eType = pColliderWorldSpace->Get_Type();
+
+    _float3 bestLocalHit{};
+    _float3 bestLocalN{};
+    _float bestPen = -FLT_MAX;
+    _bool touched = false;
+
+    switch (eType)
+    {
+    case CCollider::TYPE_SPHERE:
+    {
+        // 월드 스피어 가져옴
+        const CBounding_Sphere* pSphBound = static_cast<const CBounding_Sphere*>(pColliderWorldSpace->Get_Bounding());
+        BoundingSphere worldSphere = *pSphBound->Get_Desc();
+
+        // 스피어를 로컬로 변환
+        BoundingSphere localSphere;
+        {
+            _vector c = XMLoadFloat3(&worldSphere.Center);
+            _vector lc = XMVector3TransformCoord(c, invWorld);
+            XMStoreFloat3(&localSphere.Center, lc);
+
+            // 스케일 보정 (반지름은 최대 scale 성분 사용)
+            _vector S, R, T;
+            XMMatrixDecompose(&S, &R, &T, invWorld);
+            _float sx = XMVectorGetX(S);
+            _float sy = XMVectorGetY(S);
+            _float sz = XMVectorGetZ(S);
+            _float maxScale = max(sx, max(sy, sz));
+            localSphere.Radius = worldSphere.Radius * maxScale;
+        }
+       
+         touched = m_pQuadTree->Intersect_Node(localSphere, m_pVertexPositions, &bestLocalHit, &bestLocalN, &bestPen);
+    }
+    break;
+
+    case CCollider::TYPE_AABB:
+    {
+        const CBounding_AABB* pBoxBound = static_cast<const CBounding_AABB*>(pColliderWorldSpace->Get_Bounding());
+        BoundingBox worldBox = *pBoxBound->Get_Desc();
+
+        // AABB를 로컬로 변환
+        BoundingBox localBox;
+        worldBox.Transform(localBox, invWorld);
+
+        touched = m_pQuadTree->Intersect_Node(localBox, m_pVertexPositions, &bestLocalHit, &bestLocalN, &bestPen);
+    }
+    break;
+
+    case CCollider::TYPE_OBB:
+    {
+        const CBounding_OBB* pOBBBound = static_cast<const CBounding_OBB*>(pColliderWorldSpace->Get_Bounding());
+        BoundingOrientedBox worldOBB = *pOBBBound->Get_Desc();
+
+        BoundingOrientedBox localOBB;
+        worldOBB.Transform(localOBB, invWorld);
+
+        touched = m_pQuadTree->Intersect_Node(localOBB, m_pVertexPositions, &bestLocalHit, &bestLocalN, &bestPen);
+    }
+    break;
+    }
+
+    if (!touched || bestPen == -FLT_MAX)
+        return false;
+    cout << "2차 통과 " << endl;
+    // 2) 최종 결과를 로컬 -> 월드로 변환해서 리턴
+    _matrix worldMat = pTerrainTransform->Get_WorldMatrix();
+    XMVECTOR wh = XMVector3TransformCoord(XMLoadFloat3(&bestLocalHit), worldMat);
+    XMVECTOR wn = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&bestLocalN), worldMat));
+
+    if (pWorldHitPos)
+        *pWorldHitPos = wh;
+    if (pWorldNormal)
+        *pWorldNormal = wn;
+
+    return true;
+}
+
+
 
 void CVIBuffer_Terrain::Culling(_fmatrix WorldMatrixInverse)
 {
@@ -450,4 +569,5 @@ void CVIBuffer_Terrain::Free()
 
 	Safe_Release(m_pQuadTree);
     Safe_Delete_Array(m_pPos);
+    Safe_Delete_Array(m_pIndices);
 }

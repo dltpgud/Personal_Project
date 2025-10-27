@@ -1,6 +1,5 @@
 #include "Engine_Shader_Defines.hlsli"
 
-
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 textureCUBE     g_SKYTexture;
 
@@ -55,14 +54,15 @@ PS_OUT PS_MAIN(PS_IN In)
 
 technique11 DefaultTechnique
 {
-	pass DefaultPass
-	{
-		SetRasterizerState(RS_Sky);
-		SetDepthStencilState(DSS_None, 0);
+    pass DefaultPass
+    {
+        SetRasterizerState(RS_Sky);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 		
-		VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-		PixelShader = compile ps_5_0 PS_MAIN();
-	}
+        PixelShader = compile ps_5_0 PS_MAIN();
+    }
+
 }

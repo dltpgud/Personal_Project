@@ -32,10 +32,9 @@ HRESULT CActor::Initialize(void* pArg)
 
 void CActor::Priority_Update(_float fTimeDelta)
 {
- 
     if (true == m_bOnCell && nullptr != m_pNavigationCom ) {
+		
 		_float3 fPos{};
-
 		Height_On_Cell(&fPos);
 		m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetY(Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), m_fY));
 	}
@@ -84,8 +83,17 @@ void CActor::Find_CurrentCell()
 
 void CActor::Height_On_Cell(_float3* fPos)
 {
-	m_pGameInstance->Compute_Y(m_pNavigationCom, m_pTransformCom, fPos);
-	m_fY = fPos->y + m_FixY;	
+	_float3 Pos{};
+
+    XMStoreFloat3(&Pos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+
+    _float fY{0.f};
+
+    fY = m_pNavigationCom->Compute_HeightOnCell(&Pos);
+
+    *fPos = {Pos.x, fY, Pos.z};
+
+	m_fY = fY + m_FixY;
 }
 
 void CActor::Set_HealthCurrentHP(_int Health) {

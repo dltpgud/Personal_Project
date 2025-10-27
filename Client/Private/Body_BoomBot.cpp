@@ -37,8 +37,6 @@ HRESULT CBody_BoomBot::Initialize(void* pArg)
 
   if (FAILED(Set_StateMachine()))
       return E_FAIL;
-
-   m_fDeadTime = 0.7f;
  
    return S_OK;
 }
@@ -112,10 +110,10 @@ HRESULT CBody_BoomBot::Render_Shadow()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-
+ 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
-
+ 
     _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -152,19 +150,7 @@ HRESULT CBody_BoomBot::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto_Component_BoomBot_Model"), TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
-
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 2,TEXT("../Bin/Resources/Models/Nomal/T_Tire_N.dds"))))
-       return E_FAIL;
-    
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 1,TEXT("../Bin/Resources/Models/Nomal/T_BoomBot_N.dds"))))
-       return E_FAIL;
-    
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 3,TEXT("../Bin/Resources/Models/Nomal/T_BoomBot_N.dds"))))
-       return E_FAIL;
-    
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 0,TEXT("../Bin/Resources/Models/Nomal/T_BoomBot_N.dds"))))
-       return E_FAIL;
-    
+ 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"), TEXT("Com_Texture_Mask"),
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
@@ -195,13 +181,13 @@ HRESULT CBody_BoomBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_DissolveDesc.bDissolveState, sizeof(_bool))))
         return E_FAIL;
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_fthreshold, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_DissolveDesc.fDissolve_threshold, sizeof(_float))))
         return E_FAIL;
 
    return S_OK;

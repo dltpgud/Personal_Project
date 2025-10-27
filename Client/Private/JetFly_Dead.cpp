@@ -2,6 +2,7 @@
 #include "JetFly_Dead.h"
 #include "GameInstance.h"
 #include "Trigger.h"
+#include "HealthBall.h"
 CJetFly_Dead::CJetFly_Dead()
 {
 }
@@ -22,9 +23,28 @@ HRESULT CJetFly_Dead::Initialize(void* pArg)
 	return S_OK;
 }
 
+void CJetFly_Dead::Init_CallBack_Func()
+{
+    m_pParentModel->Callback(
+        10, 0,
+        [&]()
+        {
+            _int iCount = static_cast<_int>(m_pGameInstance->Compute_Random(0.f, 3.f));
+
+            _vector vPos = m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+            for (_int i = 0; i < iCount; i++)
+            {
+                CHealthBall::CHealthBall_DESC Desc{};
+                Desc.vPos = vPos;
+                m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
+                                                         TEXT("Prototype GameObject_HealthBall"), &Desc);
+            }
+        });
+}
+
 CStateMachine::Result CJetFly_Dead::StateMachine_Playing(_float fTimeDelta, RIM_LIGHT_DESC* pRim)
 {
-    m_pParentPartObject->Set_DeadState(true);
+    m_pParentPartObject->Get_DissolveDesc()->bDissolveState = true;
 
     _vector vPos =  m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
 
@@ -47,8 +67,10 @@ CStateMachine::Result CJetFly_Dead::StateMachine_Playing(_float fTimeDelta, RIM_
        m_pParentObject->Get_Transform()->Go_Move(CTransform::DOWN, fTimeDelta);
     }
     
-    if (1.f == m_pParentPartObject->Get_threshold())
-        m_pParentObject->Set_LifeState(true);
+    if (1.f == m_pParentPartObject->Get_DissolveDesc()->fDissolve_threshold)
+        m_pParentObject->Set_LifeState(OBJ_DEAD);
+
+    m_pParentPartObject->Get_DissolveDesc()->Check_DisslveSt(fTimeDelta);
 
      return __super::StateMachine_Playing(fTimeDelta,pRim);
 }      

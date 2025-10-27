@@ -56,12 +56,19 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pShaderFilePath, const D3D11
         D3DX11_PASS_DESC PassDesc{};
 
         pPass->GetDesc(&PassDesc);
-
-        /* 입력 버퍼 데이터를 설명하는 입력 레이아웃 개체를 만듭니다.*/
-        if (FAILED(m_pDevice->CreateInputLayout(pElements, iNumElements, PassDesc.pIAInputSignature,
-                                                PassDesc.IAInputSignatureSize, &pInputLayout)))
-            return E_FAIL;
-
+        if (pElements && iNumElements > 0)
+        {
+            /* 입력 버퍼 데이터를 설명하는 입력 레이아웃 개체를 만듭니다.*/
+            if (FAILED(m_pDevice->CreateInputLayout(pElements, iNumElements, PassDesc.pIAInputSignature,
+                                                    PassDesc.IAInputSignatureSize, &pInputLayout)))
+                return E_FAIL;
+            m_InputLayouts.push_back(pInputLayout);
+        }
+        else
+        {
+            // InputLayout이 필요 없는 경우 (SV_VertexID만 사용하는 셰이더)
+            m_InputLayouts.push_back(nullptr);
+        }
         /* ID3DllDevice::CreateInputLayout
              plnputElementDescs: 정점 구조체를 서술하는 D3D11_INPUT__ELEMENT_DESC들의 배열.
              NumElements：그 D3D11_INPUT_ELEMENT_DESC 배열의 원소 개수.
@@ -88,7 +95,7 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pShaderFilePath, const D3D11
                                     이것은 D3D11_INPUT_ELEMENT_DESC  구조체들로 이루어진  배열을 통해
        구축한다.(배열하나가 정점 구조체 원소 하나) &pInputLayout);*/
 
-        m_InputLayouts.push_back(pInputLayout);
+      
     }
     return S_OK;
 }

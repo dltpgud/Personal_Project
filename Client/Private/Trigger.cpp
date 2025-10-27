@@ -112,7 +112,9 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
                   m_bTriggered = true;
              
                   list<CGameObject*> Monster = m_pGameInstance->Get_ALL_GameObject(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Monster"));
-             
+                  
+                  if (Monster.size() == 0)
+                      return;
                   _float3 fPos{};
                   for (auto& monster :Monster)
                   {
@@ -132,7 +134,10 @@ HRESULT CTrigger::Set_TriggerZone(_int Type)
              
                   list<CGameObject*> Monster =
                       m_pGameInstance->Get_ALL_GameObject(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Monster"));
-             
+
+                  if (Monster.size() == 0)
+                      return;
+
                   _float3 fPos{};
                   for (auto& monster : Monster)
                   {

@@ -38,8 +38,6 @@ HRESULT CBody_MecanoBot::Initialize(void* pArg)
     if (FAILED(Set_StateMachine()))
         return E_FAIL;
 
-    m_fDeadTime = 0.7f;
-
     return S_OK;
 }
 
@@ -111,7 +109,7 @@ HRESULT CBody_MecanoBot::Render_Shadow()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-
+    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
@@ -147,23 +145,8 @@ HRESULT CBody_MecanoBot::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_MecanoBot"), TEXT("Com_Model"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_ComPonent_MecanoBot"),TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
-        return E_FAIL;
-
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 0,TEXT("../Bin/Resources/Models/Nomal/T_Tire_N.dds"))))
-        return E_FAIL;
-
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 1,TEXT("../Bin/Resources/Models/Nomal/T_Mecanobot_N.dds"))))
-        return E_FAIL;
-
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 2,TEXT("../Bin/Resources/Models/Nomal/T_Mecanobot_N.dds"))))
-        return E_FAIL;
-
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 3,TEXT("../Bin/Resources/Models/Nomal/T_Mecanobot_N.dds"))))
-        return E_FAIL;
-
-    if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, 4,TEXT("../Bin/Resources/Models/Nomal/T_Mecanobot_N.dds"))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"), TEXT("Com_Texture_Mask"),
@@ -195,13 +178,13 @@ HRESULT CBody_MecanoBot::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_DissolveDesc.bDissolveState, sizeof(_bool))))
         return E_FAIL;
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_fthreshold, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_DissolveDesc.fDissolve_threshold,sizeof(_float))))
         return E_FAIL;
 
     return S_OK;

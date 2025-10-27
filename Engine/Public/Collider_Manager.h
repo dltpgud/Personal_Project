@@ -1,5 +1,5 @@
 #include "Base.h"
-
+#include "SpatialGrid.h"
 BEGIN(Engine)
 class Collider_Manager final : public CBase
 {
@@ -29,7 +29,9 @@ public:
     HRESULT Monster_To_Monster_Collision();
     HRESULT Player_To_Monster_Bullet_Collison();
     HRESULT Player_To_Mash_Collison_for_Decal();
-    HRESULT MonsterBullet_To_Mash_Collison_for_Decal();
+    HRESULT Boss_To_Mash_Collison();
+    HRESULT Monster_To_Mash_Collison_for_Decal();
+   
     void Clear();
     HRESULT Find_Cell();
     HRESULT Set_Collison(_bool SetColl) {
@@ -45,7 +47,9 @@ private:
     _int m_ColliderDamage{ 0};
 
     _bool m_bIsColl = { false };
- 
+
+private:
+    CSpatialGrid m_SpatialGrid;
 
 public:
     static Collider_Manager* Create();

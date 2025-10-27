@@ -49,9 +49,9 @@
 #include "Particle_Explosion.h"
 #include "Fade.h"
 #include "Trigger.h"
-#include "Trail.h"
 #include "Decal.h"
-
+#include "HealthBall.h"
+#include "ShockWave_Bullet.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -110,6 +110,7 @@ HRESULT CLoader::Loading()
 		hr = Loading_For_MenuLevel();
 		break;
 	case LEVEL_STAGE1:
+        Loading_For_Add_MashMaterial();
         Loading_For_Preallocate();
 		hr = Loading_For_Stage1Level();
 		break;
@@ -142,7 +143,7 @@ void CLoader::Output_LoadingState()
 HRESULT CLoader::Loading_For_ProtoObject()
 {
 #pragma region Map
-
+   
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Proto GameObject_Terrain"), CTerrain::Create(m_pDevice, m_pContext)); });
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_NonAniObj"),CNonAni::Create(m_pDevice, m_pContext)); });
@@ -223,9 +224,14 @@ HRESULT CLoader::Loading_For_ProtoObject()
 
 #pragma endregion
 
-#pragma region Weapon
+#pragma region Item
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_WeaPonIcon"),CWeaPonIcon::Create(m_pDevice, m_pContext));});
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_HealthBall"),CHealthBall::Create(m_pDevice, m_pContext));});
+
+#pragma endregion
+
+#pragma region Weapon
 	
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Weapon"),CWeapon::Create(m_pDevice, m_pContext));});
 
@@ -243,6 +249,8 @@ HRESULT CLoader::Loading_For_ProtoObject()
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_Bullet"),CBullet::Create(m_pDevice, m_pContext));});
   
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_ShockWaveBullet"),CShockWave_Bullet::Create(m_pDevice, m_pContext));});
+    
 #pragma endregion
   
 #pragma region Effect
@@ -250,8 +258,6 @@ HRESULT CLoader::Loading_For_ProtoObject()
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_ShootEffect"),CShootEffect::Create(m_pDevice, m_pContext));});
    
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Particle_Explosion"),CParticle_Explosion::Create(m_pDevice, m_pContext));});
-    
-    m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype_GameObject_Trail"),CTrail::Create(m_pDevice, m_pContext));});
     
 #pragma endregion
 
@@ -398,10 +404,7 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Point"),
                           CShader::Create(m_pDevice, m_pContext,TEXT("../Bin/ShaderFiles/Shader_VtxPoint.hlsl"),VTXPOSTEX::Elements, VTXPOSTEX::iNumElements));});
-    
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_Trail"),
-                          CShader::Create(m_pDevice, m_pContext,TEXT("../Bin/ShaderFiles/Shader_VtxTrail.hlsl"),TrailVertex::Elements, TrailVertex::iNumElements));});
-
+  
 #pragma endregion
 
 #pragma region Buffer
@@ -414,8 +417,6 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
 
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Terrain"),CVIBuffer_Terrain::Create(m_pDevice, m_pContext));});
    
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferTrail"),CVIBuffer_Trail::Create(m_pDevice, m_pContext));});
-    
 #pragma endregion
 
 #pragma region Collider
@@ -490,7 +491,9 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
   ParticleExploDesc.isLoop = false;
   
   if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Particle_Explosion"),CVIBuffer_Particle_Point::Create(m_pDevice, m_pContext, &ParticleExploDesc))))
-      return E_FAIL; 
+      return E_FAIL;
+
+ 
 #pragma endregion
 
     return S_OK;
@@ -576,31 +579,73 @@ HRESULT CLoader::Loading_For_Static_Texture()
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Mask/T_Noise_Liquid.dds")));});
 
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Flash_output"),
-                    CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/Flash_output.dds")));});
-
-    //m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Angle_Blur"),
-    //                CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/T_Mask_Angle_Blur.dds")));});
-
-    m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_DecalProto(TEXT("Base"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),1);});
+     m_pGameInstance->Add_DecalProto(TEXT("Base"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),9);
 
     return S_OK;
 }
 
 HRESULT CLoader::Loading_For_Preallocate()
-{  
-    CTrail::CTrail_DESC pTrail{};
-    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype_GameObject_Trail"), 200, &pTrail);
+{
+    CEffect_TrailStream::TRAILSDESC TrailTSpexdesc{};
+    TrailTSpexdesc.maxTrails = 300;      // 동시에 존재할 수 있는 트레일 개수
+    TrailTSpexdesc.maxPointsPerTrail = 64; // 각 트레일에 저장될 포인트 개수
+    TrailTSpexdesc.fadeSpeed = 1.5f;        // Life 감소 속도
+    TrailTSpexdesc.lifeTime = 2.0f;         // 트레일이 사라지기까지의 시간
+    TrailTSpexdesc.iPass = CEffect_TrailStream::RP_SPRITE; 
+    TrailTSpexdesc.Mode = CEffect_TrailStream::RM_DEFULT;
+    TrailTSpexdesc.pTrailTexturePath = TEXT("../Bin/Resources/Textures/Effect/Flash_output.dds");
+    TrailTSpexdesc.vTrailTexUVScale = {1.f, 1.f}; // UV 스크롤/타일링 계수
+    TrailTSpexdesc.iTotalSprite = 4;
+    m_pGameInstance->Add_EffectStream(L"SpriteTexTrail", CEffect_TrailStream::Create(m_pDevice, m_pContext, &TrailTSpexdesc));
 
     CBullet::CBULLET_DESC Bullet{};
-    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 200, &Bullet);
+    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 20, &Bullet);
   
     CPlayerBullet::CPlayerBullet_DESC pBullet{};
     m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_PlayerBullet"), 200, &pBullet);
    
     DECAL_DESC DecalDesc{};
-    m_pGameInstance->Preallocate_Decal(TEXT("Base"), 200, &DecalDesc);
+    m_pGameInstance->Preallocate_Decal(TEXT("Base"), 500, &DecalDesc);
+    
+    CEffect_TrailStream::TRAILSDESC Traildesc{};
+    Traildesc.maxTrails = 256;      // 동시에 존재할 수 있는 트레일 개수
+    Traildesc.maxPointsPerTrail = 64; // 각 트레일에 저장될 포인트 개수
+    Traildesc.fadeSpeed = 1.5f;       // Life 감소 속도
+    Traildesc.lifeTime = 2.0f;        // 트레일이 사라지기까지의 시간
+    Traildesc.iPass = CEffect_TrailStream::RP_CURVE; 
+    TrailTSpexdesc.Mode = CEffect_TrailStream::RM_CURVE;
+    Traildesc.vTrailTexUVScale = {1.f, 2.f}; // UV 스크롤/타일링 계수
+    m_pGameInstance->Add_EffectStream(L"CuTrail", CEffect_TrailStream::Create(m_pDevice, m_pContext, &Traildesc));
+   
+    CHealthBall::CHealthBall_DESC pHealthBall{};
+    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_HealthBall"), 200, &pHealthBall);
+   
+    CEffect_TrailStream::TRAILSDESC TrailTexdesc{};
+    TrailTexdesc.maxTrails = 1024;       // 동시에 존재할 수 있는 트레일 개수
+    TrailTexdesc.maxPointsPerTrail = 64; // 각 트레일에 저장될 포인트 개수
+    TrailTexdesc.fadeSpeed = 2.f;       // Life 감소 속도
+    TrailTexdesc.lifeTime = 2.0f;        // 트레일이 사라지기까지의 시간
+    TrailTexdesc.iPass = CEffect_TrailStream::RP_TEX;
+    TrailTSpexdesc.Mode = CEffect_TrailStream::RM_DEFULT;
+    TrailTexdesc.pTrailTexturePath = TEXT("../Bin/Resources/Textures/Effect/T_Trails_Gen1.dds");
+    TrailTexdesc.vTrailTexUVScale = {1.f, 1.f}; // UV 스크롤/타일링 계수
+    m_pGameInstance->Add_EffectStream(L"TexTrail",CEffect_TrailStream::Create(m_pDevice, m_pContext, &TrailTexdesc));
 
+
+
+    return S_OK;
+}
+
+HRESULT CLoader::Loading_For_Add_MashMaterial()
+{
+  
+    static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Model_Player")))
+        ->InsertAiTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Arm_Player_FPV_F1.dds"));
+
+   static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_ComPonent_BillyBoom")))
+        ->InsertAiTexture(aiTextureType_EMISSION_COLOR, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Boss_BillyBoom_01_F1.dds"));
+      static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_ComPonent_BillyBoom")))
+        ->InsertAiTexture(aiTextureType_EMISSION_COLOR, 1, TEXT("../Bin/Resources/Models/AnimModel/T_Boss_BillyBoom_02_F1.dds"));
     return S_OK;
 }
 
@@ -778,7 +823,10 @@ HRESULT CLoader::Loading_For_Stage1Level()
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component StageDoor Model_aniObj"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
             TEXT("../Bin/Data/Ani/StageDoor.dat"), PreTransformMatrix))))
 			return E_FAIL;
-		
+
+         static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STAGE1, TEXT("Proto Component StageDoor Model_aniObj")))
+                   ->InsertAiTexture(aiTextureType_NORMALS, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Door_Regular_Act1_N.dds"));
+           
 		if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE1, TEXT("Proto Component ItemDoor Model_aniObj"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
             TEXT("../Bin/Data/Ani/WPDoor.dat"), PreTransformMatrix))))
 			return E_FAIL;
@@ -944,10 +992,16 @@ HRESULT CLoader::Loading_For_Stage2Level()
          if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE2, TEXT("Proto Component StageDoor Model_aniObj"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
                    TEXT("../Bin/Data/Ani/StageDoor.dat"), PreTransformMatrix))))
 	          return E_FAIL;
+
+         static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STAGE2, TEXT("Proto Component StageDoor Model_aniObj")))
+                   ->InsertAiTexture(aiTextureType_NORMALS, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Door_Regular_Act1_N.dds"));
          
 	     if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE2, TEXT("Proto Component BossDoor Model_aniObj"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM, 
                    TEXT("../Bin/Data/Ani/BossDoor.dat"), PreTransformMatrix))))
 	      	return E_FAIL;
+             
+         static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STAGE2, TEXT("Proto Component BossDoor Model_aniObj")))
+                   ->InsertAiTexture(aiTextureType_NORMALS, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Door_Boss_N.dds"));
          
          if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STAGE2, TEXT("Proto Component ItemDoor Model_aniObj"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_ANIM,
                    TEXT("../Bin/Data/Ani/WPDoor.dat"), PreTransformMatrix))))
@@ -1053,14 +1107,17 @@ HRESULT CLoader::Loading_For_BossLevel()
                    TEXT("../Bin/Data/Ani/BossDoor.dat"),PreTransformMatrix))))
             return E_FAIL;
 
+        static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_BOSS, TEXT("Proto Component BossDoor Model_aniObj")))
+                   ->InsertAiTexture(aiTextureType_NORMALS, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Door_Boss_N.dds"));
+
          PreTransformMatrix = XMMatrixIdentity();
 	    if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto_Component_ShockWave"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM,
                    TEXT("../Bin/Data/NonAni/ShockWave.dat"), PreTransformMatrix))))
 		    return E_FAIL;
 
-        if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto_Component_Shock"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM,
-                   TEXT("../Bin/Data/NonAni/Shock.dat"), PreTransformMatrix))))
-		    return E_FAIL;
+       ///if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto_Component_Shock"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM,
+       ///           TEXT("../Bin/Data/NonAni/Shock.dat"), PreTransformMatrix))))
+		//    return E_FAIL;
 #pragma endregion
 
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");

@@ -1,7 +1,7 @@
 #include"stdafx.h"
 #include "BillyBoom_ShockWave.h"
 #include "GameInstance.h"
-#include "Bullet.h"
+#include "ShockWave_Bullet.h"
 #include "ShockWave.h"
 #include "Body_BillyBoom.h"
 CBillyBoom_ShockWave::CBillyBoom_ShockWave()
@@ -80,30 +80,19 @@ HRESULT CBillyBoom_ShockWave::Make_ShockWave()
       _vector vTagetPos =  XMVectorSet(m_pPerantWorldMat->_41, m_pPerantWorldMat->_42, m_pPerantWorldMat->_43, 1.f) +
         XMVectorSet(m_pPerantWorldMat->_31, m_pPerantWorldMat->_32, m_pPerantWorldMat->_33, 0.f) * 25.f;
 
-    CBullet::CBULLET_DESC Desc{};
+    CShockWave_Bullet::CBULLET_DESC Desc{};
     Desc.fSpeedPerSec = 20.f;
     Desc.pTagetPos = vTagetPos;
     Desc.vPos = vHPos;
     Desc.iDamage = 10;
-    Desc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
+    Desc.iSkillType = CSkill::SKill::STYPE_NOMAL;
     Desc.iActorType = CSkill::BOSS_MONSTER;
     Desc.fScale = _float2{0.6f, 0.6f};
     Desc.fClolor[CSkill::COLOR::CSTART] = _float4(1.f, 1.f, 0.f, 0.f);
     Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.f, 0.f, 1.f);
-    Desc.fRadius = 0.5f;
-    Desc.fTrailLength = 4.f;
-    Desc.fTrailWidth = 0.5f;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                             L"Prototype GameObject_Bullet", &Desc);
+                                             L"Prototype GameObject_ShockWaveBullet", &Desc);
 
-
-      CShockWave::CShockWave_DESC esc{};
-    esc.iDamage = 1;
-    esc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
-    esc.iActorType = CSkill::BOSS_MONSTER;
-    esc.vPos = m_pParentObject->Get_Transform()-> Get_TRANSFORM(CTransform::T_POSITION);
-    m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-                                             L"Prototype_GameObject_ShockWave", &esc);
     return S_OK;
 }
 

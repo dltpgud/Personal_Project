@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "CHEST.h"
 #include "GameInstance.h"
 #include "WeaPonIcon.h"
@@ -63,29 +63,30 @@ void CCHEST::Update(_float fTimeDelta)
 
 void CCHEST::Late_Update(_float fTimeDelta)
 {
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
+        return;
+
+    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 1.5))
+        return;
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
+    
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-       return;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
-       return;
+        return;
 
     __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CCHEST::Render_Shadow()
 {
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom,"g_WorldMatrix")))
+        return E_FAIL;
+ 
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", m_pTransformCom->Get_WorldMatrixPtr())))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
@@ -207,7 +208,8 @@ HRESULT CCHEST::Init_CallBakc()
             {
                 if (!(m_flags & HOVER) && !(m_flags & ICON))
                 {
-                   m_InteractiveUI->Set_Text(L"»óÀÚ ¿­±â");
+                   m_InteractiveUI->Set_Text(L"ìƒìž ì—´ê¸°");
+                   m_InteractiveUI->Set_Radians(25.f);
                    m_InteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
                    m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
                    m_pModelCom->Set_Animation(State::HOVDER, true);

@@ -30,8 +30,9 @@ public:
     virtual void    Priority_Update(_float fTimeDelta) override;
     virtual void    Update(_float fTimeDelta) override;
     virtual void    Late_Update(_float fTimeDelta) override;
-    virtual void    Dead_Rutine() override;
+    virtual void Dead_Rutine() override;
     virtual HRESULT Render() override;
+    virtual HRESULT Render_Shadow() override;
 
 private:
     virtual HRESULT Add_Components() override;

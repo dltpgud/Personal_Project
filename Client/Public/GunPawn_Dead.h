@@ -25,6 +25,7 @@ public:
 
 private:
     virtual HRESULT Initialize(void* pArg) override;
+    virtual void Init_CallBack_Func() override;
 
 private:
 

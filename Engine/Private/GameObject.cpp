@@ -38,7 +38,7 @@ HRESULT CGameObject::Initialize(void* pArg)
      
      if (m_iCloneCount > 1)
      {
-         m_pTransformCom->Initialize_Prototype(pDesc);
+        m_pTransformCom->Initialize_Prototype(pDesc);
          return S_OK;
      }
    

@@ -135,6 +135,7 @@ HRESULT CHealthBot::Init_CallBack()
             if ( false == HasState(ST_DEAD)) // 충돌 중
             {
                 m_pInteractiveUI->Set_Text(L"체력 회복");
+                m_pInteractiveUI->Set_Radians(25.f);
                 m_pInteractiveUI->Set_OnwerPos(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
                 m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
                 m_iState |= FLAG_INTERACTUI;

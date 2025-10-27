@@ -13,6 +13,7 @@ private:
 
 public:
 	_float					Get_TimeDelta(const _wstring& pTimerTag);
+    _float*                 Get_TimeDeltaSum(const _wstring& pTimerTag);
 
 public:
 	HRESULT					Add_Timer(const _wstring& strTimerTag);

@@ -10,10 +10,11 @@ texture2D       g_NormalTexture;
 float4			g_RimColor;
 float			g_RimPow =1.f;
 
-
 texture2D		g_DiffuseTexture;
+texture2D       g_VFXTexture;
 texture2D       g_EmissiveTexture;
 texture2D       g_DiffTexture;
+
 float4			g_vMtrlAmbient	= float4(0.4f, 0.4f, 0.4f, 1.f);
 float4			g_vMtrlSpecular = float4(1.f, 1.f, 1.f, 1.f);
 
@@ -108,25 +109,25 @@ struct PS_OUT
     vector vDepth : SV_TARGET2;
     vector vRim : SV_TARGET3;
     vector vEmissive : SV_TARGET4;
-    vector vOutLine : SV_TARGET5;
-    vector vAmbient : SV_TARGET6;
+    vector vAmbient : SV_TARGET5;
+    vector vBloom : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
 	PS_OUT			Out = (PS_OUT)0;
 	
-	vector		vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);	
-
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    
 	if (vMtrlDiffuse.a <= 0.3f)
 		discard;
 
     Out.vDiffuse = vMtrlDiffuse;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.35f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = 0.f;
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.02f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
 	return Out;
 }
 
@@ -134,7 +135,7 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 	
-    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
 
     if (true == g_TagetDeadBool)
     {
@@ -153,24 +154,23 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
     else
     {
         discard;
-    }
-
-    float rim = { 0.f };
-    rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
-    rim = pow(1 - rim, g_RimPow);
-     
+    }     
    vector vNormalDesc = g_NormalTexture.Sample(LinearSampler, In.vTexcoord);
    vector vNormal = vector(vNormalDesc.xy * 2.f - 1.f, vNormalDesc.z, 0.f);
    vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
    vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
+  
+   float rim = { 0.f };
+   rim = saturate(dot(normalize(vNormal), normalize(g_vCamPosition - In.vWorldPos)));
+   rim = pow(1 - rim, g_RimPow);
     
     Out.vRim = rim * g_RimColor;
-    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.28f);
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     Out.vDiffuse = vMtrlDiffuse ;
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 1.f);;
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 1.f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -180,14 +180,13 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
     vector vMtrlEmissive;
-	
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
 
     float rim = { 0.f };
     rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
     rim = pow(1 - rim, g_RimPow);
-    
+
 
     if (true == g_bEmissive) 
     {
@@ -201,13 +200,15 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
     else
         vMtrlEmissive = 0.f;
     
+
+    
     Out.vEmissive =  vMtrlEmissive;
     Out.vDiffuse = vMtrlDiffuse;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.2f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 1.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -224,11 +225,11 @@ PS_OUT PS_WEAPON(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vEmissive = vMtrlEmissive * g_EmissivePower;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.27f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.019f, 0.f);
     Out.vRim = 0.f;
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -239,35 +240,29 @@ PS_OUT PS_Door(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-    vector vMatEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
     
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
+    
+    vector vNormalDesc = g_NormalTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vNormal = vector(vNormalDesc.xy * 2.f - 1.f, vNormalDesc.z, 0.f);
+    vNormal.z = sqrt(saturate(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y));
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
+    vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
 
-    vector vEmissive;
-    vector vDiffuse;
     if (true == g_bDoorEmissive)
     {
-        vDiffuse = float4(0.1f, 0.1f, 0.1f, 1.f);
-        vEmissive = vMatEmissive * g_DoorEmissiveColor;
+        Out.vBloom = float4(vMtrlDiffuse.rgb* g_DoorEmissiveColor.rgb, In.vProjPos.w / g_fCamFar);
     }
     else
     {
-        vDiffuse = vMtrlDiffuse;
-        vEmissive = vector(0.f, 0.f, 0.f, 0.f);
+        Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     }
-    
-    float rim = { 0.f };
-    rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
-    rim = pow(1 - rim, g_RimPow);
-
-    Out.vDiffuse = vDiffuse;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDiffuse = vMtrlDiffuse;
+    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.1f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vRim = (rim * g_DoorRimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
-    Out.vEmissive = vEmissive;
-    Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
+    Out.vAmbient = vector(1.1f, 1.1f, 1.1f, 1.1f);
+
     return Out;
 }
 
@@ -289,7 +284,7 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
 	
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
-
+    vector vMtrlEmissive;
     if (true == g_TagetDeadBool)
     {
         vector Black = { 0.3f, 0.3f, 0.3f, 0.1f };
@@ -299,18 +294,47 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
 	
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
-
+  
     float rim = { 0.f };
     rim = saturate(dot(normalize(In.vNormal), normalize(g_vCamPosition - In.vWorldPos)));
     rim = pow(1 - rim, g_RimPow);
+
+    if (true == g_bEmissive)
+    {
+        vMtrlEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
     
+        float r = vMtrlEmissive.r;
+        float g = vMtrlEmissive.g;
+        float b = vMtrlEmissive.b;
+
+        bool isWhite = (abs(r - g) < 0.1f) && (abs(r - b) < 0.1f) && (r > 0.8f);
+
+        if (isWhite)
+            vMtrlEmissive = vMtrlEmissive;
+        else
+            vMtrlEmissive = 0; 
+        
+    }
+    else
+        vMtrlEmissive = 0.f;
     
+    if (true == g_bNomal)
+    {
+    
+        vector vNormalDesc = g_NormalTexture.Sample(LinearSampler, In.vTexcoord);
+        vector vNormal = vector(vNormalDesc.xy * 2.f - 1.f, vNormalDesc.z, 0.f);
+        vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
+        float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
+        vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
+        Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.2f);
+    }else 
+        Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.2f);
     Out.vDiffuse = vMtrlDiffuse;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
     Out.vRim = (rim * g_RimColor);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
+    Out.vEmissive = vMtrlEmissive;
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
+    Out.vBloom = vector(vMtrlEmissive.rgb, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 

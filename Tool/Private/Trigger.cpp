@@ -213,6 +213,7 @@ void CTrigger::Free()
 {
     __super::Free();
 
-        if (m_bClone)
+ 
+    if (m_iCloneCount == 1) 
             Safe_Delete_Array(m_Proto);
 }

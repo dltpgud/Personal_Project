@@ -28,9 +28,6 @@ HRESULT Cfabric::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    if (FAILED(Add_Components()))
-        return E_FAIL;
-
     return S_OK;
 }
 
@@ -97,19 +94,30 @@ HRESULT Cfabric::Render_Shadow()
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix(
-            "g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
+    // ===== CSM 행렬 바인딩 (구식 시스템에서 CSM으로 변경) =====
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView0", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 0))))
         return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix(
-            "g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView1", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 1))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView2", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 2))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView3", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 3))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj0", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 0))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj1", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 1))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj2", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 2))))
+        return E_FAIL;
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj3", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 3))))
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-
-        if (FAILED(m_pShaderCom->Begin(2)))
+        if (FAILED(m_pShaderCom->Begin(2)))  // Pass 2 = LightDepth (CSM)
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -207,6 +215,7 @@ void Cfabric::Free()
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
 
-        if (m_bClone)
+
+    if (m_iCloneCount == 1) 
             Safe_Delete_Array(m_Proto);
 }

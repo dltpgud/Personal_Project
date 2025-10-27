@@ -13,6 +13,16 @@ _float CTimer_Manager::Get_TimeDelta(const _wstring& pTimerTag)
 	return pInstance->Get_TimeDelta();
 }
 
+_float* CTimer_Manager::Get_TimeDeltaSum(const _wstring& pTimerTag)
+{
+    CTimer* pInstance = Find_Timer(pTimerTag);
+
+    if (nullptr == pInstance)
+        return nullptr;
+
+    return pInstance->Get_TimeDeltaSum();
+}
+
 HRESULT CTimer_Manager::Add_Timer(const _wstring& strTimerTag)
 {
 	 if (nullptr != Find_Timer(strTimerTag))

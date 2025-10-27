@@ -92,29 +92,28 @@ struct PS_OUT
     vector vDepth : SV_TARGET2;
     vector vRim : SV_TARGET3;
     vector vEmissive : SV_TARGET4;
-    vector vOutLine : SV_TARGET5;
-    vector vAmbient : SV_TARGET6;
+    vector vAmbient : SV_TARGET5;
+    vector vBloom : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 	
-    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
 
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
 
     Out.vDiffuse = vMtrlDiffuse;
 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 1.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
-
 
 PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
@@ -124,39 +123,22 @@ PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
     return Out;
 }
 
-
-struct PS_OUT_HEIGHT
-{
-    vector vHeight : SV_TARGET0;
-};
-
-PS_OUT_HEIGHT PS_MAIN_HEIGHT(PS_IN In)
-{
-    PS_OUT_HEIGHT Out = (PS_OUT_HEIGHT) 0;
-
-    Out.vHeight = vector(In.vWorldPos.y, 0.f, 0.f, 1.f);
-
-    return Out;
-}
-
-
-
 PS_OUT PS_NONOUTLINE(PS_IN In)
 {
 PS_OUT Out = (PS_OUT) 0;
 	
-vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
 
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
     
     Out.vDiffuse = vMtrlDiffuse;
 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.01f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
-    Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
+    Out.vAmbient = vector(0.2f, 0.2f, 0.2f, 1.f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -196,16 +178,5 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VSINST_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_LIGHTDEPTH();
-    }
-
-    pass HeightPass //3
-    {
-        SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
-
-        VertexShader = compile vs_5_0 VSINST_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN_HEIGHT();
     }
 }

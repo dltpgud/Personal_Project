@@ -44,7 +44,7 @@ using namespace DirectX;
 #include <list>
 #include <algorithm>
 #include <set>
-
+#include <random>
 using namespace std;
 
 #include "Engine_Typedef.h"
@@ -58,9 +58,7 @@ using namespace Engine;
 
 namespace Engine
 {
-
-
-	enum MOUSEKEYSTATE { DIM_LB, DIM_RB, DIM_MB, DIM_END };
+    enum MOUSEKEYSTATE { DIM_LB, DIM_RB, DIM_MB, DIM_END };
 	enum MOUSEMOVESTATE { DIMS_X, DIMS_Y, DIMS_Z, DIMS_END };
 
 	enum aiTextureType {

@@ -54,6 +54,19 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta, R
 
         m_pGameInstance->Add_GameObject_To_Layer(LEVEL_BOSS, TEXT("Layer_Skill"), L"Prototype_GameObject_Particle_Explosion", &Desc);
 
+        DECAL_DESC DecalDesc{};
+        DecalDesc.bOnce = true;
+        DecalDesc.bNormal = false;
+        DecalDesc.fDepth = 1.f;
+        DecalDesc.iTexIndex = 7;
+        DecalDesc.fLifeTime = 10.f;
+        DecalDesc.fSize = 6.f;
+        DecalDesc.iType = DECAL_DESC::TYPE_BOX;
+        DecalDesc.Key = TEXT("Base");
+        DecalDesc.vPos = m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+        DecalDesc.vNormal = XMVectorSet(0.f, 1, 0.f, 0.f);
+        m_pGameInstance->Add_Decal(DecalDesc.Key, &DecalDesc);
+
         m_bEffect = true;
     }
 

@@ -60,9 +60,12 @@ void CWeaPonIcon::Late_Update(_float fTimeDelta)
 
     Rotation(m_pGameInstance->Get_Player()->Get_Transform());
 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
+        return;
+
+    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5))
+        return;
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 }
 
@@ -145,6 +148,7 @@ HRESULT CWeaPonIcon::Init_CallBack()
                 if (OBJ_DEAD != m_iLifeState)
                 {
                     m_InteractiveUI->Set_Text(m_pWeaPonNumName);
+                    m_InteractiveUI->Set_Radians(25.f);
                     m_pGameInstance->Set_OpenUI(true, TEXT("Interactive"), this);
                     m_InteractiveUI->Set_OnwerPos(XMVectorSet(m_WorldMatrix._41,m_WorldMatrix._42,m_WorldMatrix._43,m_WorldMatrix._44));
                 }

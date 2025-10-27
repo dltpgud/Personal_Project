@@ -53,9 +53,9 @@ private:
     const _float4x4* m_pPerantWorldMat{};
 
     _float m_BeamY{-45.f};
-    _float m_BeamZ{15.f};
+    _float m_BeamZ{20.f};
     _uint m_iBoneIndex[BONE_INDEX_END]{};
-    _float m_fRimTimeSum{};
+    _float m_fRimTimeSum{0.f};
 
 public:
     static CBillyBoom_Laser* Create(void* pArg);

@@ -6,7 +6,8 @@ CMesh::CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CVIBuffer{p
 }
 
 CMesh::CMesh(const CMesh& Prototype)
-    : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex}
+    : CVIBuffer{Prototype}, m_iMaterialIndex{Prototype.m_iMaterialIndex}, m_AABBMaxLocal{Prototype.m_AABBMaxLocal},
+      m_AABBMinLocal{Prototype.m_AABBMinLocal},m_eModelType{Prototype.m_eModelType}
 {
     strcpy_s(m_szName, Prototype.m_szName);
     m_pAnimVertices = new VTXANIMMESH[m_iNumVertices];
@@ -15,7 +16,8 @@ CMesh::CMesh(const CMesh& Prototype)
 
     memcpy(m_pAnimVertices, Prototype.m_pAnimVertices, sizeof(VTXANIMMESH) * m_iNumVertices);
     memcpy(m_pPos, Prototype.m_pPos, sizeof(_float3) * m_iNumVertices);
-    memcpy(m_pIndices, Prototype.m_pIndices, sizeof(_uint) * m_iNumIndexices);
+    memcpy(m_pIndices, Prototype.m_pIndices, sizeof(_uint) * m_iNumIndexices);   
+
 }
 HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix)
 {
@@ -62,7 +64,11 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
 
 #pragma endregion
     Safe_Delete_Array(pIndices);
-
+    m_eModelType = eModelType;
+    if (eModelType == CModel::TYPE_NONANIM)
+    {
+        Build_MeshAABB_Local();
+    }
     return S_OK;
 }
 
@@ -87,18 +93,15 @@ HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const vector<class CBone*>& B
         m_FinalBoneMatrices.push_back(finalMat); // CPU에도 저장
 
     }
-
     return pShader->Bind_Matrices(pConstantName, BoneMatrices, 512);
 }
 
 HRESULT CMesh::Render()
 {
-
     if (m_pInst_Buffer == nullptr)
         return __super::Render(); // 인스턴싱이 아닐경우 , 상위 렌더 함수 호출
     else   // 인스턴싱
         m_pContext->DrawIndexedInstanced(m_iNumIndexices, m_iNumInstance, 0, 0, 0);
-
 
     return S_OK;
 }
@@ -108,35 +111,37 @@ _float3* CMesh::Get_pPos(_int i)
     return &m_pPos[i];
 }
 
-_float3 CMesh::GetVetexPosAnim(_int NumIndexices)
+_float3 CMesh::GetVetexPosAnim(_int vertexIndex)
 {
-     const VTXANIMMESH& vtx = m_pAnimVertices[NumIndexices]; 
 
-    XMVECTOR finalPos = XMVectorZero();
+    const VTXANIMMESH& vtx = m_pAnimVertices[vertexIndex];
+
     XMVECTOR basePos = XMLoadFloat3(&vtx.vPosition);
+    XMVECTOR skinned = XMVectorZero();
 
-    for (int i = 0; i < 4; i++) // 최대 4개의 본 영향
+    const float w[4] = {vtx.vBlendWeight.x, vtx.vBlendWeight.y, vtx.vBlendWeight.z, vtx.vBlendWeight.w};
+    const int i[4] = {(int)vtx.vBlendIndex.x, (int)vtx.vBlendIndex.y, (int)vtx.vBlendIndex.z, (int)vtx.vBlendIndex.w};
+
+    float wsum = 0.0f;
+    for (int k = 0; k < 4; ++k)
     {
-        int boneIndex = 0;
-        float weight = 0.f;
+        if (w[k] <= 0.0f)
+            continue;
+        // 방어: 본 인덱스 범위 체크
+        if (i[k] < 0 || i[k] >= (int)m_FinalBoneMatrices.size())
+            continue;
 
-        switch (i)
-        {
-            case 0: boneIndex = vtx.vBlendIndex.x; weight = vtx.vBlendWeight.x; break;
-            case 1: boneIndex = vtx.vBlendIndex.y; weight = vtx.vBlendWeight.y; break;
-            case 2: boneIndex = vtx.vBlendIndex.z; weight = vtx.vBlendWeight.z; break;
-            case 3: boneIndex = vtx.vBlendIndex.w; weight = vtx.vBlendWeight.w; break;
-        }
-
-        if (weight > 0.0f)
-        {
-            XMMATRIX boneMat = m_FinalBoneMatrices[boneIndex];
-            finalPos += XMVector3TransformCoord(basePos, boneMat) * weight;
-        }
+        XMMATRIX M = m_FinalBoneMatrices[i[k]]; // (combined * inverseBindPose) 형태여야 함
+        skinned = XMVectorAdd(skinned, XMVectorScale(XMVector3TransformCoord(basePos, M), w[k]));
+        wsum += w[k];
     }
 
+    // 가끔 weight 합이 1 미만이면, 잔여 가중치를 원위치에 더해 주면 안정적
+    if (wsum < 1.0f)
+        skinned = XMVectorAdd(skinned, XMVectorScale(basePos, (1.0f - wsum)));
+
     _float3 result;
-    XMStoreFloat3(&result, finalPos);
+    XMStoreFloat3(&result, skinned);
     return result;
 }
 
@@ -241,8 +246,6 @@ HRESULT CMesh::Load_AnimMesh(HANDLE hFile)
     m_pAnimVertices = new VTXANIMMESH[m_iNumVertices];
 
     bReadFile = ReadFile(hFile, m_pAnimVertices, sizeof(VTXANIMMESH) * m_iNumVertices, &dwByte, nullptr);
-    m_pPos = new _float3[m_iNumVertices];
-    for (size_t i = 0; i < m_iNumVertices; i++) { m_pPos[i] = m_pAnimVertices[i].vPosition; }
 
     m_iVertexStride = sizeof(VTXANIMMESH);
 
@@ -295,13 +298,13 @@ HRESULT CMesh::Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix)
 
     for (_uint i = 0; i < m_iNumVertices; i++)
     {
-        pVertices[i].vPosition = pLoadVertices[i].vPosition;
+        m_pPos[i] = pVertices[i].vPosition = pLoadVertices[i].vPosition;
         XMStoreFloat3(&pVertices[i].vPosition,
                       XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
-        m_pPos[i] = pVertices[i].vPosition;
+        
         pVertices[i].vNormal = pLoadVertices[i].vNormal;
-        XMStoreFloat3(&pVertices[i].vPosition,
-                      XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
+        XMStoreFloat3(&pVertices[i].vNormal,
+                      XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vNormal), PreTransformMatrix));
 
         pVertices[i].vTangent = pLoadVertices[i].vTangent;
         pVertices[i].vTexcoord = pLoadVertices[i].vTexcoord;
@@ -342,76 +345,26 @@ HRESULT CMesh::Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix)
     return S_OK;
 }
 
-HRESULT CMesh::Create_RaycastSRV()
+void CMesh::Build_MeshAABB_Local()
 {
-    // 1. Positions SRV
+    m_AABBMinLocal = {_float(FLT_MAX), _float(FLT_MAX), _float(FLT_MAX)};
+    m_AABBMaxLocal = {_float(-FLT_MAX), _float(-FLT_MAX), _float(-FLT_MAX)};
+    for (_uint i = 0; i < m_iNumVertices; ++i)
     {
-        D3D11_BUFFER_DESC desc = {};
-        desc.ByteWidth = sizeof(_float3) * m_iNumVertices;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        desc.CPUAccessFlags = 0;
-        desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-        desc.StructureByteStride = sizeof(_float3);
-
-        D3D11_SUBRESOURCE_DATA init = {};
-        init.pSysMem = m_pPos;
-
-        ID3D11Buffer* pBuffer = nullptr;
-        if (FAILED(m_pDevice->CreateBuffer(&desc, &init, &pBuffer)))
-            return E_FAIL;
-
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srvDesc.Format = DXGI_FORMAT_UNKNOWN; // structured buffer → UNKNOWN
-        srvDesc.Buffer.FirstElement = 0;
-        srvDesc.Buffer.NumElements = m_iNumVertices;
-
-        HRESULT hr = m_pDevice->CreateShaderResourceView(pBuffer, &srvDesc, &m_pPositionsSRV);
-        Safe_Release(pBuffer);
-        if (FAILED(hr))
-            return hr;
-    }
-
-    // 2. Indices SRV (uint3 단위로 묶기)
-    {
-        UINT numTris = m_iNumIndexices / 3;
-        std::vector<XMUINT3> triIndices(numTris);
-        for (UINT i = 0; i < numTris; i++)
-        {
-            triIndices[i].x = m_pIndices[i * 3 + 0];
-            triIndices[i].y = m_pIndices[i * 3 + 1];
-            triIndices[i].z = m_pIndices[i * 3 + 2];
+         _float3 p{};
+        if (m_eModelType == CModel::TYPE_NONANIM)
+           p = *Get_pPos(i);
+        else {
+            p = GetVetexPosAnim(i);
         }
 
-        D3D11_BUFFER_DESC desc = {};
-        desc.ByteWidth = sizeof(XMUINT3) * numTris;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        desc.CPUAccessFlags = 0;
-        desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-        desc.StructureByteStride = sizeof(XMUINT3);
-
-        D3D11_SUBRESOURCE_DATA init = {};
-        init.pSysMem = triIndices.data();
-
-        ID3D11Buffer* pBuffer = nullptr;
-        if (FAILED(m_pDevice->CreateBuffer(&desc, &init, &pBuffer)))
-            return E_FAIL;
-
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-        srvDesc.Buffer.FirstElement = 0;
-        srvDesc.Buffer.NumElements = numTris;
-
-        HRESULT hr = m_pDevice->CreateShaderResourceView(pBuffer, &srvDesc, &m_pIndicesSRV);
-        Safe_Release(pBuffer);
-        if (FAILED(hr))
-            return hr;
+        m_AABBMinLocal.x = min(m_AABBMinLocal.x, p.x);
+        m_AABBMinLocal.y = min(m_AABBMinLocal.y, p.y);
+        m_AABBMinLocal.z = min(m_AABBMinLocal.z, p.z);
+        m_AABBMaxLocal.x = max(m_AABBMaxLocal.x, p.x);
+        m_AABBMaxLocal.y = max(m_AABBMaxLocal.y, p.y);
+        m_AABBMaxLocal.z = max(m_AABBMaxLocal.z, p.z);
     }
-
-    return S_OK;
 }
 
 CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile,
@@ -449,6 +402,4 @@ void CMesh::Free()
     Safe_Delete_Array(m_pIndices);
     Safe_Release(m_pInst_Buffer);
     Safe_Delete(m_pInst_BufferData);
-    Safe_Release(m_pPositionsSRV);
-    Safe_Release(m_pIndicesSRV);
 }

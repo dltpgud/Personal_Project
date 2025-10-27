@@ -52,6 +52,8 @@ HRESULT CBody_Player::Render()
 	{
 		if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0, "g_DiffuseTexture")))
 			return E_FAIL;
+		if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE_ROUGHNESS, 0, "g_VFXTexture")))
+			return E_FAIL;
 
 		if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
 			return E_FAIL;

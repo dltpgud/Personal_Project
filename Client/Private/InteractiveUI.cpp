@@ -114,6 +114,11 @@ void CInteractiveUI::Set_OnwerPos(const _vector& Pos)
     m_vOnwerPos = Pos;
 }
 
+void CInteractiveUI::Set_Radians(_float Rad)
+{
+    m_Radians = Rad;
+}
+
 HRESULT CInteractiveUI::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_KeyBoard_F"), TEXT("Com_Texture_Interactive"),
@@ -146,7 +151,7 @@ _bool CInteractiveUI::IsLookingAtObject()
 
     _float dot = XMVectorGetX(XMVector3Dot(PlayerForward, dir));
 
-    constexpr _float maxAngle = XMConvertToRadians(30.f);
+    _float maxAngle = XMConvertToRadians(m_Radians);
 
     if (dot > cosf(maxAngle))
     {

@@ -31,6 +31,7 @@ HRESULT CBossBullet_Berrle::Initialize(void* pArg)
     if (FAILED(Initialize_SkillType()))
         return E_FAIL;
 
+ 
     return S_OK;
 }
 
@@ -50,9 +51,10 @@ void CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
       lDesc.fLifeTime = 4.5f;
           m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                                L"Prototype GameObject_BossBullet_Laser", &lDesc);
-        m_iLifeState = OBJ_POOL;
+        m_iLifeState = OBJ_DEAD;
     }
 
+      
     if(CSkill::SKill::STYPE_BERRLE == m_iSkillType)
      m_pTransformCom->GO_Dir(fTimeDelta, m_vDir, m_pNavigationCom);
 
@@ -88,11 +90,7 @@ void CBossBullet_Berrle::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
        return;
  
-    if (m_iSkillType == CSkill::STYPE_LASER)
-    {
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
-            return;
-    }
+
     __super::Late_Update(fTimeDelta);
 }
 
@@ -133,7 +131,6 @@ HRESULT CBossBullet_Berrle::Initialize_SkillType()
         _vector Dir = m_pTagetPos - m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);
         Dir = XMVectorSetW(Dir, 0.f);
         m_vDir = XMVector3Normalize(Dir);
-     
         m_pTransformCom->Set_Scaling(3.f, 3.f, 3.f);
         m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
 
@@ -196,15 +193,16 @@ HRESULT CBossBullet_Berrle::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_Clolor[CSkill::COLOR::CSTART], sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RGB", &m_Color[CSkill::COLOR::CSTART], sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RGBEnd", &m_Clolor[CSkill::COLOR::CEND], sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RGBEnd", &m_Color[CSkill::COLOR::CEND], sizeof(_float4))))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
         return E_FAIL;
-
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
     return S_OK;
 }
 

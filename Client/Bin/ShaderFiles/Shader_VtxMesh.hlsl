@@ -1,7 +1,7 @@
  #include "Engine_Shader_Defines.hlsli"
 
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-
+matrix g_LightViewMatrix, g_LightProjMatrix;
 float4			g_vLightDir;
 float4			g_vLightDiffuse;
 float4			g_vLightAmbient;
@@ -36,8 +36,6 @@ struct VS_OUT
 	float2 vTexcoord : TEXCOORD0;	
 	float4 vWorldPos : TEXCOORD1;
     float4 vProjPos : TEXCOORD2;
-    
-
 };
 
 VS_OUT VS_MAIN(VS_IN In)
@@ -76,15 +74,17 @@ struct PS_OUT
     vector vDepth : SV_TARGET2;
     vector vRim : SV_TARGET3;
     vector vEmissive : SV_TARGET4;
-    vector vOutLine : SV_TARGET5;
-    vector vAmbient : SV_TARGET6;
+    vector vAmbient : SV_TARGET5;
+    vector vBloom : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 	
-    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    // ===== 개선된 텍스처 필터링 (자글자글함 제거) =====
+    // Mip 레벨을 명시적으로 지정하여 더 부드러운 필터링
+    vector vMtrlDiffuse = g_DiffuseTexture.SampleLevel(LinearSamplerClamp, In.vTexcoord, 1.0f);
 
     if (vMtrlDiffuse.a <= 0.3f)
         discard;
@@ -93,10 +93,10 @@ PS_OUT PS_MAIN(PS_IN In)
 
     Out.vNormal = In.vNormal;
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vRim = 0.f;
     Out.vAmbient = vector(1.f, 1.f, 1.f, 1.f);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -112,25 +112,12 @@ PS_OUT PS_NONOUTLINE(PS_IN In)
     
     Out.vDiffuse = vMtrlDiffuse;
 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.3f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vRim = 0.f;
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
-    return Out;
-}
-
-
-struct PS_OUT_LIGHTDEPTH
-{
-    float vLightDepth : SV_TARGET0;
-};
-
-PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
-{
-    PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
-    Out.vLightDepth = (In.vProjPos.z / In.vProjPos.w);
+    Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -160,6 +147,7 @@ PS_OUT PS_FIRE(PS_IN In)
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vAmbient = vector(1.f, 1.f, 1.f, 1.f);
+    Out.vBloom = vector(vDiffuse.rgb, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -184,32 +172,8 @@ PS_OUT PS_ShockWaveFire(PS_IN In)
     Out.vRim = 0.f;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vAmbient = vector(1.f, 1.f, 1.f, 1.f);
-    return Out;
-}
-
-PS_OUT PS_Shock(PS_IN In)
-{
-    PS_OUT Out = (PS_OUT) 0;
-    
-    float4 vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler,In.vTexcoord);
-
-    vMtrlDiffuse.a = vMtrlDiffuse.r;
-    
-    float3 Red = { 1.f, 0.f, 0.f };
-    
-    float3 color = lerp(Red, g_RGB.rgb, vMtrlDiffuse.rgb);
-       
-    Out.vDiffuse = float4(color, vMtrlDiffuse.a);
-    
-    if (Out.vDiffuse.a <= 0.01f)
-        discard;
-    Out.vRim = 0.f;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
-    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
-    Out.vAmbient = vector(1.f, 1.f, 1.f, 1.f);
+    Out.vBloom = vector(color.rgb, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -238,11 +202,11 @@ PS_OUT PS_WALL(PS_IN In)
     
     Out.vDiffuse = vDiffuse;
     Out.vRim = 0.f;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.6f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vOutLine = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.01f, 0.f);
     Out.vEmissive = vEmissive;
     Out.vAmbient = vector(1.3f, 1.f, 1.f, 1.f);
+    Out.vBloom = vector(vEmissive.rgb, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
@@ -269,26 +233,37 @@ PS_OUT PS_LASER(PS_IN In)
     Out.vDiffuse = float4(color.rgb, vDiffuse.a);
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
-    Out.vEmissive = vDiffuse;
+    Out.vEmissive = float4(color.rgb, vDiffuse.a);
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
+    Out.vBloom = vector(color.rgb, In.vProjPos.w / g_fCamFar);
     return Out;
 }
 
-
-
-struct PS_OUT_HEIGHT
+VS_OUT VS_MAIN_LIGHTDEPTH(VS_IN In)
 {
-    vector vHeight : SV_TARGET0;
+    VS_OUT Out = (VS_OUT) 0;
+
+    float4 worldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    worldPos = mul(worldPos, g_LightViewMatrix);
+    worldPos = mul(worldPos, g_LightProjMatrix);
+
+    Out.vPosition = worldPos;
+    Out.vProjPos = worldPos;
+    return Out;
+}
+
+struct PS_OUT_LIGHTDEPTH
+{
+    float vLightDepth : SV_TARGET0;
 };
 
-PS_OUT_HEIGHT PS_MAIN_HEIGHT(PS_IN In)
+PS_OUT_LIGHTDEPTH PS_MAIN_LIGHTDEPTH(PS_IN In)
 {
-    PS_OUT_HEIGHT Out = (PS_OUT_HEIGHT) 0;
-
-    Out.vHeight = vector(In.vWorldPos.y, 0.f, 0.f, 1.f);
-
+    PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
+    Out.vLightDepth = (In.vProjPos.z / In.vProjPos.w);
     return Out;
 }
+
 
 
 technique11 DefaultTechnique
@@ -320,7 +295,7 @@ technique11 DefaultTechnique
     pass LightDepth
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_None, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -351,20 +326,8 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_ShockWaveFire();
     }
    
-   
+
     pass DefaultPass5
-    {
-        SetRasterizerState(RS_NONCULL);
-        SetDepthStencilState(DSS_DefaultNoWrite, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
-   
-        VertexShader = compile vs_5_0 VS_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_Shock();
-    }
-
-
-    pass DefaultPass6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -376,7 +339,7 @@ technique11 DefaultTechnique
 
     }
 
-    pass DefaultPass7
+    pass DefaultPass6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -387,16 +350,4 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LASER();
 
     }
-
-    pass HeightPass //8
-    {
-        SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
-
-        VertexShader = compile vs_5_0 VS_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN_HEIGHT();
-    }
- 
 }

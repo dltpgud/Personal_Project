@@ -12,6 +12,7 @@
 #include "Frustum.h"
 #include "Decal_Manager.h"
 #include "Decal.h"
+
 IMPLEMENT_SINGLETON(CGameInstance)
 
 
@@ -95,6 +96,10 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
     if (nullptr == m_pDecal_Manager)
         return E_FAIL;
 
+	m_pEffect_Manager = CEffect_Manager::Create(*ppDevice, *ppContext);
+    if (nullptr == m_pEffect_Manager)
+        return E_FAIL;
+
 	return S_OK;
 }
 
@@ -106,17 +111,21 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 	m_pUI_Manager->Priority_Update(fTimeDelta);
 	m_pPipeLine->Update();
-
 	m_pFrustum->Update();
 	
 	m_pObject_Manager->Update(fTimeDelta);
+    m_pEffect_Manager->Update(fTimeDelta);  
 	m_pUI_Manager->Update(fTimeDelta);
-    m_pDecal_Manager->Update(fTimeDelta);
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	m_pUI_Manager->Late_Update(fTimeDelta);
-    m_pSound->Set3DListenerAttributes();
-    m_pCollider_Manager->All_Collison_check();
+
+	m_pDecal_Manager->Update(fTimeDelta);
+    
+	m_pSound->Set3DListenerAttributes();
+    
+	m_pCollider_Manager->All_Collison_check();
+
 	m_pLevel_Manager->Update(fTimeDelta);
 
 }
@@ -222,6 +231,13 @@ _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 		return 0.0f;
 
 	return m_pTimer_Manager->Get_TimeDelta(strTimerTag);
+}
+_float* CGameInstance::Get_TimeDeltaSum(const _wstring& strTimerTag)
+{
+    if (nullptr == m_pTimer_Manager)
+        return nullptr;
+
+    return m_pTimer_Manager->Get_TimeDeltaSum(strTimerTag);
 }
 
 HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
@@ -427,7 +443,6 @@ HRESULT CGameInstance::Find_Cell()
 
 	return m_pCollider_Manager->Find_Cell();
 }
-#pragma endregion
 
 
 #pragma region UI_Manager
@@ -603,10 +618,6 @@ const _float4x4* CGameInstance::Get_ShadowTransformFloat4x4_Inverse(CPipeLine::T
     return m_pPipeLine->Get_ShadowTransformFloat4x4_Inverse(eState);
 }
 
-const _float4x4* CGameInstance::Get_HeightTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState)
-{
-    return m_pPipeLine->Get_HeightTransformFloat4x4(eState);
-}
 
 _matrix CGameInstance::Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState)
 {
@@ -682,13 +693,6 @@ void CGameInstance::Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState,
 	return m_pPipeLine->Set_ShadowTransformMatrix(eState, TransformMatrix);
 }
 
-void CGameInstance::Set_HeighTransformMatrix(_vector CamPos, _float ViewWidth, _float ViewHeight, _float FarZ,_float NearZ)
-{
-    if (nullptr == m_pPipeLine)
-        return;
-    return m_pPipeLine->Set_HeighTransformMatrix(CamPos, ViewWidth, ViewHeight, FarZ, NearZ);
-}
-
 #pragma endregion
 
 #pragma region Light_Manager
@@ -720,12 +724,12 @@ HRESULT CGameInstance::Light_Clear()
 #pragma endregion
 
 #pragma region Calculator
-_float3 CGameInstance::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis, _float3* vNormal)
+_float3 CGameInstance::Picking_OnTerrain( CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis, _float3* vNormal)
 {
     if (nullptr == m_pCalculator)
         return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
 
-	return m_pCalculator->Picking_OnTerrain(hWnd, pTerrainBufferCom, RayPos, RayDir, Transform, fDis, vNormal);
+	return m_pCalculator->Picking_OnTerrain( pTerrainBufferCom, RayPos, RayDir, Transform, fDis, vNormal);
 }
 
 void CGameInstance::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir , _bool forPlayer)
@@ -752,16 +756,15 @@ _float CGameInstance::Compute_Random(_float fMin, _float fMax)
 
 	return m_pCalculator->Compute_Random(fMin, fMax);
 }
-HRESULT CGameInstance::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
-{
-	if (nullptr == m_pCalculator)
-		return E_FAIL;
 
-	return m_pCalculator->Compute_Y(pNavigation, Transform, Pos);
-}
 _vector CGameInstance::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 {
 	return m_pCalculator->PointNomal(fP1, fP2, fP3);
+}
+
+_bool CGameInstance::RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& min, const _float3& max)
+{
+    return m_pCalculator->RayIntersectsAABB_Local(rayO_L, rayD_L, min, max);
 }
 
 #pragma endregion
@@ -826,6 +829,11 @@ HRESULT CGameInstance::Bind_RT_SRV(CShader* pShader, const _char* pConstantName,
 HRESULT CGameInstance::Copy_RT_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut)
 {
 	return m_pTarget_Manager->Copy_Resource(strTargetTag, pOut);
+}
+
+ID3D11ShaderResourceView* CGameInstance::Get_SRV(const _wstring& strTargetTag)
+{
+    return m_pTarget_Manager->Get_SRV(strTargetTag);
 }
 
  #ifdef _DEBUG
@@ -897,6 +905,11 @@ CDecal* CGameInstance::Find_Prototype_Decal(const _wstring& strPrototypeTag)
     return m_pDecal_Manager->Find_Prototype(strPrototypeTag);
 }
 
+HRESULT CGameInstance::BuildGlobalDecalArray()
+{
+    return m_pDecal_Manager->BuildGlobalDecalArray();
+}
+
 void CGameInstance::Preallocate_GameObject(_wstring ProtoTag, size_t count, void* desc)
 {
     m_pObject_Manager->Preallocate(ProtoTag, count, desc);
@@ -905,11 +918,33 @@ void CGameInstance::Preallocate_Decal(_wstring ProtoTag, size_t count, void* des
 {
     m_pDecal_Manager->Preallocate(ProtoTag, count, desc);
 }
+
+HRESULT CGameInstance::Render_All(CShader* pShader)
+{
+    return m_pEffect_Manager->Render_All(pShader);
+}
+
+HRESULT CGameInstance::Add_EffectStream(const _wstring& key, CEffectStream* pStream)
+{
+    return m_pEffect_Manager->Add_EffectStream(key, pStream);
+}
+
+HRESULT CGameInstance::Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc)
+{
+    return m_pEffect_Manager->Trigger_Effect(streamKey, pSpawnDesc);
+}
+
+CEffectStream* CGameInstance::Find_EffectStream(const _wstring& key)
+{
+    return m_pEffect_Manager->Find_EffectStream(key);
+}
+
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
-    Safe_Release(m_pDecal_Manager);
     Safe_Release(m_pThreadPool);
+    Safe_Release(m_pEffect_Manager);
+	Safe_Release(m_pDecal_Manager);
 	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);
 	Safe_Release(m_pFont_Manager);
@@ -923,6 +958,7 @@ void CGameInstance::Free()
     Safe_Release(m_pObject_Manager);
     Safe_Release(m_pUI_Manager);
     Safe_Release(m_pLevel_Manager);
+    
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pGraphic_Device);

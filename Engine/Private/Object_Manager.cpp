@@ -133,7 +133,7 @@ HRESULT CObject_Manager::Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& s
 
 void CObject_Manager::Preallocate(_wstring ProtoTag,  size_t count, void* desc)
 {
-    ObjectPool<CGameObject>::Preallocate(*Find_Prototype(ProtoTag), count, desc);
+    ObjectPool<CGameObject>::Preallocate(Find_Prototype(ProtoTag), count, desc);
 }
 
 CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)
@@ -163,7 +163,9 @@ CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, v
 	if (nullptr == pPrototype)
 		return nullptr;
         
-	CGameObject* pGameObject = ObjectPool<Engine::CGameObject>::Pop(*pPrototype, pArg);
+
+
+	CGameObject* pGameObject = ObjectPool<Engine::CGameObject>::Pop(pPrototype, pArg);
         
 	if (nullptr == pGameObject)
             MSG_BOX("pGameObject_Empty");
@@ -211,8 +213,8 @@ CGameObject* CObject_Manager::Recent_GameObject(_uint iLevelIndex, const _wstrin
 list<class CGameObject*> CObject_Manager::Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag)
 {
 	CLayer* pLayer = Find_Layer(iLevelIndex, strLayerTag);
-	if (nullptr == pLayer)
-		MSG_BOX("Layer_Empty");
+    if (nullptr == pLayer)
+        return {};
 
 	return  pLayer->Get_GameObject_List();
 }
