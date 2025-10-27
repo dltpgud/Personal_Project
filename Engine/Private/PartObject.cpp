@@ -37,24 +37,11 @@ void CPartObject::Priority_Update(_float fTimeDelta)
 
 void CPartObject::Update(_float fTimeDelta)
 {
-	if (true == m_bDeadState)
-	{
-		m_fDeadTimeSum += fTimeDelta;
-
-		if (m_fDeadTimeSum >= m_fDeadTime) {
-			m_fthreshold += fTimeDelta;
-			if (m_fthreshold > 1.f) {
-				m_fthreshold = 1.0f;  
-			}
-		}
-	}
-
 	__super::Update(fTimeDelta);
 }
 
 void CPartObject::Late_Update(_float fTimeDelta)
 {
-
     XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * XMLoadFloat4x4(m_pParentMatrix)); 
 	__super::Late_Update(fTimeDelta);
 }

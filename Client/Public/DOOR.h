@@ -14,8 +14,7 @@ class CPlayer;
 class CDOOR final : public CGameObject
 {
     enum DoorType{ STAGE, ITEM, BOSS };
-	enum State {OPEN, ClOSE};
-	enum State2 { OPEN2, IDLE,ClOSE2};
+	enum State {OPEN, ClOSE}; 
 
 enum DOOR_FLAGS
 {
@@ -41,7 +40,7 @@ public:
 	virtual HRESULT Render() override;	
 	virtual HRESULT Render_Shadow() override;
 	virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-    virtual HRESULT CreateDecal(_vector RayPos, _vector RayDir) override;
+
 	HRESULT Add_StageDoorLight();
 	HRESULT Add_BossDoorLight();
 

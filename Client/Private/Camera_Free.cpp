@@ -30,7 +30,7 @@ HRESULT CCamera_Free::Initialize(void* pArg)
 }
 
 void CCamera_Free::Priority_Update(_float fTimeDelta)
-{
+{  
      _vector  vEye = {  m_PlayerEye->_41, m_PlayerEye->_42, m_PlayerEye->_43, m_PlayerEye->_44 };
  
      _vector Eye = XMVector3TransformCoord(vEye, m_pPlayer->Get_Transform()->Get_WorldMatrix());

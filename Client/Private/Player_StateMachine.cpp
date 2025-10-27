@@ -150,8 +150,8 @@ void CPlayer_StateMachine::Check_UIState(_uint* pPreState) const
 
     if (((*pPreState & CPlayer::BEH_RELOAD) == 0) || ((*pPreState & CPlayer::BEH_SHOOT) == 0))
     {
-        m_pGameInstance->Set_OpenUI(false, TEXT("Player_ShootingUI"));
-        m_pGameInstance->Set_OpenUI(false, TEXT("Player_AutoShootingUI"));
+       m_pGameInstance->Set_OpenUI(false, TEXT("Player_ShootingUI"));
+       m_pGameInstance->Set_OpenUI(false, TEXT("Player_AutoShootingUI"));
     }
 }
 

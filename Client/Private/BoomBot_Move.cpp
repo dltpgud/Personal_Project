@@ -101,18 +101,7 @@ CStateMachine::Result CBoomBot_Move::StateMachine_Playing(_float fTimeDelta, RIM
     }  
   
     m_fTimeSum += fTimeDelta;
-  //  if (m_fTimeSum > 0.5f)
-   // {
-   //     m_fTimeSum = 0;
-   //     DECAL_DESC Desc{};
-   //     Desc.vNormal = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-   //     Desc.vPos = XMVectorSetY(m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), 0.f);
-   //     Desc.fSize = 0.2f;
-   //     Desc.fDepth = 0.2f;
-   //     Desc.fLifeTime = 1.f;
-   //     Desc.iType = DECAL_DESC::TYPE_BOX;
-   //     m_pGameInstance->Add_Decal(TEXT("Footstep"), &Desc);
-   // }
+ 
   if( m_StateNodes[m_iCurIndex]->State_Processing(fTimeDelta))
   {
         _int iNextIndex = -1;

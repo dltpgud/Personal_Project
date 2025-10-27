@@ -13,7 +13,6 @@ CModel::CModel(const CModel& Prototype)
     : CComponent{Prototype}, m_eModelType{Prototype.m_eModelType}, m_PreTransformMatrix{Prototype.m_PreTransformMatrix},
       m_iNumMeshes{Prototype.m_iNumMeshes}, m_Meshes{Prototype.m_Meshes}, m_iNumMaterials{Prototype.m_iNumMaterials},
       m_Materials{Prototype.m_Materials}, m_iNumAnimations{Prototype.m_iNumAnimations}
-// ,m_Animations{Prototype.m_Animations}, m_Bones{Prototype.m_Bones}
 {
     for (auto& pPrototypeAnimation : Prototype.m_Animations) m_Animations.push_back(pPrototypeAnimation->Clone());
 
@@ -30,7 +29,8 @@ HRESULT CModel::Initialize_Proto(TYPE eModelType, const TCHAR* pModelFilePath, _
 
     XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
     
-    Ready_AniModel(pModelFilePath);
+    Ready_Model(pModelFilePath);
+
     return S_OK;
 }
 
@@ -86,8 +86,8 @@ const void CModel::Set_BoneUpdateMatrix(const _uint iIndex, _fmatrix NewMatrix) 
 HRESULT CModel::Bind_Material_ShaderResource(CShader* pShader, _uint iMeshIndex, aiTextureType eType, _uint iIndex,
                                              const _char* pConstantName)
 {
-        if (iMeshIndex >= m_Meshes.size())
-        return E_FAIL;
+    if (iMeshIndex >= m_Meshes.size())
+     return E_FAIL;
 
     _uint iMaterialIndex = m_Meshes[iMeshIndex]->Get_MaterialIndex();
 
@@ -96,13 +96,13 @@ HRESULT CModel::Bind_Material_ShaderResource(CShader* pShader, _uint iMeshIndex,
 
 HRESULT CModel::InsertAiTexture(aiTextureType eTextureType, _uint MashiIndex, const _tchar* Path)
 {
-        if (MashiIndex >= m_Meshes.size())
-            return E_FAIL;
+   if (MashiIndex >= m_Meshes.size())
+       return E_FAIL;
 
-        _uint iMaterialIndex = m_Meshes[MashiIndex]->Get_MaterialIndex();
+   _uint iMaterialIndex = m_Meshes[MashiIndex]->Get_MaterialIndex();
 
-        return m_Materials[iMaterialIndex]->InsertAiTexture(eTextureType, Path);
-  
+   return m_Materials[iMaterialIndex]->InsertAiTexture(eTextureType, Path);
+
 }
 
 
@@ -163,12 +163,10 @@ void CModel::Center_Ext(_float3* Center, _float3* extend)
         _uint NumIndexces = m_Meshes[i]->Get_iNumVertices();
         for (_uint j = 0; j < NumIndexces; j++)
         {
-            // �ּҰ� ����
             minPoint.x = min(minPoint.x, m_Meshes[i]->Get_pPos(j)->x);
             minPoint.y = min(minPoint.y, m_Meshes[i]->Get_pPos(j)->y);
             minPoint.z = min(minPoint.z, m_Meshes[i]->Get_pPos(j)->z);
 
-            // �ִ밪 ����
             maxPoint.x = max(maxPoint.x, m_Meshes[i]->Get_pPos(j)->x);
             maxPoint.y = max(maxPoint.y, m_Meshes[i]->Get_pPos(j)->y);
             maxPoint.z = max(maxPoint.z, m_Meshes[i]->Get_pPos(j)->z);
@@ -193,81 +191,120 @@ void CModel::Callback(_uint AnimIdx, _int Duration, function<void()> func)
     m_Animations[AnimIdx]->Callback(Duration, func);
 }
 
-_bool CModel::RayIntersect(_vector vRayPos, _vector vRayDir,CTransform* pTransform, OUT _vector& vPos,OUT _vector& vNormal)
+_bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* pTransform, OUT _vector& vHitPos_WS,
+                           OUT _vector& vHitN_WS, OUT _float* fDist)
 {
-    _matrix matWorld = pTransform->Get_WorldMatrix_Inverse();
-    _vector PreRayDir = vRayDir;
-    _vector CurRayPos = XMVector3TransformCoord(vRayPos, matWorld);
-    _vector CurRayDir = XMVector3TransformNormal(vRayDir, matWorld);
+  _matrix W = pTransform->Get_WorldMatrix();
+   _matrix Wi = pTransform->Get_WorldMatrix_Inverse();
 
-    CurRayDir = XMVector3Normalize(CurRayDir);
-    _bool bHit = false;
-    _float closestDist = FLT_MAX;
-    _vector bestPos, bestNormal;
-    for (_uint i = 0; i < m_iNumMeshes; i++)
-    {
-        _uint NumIndexices = m_Meshes[i]->Get_iNumIndexices();
-        _float3* pPositions = m_Meshes[i]->Get_pPos(0);
-        for (_uint j = 0; j < NumIndexices; j+=3)
-        {
-            _uint idx0 = m_Meshes[i]->Get_pIndices(j);
-            _uint idx1 = m_Meshes[i]->Get_pIndices(j + 1);
-            _uint idx2 = m_Meshes[i]->Get_pIndices(j + 2);
+   _vector oL = XMVector3TransformCoord(vRayPos_WS, Wi);
+   _vector dL = XMVector3Normalize(XMVector3TransformNormal(vRayDir_WS, Wi));
+
+   struct HitResult
+   {
+       _bool hit = false;
+       _float dist = FLT_MAX;
+       _vector posL = XMVectorZero();
+       _vector nL = XMVectorZero();
+   };
+
+   HitResult g_bestResult;
+
+     if (m_eModelType == TYPE_ANIM)
+       for (auto& mesh : m_Meshes) mesh->Build_MeshAABB_Local();
+
+   _float fDis;
+   for (auto& mesh : m_Meshes)
+   {
+       HitResult localBest;
+   
+       _float3 MeahMin = mesh->GetAABBMinLocal();
+       _float3 MeahMax = mesh->GetAABBMaxLocal();
+       _float3 Center = {(MeahMin.x + MeahMax.x) / 2.0f, (MeahMin.y + MeahMax.y) / 2.0f, (MeahMin.z + MeahMax.z) / 2.0f};
+       _float3 extend = {(MeahMax.x - MeahMin.x) / 2.0f, (MeahMax.y - MeahMin.y) / 2.0f, (MeahMax.z - MeahMin.z) / 2.0f};
+
+       BoundingBox AABB = BoundingBox(Center, extend);
+
+       if (!AABB.Intersects(oL, dL, fDis))
+           continue;
+
+       const _uint triCount = mesh->Get_iNumIndexices() / 3;
+
+       for (_uint t = 0; t < triCount; ++t)
+       {
+           _uint i0 = mesh->Get_pIndices(t * 3 + 0);
+           _uint i1 = mesh->Get_pIndices(t * 3 + 1);
+           _uint i2 = mesh->Get_pIndices(t * 3 + 2);
+
+           const _float3& A = GetVetexPos(mesh, i0);   
+           const _float3& B = GetVetexPos(mesh, i1); 
+           const _float3& C = GetVetexPos(mesh, i2);   
+
+           // --- Per-tri AABB ---
+           _float3 triMin{min(A.x, min(B.x, C.x)), min(A.y, min(B.y, C.y)), min(A.z, min(B.z, C.z))};
+           _float3 triMax{max(A.x, max(B.x, C.x)), max(A.y, max(B.y, C.y)), max(A.z, max(B.z, C.z))};
+           _float3 Center = {(triMin.x + triMax.x) / 2.0f, (triMin.y + triMax.y) / 2.0f, (triMin.z + triMax.z) / 2.0f};
+           _float3 extend = {(triMax.x - triMin.x) / 2.0f, (triMax.y - triMin.y) / 2.0f, (triMax.z - triMin.z) / 2.0f};
+            
+           BoundingBox AABB = BoundingBox(Center,extend);
            
-            _float3 v0 = GetVetexPos(i, idx0);
-            _float3 v1 = GetVetexPos(i, idx1);
-            _float3 v2 = GetVetexPos(i, idx2);
+           if (!AABB.Intersects(oL, dL, fDis))
+               continue;
 
-            _float fDist{};
+           // --- Backface Cull ---
+           XMVECTOR vA = XMLoadFloat3(&A);
+           XMVECTOR vB = XMLoadFloat3(&B);
+           XMVECTOR vC = XMLoadFloat3(&C);
+           XMVECTOR e0 = XMVectorSubtract(vB, vA);
+           XMVECTOR e1 = XMVectorSubtract(vC, vA);
+           XMVECTOR n = XMVector3Normalize(XMVector3Cross(e0, e1));
+           if (XMVectorGetX(XMVector3Dot(n, dL)) > 0.f)
+               continue;
 
-            if (DirectX::TriangleTests::Intersects(CurRayPos, CurRayDir, XMLoadFloat3(&v0), XMLoadFloat3(&v1),
-                                                   XMLoadFloat3(&v2), fDist))
-            {
-                 _vector LoclPos = CurRayPos + CurRayDir * fDist;
-                 _vector WorldPos =  XMVector3TransformCoord(LoclPos, pTransform->Get_WorldMatrix());
-                 vPos = WorldPos;
-                 _vector e0 = XMLoadFloat3(&v1) - XMLoadFloat3(&v0);
-                 _vector e1 = XMLoadFloat3(&v2) - XMLoadFloat3(&v0);
+           _float tDist = 0.f;
+           if (DirectX::TriangleTests::Intersects(oL, dL, vA, vB, vC, tDist))
+           {
+               if (tDist < localBest.dist)
+               {
+                   localBest.hit = true;
+                   localBest.dist = tDist;
+                   localBest.posL = XMVectorAdd(oL, XMVectorScale(dL, tDist));
+                   localBest.nL = n;
+               }
+           }
+       }
 
-                 _vector localNormal = XMVector3Normalize(XMVector3Cross(e0, e1));
+       if (localBest.hit)
+       {
+          g_bestResult = localBest;
+           break;
+       }
+   }
 
-                 _vector Normal = XMVector3TransformNormal(localNormal, pTransform->Get_WorldMatrix());
-                 _vector WorldNormal = XMVector3Normalize(Normal);
+   if (!g_bestResult.hit)
+       return false;
 
-                if (XMVectorGetX(XMVector3Dot(WorldNormal, CurRayDir)) > 0.f)
-                     WorldNormal = -WorldNormal;
+   vHitPos_WS = XMVector3TransformCoord(g_bestResult.posL, W);
+   vHitN_WS = XMVector3Normalize(XMVector3TransformNormal(g_bestResult.nL, W));
 
-                if (fDist < closestDist)
-                {
-                    closestDist = fDist;
-                    bestPos = WorldPos;
-                    bestNormal = WorldNormal;
-                    bHit = true;
-                }
-            }
-        }
-    }
+  if (XMVectorGetX(XMVector3Dot(vHitN_WS, vRayDir_WS)) > 0.f)
+       vHitN_WS = XMVectorNegate(vHitN_WS);
 
-    if (bHit)
-    {
-        vPos = bestPos;
-        vNormal = bestNormal;
-        return true;
-    }
-
-    return false;
+  if (fDist)
+   *fDist = g_bestResult.dist;
+  
+   return true;
 }
 
-_float3 CModel::GetVetexPos(_uint Mashinx, _int NumIndexices)
+_float3 CModel::GetVetexPos(CMesh* Mash, _int Pos)
 {
     if (m_eModelType == TYPE_NONANIM)
     {
-        _float3* pPositions = m_Meshes[Mashinx]->Get_pPos(0);
-        return pPositions[NumIndexices];
+        return *Mash->Get_pPos(Pos);
     }
     else 
      
-    return m_Meshes[Mashinx]->GetVetexPosAnim(NumIndexices);
+    return Mash->GetVetexPosAnim(Pos);
 }
 
 CMesh* CModel::Get_Mash(_uint Mashinx)
@@ -275,7 +312,7 @@ CMesh* CModel::Get_Mash(_uint Mashinx)
     return m_Meshes[Mashinx];
 }
 
-HRESULT CModel::Ready_AniModel(const _tchar* pModelFilePath)
+HRESULT CModel::Ready_Model(const _tchar* pModelFilePath)
 {
     HANDLE hFile = CreateFile(pModelFilePath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 

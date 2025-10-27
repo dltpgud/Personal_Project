@@ -86,6 +86,10 @@ public:
     void Rotation(_float fX, _float fY, _float fZ);
 
 public:
+    void Set_RayDir(_vector vDir)
+    {
+        m_vRayDir = XMVector3Normalize(vDir);
+    }
     _vector Get_TRANSFORM(TRANSFORM eTRANSFORM)
     {
         /*XMLoad- 저장용행렬을 연산용으로*/
@@ -161,12 +165,13 @@ public:
 
 public:
     HRESULT Bind_ShaderResource(class CShader* pShader, const _char* pConstantName);
+    void Get_Ray(OUT _vector& RayPos,OUT _vector& RayDir);
 
 public:
     virtual HRESULT Initialize_Prototype(void* pTransformDesc);
 
 private:
-    _float m_fGravity = 9.8f;
+    _float m_fGravity = 5.8f;
     _float4x4 m_WorldMatrix = {};
     _float m_fSpeedPerSec = {};
     _float m_fRotationPerSec = {};
@@ -180,7 +185,7 @@ private:
 
     _vector m_vPrevPos = XMVectorZero();  // 이전 프레임 위치
     _vector m_vVelocity = XMVectorZero(); // 속도 벡터
-
+    _vector m_vRayDir{};
  public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;

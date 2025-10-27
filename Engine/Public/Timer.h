@@ -7,15 +7,15 @@ BEGIN(Engine)
 class ENGINE_DLL CTimer : public CBase
 {
 private:
-	 CTimer(void);
-	virtual ~CTimer(void) = default;
+	 CTimer();
+	virtual ~CTimer() = default;
 
 public:
-	_float					Get_TimeDelta(void) const { return m_fTimeDelta; }
-
+	_float					Get_TimeDelta() const { return m_fTimeDelta; }
+		_float*			    Get_TimeDeltaSum()  { return &m_fTimeDeltaSum; }
 public:
-	HRESULT					Ready_Timer(void);
-	void					Update_Timer(void);
+	HRESULT					Ready_Timer();
+	void					Update_Timer();
 	
 private:
 	LARGE_INTEGER			m_FrameTime{};
@@ -25,10 +25,11 @@ private:
 
 private:
 	_float					m_fTimeDelta{};
+    _float                  m_fTimeDeltaSum{};
 
 public:
-	static CTimer*			Create(void);
-	virtual void			Free(void) override;
+	static CTimer*			Create();
+	virtual void			Free() override;
 
 };
 

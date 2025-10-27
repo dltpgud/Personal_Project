@@ -212,6 +212,7 @@
     <ClInclude Include="..\Public\GunPawn_Hit.h" />
     <ClInclude Include="..\Public\GunPawn_Idle.h" />
     <ClInclude Include="..\Public\GunPawn_Move.h" />
+    <ClInclude Include="..\Public\HealthBall.h" />
     <ClInclude Include="..\Public\HealthBot.h" />
     <ClInclude Include="..\Public\InteractiveUI.h" />
     <ClInclude Include="..\Public\JetFly.h" />
@@ -266,6 +267,7 @@
     <ClInclude Include="..\Public\Player_Swich.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\ShockWave.h" />
+    <ClInclude Include="..\Public\ShockWave_Bullet.h" />
     <ClInclude Include="..\Public\ShootEffect.h" />
     <ClInclude Include="..\Public\Player_ShootingStateUI.h" />
     <ClInclude Include="..\Public\Sky.h" />
@@ -275,7 +277,6 @@
     <ClInclude Include="..\Public\Terrain.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\Public\Trail.h" />
     <ClInclude Include="..\Public\Trigger.h" />
     <ClInclude Include="..\Public\Wall.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -329,6 +330,7 @@
     <ClCompile Include="..\Private\GunPawn_Hit.cpp" />
     <ClCompile Include="..\Private\GunPawn_Idle.cpp" />
     <ClCompile Include="..\Private\GunPawn_Move.cpp" />
+    <ClCompile Include="..\Private\HealthBall.cpp" />
     <ClCompile Include="..\Private\HealthBot.cpp" />
     <ClCompile Include="..\Private\InteractiveUI.cpp" />
     <ClCompile Include="..\Private\JetFly.cpp" />
@@ -382,6 +384,7 @@
     <ClCompile Include="..\Private\Player_Swich.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\Private\ShockWave.cpp" />
+    <ClCompile Include="..\Private\ShockWave_Bullet.cpp" />
     <ClCompile Include="..\Private\ShootEffect.cpp" />
     <ClCompile Include="..\Private\Player_ShootingStateUI.cpp" />
     <ClCompile Include="..\Private\Sky.cpp" />
@@ -391,7 +394,6 @@
     <ClCompile Include="..\Private\Terrain.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\Private\Trail.cpp" />
     <ClCompile Include="..\Private\Trigger.cpp" />
     <ClCompile Include="..\Private\Wall.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

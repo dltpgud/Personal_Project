@@ -58,7 +58,7 @@ void CPlayer_Swich::SetActive(_bool active, _uint* pState)
 
 _bool CPlayer_Swich::CanEnter(_uint* pState)
 {
-    if ((*pState & (CPlayer::MOV_JUMP | CPlayer::BEH_SWICH)) != 0)
+    if ((*pState & (CPlayer::MOV_JUMP)) != 0)
         return false;
 
     return m_pParentObject->HasState(CPlayer::BRH_CHANGE);

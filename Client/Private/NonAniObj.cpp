@@ -41,22 +41,13 @@ void CNonAni::Late_Update(_float fTimeDelta)
   
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
-
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
-        return;
 }
 
 HRESULT CNonAni::Render_Shadow()
 {
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
-        return E_FAIL;
-    
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
-    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_VIEW))))
         return E_FAIL;
-
+    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::TRANSFORM_STATE::D3DTS_PROJ))))
         return E_FAIL;
     
@@ -65,7 +56,7 @@ HRESULT CNonAni::Render_Shadow()
     for (_uint i = 0; i < iNumMeshes; i++)
     {
      
-        if (FAILED(m_pShaderCom->Begin(2)))
+        if (FAILED(m_pShaderCom->Begin(2)))  
             return E_FAIL;
     
             m_pModelCom->Render(i);
@@ -125,39 +116,8 @@ void CNonAni::Set_InstaceBuffer(const vector<_matrix>& worldmat)
   m_pModelCom->Set_InstanceBuffer(worldmat);
 }
 
-HRESULT CNonAni::Render_Height()
-{
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
-        return E_FAIL;
-    _uint iNumMesh = m_pModelCom->Get_NumMeshes();
-
-    for (_uint i = 0; i < iNumMesh; i++)
-    {
-        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
-                                                             "g_DiffuseTexture")))
-            return E_FAIL;
-
-        if (FAILED(m_pShaderCom->Begin(3)))
-            return E_FAIL;
-
-        m_pModelCom->Render(i);
-    }
-
-  
-    return S_OK;
-}
-
 HRESULT CNonAni::Bind_ShaderResources()
 {
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
-
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformFloat4x4(CPipeLine::D3DTS_PROJ))))

@@ -26,7 +26,7 @@ HRESULT CPlayer::Initialize(void* pArg)
     Desc.iNumPartObjects = PART_END;
     Desc.fSpeedPerSec = 2.f; 
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
-    Desc.JumpPower = 15.f; 
+    Desc.JumpPower = 10.f; 
     Desc.iType = CActor::TYPE_PLAYER;
     Desc.iHP = 500;
     Desc.fFixY = 2.f;
@@ -165,6 +165,16 @@ void CPlayer::Set_Navigation()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
                                           reinterpret_cast<CComponent**>(&m_pNavigationCom))))
             return;        
+}
+
+DECAL_DESC* CPlayer::Get_DecalDesc()
+{
+    return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_WeaponDecal_Info();
+}
+
+HRESULT CPlayer::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEndPos, _vector vNomal, void* pArg)
+{
+    return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->CreateEffect(RayStartPos, RayDir, RayEndPos, vNomal, pArg);
 }
 
 void CPlayer::Set_PartObj_Set_Anim(_int Part,_int Index, _bool IsLoop)

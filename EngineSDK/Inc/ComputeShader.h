@@ -14,7 +14,7 @@ public:
     virtual HRESULT Initialize_Proto();
     virtual HRESULT Initialize(void* pArg) override;
 
-    HRESULT Bind_SRV(class CShader* pShader, const _char* pConstantName);
+  virtual HRESULT Bind_SRV(class CShader* pShader, const _char* pConstantName);
 
 protected:
     HRESULT Create_CS(_wstring strFilePath, _string strEntryPoint, ID3D11ComputeShader** ppComputeShader);
@@ -30,5 +30,9 @@ protected:
 
 public:
     virtual void Free() override;
+    virtual CComponent* Clone(void* pArg) override
+    {
+        return nullptr;
+    };
 };
 END

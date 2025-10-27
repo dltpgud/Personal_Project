@@ -109,6 +109,8 @@ BlendState BS_Light
     BlendOp = Add;
 };
 
+
+
 RasterizerState RS_Shadow
 {
     FillMode = Solid;
@@ -139,13 +141,6 @@ RasterizerState RS_Decal
     FrontCounterClockwise = false;
 };
 
-DepthStencilState DSS_Decal
-{
-    DepthEnable = true;
-    DepthWriteMask = zero;
-    DepthFunc = less_equal;
-};
-
 BlendState BS_Decal
 {
     BlendEnable[0] = true;
@@ -156,5 +151,40 @@ BlendState BS_Decal
     SrcBlendAlpha[0] = One; // 알파 채널 유지
     DestBlendAlpha[0] = Inv_Src_Alpha;
     BlendOpAlpha[0] = Add;
+};
+
+SamplerState NoMipSampler
+{
+    Filter = MIN_MAG_MIP_LINEAR; // 또는 POINT
+    AddressU = Clamp;
+    AddressV = Clamp;
+    MipLODBias = 0;
+    MinLOD = 0;
+    MaxLOD = 0; // ?? 밈맵 0레벨만 샘플링하도록 강제
+};
+BlendState BS_Additive
+{
+    BlendEnable[0] = true;
+    SrcBlend[0] = ONE;
+    DestBlend[0] = ONE;
+    BlendOp[0] = ADD;
+
+    SrcBlendAlpha[0] = ONE;
+    DestBlendAlpha[0] = ONE;
+    BlendOpAlpha[0] = ADD;
+};
+
+RasterizerState RS_Trail
+{
+    FillMode = Solid;
+    CullMode = None; // 양면 렌더링 (트레일은 얇은 리본형이라 뒤집힐 수 있음)
+    FrontCounterClockwise = false;
+};
+
+DepthStencilState DSS_Trail
+{
+    DepthEnable = true;
+    DepthWriteMask = zero; // 깊이 갱신하지 않음
+    DepthFunc = less_equal;
 };
 

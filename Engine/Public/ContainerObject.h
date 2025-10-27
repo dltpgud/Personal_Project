@@ -27,7 +27,8 @@ public:
 	virtual void Late_Update(_float fTimeDelta);
 	virtual HRESULT Render();
     virtual HRESULT Add_PartObjects() {return S_OK;};
-	
+    virtual _bool Part_Intersects(_vector RayStartPos, _vector RayDir, OUT _vector& RayEndPos,OUT _vector& vNomal) { return false; };
+
 protected:
 	_uint								m_iNumPartObjects = { 0 };
 	vector<class CPartObject*>			m_PartObjects;

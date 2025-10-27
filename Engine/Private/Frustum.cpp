@@ -36,6 +36,7 @@ void CFrustum::Update()
 	}
 
 	Make_Planes(m_vWorldPoints, m_WorldPlanes);
+
 }
 
 
@@ -100,6 +101,7 @@ HRESULT CFrustum::Make_Planes(const _float3* pPoints, _float4* pPlanes)
 
 	return S_OK;
 }
+
 
 CFrustum * CFrustum::Create()
 {

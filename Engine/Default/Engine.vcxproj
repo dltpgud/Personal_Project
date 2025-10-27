@@ -198,9 +198,11 @@ call UpdateLib.bat</Command>
     </ClInclude>
     <ClInclude Include="..\Public\ComputeShader.h" />
     <ClInclude Include="..\Public\ContainerObject.h" />
-    <ClInclude Include="..\Public\CS_RayCastingDecal.h" />
     <ClInclude Include="..\Public\Decal.h" />
     <ClInclude Include="..\Public\Decal_Manager.h" />
+    <ClInclude Include="..\Public\EffectStream.h" />
+    <ClInclude Include="..\Public\Effect_Manager.h" />
+    <ClInclude Include="..\Public\Effect_TrailStream.h" />
     <ClInclude Include="..\Public\Frustum.h" />
     <ClInclude Include="..\Public\ObjectPool.h" />
     <ClInclude Include="..\Public\QuadTree.h" />
@@ -237,6 +239,7 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\RenderTarget.h" />
     <ClInclude Include="..\Public\Shader.h" />
     <ClInclude Include="..\Public\Sound.h" />
+    <ClInclude Include="..\Public\SpatialGrid.h" />
     <ClInclude Include="..\Public\SPinLock.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h">
@@ -261,7 +264,7 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\VIBuffer_Terrain.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Trail.h" />
+    <ClInclude Include="..\Public\CS_SSAO.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Actor.cpp" />
@@ -274,6 +277,9 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\Bounding_Sphere.cpp" />
     <ClCompile Include="..\Private\Calculator.cpp" />
     <ClCompile Include="..\Private\Camera.cpp" />
+    <ClCompile Include="..\Private\Effect_Manager.cpp" />
+    <ClCompile Include="..\Private\Effect_ParticleStream.cpp" />
+    <ClCompile Include="..\Private\Effect_TrailStream.cpp" />
     <ClCompile Include="..\Private\Cell.cpp" />
     <ClCompile Include="..\Private\Channel.cpp" />
     <ClCompile Include="..\Private\Collider.cpp" />
@@ -287,9 +293,9 @@ call UpdateLib.bat</Command>
     </ClCompile>
     <ClCompile Include="..\Private\ComputeShader.cpp" />
     <ClCompile Include="..\Private\ContainerObject.cpp" />
-    <ClCompile Include="..\Private\CS_RayCastingDecal.cpp" />
     <ClCompile Include="..\Private\Decal.cpp" />
     <ClCompile Include="..\Private\Decal_Manager.cpp" />
+    <ClCompile Include="..\Private\EffectStream.cpp" />
     <ClCompile Include="..\Private\Frustum.cpp" />
     <ClCompile Include="..\Private\ObjectPool.cpp" />
     <ClCompile Include="..\Private\QuadTree.cpp" />
@@ -323,6 +329,7 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\RenderTarget.cpp" />
     <ClCompile Include="..\Private\Shader.cpp" />
     <ClCompile Include="..\Private\Sound.cpp" />
+    <ClCompile Include="..\Private\SpatialGrid.cpp" />
     <ClCompile Include="..\Private\SPinLock.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp">
@@ -347,12 +354,16 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\VIBuffer_Terrain.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Trail.cpp" />
+    <ClCompile Include="..\Private\CS_SSAO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\SSAO_Compute.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\TrailUpdateCS.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Deferred.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\TrailInterpCS.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\TrailRender.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />

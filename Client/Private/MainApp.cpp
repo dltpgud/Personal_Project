@@ -62,7 +62,7 @@ void CMainApp::Render()
         m_iNumRender = 0;
     }
 #ifdef _DEBUG
-    m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(1150.f, 0.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.5f);
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(1150.f, 0.f), XMVectorSet(1.f, 0.f, 1.f, 1.f), 0.5f);
 
 #else
 		SetWindowText(g_hWnd, m_szFPS);

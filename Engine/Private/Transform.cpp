@@ -129,8 +129,9 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _floa
 void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigation, _bool* bStop )
 {
     _vector vPosition = Get_TRANSFORM(T_POSITION);
+    _vector Dir = XMVector3Normalize(vDir);
 
-    _vector vAfterPos = vPosition + vDir * m_fSpeedPerSec * fTimeDelta;
+    _vector vAfterPos = vPosition + Dir * m_fSpeedPerSec * fTimeDelta;
 
     _vector Slide{};
     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
@@ -142,34 +143,40 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
     Set_TRANSFORM(T_POSITION, vAfterPos);
 }
 
-void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavigation* pNavigation, _bool* bStop )
+void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavigation* pNavigation, _bool* bStop)
 {
-
     _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
 
-    _vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f) *0.09f;
+    _vector vDir = XMVector3Normalize(Dir);
 
-    _vector vAfterPos = vPosition + Dir * fTimeDelta * m_fSpeedPerSec*2.f - vUp;
+    m_fJumpVelocity -= m_fGravity * fTimeDelta; 
+    _vector vUpMove = XMVectorSet(0.f, m_fJumpVelocity * fTimeDelta, 0.f, 0.f);
+    _vector vHorizontal = vDir * (m_fSpeedPerSec * fTimeDelta);
+    _vector vAfterPos = vPosition + vHorizontal + vUpMove;
 
-    _vector Slide{};
-     if (nullptr != pNavigation && false == pNavigation->isMove(vAfterPos, vPosition, &Slide))
-     {
-         vPosition += XMVectorZero();
-    
-         if (bStop != nullptr)
-             *bStop = true;
-     }
-     else
-        vPosition = vAfterPos;
-
-     Set_TRANSFORM(CTransform::T_POSITION, vPosition);
-
-    if ( XMVectorGetY(Get_TRANSFORM(CTransform::T_POSITION)) <= YPos)
+    _vector vSlide{};
+    if (pNavigation && !pNavigation->isMove(vAfterPos, vPosition, &vSlide))
     {
-        XMVectorSetY(Get_TRANSFORM(CTransform::T_POSITION), YPos);
-        if (bStop != nullptr)
-           *bStop = true;
+        vAfterPos += vSlide;
     }
+
+    if (XMVectorGetY(vAfterPos) <= YPos)
+    {
+        vAfterPos = XMVectorSetY(vAfterPos, YPos);
+        m_fJumpVelocity = 0.f;
+        m_bIsLanding = true;
+
+        if (bStop)
+            *bStop = true;
+    }
+    else
+    {
+        m_bIsLanding = false;
+        if (bStop)
+            *bStop = false;
+    }
+
+    Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
 }
 
 void CTransform::Stop_Move()
@@ -360,6 +367,14 @@ HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstant
 {
     return pShader->Bind_Matrix(pConstantName, &m_WorldMatrix);
 }
+
+void CTransform::Get_Ray(OUT _vector& RayPos, OUT _vector& RayDir)
+{
+    RayPos = Get_TRANSFORM(T_POSITION);
+    RayDir= XMVector3Normalize(XMVectorSetY(m_vRayDir,0.f));
+}
+
+
 
 HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 {    

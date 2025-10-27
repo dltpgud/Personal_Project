@@ -137,6 +137,7 @@ PS_OUT PS_MAIN(PS_IN In)
 	return Out;
 }
 
+
 technique11 DefaultTechnique
 {
 	pass DefaultPass
@@ -149,4 +150,5 @@ technique11 DefaultTechnique
 		GeometryShader = compile gs_5_0 GS_MAIN();
 		PixelShader = compile ps_5_0 PS_MAIN();
 	}
+
 }

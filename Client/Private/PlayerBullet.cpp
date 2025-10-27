@@ -3,7 +3,7 @@
 #include "GameInstance.h"
 #include "GameObject.h"
 #include "Weapon.h"
-#include "Trail.h"
+
 CPlayerBullet::CPlayerBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -69,8 +69,7 @@ void CPlayerBullet::Late_Update(_float fTimeDelta)
     {
         if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
             return;
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
-            return;
+
     }
    
     __super::Late_Update(fTimeDelta);
@@ -79,6 +78,7 @@ void CPlayerBullet::Late_Update(_float fTimeDelta)
 void CPlayerBullet::Dead_Rutine()
 {
     m_iLifeState = OBJ_POOL;
+ 
 }
 
 HRESULT CPlayerBullet::Render()
@@ -138,10 +138,10 @@ HRESULT CPlayerBullet::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_PSize", &m_fScale, sizeof(_float2))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbStart", &m_Clolor[CSkill::COLOR::CSTART], sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbStart", &m_Color[CSkill::COLOR::CSTART], sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbEnd", &m_Clolor[CSkill::COLOR::CEND], sizeof(_float4))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_RgbEnd", &m_Color[CSkill::COLOR::CEND], sizeof(_float4))))
         return E_FAIL;
 
     return S_OK;

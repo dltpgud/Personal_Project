@@ -36,7 +36,7 @@ public:
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
     virtual void Dead_Rutine() override;
-    virtual HRESULT CreateDecal(_vector RayPos, _vector RayDir) override;
+  
 
 private:
     virtual HRESULT Add_Components() override;
@@ -44,10 +44,10 @@ private:
 private:
     _vector m_pTagetPos = {};
     CTexture* m_pTextureCom = { nullptr };
+    CTexture* m_pTrailTextureCom = {nullptr};
     CVIBuffer_Point* m_pVIBufferCom = { nullptr };
     _float2 m_pScale{};
-    _float3 m_fPrePos{};
-    _float3 m_fCurPos{};
+    _uint m_iTrailIndex{};
 
 public:
     static CBullet* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

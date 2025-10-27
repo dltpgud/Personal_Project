@@ -10,7 +10,7 @@
 #include "Actor.h"
 #include "ThreadPool.h"
 #include "Frustum.h"
-
+#include "Effect_Manager.h"
 /* CGameInstance : */
 /* 내 Engine에 유일하게 존재하는 싱글톤클래스다. */
 /* Client사용자가 엔진의 기능을 이용하고자한다면 CGameInstance를 통해서 기능을 수행할 수 있도록 하겠다. */
@@ -56,6 +56,7 @@ public: /* For.Input_Device */
 #pragma region Timer_Manager
 public: /* for.Timer_Manager */
 	_float  Get_TimeDelta(const _wstring& strTimerTag);
+    _float* Get_TimeDeltaSum(const _wstring& strTimerTag);
 	HRESULT	Add_Timer(const _wstring& strTimerTag);
 	void    Update_TimeDelta(const _wstring& strTimerTag);
 #pragma endregion
@@ -87,6 +88,7 @@ public: /* For.Object_Manager*/
                                              _vector RayDir);
     CGameObject* Recent_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
     list<class CGameObject*> Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
+    void Preallocate_GameObject(_wstring ProtoTag, size_t count, void* desc);
 #pragma endregion
 
 #pragma region Collider_Manager
@@ -95,6 +97,7 @@ public: /* For.Object_Manager*/
     HRESULT Add_GameObject_To_ColGroup(class CGameObject* Obj, const _uint& Type);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
 	HRESULT Find_Cell();
+   
 #pragma endregion
 
 #pragma region UI_Manager
@@ -139,7 +142,7 @@ public: /* For.PipeLine */
 	_matrix Get_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState);
 	const _float4x4* Get_TransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
     const _float4x4* Get_ShadowTransformFloat4x4_Inverse(CPipeLine::TRANSFORM_STATE eState);
-    const _float4x4* Get_HeightTransformFloat4x4(CPipeLine::TRANSFORM_STATE eState);
+  
 	_matrix Get_TransformMatrix_Inverse(CPipeLine::TRANSFORM_STATE eState);
 	const _float4* Get_CamPosition();
 	const _float4* Get_CamLook();
@@ -149,8 +152,8 @@ public: /* For.PipeLine */
     void Set_CamNear(_float fNear);
     const float* Get_CamFar();
 	void Set_TransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
-	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);
-	void Set_HeighTransformMatrix(_vector CamPos, _float ViewWidth, _float ViewHeight, _float FarZ = 0, _float NearZ = 0);
+	void Set_ShadowTransformMatrix(CPipeLine::TRANSFORM_STATE eState, _fmatrix TransformMatrix);  
+
 #pragma endregion
 
 #pragma region Light_Manager 
@@ -163,13 +166,14 @@ public: /* For.Light_Manager */
 
 #pragma region Calculator
 public: /* For.Calculator */
-     _float3 Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
+     _float3 Picking_OnTerrain( CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
                                   CTransform* Transform, _float* fDis, _float3* vNormal = nullptr);
     void Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir ,_bool forPlayer = false);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
-	HRESULT Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos);
 	_vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
+    _bool RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& min, const _float3& max);
+     
 #pragma endregion
 
 #pragma region Font_Manager
@@ -186,6 +190,8 @@ public: /* For.Target_Manager */
 		HRESULT End_MRT(const _wstring& strMRTTag);
 		HRESULT Bind_RT_SRV(class CShader* pShader, const _char* pConstantName, const _wstring& strTargetTag);
 		HRESULT Copy_RT_Resource(const _wstring& strTargetTag, ID3D11Texture2D* pOut);
+        ID3D11ShaderResourceView* Get_SRV(const _wstring& strTargetTag);
+
 #ifdef _DEBUG
 		HRESULT Ready_RT_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 		HRESULT Render_RT_Debug(const _wstring& strMRTTag, class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
@@ -197,6 +203,7 @@ public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
     _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
     void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
+
 #pragma endregion
 
 
@@ -213,14 +220,20 @@ public: /* For.ThreadPool */
     HRESULT Render_Decal(class CShader* pShader);
     HRESULT Decal_Clear();
     class CDecal* Find_Prototype_Decal(const _wstring& strPrototypeTag);
+    HRESULT BuildGlobalDecalArray();
+    void Preallocate_Decal(_wstring ProtoTag, size_t count, void* desc);
 #pragma endregion
 
-	void Preallocate_GameObject(_wstring ProtoTag, size_t count, void* desc);
-  
 
-    void Preallocate_Decal(_wstring ProtoTag, size_t count, void* desc);
-  
+	   
+    HRESULT Render_All(class CShader* pShader = nullptr);
 
+    // 특정 스트림 등록/조회
+    HRESULT Add_EffectStream(const _wstring& key, class CEffectStream* pStream);
+
+    // 이펙트 트리거
+    HRESULT Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc);
+    CEffectStream* Find_EffectStream(const _wstring& key);
 
 private:
 	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
@@ -240,7 +253,8 @@ private:
 	class CTarget_Manager*			m_pTarget_Manager	 = { nullptr };
 	class CFrustum*					m_pFrustum		     = { nullptr };
     class CThreadPool*              m_pThreadPool        = { nullptr };
-    class CDecal_Manager*           m_pDecal_Manager     = {nullptr}; 
+    class CDecal_Manager*           m_pDecal_Manager     = { nullptr }; 
+	class CEffect_Manager*          m_pEffect_Manager    = { nullptr }; 
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;

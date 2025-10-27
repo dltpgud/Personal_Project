@@ -22,18 +22,21 @@ public:
 	_uint	 Get_NumVerticesX(){ return m_iNumVerticesX; }
 	_uint    Get_NumVerticesZ() { return m_iNumVerticesZ; }
 
+public:
+     void Culling(_fmatrix WorldMatrixInverse);
+    _float3 Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, class CTransform* pTransform, OUT _float* fDist,
+                                       OUT _float3* vNormal);
+     _bool Intersect_OnTerrain_QuadTree(class CCollider* pCollider, CTransform* pTransform, OUT _vector* vNormal,
+                                        OUT _vector* vWorldPos);
 
-	public:
-        void Culling(_fmatrix WorldMatrixInverse);
-
-
-private:
+ private:
 	_uint					m_iNumVerticesX = {};
 	_uint					m_iNumVerticesZ = {};
-	_float3*					m_pPos;
-        class CQuadTree* m_pQuadTree = {nullptr};
+	_float3*		        m_pPos          = {};
+    _uint*                  m_pIndices      = {};
+    class CQuadTree* m_pQuadTree = {nullptr};
 
-    public:
+public:
 	static CVIBuffer_Terrain* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CComponent*    Clone(void* pArg) override;
 	virtual void		   Free() override;

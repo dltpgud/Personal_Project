@@ -93,8 +93,8 @@ void CWeaponUI::Update(_float fTimeDelta)
         m_WeaPonUI = CWeapon::HeavyCrossbow;
         m_bChooseWeaPon = true;
     }
-
-    if (m_pGameInstance->Get_DIKeyDown(DIK_C))
+    _long MouseMove = {0};
+    if (MouseMove = m_pGameInstance->Get_DIMouseMove(DIMS_Z))
     {
         m_change = true;
 

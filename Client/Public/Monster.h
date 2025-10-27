@@ -47,6 +47,7 @@ public:
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
     virtual void Set_State(_uint State) {};
+    virtual _bool Part_Intersects(_vector RayStartPos, _vector RayDir, OUT _vector& RayEndPos,OUT _vector& vNomal) override;
 
 public:
      _bool HasState(_uint flag) const {return m_iState ==flag;};
@@ -61,6 +62,8 @@ public:
     _float* Get_fAttackLength() { return &m_fAttackLength;}
     _int* Get_AttackAngle() { return &m_iAttackAngleType;}
    
+    void Set_DecalDesc(DECAL_DESC Desc);
+
 
 protected:
     _float m_fAttackLength{};

@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Terrain.h"
 #include "GameInstance.h"
-
-CTerrain::CTerrain(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{ pDevice, pContext }
+#include "Particle_Fog.h"
+CTerrain::CTerrain(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
 
-CTerrain::CTerrain(const CTerrain& Prototype) : CGameObject{ Prototype }
+CTerrain::CTerrain(const CTerrain& Prototype) : CGameObject{Prototype}
 {
 }
 
@@ -23,10 +23,9 @@ HRESULT CTerrain::Initialize(void* pArg)
     m_bMain = pDesc->IsMain;
 
     if (FAILED(__super::Initialize(pDesc)))
-       return E_FAIL;
+        return E_FAIL;
 
-     
-    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
+     Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
     Set_Buffer(pDesc->Buffer[0], pDesc->Buffer[1]);
 
     return S_OK;
@@ -41,39 +40,31 @@ void CTerrain::Update(_float fTimeDelta)
 {
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
         m_pVIBufferCom->Culling(m_pTransformCom->Get_WorldMatrix_Inverse());
-        
+
+    __super::Update(fTimeDelta);
 }
 
 void CTerrain::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-   
-    if (m_iFire == 1)
-    {
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_BLOOM, this)))
+
+    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
             return;
-    }
-    else
-    {
-        if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-            return;
-    }
 
     if (nullptr != m_pNavigationCom)
     {
         m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
     }
 
- //    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_DECAL)))
-  //      return;
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_DECAL)))
+        return;
 
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
-		return;
+    __super::Late_Update(fTimeDelta);
 }
 
 HRESULT CTerrain::Render()
-{ 
+{
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
@@ -90,7 +81,10 @@ HRESULT CTerrain::Render()
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_RawValue("g_onEmissive", &m_iFire, sizeof(_int))))
-            return E_FAIL;
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+        return E_FAIL;
 
     m_pShaderCom->Begin(m_iFire);
 
@@ -103,48 +97,11 @@ HRESULT CTerrain::Render()
 
 void CTerrain::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
-    if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),reinterpret_cast<CComponent**>(&m_pTextureCom))))
-             return;
+    if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
+                                      reinterpret_cast<CComponent**>(&m_pTextureCom))))
+        return;
 }
 
-HRESULT CTerrain::CreateDecal(_vector RayPos, _vector RayDir)
-{
-    _float fDist{};
-    _vector vPos{};
-    _float3 fNormal{};
-        _float3 fPos = m_pGameInstance->Picking_OnTerrain(g_hWnd, m_pVIBufferCom, RayPos, XMVector3Normalize(RayDir), m_pTransformCom, &fDist, &fNormal);
-
-    DECAL_DESC Desc{};
-    Desc.vNormal = XMVectorSet(fNormal.x, fNormal.y, fNormal.z, 0.f);
-    Desc.vPos = XMVectorSet(fPos.x, fPos.y, fPos.z, 0.f);
-    Desc.iType = DECAL_DESC::TYPE_BOX;
-    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
-
-    return S_OK;
-}
-
-HRESULT CTerrain::Render_Height()
-{
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Begin(3)))
-        return E_FAIL;
-
-    if (FAILED(m_pVIBufferCom->Bind_Buffers()))
-        return E_FAIL;
-
-    if (FAILED(m_pVIBufferCom->Render()))
-        return E_FAIL;
-
-    return S_OK;
-}
 
 void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
 {
@@ -153,42 +110,26 @@ void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
 
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
     {
-        m_pVIBufferCom->DYNAMIC_Set_Buffer(m_pSize[0], m_pSize[1]);
-        m_pVIBufferCom->Set_QuadTree();
+       m_pVIBufferCom->DYNAMIC_Set_Buffer(m_pSize[0], m_pSize[1]);
+            m_pVIBufferCom->Set_QuadTree();
     }
     else
     {
-        m_pVIBufferCom->Set_Buffer(m_pSize[0], m_pSize[1]);
+      m_pVIBufferCom->Set_Buffer(m_pSize[0], m_pSize[1]);
     }
-    CBounding_AABB::BOUND_AABB_DESC AABB{};
-    AABB.vExtents = {static_cast<_float> (m_pSize[0]), 0.f, static_cast<_float> (m_pSize[1])};
-    AABB.vCenter = _float3{0.f,0.f,0.f};
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider"),
-                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &AABB)))
+    
     return;
 }
 
 HRESULT CTerrain::Render_Shadow()
 {
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
-        return E_FAIL;
-
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
-        return E_FAIL;
-
-    if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_DiffuseTexture", 0)))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TimeSum", &m_fTimeSum, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
 
     m_pShaderCom->Begin(2);
@@ -200,27 +141,32 @@ HRESULT CTerrain::Render_Shadow()
     return S_OK;
 }
 
-
 HRESULT CTerrain::Add_Components()
 {
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxNorTex"), TEXT("Com_Shader"),
-        reinterpret_cast<CComponent**>(&m_pShaderCom))))
+                                      reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Terrain"), TEXT("Com_Buffer"),
-        reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
+                                      reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL;
 
     if (true == m_bMain)
     {
         CNavigation::NAVIGATION_DESC Desc{};
         Desc.iCurrentCellIndex = -1;
-        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"),
-            TEXT("Com_Navigation"), reinterpret_cast<CComponent**>(&m_pNavigationCom),&Desc)))
+        if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+                                          reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
             return E_FAIL;
 
         m_pNavigationCom->Update(m_pTransformCom->Get_WorldMatrixPtr());
     }
+
+       CParticle_Fog::CCParticle_FogDESC Desc{};
+         Desc.pParentMatrix =m_pTransformCom->Get_WorldMatrix();
+
+        m_pGameInstance->Add_GameObject_To_Layer(LEVEL_STAGE1, TEXT("Layer_map"), L"Prototype_GameObject_Particle_Fog", &Desc);
+
 
     return S_OK;
 }

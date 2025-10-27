@@ -26,14 +26,8 @@ public:
 	virtual void Update(_float fTimeDelta);
 	virtual void Late_Update(_float fTimeDelta);
 	virtual HRESULT Render();
-
 	const _float4x4* Get_SocketMatrix(const _char* pBoneName);
-
-	_float Get_threshold() {return m_fthreshold;}
-    void Set_DeadState(_bool DeadSt)
-    {
-            m_bDeadState = DeadSt;
-    }
+    DISSOLVE_DESC* Get_DissolveDesc() { return &m_DissolveDesc; }
 
 protected:
 	const _float4x4*				m_pParentMatrix = { nullptr };
@@ -47,11 +41,7 @@ protected:
 	_uint* m_pParentState = { nullptr };  // 부모 파츠의 상태
 
 	RIM_LIGHT_DESC m_RimDesc{}; // 림 연산 구조체
-
-	_float m_fthreshold{ 0.f }; // 쉐이더에 넘겨 줄 디졸브 효과 임계값
-	_bool m_bDeadState = { false };
-	_float m_fDeadTimeSum = { 0.f };
-	_float m_fDeadTime { 0.f };
+	DISSOLVE_DESC   m_DissolveDesc{};
 public:
 	virtual CGameObject* Clone(void* pArg) = 0;
 	virtual void Free() override;

@@ -15,22 +15,22 @@ HRESULT CMecanoBot_Hit::Initialize(void* pArg)
 
     CStateNode::STATENODE_DESC pNodeDesc{};
     pNodeDesc.pParentModel = m_pParentModel;
-    pNodeDesc.iCurrentState = 12;
+    pNodeDesc.iCurrentState = 18;
     pNodeDesc.iNextStateIdx = -1;
     pNodeDesc.bIsLoop = false;
     m_StateNodes[FrontHit] = CStateNode::Create(&pNodeDesc);
 
-    pNodeDesc.iCurrentState = 11;
+    pNodeDesc.iCurrentState = 17;
     pNodeDesc.iNextStateIdx = -1;
     pNodeDesc.bIsLoop = false;
     m_StateNodes[BackHit] = CStateNode::Create(&pNodeDesc);
 
-    pNodeDesc.iCurrentState = 13;
+    pNodeDesc.iCurrentState = 20;
     pNodeDesc.iNextStateIdx = -1;
     pNodeDesc.bIsLoop = false;
     m_StateNodes[LeftHit] = CStateNode::Create(&pNodeDesc);
 
-    pNodeDesc.iCurrentState = 14;
+    pNodeDesc.iCurrentState = 19;
     pNodeDesc.iNextStateIdx = -1;
     pNodeDesc.bIsLoop = false;
     m_StateNodes[RightHit] = CStateNode::Create(&pNodeDesc);

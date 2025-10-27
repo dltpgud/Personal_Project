@@ -68,6 +68,7 @@ _bool CPlayer_Shoot::State_Processing(_float fTimedelta, _uint* pState, _uint* p
     if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0)
         return true;
 
+
     if (false == m_bAutoFire) // 단발
     {
         // 점프 중이면 WEAPON만 애니메이션 처리
@@ -126,11 +127,6 @@ _bool CPlayer_Shoot::State_Exit(_uint* pState)
     m_fLastFireTime = 0.f;
     m_pShootingUI->Set_Open(false);
     m_pAutoShootingUI->Set_Open(false);
-    if (!m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::DIM_LB))
-    {
-        return true;
-    }
-    
     return true;
 }
 
@@ -181,6 +177,8 @@ _bool CPlayer_Shoot::CanEnter(_uint* pState)
     if (m_pParentObject->Get_Weapon_Info().iCurBullet <= 0 ||
         m_pParentObject->Get_Weapon_Info().iCurBullet > m_pParentObject->Get_Weapon_Info().iMaxBullet)
         return false;
+
+
 
     // 점프 중에도 총을 쏠 수 있도록 허용
     if (m_pGameInstance->Get_DIMouseDown(MOUSEKEYSTATE::DIM_LB))

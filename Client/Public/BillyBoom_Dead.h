@@ -36,6 +36,7 @@ private:
     _float*  m_fEmissivePower{};
     _float3* m_fEmissiveColor{};
 
+
 public:
     static CBillyBoom_Dead* Create(void* pArg);
 	virtual void Free();

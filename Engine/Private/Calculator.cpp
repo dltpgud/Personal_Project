@@ -36,7 +36,7 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     {  //1인칭 슈팅게임 클라이언트에서 Ray를 쏘는 위치는 고정되어있다.
          POINT ptPlayerAim{};
                  ptPlayerAim.x = 640;
-                 ptPlayerAim.y = 360;
+                 ptPlayerAim.y = 420;
 
         // 뷰 포트 -> 투영
          vMousePos.x = ptPlayerAim.x / (ViewportWidth * 0.5f) - 1.f;
@@ -73,9 +73,10 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     return;
 }
 
-_float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
-                                       CTransform* Transform, _float* fDis, _float3* vNormal)
+_float3 CCalculator::Picking_OnTerrain(CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
+                                       CTransform* Transform, OUT _float* fDis, OUT _float3* vNormal)
 {
+
     _float3 vPosition = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
     _float3 fNormal = _float3(0.f, 1.f, 0.f); // 기본값 ↑
     _float fDistance = FLT_MAX;
@@ -165,83 +166,13 @@ _float3 CCalculator::Picking_OnTerrain(HWND hWnd, CVIBuffer_Terrain* pTerrainBuf
 
 HRESULT CCalculator::Initialize(HWND hWnd, _uint iViewportWidth, _uint iViewportHeight)
 {
-
     g_hWnd = hWnd;
-
-
     m_iViewportWidth = iViewportWidth;
     m_iViewportHeight = iViewportHeight;
-
-    D3D11_TEXTURE2D_DESC TextureDesc{};
-
-    TextureDesc.Width = m_iViewportWidth;
-    TextureDesc.Height = m_iViewportHeight;
-    TextureDesc.MipLevels = 1;
-    TextureDesc.ArraySize = 1;
-    TextureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-
-    TextureDesc.SampleDesc.Quality = 0;
-    TextureDesc.SampleDesc.Count = 1;
-
-    TextureDesc.Usage = D3D11_USAGE_STAGING;
-    TextureDesc.BindFlags = 0;
-    TextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
-    TextureDesc.MiscFlags = 0;
-
-    if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
-        return E_FAIL;
-
-
     return S_OK;
 }
 
-HRESULT CCalculator::Compute_Y(CNavigation* pNavigation, CTransform* Transform, _float3* Pos)
-{
-    _float3 fPos{};
-   XMStoreFloat3(&fPos, Transform->Get_TRANSFORM(CTransform::T_POSITION));  
 
-    _float fY{0.f};
-   
-
-
-  // isComputeHeight(Transform->Get_TRANSFORM(CTransform::T_POSITION), &fPos);
-   //     fY = fPos.y;
-
-        fY = pNavigation->Compute_HeightOnCell(&fPos);
-    
-    *Pos = { fPos.x, fY, fPos.z };
-
-
-    return S_OK;
-}
-
-_bool CCalculator::isComputeHeight(_fvector vTargetPos, _float3* pOut)
-{ 
-    _float4x4 ViewMatrix, ProjMatrix;
-
-    _vector vProjPos = XMVector3TransformCoord(vTargetPos, XMLoadFloat4x4(m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW)));
-    vProjPos = XMVector3TransformCoord(vProjPos, XMLoadFloat4x4(m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ)));
-
-    _float2 vTexcoord;
-    vTexcoord.x = XMVectorGetX(vProjPos) * m_iViewportWidth * 0.5f + m_iViewportWidth * 0.5f;
-    vTexcoord.y = XMVectorGetY(vProjPos) * m_iViewportHeight * -0.5f + m_iViewportHeight * 0.5f;
-
-    _uint iIndex = (_uint)vTexcoord.y * m_iViewportWidth + (_uint)vTexcoord.x;
-
-    m_pGameInstance->Copy_RT_Resource(TEXT("Target_Height"), m_pTexture2D);
-
-    D3D11_MAPPED_SUBRESOURCE SubResource{};
-
-    m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ_WRITE, 0, &SubResource);
-
-    _float4* pPixel = static_cast<_float4*>(SubResource.pData) + iIndex;
-
-    m_pContext->Unmap(m_pTexture2D, 0);
-
-    XMStoreFloat3(pOut, XMVectorSetY(vTargetPos, pPixel->x));
-
-    return _bool(pPixel->w);
-}
 
 _vector CCalculator::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 {
@@ -268,6 +199,41 @@ _float CCalculator::Compute_Random(_float fMin, _float fMax)
     return (fMax - fMin) * Compute_Random_Normal() + fMin;
 }
 
+_bool CCalculator::RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& mn, const _float3& mx)
+{
+    _float3 o, d;
+    XMStoreFloat3(&o, rayO_L);
+    XMStoreFloat3(&d, rayD_L);
+
+    _float tmin = 0.f, tmax = FLT_MAX;
+
+    auto slab = [&](_float o, _float d, _float mn, _float mx, _float& t0, _float& t1)
+    {
+        if (fabsf(d) < 1e-8f)
+        {
+            t0 = (o < mn || o > mx) ? 1.f : 0.f;
+            t1 = (o < mn || o > mx) ? 0.f : FLT_MAX;
+        }
+        else
+        {
+            float inv = 1.f / d;
+            float tA = (mn - o) * inv;
+            float tB = (mx - o) * inv;
+            t0 = min(tA, tB);
+            t1 = max(tA, tB);
+        }
+    };
+
+    _float tx0, tx1, ty0, ty1, tz0, tz1;
+    slab(o.x, d.x, mn.x, mx.x, tx0, tx1);
+    slab(o.y, d.y, mn.y, mx.y, ty0, ty1);
+    slab(o.z, d.z, mn.z, mx.z, tz0, tz1);
+
+    tmin = max(tmin, max(tx0, max(ty0, tz0)));
+    tmax = min(tmax, min(tx1, min(ty1, tz1)));
+    return tmax >= tmin;
+}
+
 
 CCalculator* CCalculator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,  HWND hWnd, _uint iViewportWidth, _uint iViewportHeight )
 {
@@ -286,12 +252,7 @@ void CCalculator::Free()
 {
     __super::Free();
 
-
     Safe_Release(m_pGameInstance);
-
-    Safe_Release(m_pTexture2D);
-
-
     Safe_Release(m_pContext);
     Safe_Release(m_pDevice);
 }

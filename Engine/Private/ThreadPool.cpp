@@ -9,7 +9,7 @@ HRESULT CThreadPool::Initialize(_uint iNumThread)
     m_iNumThread = iNumThread;
 
     m_vecThread_Working.resize(m_iNumThread);
-    for (auto& working : m_vecThread_Working) working = make_shared<std::atomic<_bool>>(false);
+    for (auto& working : m_vecThread_Working) working = make_shared<atomic<_bool>>(false);
 
 
     for (_uint i = 0; i < m_iNumThread; ++i)
@@ -29,20 +29,17 @@ void CThreadPool::Work_thread(_int iIndex)
         function<void()> Job;
         {
             unique_lock<mutex> lock(m_Job_Mutex);
-            m_Job_Condition.wait(lock, [this] { return !this->m_Job_queue.empty() || m_bStop.load(); });
+            while (!m_bStop.load() && m_Job_queue.empty()) m_Job_Condition.wait(lock);
 
-            if (m_bStop.load() && this->m_Job_queue.empty())
-                return;
+            if (m_bStop.load())
+                break;
 
             Job = move(m_Job_queue.front());
             m_Job_queue.pop();
-            lock.unlock();
         }
 
         m_vecThread_Working[iIndex]->store(true);
-
         Job();
-        
         m_vecThread_Working[iIndex]->store(false);
     }
 }
@@ -82,20 +79,18 @@ CThreadPool* CThreadPool::Create(_uint iNumThread)
 
 void CThreadPool::Free()
 {
+    unique_lock<mutex> lock(m_Job_Mutex);
     m_bStop.store(true);
-            
-       {
-           unique_lock<mutex> lock(m_Job_Mutex);
-           m_Job_Condition.notify_all();
-       }
-        for (thread& t : m_vecThread)
-        {
-            if (t.joinable())
-                t.join();
-        }
 
-        m_vecThread.clear();
-        m_vecThread_Working.clear();
-    
+    m_Job_Condition.notify_all();
+
+    for (thread& t : m_vecThread)
+    {
+        if (t.joinable())
+            t.join();
+    }
+
+    m_vecThread.clear();
+    m_vecThread_Working.clear();
 }
 

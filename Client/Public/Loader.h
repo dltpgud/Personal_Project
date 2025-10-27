@@ -39,6 +39,8 @@ private:
     HRESULT                     Loading_For_Static_ComPonent();
     HRESULT                     Loading_For_Static_Texture();
     HRESULT                     Loading_For_Preallocate(); 
+	HRESULT                     Loading_For_Add_MashMaterial(); 
+
 
 	HRESULT						Loading_For_MenuLevel();
 	HRESULT						Loading_For_Stage1Level();

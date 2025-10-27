@@ -49,7 +49,6 @@ void CMonster::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER)))
         return;
 
-    
     __super::Late_Update(fTimeDelta);
 }
 
@@ -57,6 +56,12 @@ HRESULT CMonster::Render()
 {
     __super::Render();
     return S_OK; 
+}
+
+_bool CMonster::Part_Intersects(_vector RayStartPos, _vector RayDir, _vector& RayEndPos, _vector& vNomal)
+{
+    return dynamic_cast<CModel*>(m_PartObjects[PART_BODY]->Find_Component(TEXT("Com_Model")))
+        ->RayIntersect(RayStartPos, RayDir, m_pTransformCom, RayEndPos, vNomal);
 }
 
 void CMonster::Compute_Length()
@@ -128,6 +133,11 @@ _bool CMonster::IsLookAtPlayer(_float angle)
     }
 
     return false;
+}
+
+void CMonster::Set_DecalDesc(DECAL_DESC Desc)
+{
+    m_DecalDesc = Desc;
 }
 
 CMonster* CMonster::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

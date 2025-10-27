@@ -16,7 +16,7 @@ public:
 	ID3D11RenderTargetView* Get_RTV() const {
 		return m_pRTV;
 	}
-
+	ID3D11ShaderResourceView* Get_SRV() { return m_pSRV; };
 public:
 	HRESULT Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT ePixelFormat, const _float4& vClearColor);
 	void Clear();

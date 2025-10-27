@@ -26,7 +26,7 @@ CCollider::CCollider(const CCollider& Prototype)
 #endif
 }
 
-_bool CCollider::IsColl()
+_bool CCollider::IsColl() const
 {
     return m_isColl;
 }
@@ -91,7 +91,7 @@ _bool CCollider::RayIntersects(_vector RayPos, _vector RayDir, _float& fDis, _ve
     return m_isColl = m_pBounding->RayIntersect(RayPos, RayDir, fDis, hitPos);
 }
 
-_float CCollider::Get_iCurRadius()
+_float CCollider::Get_iCurRadius() const
 {
 	return m_pBounding->Get_iCurRadius();
 }
@@ -99,9 +99,19 @@ _bool CCollider::IsInside(const _float3& pos)
 {
     return m_pBounding->IsInside(pos);
 }
-_float3 CCollider::Get_iCurCenter()
+_float3 CCollider::Get_iCurCenter() const
 {
 	return m_pBounding->Get_iCurCenter();
+}
+
+CCollider::TYPE CCollider::Get_Type() const
+{
+    return m_eColliderType;
+}
+
+CBounding* CCollider::Get_Bounding() const
+{
+    return m_pBounding;
 }
 
 void CCollider::Set_Info(void* pArg)

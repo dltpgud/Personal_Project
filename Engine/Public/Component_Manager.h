@@ -6,7 +6,6 @@
 #include "VIBuffer_Cube.h"
 #include "VIBuffer_Point.h"
 #include "VIBuffer_Particle_Point.h"
-#include "VIBuffer_Trail.h"
 #include "VIBuffer_DecalCube.h"
 #include "Navigation.h"
 #include "Model.h"

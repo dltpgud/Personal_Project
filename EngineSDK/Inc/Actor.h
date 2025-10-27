@@ -52,13 +52,11 @@ public:
      void   Check_Coll();
      _uint  Get_Type() {return m_iType;}
 
-
      void   Find_CurrentCell();
      _float Get_fY() { return m_fY; }
      void   Height_On_Cell(_float3* fPos);
      void   Set_onCell(_bool bonCell) { m_bOnCell = bonCell; }
      _bool  Get_onCell(){ return m_bOnCell;}
-  
   
      CNavigation* Get_Navigation() { return m_pNavigationCom; }
      virtual void Set_CurrentHP(_int CurrentHp){m_iHP -= CurrentHp;}
@@ -78,10 +76,17 @@ public:
              m_iTriggerState &= ~flag;
      };
 
+     virtual DECAL_DESC* Get_DecalDesc()
+     {
+         return &m_DecalDesc;
+     } 
+
  protected:
      CNavigation* m_pNavigationCom = { nullptr };
+     DECAL_DESC   m_DecalDesc{};
      _int         m_iHP{};
      _int         m_iMAXHP{};
+
      _uint        m_iState = {};
      _uint        m_iTriggerState = {};
      _float       m_fY{0.f};
@@ -89,8 +94,9 @@ public:
      _bool        m_bOnCell = {false};
      _uint        m_iType = {};
      _uint        m_iRim{}; 
-    
-public:
+     
+
+ public:
         virtual CGameObject* Clone(void* pArg) = 0;
         virtual void Free() override;
 };

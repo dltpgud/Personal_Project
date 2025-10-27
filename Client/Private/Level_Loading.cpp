@@ -50,6 +50,7 @@ void CLevel_Loading::Update(_float fTimeDelta)
         case LEVEL_STAGE1:
             if (m_pGameInstance->Get_DIAnyKey())
             {
+                m_pGameInstance->BuildGlobalDecalArray();
                 if (m_pFade)
                     m_pFade->Set_Fade(false);
                 m_pChannel->stop();
@@ -111,7 +112,7 @@ HRESULT CLevel_Loading::Render()
 
 HRESULT CLevel_Loading::Ready_UI()
 {
-    m_pGameInstance->Play_Sound(L"ST_Music_Credits.wav", &m_pChannel, 0.5f, nullptr);
+    m_pGameInstance->Play_Sound(L"ST_Music_Credits.wav", &m_pChannel, 0.5f);
 
     if (m_pGameInstance->Find_Clone_UIObj(L"Fade") != nullptr)
     {

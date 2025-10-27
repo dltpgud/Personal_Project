@@ -32,7 +32,6 @@ HRESULT CBody_JetFly::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pArg)))
         return E_FAIL;
 
-    m_fDeadTime = 2.5f;
     m_pSocketMatrix = Get_SocketMatrix("Canon_Scale");
 
     if (FAILED(Set_StateMachine()))
@@ -65,7 +64,7 @@ void CBody_JetFly::Late_Update(_float fTimeDelta)
 {
     __super::Late_Update(fTimeDelta);
  
-    if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
+     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
             return;
 
     if (true == m_pGameInstance->isIn_Frustum_WorldSpace(XMVectorSet(m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44), 1.5f))
@@ -107,10 +106,10 @@ HRESULT CBody_JetFly::Render_Shadow()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-
+   
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
-
+    
     _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -178,13 +177,15 @@ HRESULT CBody_JetFly::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_DissolveDesc.bDissolveState,
+                                           sizeof(_bool))))
         return E_FAIL;
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_fthreshold, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_DissolveDesc.fDissolve_threshold,
+                                           sizeof(_float))))
         return E_FAIL;
 
     return S_OK;

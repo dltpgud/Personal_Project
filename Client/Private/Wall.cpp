@@ -38,6 +38,9 @@ void CWall::Update(_float fTimeDelta)
 
 void CWall::Late_Update(_float fTimeDelta)
 {
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
+        return;
+
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
     
@@ -46,12 +49,6 @@ void CWall::Late_Update(_float fTimeDelta)
         return;
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
-        return;
-
-    //if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_HEIGHT, this)))
-    //    return;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
         return;
 
     __super::Late_Update(fTimeDelta);
@@ -68,7 +65,8 @@ HRESULT CWall::Render()
         if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
                                                              "g_DiffuseTexture")))
             return E_FAIL;
-        _bool bEmissive{false};
+         
+       _bool bEmissive{false};
             if (m_pModelName == L"Proto Component DoorRock Model_Wall") {
           
                 if (i == 0) {
@@ -84,10 +82,10 @@ HRESULT CWall::Render()
                     return E_FAIL;
             }
   
-            if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &bEmissive, sizeof(_bool))))
+        if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &bEmissive, sizeof(_bool))))
                     return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(6)))
+        if (FAILED(m_pShaderCom->Begin(5)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -109,7 +107,7 @@ HRESULT CWall::Render_Shadow()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pShaderCom->Begin(2)))
+        if (FAILED(m_pShaderCom->Begin(2)))  
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -143,41 +141,10 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
         return;
 }
 
-HRESULT CWall::CreateDecal(_vector RayPos, _vector RayDir)
+HRESULT CWall::CreateEffect(_vector RayStartPos, _vector RayDir,_vector RayEndPos, _vector vNomal, void* pArg)
 {
-    DECAL_DESC Desc{};
-    Desc.vDir = RayDir;
-    Desc.vPos = RayPos;
-    Desc.iTexIndex = 0;
-    Desc.iType = DECAL_DESC::TYPE_SSD;
-    m_pGameInstance->Add_Decal(TEXT("Base"), &Desc);
+   
     return S_OK;
-}
-
-HRESULT CWall::Render_Height()
-{
-    if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix",m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix",m_pGameInstance->Get_HeightTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
-        return E_FAIL;
-
-    _uint iNumMesh = m_pModelCom->Get_NumMeshes();
-
-    for (_uint i = 0; i < iNumMesh; i++)
-    {
-        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_DIFFUSE, 0,
-                                                             "g_DiffuseTexture")))
-            return E_FAIL;
-
-        if (FAILED(m_pShaderCom->Begin(3)))
-            return E_FAIL;
-
-        m_pModelCom->Render(i);
-    }
 }
 
 HRESULT CWall::Add_Components()

@@ -37,8 +37,6 @@ HRESULT CBody_GunPawn::Initialize(void* pArg)
     if (FAILED(Set_StateMachine()))
         return E_FAIL;
 
-    m_fDeadTime = 2.f;
-
     return S_OK;
 }
 
@@ -87,9 +85,9 @@ HRESULT CBody_GunPawn::Render()
                                                              "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
-                                                                 "g_NormalTexture")))
-                return E_FAIL;
+       if (FAILED(m_pModelCom->Bind_Material_ShaderResource(m_pShaderCom, i, aiTextureType_NORMALS, 0,
+                                                                "g_NormalTexture")))
+               return E_FAIL;
 
         if (FAILED(m_pModelCom->Bind_Mesh_BoneMatrices(m_pShaderCom, i, "g_BoneMatrices")))
             return E_FAIL;
@@ -110,10 +108,10 @@ HRESULT CBody_GunPawn::Render_Shadow()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_VIEW))))
         return E_FAIL;
-
+  
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_ShadowTransformFloat4x4(CPipeLine::D3DTS_PROJ))))
         return E_FAIL;
-
+  
     _uint		iNumMeshes = m_pModelCom->Get_NumMeshes();
 
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -151,15 +149,6 @@ HRESULT CBody_GunPawn::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
-     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
-
-    for (_uint i = 0; i < iNumMeshes; i++)
-     {
-         if (FAILED(m_pModelCom->InsertAiTexture(aiTextureType::aiTextureType_NORMALS, i,
-                                                 TEXT("../Bin/Resources/Models/Nomal/T_GunPawn_N.dds"))))
-             return E_FAIL;
-     }
-
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),TEXT("Com_Texture_Mask"),
                                       reinterpret_cast<CComponent**>(&m_pTextureCom))))
         return E_FAIL;
@@ -190,13 +179,15 @@ HRESULT CBody_GunPawn::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_RawValue("g_RimColor", &m_RimDesc.fcolor, sizeof(_float4))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_bDeadState, sizeof(_bool))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_TagetDeadBool", &m_DissolveDesc.bDissolveState,
+                                           sizeof(_bool))))
         return E_FAIL;
 
     if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_maskTexture", 0)))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_fthreshold, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_threshold", &m_DissolveDesc.fDissolve_threshold,
+                                           sizeof(_float))))
         return E_FAIL;
 
     return S_OK;

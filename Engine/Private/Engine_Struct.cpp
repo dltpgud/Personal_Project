@@ -60,7 +60,6 @@ namespace Engine
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        // { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
@@ -95,12 +94,6 @@ namespace Engine
         {"TEXCOORD", 5, DXGI_FORMAT_R32G32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1},
     };
 
-    const D3D11_INPUT_ELEMENT_DESC TrailVertex::Elements[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
-
     const D3D11_INPUT_ELEMENT_DESC VTXPARTICLE_POINT::Elements[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"PSIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -111,6 +104,14 @@ namespace Engine
         {"WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1},
     };
+
+    const D3D11_INPUT_ELEMENT_DESC TRAIL_POINT::Elements[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 1, DXGI_FORMAT_R32_UINT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+
 
   const D3D11_INPUT_ELEMENT_DESC VTXDECAL::Elements[] = {
         // --- Vertex Buffer (slot 0) ---
@@ -132,48 +133,39 @@ namespace Engine
         {"TEXCOORD", 4, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, offsetof(DecalInstanceData, WorldInv) + sizeof(XMFLOAT4) * 3,
          D3D11_INPUT_PER_INSTANCE_DATA, 1},
 
-        // Tangent
-        {"TEXCOORD", 5, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, Tangent),
-         D3D11_INPUT_PER_INSTANCE_DATA, 1},
-
-        // Binormal
-        {"TEXCOORD", 6, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, Binormal),
-         D3D11_INPUT_PER_INSTANCE_DATA, 1},
-
-        // Normal
-        {"TEXCOORD", 7, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, Normal),
-         D3D11_INPUT_PER_INSTANCE_DATA, 1},
-
         // DecalPos
-        {"TEXCOORD", 8, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, DecalPos),
+        {"TEXCOORD", 5, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, DecalPos),
          D3D11_INPUT_PER_INSTANCE_DATA, 1},
 
         // DecalDir
-        {"TEXCOORD", 9, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, DecalDir),
+        {"TEXCOORD", 6, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, DecalDir),
          D3D11_INPUT_PER_INSTANCE_DATA, 1},
 
         // HalfSize
-        {"TEXCOORD", 10, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, HalfSize),
+        {"TEXCOORD", 7, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(DecalInstanceData, HalfSize),
          D3D11_INPUT_PER_INSTANCE_DATA, 1},
 
         // LifeTime
-        {"TEXCOORD", 11, DXGI_FORMAT_R32_FLOAT, 1, offsetof(DecalInstanceData, LifeTime), D3D11_INPUT_PER_INSTANCE_DATA,
+        {"TEXCOORD", 8, DXGI_FORMAT_R32_FLOAT, 1, offsetof(DecalInstanceData, LifeTime), D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
         // DecalTime
-        {"TEXCOORD", 12, DXGI_FORMAT_R32_FLOAT, 1, offsetof(DecalInstanceData, DecalTime),
+        {"TEXCOORD", 9, DXGI_FORMAT_R32_FLOAT, 1, offsetof(DecalInstanceData, DecalTime),
          D3D11_INPUT_PER_INSTANCE_DATA, 1},
 
         // TexIndex
-        {"TEXCOORD", 13, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, TexIndex), D3D11_INPUT_PER_INSTANCE_DATA,
+        {"TEXCOORD", 10, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, TexIndex), D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
         // bNormal
-        {"TEXCOORD", 14, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, bNormal), D3D11_INPUT_PER_INSTANCE_DATA,
+        {"TEXCOORD", 11, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, bNormal), D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
         // DecalType
-        {"TEXCOORD", 15, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, DecalType), D3D11_INPUT_PER_INSTANCE_DATA,
+        {"TEXCOORD", 12, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, DecalType), D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TEXCOORD", 13, DXGI_FORMAT_R32_SINT, 1, offsetof(DecalInstanceData, ProtoIndex), D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
 
