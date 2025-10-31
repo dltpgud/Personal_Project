@@ -59,7 +59,12 @@ public:
      _bool  Get_onCell(){ return m_bOnCell;}
   
      CNavigation* Get_Navigation() { return m_pNavigationCom; }
-     virtual void Set_CurrentHP(_int CurrentHp){m_iHP -= CurrentHp;}
+     virtual void Set_CurrentHP(_int CurrentHp){
+         m_iHP -= CurrentHp;
+         if (0 > m_iHP)
+             m_iHP = 0;
+     }
+
      void Set_HealthCurrentHP(_int Health);
      _bool IsFullHP() const { return m_iHP == m_iMAXHP;}
      _bool GetTriggerFlag(_uint flag) const

@@ -201,6 +201,7 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\Decal.h" />
     <ClInclude Include="..\Public\Decal_Manager.h" />
     <ClInclude Include="..\Public\EffectStream.h" />
+    <ClInclude Include="..\Public\Effect_DecalStream.h" />
     <ClInclude Include="..\Public\Effect_Manager.h" />
     <ClInclude Include="..\Public\Effect_TrailStream.h" />
     <ClInclude Include="..\Public\Frustum.h" />
@@ -277,8 +278,8 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\Bounding_Sphere.cpp" />
     <ClCompile Include="..\Private\Calculator.cpp" />
     <ClCompile Include="..\Private\Camera.cpp" />
+    <ClCompile Include="..\Private\Effect_DecalStream.cpp" />
     <ClCompile Include="..\Private\Effect_Manager.cpp" />
-    <ClCompile Include="..\Private\Effect_ParticleStream.cpp" />
     <ClCompile Include="..\Private\Effect_TrailStream.cpp" />
     <ClCompile Include="..\Private\Cell.cpp" />
     <ClCompile Include="..\Private\Channel.cpp" />
@@ -357,13 +358,16 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\CS_SSAO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_DecalBuildInstance.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\CS_DecalSpawnUpdate.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\RenderDecal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\SSAO_Compute.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\TrailUpdateCS.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Deferred.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\TrailInterpCS.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\TrailRender.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_Trail.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />

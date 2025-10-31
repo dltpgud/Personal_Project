@@ -15,7 +15,7 @@ public:
         RG_UI,
         RG_END
     };
-	enum SIZE {SIZE_ORIGINAL, SIZE_DOWN_4, SIZE_DOWN_44, SIZE_DOWN_444, SIZE_SHADOW, SIZE_END};
+	enum SIZE {SIZE_ORIGINAL, SIZE_DOWN_2, SIZE_DOWN_4, SIZE_DOWN_8, SIZE_SHADOW, SIZE_END};
 
 private:
 	CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -37,8 +37,7 @@ private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
 	ID3D11DepthStencilView* m_pLightDepthStencilView = { nullptr };   
-	ID3D11DepthStencilView* m_pMainDepthStencilView = {nullptr};    
-	
+
 	 class CVIBuffer_Rect* m_pVIBuffer = { nullptr };
 	 class CShader* m_pShader = { nullptr };
      class CShader* m_pDecalShader = {nullptr};
@@ -53,8 +52,6 @@ private:
      D3D11_VIEWPORT m_ViewPortDescs[SIZE_END]{};
      _float m_fdX[SIZE_END]{}; 
      _float m_fdY[SIZE_END]{};
-
-	     _bool bssao = true;
 
  private:
 	list<class CGameObject*>	m_RenderGameObjects[RG_END];
@@ -72,7 +69,7 @@ private:
     HRESULT Render_Final();
 	HRESULT Render_NonLight();
 	HRESULT Render_UI();
-
+    
 #ifdef _DEBUG
 private:
 	HRESULT Render_Debug();

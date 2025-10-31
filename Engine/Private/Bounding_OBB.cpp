@@ -72,6 +72,17 @@ _bool CBounding_OBB::IsInside(const _float3& pos)
 {
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
 }
+void CBounding_OBB::Get_OctreeAABB(_float3& outMin, _float3& outMax) const
+{
+    BoundingBox outBox;
+    BoundingBox::CreateFromPoints(outBox,
+        XMLoadFloat3(&(_float3{m_pBoundDesc->Center.x - m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y - m_pBoundDesc->Extents.y,m_pBoundDesc->Center.z - m_pBoundDesc->Extents.z})),
+        XMLoadFloat3(&(_float3{m_pBoundDesc->Center.x + m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y + m_pBoundDesc->Extents.y, m_pBoundDesc->Center.z + m_pBoundDesc->Extents.z})));
+
+	outMin = {outBox.Center.x - outBox.Extents.x, outBox.Center.y - outBox.Extents.y, outBox.Center.z - outBox.Extents.z};
+    outMax = {outBox.Center.x + outBox.Extents.x, outBox.Center.y + outBox.Extents.y, outBox.Center.z + outBox.Extents.z};
+
+}
 void CBounding_OBB::Set_Info(BOUND_DESC* pBoundDesc)
 {
   BOUND_OBB_DESC* pDesc = static_cast<BOUND_OBB_DESC*>(pBoundDesc);

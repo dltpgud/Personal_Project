@@ -78,6 +78,13 @@ PS_OUT PS_MAIN(PS_IN In)
     return Out;
 }
 
+float PerlinNoise(float2 uv)
+{
+    // PerlinNoise 알고리즘 또는 Simplex Noise를 사용할 수 있습니다
+    // 예시로 단순화된 PerlinNoise 함수 사용
+    return (sin(uv.x * 10.0) + cos(uv.y * 10.0)) * 0.5;
+}
+
 
 PS_OUT PS_Fire(PS_IN In)
 {
@@ -86,7 +93,7 @@ PS_OUT PS_Fire(PS_IN In)
     float2 uvOffset = g_TimeSum;
     
     float2 movedTexCoord = In.vTexcoord + uvOffset;
-    
+
     vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, movedTexCoord);
  
     float3 colorStart = float3(1.f, 0.f, 0.f);

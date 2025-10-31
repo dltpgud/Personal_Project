@@ -113,7 +113,7 @@ HRESULT CAim::Set_Desc()
     m_AimDesc[0].fSizeX = 10.f;
     m_AimDesc[0].fSizeY = 4.f;
     m_AimDesc[0].fX = g_iWinSizeX * 0.5f - 10.f;
-    m_AimDesc[0].fY = g_iWinSizeY * 0.5f + 60.f;
+    m_AimDesc[0].fY = g_iWinSizeY * 0.525f + 60.f;
     m_AimDesc[0].fZ = 0.5f;
     m_AimDesc[0].fpositive_OR_negative = -1.f;
     m_AimDesc[0].fPrXPos = m_AimDesc[0].fX;
@@ -124,7 +124,7 @@ HRESULT CAim::Set_Desc()
     m_AimDesc[1].fSizeX = 10.f;
     m_AimDesc[1].fSizeY = 4.f;
     m_AimDesc[1].fX = g_iWinSizeX * 0.5f + 10.f;
-    m_AimDesc[1].fY = g_iWinSizeY * 0.5f + 60.f;
+    m_AimDesc[1].fY = g_iWinSizeY * 0.525f + 60.f;
     m_AimDesc[1].fZ = 0.5f;
     m_AimDesc[1].fpositive_OR_negative = 1.f;
     m_AimDesc[1].fPrXPos = m_AimDesc[1].fX;
@@ -135,7 +135,7 @@ HRESULT CAim::Set_Desc()
     m_AimDesc[2].fSizeX = 4.f;
     m_AimDesc[2].fSizeY = 10.f;
     m_AimDesc[2].fX = g_iWinSizeX * 0.5f;
-    m_AimDesc[2].fY = g_iWinSizeY * 0.5f + 50.f;
+    m_AimDesc[2].fY = g_iWinSizeY * 0.525f + 50.f;
     m_AimDesc[2].fZ = 0.5f;
     m_AimDesc[2].fpositive_OR_negative = +1.f;
     m_AimDesc[2].fPrXPos = m_AimDesc[2].fX;
@@ -146,7 +146,7 @@ HRESULT CAim::Set_Desc()
     m_AimDesc[3].fSizeX = 4.f;
     m_AimDesc[3].fSizeY = 10.f;
     m_AimDesc[3].fX = g_iWinSizeX * 0.5f;
-    m_AimDesc[3].fY = g_iWinSizeY * 0.5f + 70.f;
+    m_AimDesc[3].fY = g_iWinSizeY * 0.525f + 70.f;
     m_AimDesc[3].fZ = 0.5f;
     m_AimDesc[3].fpositive_OR_negative = -1.f;
     m_AimDesc[3].fPrXPos = m_AimDesc[3].fX;

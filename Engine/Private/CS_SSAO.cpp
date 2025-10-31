@@ -9,8 +9,8 @@ CSSAO_ComputeShader::CSSAO_ComputeShader(ID3D11Device* pDevice, ID3D11DeviceCont
 
 HRESULT CSSAO_ComputeShader::Initialize_Proto()
 {
-    m_Width = 1280 / 2;
-    m_Height = 720 / 2;
+    m_Width = 1920.f / 2;
+    m_Height = 1080.f / 2;
 
     //=============================
     // 1. Compute Shaders

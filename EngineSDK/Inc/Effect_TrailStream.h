@@ -59,7 +59,7 @@ public:
     HRESULT Initialize(void* pArg) override;
     void Update(_float dt) override;
     HRESULT Render(class CShader* pShader) override;
-    HRESULT Trigger_Effect(void* pArg) override;
+    HRESULT Trigger_Effect(void* pArg, _float fTimeDelta) override;
 
     int AllocateTrail();
     void ReleaseTrail(int indx);

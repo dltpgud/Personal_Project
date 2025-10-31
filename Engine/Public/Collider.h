@@ -27,6 +27,7 @@ public:
     _float3 Get_iCurCenter() const;
      CCollider::TYPE Get_Type() const;
     class CBounding* Get_Bounding() const;
+    void Get_OctreeAABB(_float3& outMin, _float3& outMax) const;
     void SetTriggerCallback(function<void(CActor* other, _bool bColliding, _bool bPlayer)> cb)
     {
         m_Callback = std::move(cb);

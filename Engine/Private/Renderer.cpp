@@ -113,9 +113,11 @@ HRESULT CRenderer::Add_DebugComponents(CComponent* pComponent)
 HRESULT CRenderer::Draw()
 {
     if (FAILED(Render_Priority()))
-        return E_FAIL;;
+        return E_FAIL;
+
     if (FAILED(Render_Shadow()))
         return E_FAIL;
+
     if (FAILED(Render_NonBlend()))
         return E_FAIL;
     
@@ -170,6 +172,14 @@ HRESULT CRenderer::Initialize_SizeViewPort()
     m_fdY[SIZE_ORIGINAL] = 1.f / static_cast<_float>(m_iWinSizeY);
 
     // 4 다운 샘플링
+    ViewPortDesc.Width = static_cast<_float>(m_iWinSizeX) / 2.f;
+    ViewPortDesc.Height = static_cast<_float>(m_iWinSizeY) / 2.f;
+    m_ViewPortDescs[SIZE_DOWN_2] = ViewPortDesc;
+
+    m_fdX[SIZE_DOWN_2] = 2.f / static_cast<_float>(m_iWinSizeX);
+    m_fdY[SIZE_DOWN_2] = 2.f / static_cast<_float>(m_iWinSizeY);
+
+    // 4x4 다운 샘플링
     ViewPortDesc.Width = static_cast<_float>(m_iWinSizeX) / 4.f;
     ViewPortDesc.Height = static_cast<_float>(m_iWinSizeY) / 4.f;
     m_ViewPortDescs[SIZE_DOWN_4] = ViewPortDesc;
@@ -177,21 +187,13 @@ HRESULT CRenderer::Initialize_SizeViewPort()
     m_fdX[SIZE_DOWN_4] = 4.f / static_cast<_float>(m_iWinSizeX);
     m_fdY[SIZE_DOWN_4] = 4.f / static_cast<_float>(m_iWinSizeY);
 
-    // 4x4 다운 샘플링
-    ViewPortDesc.Width = static_cast<_float>(m_iWinSizeX) / 16.f;
-    ViewPortDesc.Height = static_cast<_float>(m_iWinSizeY) / 16.f;
-    m_ViewPortDescs[SIZE_DOWN_44] = ViewPortDesc;
-
-    m_fdX[SIZE_DOWN_44] = 16.f / static_cast<_float>(m_iWinSizeX);
-    m_fdY[SIZE_DOWN_44] = 16.f / static_cast<_float>(m_iWinSizeY);
-
     // 4x4x4 다운 샘플링
-    ViewPortDesc.Width = static_cast<_float>(m_iWinSizeX) / 64.f;
-    ViewPortDesc.Height = static_cast<_float>(m_iWinSizeY) / 64.f;
-    m_ViewPortDescs[SIZE_DOWN_444] = ViewPortDesc;
+    ViewPortDesc.Width = static_cast<_float>(m_iWinSizeX) / 8.f;
+    ViewPortDesc.Height = static_cast<_float>(m_iWinSizeY) / 8.f;
+    m_ViewPortDescs[SIZE_DOWN_8] = ViewPortDesc;
 
-    m_fdX[SIZE_DOWN_444] = 64.f / static_cast<_float>(m_iWinSizeX);
-    m_fdY[SIZE_DOWN_444] = 64.f / static_cast<_float>(m_iWinSizeY);
+    m_fdX[SIZE_DOWN_8] = 16.f / static_cast<_float>(m_iWinSizeX);
+    m_fdY[SIZE_DOWN_8] = 16.f / static_cast<_float>(m_iWinSizeY);
 
     /*그림자 세팅*/
     ViewPortDesc.Width = (_float)g_iSizeX;
@@ -263,8 +265,7 @@ HRESULT CRenderer::Initialize_RT()
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Final"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
-
-
+    
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_VFX"), m_iWinSizeX, m_iWinSizeY,
                                                  DXGI_FORMAT_B8G8R8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
@@ -277,24 +278,24 @@ HRESULT CRenderer::Initialize_RT()
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
         return E_FAIL;
 
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_4"), m_iWinSizeX / 4, m_iWinSizeY / 4,
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_4"), m_iWinSizeX / 2, m_iWinSizeY / 2,
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_4_Temp"), m_iWinSizeX / 4, m_iWinSizeY / 4,
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_4_Temp"), m_iWinSizeX / 2, m_iWinSizeY / 2,
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
 
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_44"), m_iWinSizeX / 16, m_iWinSizeY / 16,
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_44"), m_iWinSizeX / 4, m_iWinSizeY / 4,
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_44_Temp"), m_iWinSizeX / 16, m_iWinSizeY / 16,
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_44_Temp"), m_iWinSizeX / 4, m_iWinSizeY / 4,
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
         return E_FAIL;
 
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_444"), m_iWinSizeX / 64, m_iWinSizeY / 64,
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_444"), m_iWinSizeX / 8, m_iWinSizeY / 8,
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_444_Temp"), m_iWinSizeX / 64, m_iWinSizeY / 64,
+    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Bloom_444_Temp"), m_iWinSizeX / 8, m_iWinSizeY / 8,
                                                  DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
         return E_FAIL;
     return S_OK;
@@ -304,19 +305,19 @@ HRESULT CRenderer::Initialize_MRT()
 {
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom"), TEXT("Target_Bloom"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_4"), TEXT("Target_Bloom_4"))))
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_2"), TEXT("Target_Bloom_4"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_44"), TEXT("Target_Bloom_44"))))
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_4"), TEXT("Target_Bloom_44"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_444"), TEXT("Target_Bloom_444"))))
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_8"), TEXT("Target_Bloom_444"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_Temp"), TEXT("Target_Bloom_Temp"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_4_Temp"), TEXT("Target_Bloom_4_Temp"))))
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_2_Temp"), TEXT("Target_Bloom_4_Temp"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_44_Temp"), TEXT("Target_Bloom_44_Temp"))))
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_4_Temp"), TEXT("Target_Bloom_44_Temp"))))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_444_Temp"), TEXT("Target_Bloom_444_Temp"))))
+    if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Bloom_8_Temp"), TEXT("Target_Bloom_444_Temp"))))
         return E_FAIL;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -343,23 +344,20 @@ HRESULT CRenderer::Initialize_MRT()
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_LightAcc"), TEXT("Target_Specular"))))
         return E_FAIL;
-
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("Target_LightDepth"))))
         return E_FAIL;
-
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Decal"), TEXT("Target_Decal"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Decal"), TEXT("Target_DecalNormal"))))
         return E_FAIL;
-
     if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Final"), TEXT("Target_Final"))))
         return E_FAIL;
+    
     return S_OK;
 }
 
 HRESULT CRenderer::Add_Components()
 {
-
     XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
     m_WorldMatrix._11 = static_cast<_float>(m_iWinSizeX);
     m_WorldMatrix._22 = static_cast<_float>(m_iWinSizeY);
@@ -377,7 +375,7 @@ HRESULT CRenderer::Add_Components()
     if (nullptr == m_pShader)
         return E_FAIL;
     m_pDecalShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_Decal.hlsl"),
-                                     VTXDECAL::Elements, VTXDECAL::iNumElements);
+                                     VTXDECAL:: Elements, VTXDECAL::iNumElements);
     if (nullptr == m_pDecalShader)
         return E_FAIL;
 
@@ -468,8 +466,8 @@ HRESULT CRenderer::Render_Bloom()
         return E_FAIL;
 
     // 4배 다운 샘플링
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_4]); // 이 4배 다운 샘플링 뷰포트에 적용
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4"), nullptr)))
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_2]); // 이 4배 다운 샘플링 뷰포트에 적용
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_2"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom"))))
         return E_FAIL;
@@ -479,12 +477,12 @@ HRESULT CRenderer::Render_Bloom()
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
 
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_4"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_2"))))
         return E_FAIL;
 
     // 16배 다운 샘플링
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_44]); // 16배 다운 샘플링 뷰포트
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44"), nullptr)))
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_4]); // 16배 다운 샘플링 뷰포트
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4"))))
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_4"))))
@@ -495,12 +493,12 @@ HRESULT CRenderer::Render_Bloom()
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
 
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_44"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_4"))))
         return E_FAIL;
 
     // 64배 다운 샘플링
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_444]); // 64배 다운 샘플링 뷰포트
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_444"), nullptr)))
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_8]); // 64배 다운 샘플링 뷰포트
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_8"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_44"))))
         return E_FAIL; // 16배 다운 샘플링한 결과를 가져온다.
@@ -510,17 +508,17 @@ HRESULT CRenderer::Render_Bloom()
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
 
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_444"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_8"))))
         return E_FAIL;
     // 64배 텍스쳐에 대한 블러와 업스케일링, 44 텍스쳐에 대한 add 연산
-    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_444],
+    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_8],
                                         sizeof(_float)))) // 64배 뷰포트에 텍스쳐 쿠드 좌표를 쉐이더로 던져라
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_RawValue("dY", &m_fdY[SIZE_DOWN_444], sizeof(_float))))
+    if (FAILED(m_pShader->Bind_RawValue("dY", &m_fdY[SIZE_DOWN_8], sizeof(_float))))
         return E_FAIL;
 
     // X 블러
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_444_Temp"), nullptr)))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_8_Temp"))))
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_444"))))
@@ -529,12 +527,12 @@ HRESULT CRenderer::Render_Bloom()
     m_pShader->Begin(5); // X블러
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_444_Temp"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_8_Temp"))))
         return E_FAIL;
 
     // Y 블러
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_44]); // 16배 다운 샘플링 뷰포트
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44"), nullptr, false)))
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_4]); // 16배 다운 샘플링 뷰포트
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4"), nullptr, false)))
         return E_FAIL; // 기존 텍스처를 밀지말고 이미지를 가져와라
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_444_Temp"))))
@@ -542,18 +540,18 @@ HRESULT CRenderer::Render_Bloom()
     m_pShader->Begin(6); // X블러한 이미지를 가져와서 Y블러 처리해라
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_44"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_4"))))
         return E_FAIL;
 
     // 16배 텍스쳐에 대한 블러와 업스케일링, 4 텍스쳐에 대한 add 연산
-    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_44],
+    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_4],
                                         sizeof(_float)))) // 16배 뷰포트에 텍스쳐 쿠드 좌표를 쉐이더로 던져라
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_RawValue("dY", &m_fdY[SIZE_DOWN_44], sizeof(_float))))
+    if (FAILED(m_pShader->Bind_RawValue("dY", &m_fdY[SIZE_DOWN_4], sizeof(_float))))
         return E_FAIL;
 
     // X 블러
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_44_Temp"), nullptr)))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4_Temp"))))
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_44"))))
         return E_FAIL; // 16배 다운 샘플링한 이미지를  던져라
@@ -561,13 +559,13 @@ HRESULT CRenderer::Render_Bloom()
     m_pShader->Begin(5); // x블러
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_44_Temp"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_4_Temp"))))
         return E_FAIL;
 
     // Y 블러
-    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_4]);
+    m_pContext->RSSetViewports(1, &m_ViewPortDescs[SIZE_DOWN_2]);
 
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4"), nullptr, false)))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_2"), nullptr, false)))
         return E_FAIL; // 4배 다운 샘플링한 이미지를 밀지 말고 열어서  블러 시작하자
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_44_Temp"))))
         return E_FAIL; // 16배 다운 샘플링 후 X블러를 먹인 이지를 던져라
@@ -575,18 +573,18 @@ HRESULT CRenderer::Render_Bloom()
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
 
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_4"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_2"))))
         return E_FAIL;
 
     // 4배 텍스쳐에 대한 블러와 업스케일링, 블룸 텍스쳐에 대한 add 연산
-    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_4],
+    if (FAILED(m_pShader->Bind_RawValue("dX", &m_fdX[SIZE_DOWN_2],
                                         sizeof(_float)))) // 4배 뷰포트에 텍스쳐 쿠드 좌표를 쉐이더로 던져라
         return E_FAIL;
-    if (FAILED(m_pShader->Bind_RawValue("dY", &m_fdY[SIZE_DOWN_4], sizeof(_float))))
+    if (FAILED(m_pShader->Bind_RawValue("dY", &m_fdY[SIZE_DOWN_2], sizeof(_float))))
         return E_FAIL;
 
     // X 블러링
-    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_4_Temp"), nullptr)))
+    if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Bloom_2_Temp"))))
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Bloom_4"))))
@@ -596,7 +594,7 @@ HRESULT CRenderer::Render_Bloom()
     m_pVIBuffer->Bind_Buffers();
     m_pVIBuffer->Render();
 
-    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_4_Temp"))))
+    if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Bloom_2_Temp"))))
         return E_FAIL;
 
     // Y 블러링
@@ -654,7 +652,9 @@ HRESULT CRenderer::Render_Effect()
 {
     if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_GameObjects"),nullptr,false)))
         return E_FAIL;
-    m_pGameInstance->Render_All();
+
+        m_pGameInstance->Render_All();
+
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_GameObjects"))))
         return E_FAIL;
     return S_OK;
@@ -662,13 +662,7 @@ HRESULT CRenderer::Render_Effect()
 
 HRESULT CRenderer::Render_Lights()
 {
-    if (m_pGameInstance->Get_DIKeyDown(DIK_Y))
-    {
-        if (bssao)
-            bssao = false;
-        else
-            bssao = true;
-    }
+    _bool bssao = true;
 
     if (true == bssao)
     {
@@ -775,7 +769,7 @@ HRESULT CRenderer::Render_LightsCombine()
 
     if (FAILED(m_pGameInstance->End_MRT(TEXT("MRT_Final"))))
         return E_FAIL;
-    
+
     return S_OK;
 }
 
@@ -802,7 +796,7 @@ HRESULT CRenderer::Render_Final()
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_FinalTexture", TEXT("Target_Final"))))
         return E_FAIL;
-
+    
     if (FAILED(m_pShader->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
         return E_FAIL;
     if (FAILED(m_pShader->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))

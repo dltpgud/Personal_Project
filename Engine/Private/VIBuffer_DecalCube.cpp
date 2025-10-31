@@ -1,4 +1,4 @@
-#include "VIBuffer_DecalCube.h"
+ï»¿#include "VIBuffer_DecalCube.h"
 
 CVIBuffer_DecalCube::CVIBuffer_DecalCube(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CVIBuffer_Instancing{pDevice, pContext}
@@ -20,7 +20,7 @@ HRESULT CVIBuffer_DecalCube::Initialize_Prototype()
     m_eIndexFormat = DXGI_FORMAT_R32_UINT;
     m_ePrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    // ÃÊ±â ÃÖ´ë ÀÎ½ºÅÏ½º ¼ö (ÇÊ¿ä½Ã ÀÚµ¿ È®Àå)
+    // ì´ˆê¸° ìµœëŒ€ ì¸ìŠ¤í„´ìŠ¤ ìˆ˜ (í•„ìš”ì‹œ ìë™ í™•ì¥)
     m_iMaxInstances = 10000;
 
 #pragma region Vertex Buffer
@@ -78,7 +78,7 @@ void CVIBuffer_DecalCube::Create_InstanceBuffer(UINT maxCount)
     m_InstanceBufferDesc.ByteWidth = m_iInstanceVertexStride * maxCount;
 
     if (FAILED(m_pDevice->CreateBuffer(&m_InstanceBufferDesc, nullptr, &m_pVBInstance)))
-        MSG_BOX("InstanceBuffer »ı¼º ½ÇÆĞ");
+        MSG_BOX("InstanceBuffer ìƒì„± ì‹¤íŒ¨");
 
     m_iMaxInstances = maxCount;
 }
@@ -89,7 +89,7 @@ void CVIBuffer_DecalCube::Update(const vector<DecalInstanceData>& instanceData)
     if (m_iNumInstance == 0)
         return;
 
-    // capacity ÃÊ°ú ½Ã È®Àå (2¹è¾¿ Áõ°¡)
+    // capacity ì´ˆê³¼ ì‹œ í™•ì¥ (2ë°°ì”© ì¦ê°€)
     if (m_iNumInstance > m_iMaxInstances)
     {
         Create_InstanceBuffer(m_iMaxInstances * 2);

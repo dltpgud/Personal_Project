@@ -124,7 +124,7 @@ void CGameInstance::Update(_float fTimeDelta)
     
 	m_pSound->Set3DListenerAttributes();
     
-	m_pCollider_Manager->All_Collison_check();
+	m_pCollider_Manager->All_Collison_check(fTimeDelta);
 
 	m_pLevel_Manager->Update(fTimeDelta);
 
@@ -872,6 +872,11 @@ void CGameInstance::Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
     return m_pFrustum->Transform_To_LocalSpace(WorldMatrixInv);
 }
 
+void CGameInstance::CalculateCascadeFrustum(const float* cascadeSplits, int numCascades)
+{
+    return m_pFrustum->CalculateCascadeFrustum(cascadeSplits, numCascades);
+}
+
 #pragma endregion
 
 
@@ -885,9 +890,9 @@ HRESULT CGameInstance::Add_DecalProto(const wstring& Key, const _tchar* FilePath
     return m_pDecal_Manager->Add_DecalProto(Key, FilePath, TexNum);
 }
 
-HRESULT CGameInstance::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc)
+HRESULT CGameInstance::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc, _float fTimeDelta)
 {
-    return m_pDecal_Manager->Add_Decal(Key, DecalDesc);
+    return m_pDecal_Manager->Add_Decal(Key, DecalDesc, fTimeDelta);
 }
 
 HRESULT CGameInstance::Render_Decal(CShader* pShader)
@@ -919,6 +924,11 @@ void CGameInstance::Preallocate_Decal(_wstring ProtoTag, size_t count, void* des
     m_pDecal_Manager->Preallocate(ProtoTag, count, desc);
 }
 
+HRESULT CGameInstance::Render_AllDecal(CShader* pShader)
+{
+    return m_pEffect_Manager->Render_Decal(pShader);
+}
+
 HRESULT CGameInstance::Render_All(CShader* pShader)
 {
     return m_pEffect_Manager->Render_All(pShader);
@@ -929,9 +939,9 @@ HRESULT CGameInstance::Add_EffectStream(const _wstring& key, CEffectStream* pStr
     return m_pEffect_Manager->Add_EffectStream(key, pStream);
 }
 
-HRESULT CGameInstance::Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc)
+HRESULT CGameInstance::Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc, _float fTimeDelta)
 {
-    return m_pEffect_Manager->Trigger_Effect(streamKey, pSpawnDesc);
+    return m_pEffect_Manager->Trigger_Effect(streamKey, pSpawnDesc, fTimeDelta);
 }
 
 CEffectStream* CGameInstance::Find_EffectStream(const _wstring& key)

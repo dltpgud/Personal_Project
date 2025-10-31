@@ -32,7 +32,7 @@ HRESULT CDecal_Manager::Add_DecalProto(const wstring& Key, const _tchar* FilePat
     return S_OK;
 }
 
-HRESULT CDecal_Manager::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc)
+HRESULT CDecal_Manager::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc, _float fTimeDelta)
 {
     auto iter = m_ProtoDecal_Map.find(Key);
 
@@ -41,7 +41,42 @@ HRESULT CDecal_Manager::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDes
     
     CDecal* pDecal = ObjectPool<CDecal>::Pop(iter->second, const_cast<DECAL_DESC*>(DecalDesc));
 
-    m_Decals.push_back(pDecal);
+    if (0 == pDecal->Get_iContinuous())
+    {
+        m_Decals.push_back(pDecal);
+        return S_OK;
+    }
+    else
+    {
+        CONTINUOUS_STATE& state = m_ContinuousMap[pDecal->Get_iContinuous()];
+        m_TotalTime += fTimeDelta;
+
+        _vector curPos = XMLoadFloat3(&pDecal->Get_Pos());
+        _bool canSpawn = false;
+        if (!state.Initialized)
+        {
+            canSpawn = true;
+            state.Initialized = true;
+        }
+        else
+        {
+            _float dist = XMVectorGetX(XMVector3Length(curPos - state.LastPos));
+            _float elapsed = m_TotalTime - state.LastTime;
+
+            if (dist >= fkMinDistance && elapsed >= kCooldownMs)
+                canSpawn = true;
+        }
+
+        if (canSpawn)
+        {
+
+            m_Decals.push_back(pDecal);
+            state.LastPos = curPos;
+            state.LastTime = m_TotalTime;
+        }
+
+        return S_OK;
+    }
 
     return S_OK;
 }
@@ -101,19 +136,11 @@ HRESULT CDecal_Manager::Render(CShader* pShader)
 
 HRESULT CDecal_Manager::Clear()
 {
-    for (auto& obj : m_Decals)
-    {
-        if (!obj)
-            continue;
 
-        const auto state = obj->Get_LifeState();
-    
-        if (state == OBJ_POOL)
-            ObjectPool<CDecal>::Push(obj); // 풀로
-       
-    }
+    m_Decals.erase(
+        std::remove_if(m_Decals.begin(), m_Decals.end(), [](CDecal* d) { return OBJ_POOL == d->Get_LifeState(); }),
+                   m_Decals.end());
 
-    m_Decals.clear();
     return S_OK;
 }
 

@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "HealthBall.h"
 #include "GameInstance.h"
-
+#include "Player.h"
+#include "Player_StateMachine.h"
+#include "Player_HpUI.h"
 CHealthBall::CHealthBall(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -69,6 +71,7 @@ void CHealthBall::Priority_Update(_float fTimeDelta)
     }
     if (fDist < 1.f)
     {
+        static_cast<CPlayer_HpUI*>(m_pGameInstance->Find_Clone_UIObj(L"PlayerHP"))->Set_HPGage(5);
         static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"CuTrail"))->ReleaseTrail(m_iTrailIndex);
         m_iLifeState = OBJ_POOL;
     }

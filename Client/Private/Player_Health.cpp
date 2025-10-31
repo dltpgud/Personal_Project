@@ -18,24 +18,28 @@ HRESULT CPlayer_Health::Initialize(void* pDesc)
 
 void CPlayer_Health::State_Enter(_uint* pState, _uint* pPreState)
 {
-    m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_GENERIC_STAP;
-    m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
-    m_StateDesc.bLoop = false;
-    m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK, true);
+        m_StateDesc.iCurMotion[CPlayer::PART_BODY] = CBody_Player::BODY_GENERIC_STAP;
+        m_StateDesc.iCurMotion[CPlayer::PART_WEAPON] = CWeapon::WS_IDLE;
+        m_StateDesc.bLoop = false;
+        m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK, true);
+    
     m_pGameInstance->Set_OpenUI(true, TEXT("PlayerState"));
     __super::State_Enter(pState, pPreState);
 }
 
 _bool CPlayer_Health::State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState)
 {
-    _bool bBodyAnimFinished = m_pParentObject->Set_PartObj_Play_Anim(CPlayer::PART_BODY, fTimedelta * m_StateDesc.fPlayTime);
-    _bool bWeaponAnimFinished = m_pParentObject->Set_PartObj_Play_Anim(CPlayer::PART_WEAPON, fTimedelta * m_StateDesc.fPlayTime);
+        _bool bBodyAnimFinished =
+            m_pParentObject->Set_PartObj_Play_Anim(CPlayer::PART_BODY, fTimedelta * m_StateDesc.fPlayTime);
+        _bool bWeaponAnimFinished =
+            m_pParentObject->Set_PartObj_Play_Anim(CPlayer::PART_WEAPON, fTimedelta * m_StateDesc.fPlayTime);
 
-    return bBodyAnimFinished && bWeaponAnimFinished;
+        return bBodyAnimFinished && bWeaponAnimFinished;
 }
 
 _bool CPlayer_Health::State_Exit(_uint* pState)
 {
+    m_bPlayAnim = true;
     m_pParentObject->Set_State(CPlayer::FLAG_KEYLOCK, false);
     return true;
 }
@@ -47,7 +51,8 @@ void CPlayer_Health::Init_CallBack_Func()
    }
 
    for(_int i = 0; i <BODY_TYPE::T_END; i++){ m_pParentObject->BodyCallBack(i, CBody_Player::BODY_GENERIC_STAP, 20,
-         [this]() { static_cast<CPlayer_HpUI*>(m_pGameInstance->Find_Clone_UIObj(L"PlayerHP"))->Set_HPGage(100); });
+         [this]() { static_cast<CPlayer_HpUI*>(m_pGameInstance->Find_Clone_UIObj(L"PlayerHP"))->Set_HPGage(100); 
+       });
    }     
 }
 

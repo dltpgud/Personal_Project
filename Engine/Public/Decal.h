@@ -68,6 +68,10 @@ public:
     {
         return m_ProtoKey;
     }
+    _int Get_iContinuous() const
+    {
+        return m_iContinuous;
+    }
  private:
     _float m_fLifeTime{}, m_fDecalTime{};
     _float3 m_fDecalPos{}, m_fDecalDir{}, m_fDecalSize{};
@@ -80,6 +84,8 @@ public:
     _float m_fDeltaScaling{};
     _wstring m_ProtoKey;
     class CGameInstance* m_pGameInstance{}; 
+    _uint m_iContinuous{};
+    
 
 public:
     static CDecal* Create();

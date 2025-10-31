@@ -76,7 +76,7 @@ HRESULT CEffect_TrailStream::createShaders()
     Safe_Release(csBlob);
 
    
-    m_pShader = CShader::Create(m_pDevice, m_pContext, L"../Bin/ShaderFiles/TrailRender.hlsl", TRAIL_POINT::Elements,TRAIL_POINT::iNumElements);
+    m_pShader = CShader::Create(m_pDevice, m_pContext, L"../Bin/ShaderFiles/Shader_Trail.hlsl", TRAIL_POINT::Elements,TRAIL_POINT::iNumElements);
     return m_pShader ? S_OK : E_FAIL;
 }
 
@@ -267,7 +267,7 @@ void CEffect_TrailStream::pingpong()
     m_AasInput = !m_AasInput;
 }
 
-HRESULT CEffect_TrailStream::Trigger_Effect(void* pArg)
+HRESULT CEffect_TrailStream::Trigger_Effect(void* pArg, _float fTimeDelta)
 {
     if (!pArg)
         return S_OK;

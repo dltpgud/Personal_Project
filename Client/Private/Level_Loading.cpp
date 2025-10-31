@@ -84,25 +84,25 @@ HRESULT CLevel_Loading::Render()
     {
       if (m_fTimeSum <= 0.25f)
       {
-        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 "), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+          m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 "), _float2(g_iWinSizeX-400.f, g_iWinSizeY - 65.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
       }
       else if (m_fTimeSum <= 0.5f)
       {
-        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ."), _float2(g_iWinSizeX-400.f,  g_iWinSizeY-65.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
       }
       else if (m_fTimeSum <= 0.75f)
       {
-        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 .."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 .."), _float2(g_iWinSizeX-400.f,  g_iWinSizeY-65.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
       }
       else if (m_fTimeSum <= 1.f)
       {
-        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ..."), _float2(955.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+        m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("불러 오는 중 ..."), _float2(g_iWinSizeX-400.f,  g_iWinSizeY-65.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
       }
     }       
 
     if (true == m_pLoader->Finished())
     {
-      m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요 "), _float2(760.f, 635.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.7f);
+      m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("계속 하려면 아무키나 누르세요 "), _float2(g_iWinSizeX-500.f,  g_iWinSizeY-65.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.7f);
     }
 
     m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("협곡"), _float2(40.f, 50.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 1.f);
@@ -148,10 +148,10 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     CLoading::CLoading_DESC Load1{};
     Load1.UID = UIID_Loading;
     Load1.fX = 1900.f;
-    Load1.fY = 360.f;
+    Load1.fY = g_iWinSizeY*0.5f;
     Load1.fZ = 0.5f;
     Load1.fSizeX = 10480.f;;
-    Load1.fSizeY = 720.f;
+    Load1.fSizeY = g_iWinSizeY;
     Load1.Update = true;
     Load1.fSpeedPerSec = 250.f;
     Load1.TexIndex = 4;
@@ -162,10 +162,10 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     CLoading::CLoading_DESC Load2{};
     Load2.UID = UIID_Loading;
     Load2.fX = 2150.f;
-    Load2.fY = 360.f;
+    Load2.fY = g_iWinSizeY*0.5f;
     Load2.fZ = 0.4f;
     Load2.fSizeX = 2280.f;;
-    Load2.fSizeY = 720.f;
+    Load2.fSizeY = g_iWinSizeY;
     Load2.Update = true;
     Load2.fSpeedPerSec = 300.f;
     Load2.TexIndex = 3;
@@ -177,7 +177,7 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     /*바닥*/
     Load3.UID = UIID_Loading;
     Load3.fX = 10040.f;
-    Load3.fY = 720.f;
+    Load3.fY = g_iWinSizeY;
     Load3.fZ = 0.3f;
     Load3.fSizeX = 20040.f;
     Load3.fSizeY = 200.f;
@@ -191,8 +191,8 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     /*bus*/
     CLoading::CLoading_DESC Load4{};
     Load4.UID = UIID_Loading;
-    Load4.fX = 231.f;
-    Load4.fY = 509.f;
+    Load4.fX = g_iWinSizeX*0.17f;
+    Load4.fY = g_iWinSizeY - 210.f;
     Load4.fZ = 0.2f;
     Load4.fSizeX = 550.f;
     Load4.fSizeY = 280.f;
@@ -206,11 +206,11 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     /* 버스 연기 뒤*/
     CSpriteTexture::CSpriteTexture_DESC Smoke1{};
     Smoke1.UID = UIID_Loading;
-    Smoke1.fX = 101.f;
-    Smoke1.fY = 619.f;
+    Smoke1.fX = g_iWinSizeX * 0.12f;
+    Smoke1.fY = g_iWinSizeY - 98.f;
     Smoke1.fZ = 0.19f;
     Smoke1.fSizeX = 100.f;
-    Smoke1.fSizeY = 100.f;
+    Smoke1.fSizeY = 90.f;
     Smoke1.Update = true;
     Smoke1.fSpeedPerSec = 0.f;
     Smoke1.ProtoName = L"Prototype_Component_BusSmokeBack";
@@ -223,8 +223,8 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     /* 버스 연기 앞*/
     CSpriteTexture::CSpriteTexture_DESC Smoke2{};
     Smoke2.UID = UIID_Loading;
-    Smoke2.fX = 271.f;
-    Smoke2.fY = 615.f;
+    Smoke2.fX = g_iWinSizeX *0.2;
+    Smoke2.fY = g_iWinSizeY-100.f;
     Smoke2.fZ = 0.19f;
     Smoke2.fSizeX = 100.f;
     Smoke2.fSizeY = 90.f;
@@ -241,10 +241,10 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
     CLoading::CLoading_DESC Load5{};
     Load5.UID = UIID_Loading;
     Load5.fX = 4080.f;
-    Load5.fY = 360.f;
+    Load5.fY = g_iWinSizeY;
     Load5.fZ = 0.1f;
-    Load5.fSizeX = 4080.f;
-    Load5.fSizeY = 720.f;
+    Load5.fSizeX = g_iWinSizeX*2.f;
+    Load5.fSizeY = g_iWinSizeY*2.f;
     Load5.Update = true;
     Load5.fSpeedPerSec = 1000.f;
     Load5.TexIndex = 0;
@@ -254,11 +254,11 @@ HRESULT CLevel_Loading::Ready_Clone_Layer()
 
     CSpriteTexture::CSpriteTexture_DESC LoadingBar{};
     LoadingBar.UID = UIID_Loading;
-    LoadingBar.fX = 640.f;
-    LoadingBar.fY = 685.f;
+    LoadingBar.fX = g_iWinSizeX*0.5f;
+    LoadingBar.fY = g_iWinSizeY;
     LoadingBar.fZ = 0.08f;
-    LoadingBar.fSizeX = 1280.f;
-    LoadingBar.fSizeY = 90.f;
+    LoadingBar.fSizeX = g_iWinSizeX;
+    LoadingBar.fSizeY = 120.f;
     LoadingBar.Update = true;
     LoadingBar.fSpeedPerSec = 0.f;
     LoadingBar.ProtoName = L"Prototype_Component_Loading";

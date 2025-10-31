@@ -27,6 +27,8 @@ HRESULT CTerrain::Initialize(void* pArg)
 
      Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
     Set_Buffer(pDesc->Buffer[0], pDesc->Buffer[1]);
+     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
+        return E_FAIL;
 
     return S_OK;
 }
@@ -49,6 +51,7 @@ void CTerrain::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
 
+ 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
             return;
 
@@ -56,10 +59,6 @@ void CTerrain::Late_Update(_float fTimeDelta)
     {
         m_pGameInstance->Add_DebugComponents(m_pNavigationCom);
     }
-
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_DECAL)))
-        return;
-
     __super::Late_Update(fTimeDelta);
 }
 

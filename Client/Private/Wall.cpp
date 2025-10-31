@@ -21,8 +21,8 @@ HRESULT CWall::Initialize(void* pArg)
         return E_FAIL;
 
     Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
-
-   
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
+        return E_FAIL;
     return S_OK;
 }
 
@@ -38,12 +38,9 @@ void CWall::Update(_float fTimeDelta)
 
 void CWall::Late_Update(_float fTimeDelta)
 {
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
-        return;
-
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
         return;
-    
+
     if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION),
                                                           m_fExtend.x* m_fExtend.y/2))
         return;

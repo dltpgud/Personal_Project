@@ -84,7 +84,7 @@ HRESULT CBillyBoom_ShockWave::Make_ShockWave()
     Desc.fSpeedPerSec = 20.f;
     Desc.pTagetPos = vTagetPos;
     Desc.vPos = vHPos;
-    Desc.iDamage = 10;
+    Desc.iDamage = 1;
     Desc.iSkillType = CSkill::SKill::STYPE_NOMAL;
     Desc.iActorType = CSkill::BOSS_MONSTER;
     Desc.fScale = _float2{0.6f, 0.6f};

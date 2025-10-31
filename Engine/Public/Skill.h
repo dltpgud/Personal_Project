@@ -23,6 +23,7 @@ public:
         _float4 fClolor[CSkill::COLOR::COLOR_END];
     }Skill_DESC;
 
+
 protected:
      CSkill(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
      CSkill(const CSkill& Prototype);
@@ -42,7 +43,7 @@ public:
     _uint Get_ActorType();
   
     DECAL_DESC* Get_DecalDesc()  { return &m_DecalDesc; }
-
+    _float Get_TimeSum() const {return m_fTimeSum;};
  
 
 protected:
@@ -56,7 +57,7 @@ protected:
     _uint        m_iSkillType = { STYPE_NOMAL };
     _float4      m_Color[COLOR_END]{};
     _vector      m_vDir{};
-
+    
     DECAL_DESC   m_DecalDesc;
 
 public:

@@ -52,6 +52,7 @@
 #include "Decal.h"
 #include "HealthBall.h"
 #include "ShockWave_Bullet.h"
+
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -579,7 +580,13 @@ HRESULT CLoader::Loading_For_Static_Texture()
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Mask/T_Noise_Liquid.dds")));});
 
-     m_pGameInstance->Add_DecalProto(TEXT("Base"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),9);
+   m_pGameInstance->Add_DecalProto(TEXT("Base"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),9);
+  //CEffect_DecalStream::DECALSTREAM_DESC DECALDESC{};
+  //DECALDESC.MaxDecals = 2048; // 총 슬롯 개수
+  //DECALDESC.MaxSpawnPerFrame = 2048;
+  //DECALDESC.FilePathFmt = TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds");
+  //DECALDESC.TextureCount = 8;
+  //m_pGameInstance->Add_EffectStream(TEXT("Base"), CEffect_DecalStream::Create(m_pDevice, m_pContext, &DECALDESC));
 
     return S_OK;
 }

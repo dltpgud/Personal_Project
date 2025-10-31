@@ -16,7 +16,7 @@ public:
 
     virtual HRESULT Render(class CShader* pShader) PURE;
 
-    virtual HRESULT Trigger_Effect(void* pArg) PURE;
+    virtual HRESULT Trigger_Effect(void* pArg, _float fTimeDelta) PURE;
 
     virtual void Clear_EffectPlan() {};
 

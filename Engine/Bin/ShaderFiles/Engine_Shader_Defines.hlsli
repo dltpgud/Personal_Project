@@ -139,6 +139,8 @@ RasterizerState RS_Decal
     FillMode = Solid;
     CullMode = front; 
     FrontCounterClockwise = false;
+    DepthBias = -2;
+    SlopeScaledDepthBias = -1.0f;
 };
 
 BlendState BS_Decal

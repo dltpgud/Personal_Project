@@ -64,7 +64,8 @@ public:
 	virtual void Stun_Routine()override;
 
     virtual void Set_State(_uint flag, _bool value) override;
- 	
+     void Set_ChangeAnimPlay(_uint State, _bool bPlay);
+
 public:
 	const _float4x4* Get_CameraBone();
     void WeaponCallBack(_int WeaPonType, _uint AnimIdx, _int Duration, function<void()> func);
@@ -76,8 +77,7 @@ public:
     CWeapon::WEAPON_NODE_DESC Get_Weapon_Info() const;
     void Set_Navigation();
     virtual DECAL_DESC* Get_DecalDesc() override;
-    virtual HRESULT CreateEffect(_vector RayStartPos, _vector RayDir,_vector RayEndPos, _vector vNomal = XMVectorZero(),
-                                 void* pArg = nullptr) override;
+    virtual HRESULT CreateEffect(_vector RayStartPos, _vector RayDir,_vector RayEndPos, _vector vNomal = XMVectorZero(), void* pArg = nullptr) override;
 
 private:
     virtual HRESULT Add_Components() override;

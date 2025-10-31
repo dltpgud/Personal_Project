@@ -19,8 +19,8 @@ HRESULT CPlayer_HpUI::Initialize(void* pArg)
 {
     CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
-    pDesc->fX = 145.f;
-    pDesc->fY = 640.f;
+    pDesc->fX = 160;
+    pDesc->fY = g_iWinSizeY -100.f;
     pDesc->fZ = 0.1f;
     pDesc->fSizeX = 450.f;
     pDesc->fSizeY = 150.f;

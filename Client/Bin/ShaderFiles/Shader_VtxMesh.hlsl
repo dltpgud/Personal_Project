@@ -167,7 +167,7 @@ PS_OUT PS_ShockWaveFire(PS_IN In)
        
     Out.vDiffuse = float4(color, vMtrlDiffuse.a);
     
-    if (Out.vDiffuse.a <= 0.01f)
+    if (Out.vDiffuse.a <= 0.1f)
         discard;
     Out.vRim = 0.f;
     Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);

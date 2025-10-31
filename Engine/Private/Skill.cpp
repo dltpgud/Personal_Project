@@ -38,9 +38,10 @@ HRESULT CSkill::Initialize(void* pArg)
 void CSkill::Priority_Update(_float fTimeDelta)
 {
 	m_fTimeSum += fTimeDelta;
+
 	if (m_fTimeSum > m_fLifeTime)
 	{
-       m_iLifeState = OBJ_POOL;
+      Dead_Rutine();
 	}
 }
 

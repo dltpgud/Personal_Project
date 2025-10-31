@@ -141,7 +141,6 @@ HRESULT CShader::Bind_Matrix(const _char* pConstantName, const _float4x4* pMatri
 
     /*세팅 후 반환..부동 소수점 행렬을 설정합니다*/
     return pMatrixVariable->SetMatrix(reinterpret_cast<const _float*>(pMatrix));
-    
 }
 
 HRESULT CShader::Bind_SRV(const _char* pConstantName, ID3D11ShaderResourceView* pSRV)

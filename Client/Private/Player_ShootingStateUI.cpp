@@ -51,7 +51,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		if (m_bWeaponUP)	
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY + rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY+10.f + rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponUP = false;
 		}
 	}
@@ -67,7 +67,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		if (m_bWeaponDown)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX -50.f) - ViewportDesc.Width * 0.5f, -(m_fY+250.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX -100.f) - ViewportDesc.Width * 0.5f, -(m_fY+300.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponDown = false;
 		}
 	}
@@ -82,7 +82,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		if (m_bWeaponUP)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX, m_fSizeY, 1.f);
-			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX+220.f + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY+30.f +rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX+280.f + rand() % 40) - ViewportDesc.Width * 0.5f, -(m_fY+30.f +rand() % 4) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponUP = false;
 		}
 	}
@@ -100,7 +100,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 			m_pTransformCom->Set_Scaling(m_fSizeX , m_fSizeY , 1.f);
 			m_pTransformCom->Set_TRANSFORM(
 				CTransform::T_POSITION,
-				XMVectorSet((m_fX - 75.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
+				XMVectorSet((m_fX - 125.f) - ViewportDesc.Width * 0.5f, -(m_fY + 320.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 
 			m_bWeaponDown = false;
 		}
@@ -133,7 +133,7 @@ void CPlayer_ShootingStateUI::Update(_float fTimeDelta)
 		if (m_bWeaponDown)
 		{
 			m_pTransformCom->Set_Scaling(m_fSizeX * 2.f, m_fSizeY * 2.f, 1.f);
-			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX - 75.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
+			m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION,XMVectorSet((m_fX - 275.f) - ViewportDesc.Width * 0.5f, -(m_fY + 260.f) + ViewportDesc.Height * 0.5f, m_fZ, 1.f));
 			m_bWeaponDown = false;
 		}
 	}

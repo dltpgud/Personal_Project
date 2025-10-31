@@ -45,6 +45,7 @@ private:
     const _float4x4* m_pParentMatrix = {};
     _float4x4        m_WorldMatrix   = {};
     _bool            m_bRightLeft    = {};
+    static _int iContinuous;
 
 public:
     static CBossBullet_Laser* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

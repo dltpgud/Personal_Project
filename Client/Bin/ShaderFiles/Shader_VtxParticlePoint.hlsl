@@ -109,9 +109,13 @@ struct PS_IN
 
 struct PS_OUT
 {
-	
-	vector vColor : SV_TARGET0;	
-
+    vector vDiffuse : SV_TARGET0;
+    vector vNormal : SV_TARGET1;
+    vector vDepth : SV_TARGET2;
+    vector vRim : SV_TARGET3;
+    vector vEmissive : SV_TARGET4;
+    vector vAmbient : SV_TARGET5;
+    vector vBloom : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -129,11 +133,20 @@ PS_OUT PS_MAIN(PS_IN In)
 
     float2 finalUV = frameStartUV + In.vTexcoord * frameUVSize;
 
-    Out.vColor = g_Texture.Sample(PointSampler, finalUV);;
-	if (Out.vColor.a == 0.f)
-		discard;
-    Out.vColor.rgb *= 0.4f;
+   // Out.vColor = g_Texture.Sample(PointSampler, finalUV);;
+	//if (Out.vColor.a == 0.f)
+	//	discard;
+    //Out.vColor.rgb *= 0.4f;
 
+    vector Color = g_Texture.Sample(PointSampler, finalUV);
+    if (Color.a <= 0.3f)
+        discard;
+    Out.vDiffuse = Color;
+    Out.vRim = 0.f;
+	
+    Out.vAmbient = vector(1.f, 1.f, 1.f, 1.f);
+    Out.vBloom = vector(Color.rgb, In.vPosition.w / 1000);
+	
 	return Out;
 }
 
