@@ -54,8 +54,6 @@ void CParticle_Explosion::Late_Update(_float fTimeDelta)
 	if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
 		return;
 
-
-
 	XMStoreFloat4x4(&m_NewWordMatrix, m_pTransformCom->Get_WorldMatrix() * m_pParentMatrix);
 }
 

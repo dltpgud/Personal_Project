@@ -96,7 +96,9 @@ void CActor::Height_On_Cell(_float3* fPos)
 	m_fY = fY + m_FixY;
 }
 
-void CActor::Set_HealthCurrentHP(_int Health) {
+
+void CActor::Set_HealthCurrentHP(_int Health)
+{
 	
 	if (IsFullHP())
 		return;

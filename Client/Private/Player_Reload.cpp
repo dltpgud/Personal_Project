@@ -123,21 +123,21 @@ HRESULT CPlayer_Reload::UI_CallBack()
                                         m_pShootingUI->Set_RandomPos(false, true, false);
                                         m_pShootingUI->Set_Open(true);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_RELOAD, 40,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::HendGun, CWeapon::WS_RELOAD, 45,[this]()
                                     {
                                         m_pShootingUI->Set_RandomPos(false, false, false);
-                                        m_pShootingUI->Set_PosClack(-200.f, 80.f);
+                                        m_pShootingUI->Set_PosClack(-250.f, 80.f);
                                     });
 
-    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 20,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 25,[this]()
                                     {
                                         m_pShootingUI->Set_RandomPos(false, true, false);
                                         m_pShootingUI->Set_Open(true);
                                     });
-    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 78,[this]()
+    m_pParentObject->WeaponCallBack(CWeapon::AssaultRifle, CWeapon::WS_RELOAD, 82,[this]()
                                     {
                                         m_pShootingUI->Set_RandomPos(false, false, false);
-                                        m_pShootingUI->Set_PosClack(-250.f, 60.f);
+                                        m_pShootingUI->Set_PosClack(-320.f, 60.f);
                                     });
 
     m_pParentObject->WeaponCallBack(CWeapon::MissileGatling, CWeapon::WS_RELOAD, 25,[this]()

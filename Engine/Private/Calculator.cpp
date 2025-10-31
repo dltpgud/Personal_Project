@@ -35,8 +35,8 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     else if (true == forPlayer)
     {  //1인칭 슈팅게임 클라이언트에서 Ray를 쏘는 위치는 고정되어있다.
          POINT ptPlayerAim{};
-                 ptPlayerAim.x = 640;
-                 ptPlayerAim.y = 420;
+        ptPlayerAim.x = m_iViewportWidth/2;
+        ptPlayerAim.y = m_iViewportHeight*0.5833;
 
         // 뷰 포트 -> 투영
          vMousePos.x = ptPlayerAim.x / (ViewportWidth * 0.5f) - 1.f;

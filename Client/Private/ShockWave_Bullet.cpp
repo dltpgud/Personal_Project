@@ -53,7 +53,7 @@ void CShockWave_Bullet::Priority_Update(_float fTimeDelta)
 {
     __super::Priority_Update(fTimeDelta);
 
-     m_pTransformCom->Go_jump_Dir(fTimeDelta,m_vDir, -0.1);     
+     m_pTransformCom->Go_jump_Dir(fTimeDelta,m_vDir, -0.1f);     
 }
 
 void CShockWave_Bullet::Update(_float fTimeDelta)
@@ -123,7 +123,7 @@ HRESULT CShockWave_Bullet::CreateEffect(_vector RayStartPos, _vector RayDir, _ve
       Desc.iDamage = m_iDamage;
       Desc.iSkillType = CSkill::SKill::STYPE_SHOCKWAVE;
       Desc.iActorType = CSkill::BOSS_MONSTER;
-      Desc.vPos = XMVectorSetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION),XMVectorGetY(RayEndPos));
+      Desc.vPos = XMVectorSetY(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION),XMVectorGetY(RayEndPos)-0.3f);
       m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                                L"Prototype_GameObject_ShockWave", &Desc);
   

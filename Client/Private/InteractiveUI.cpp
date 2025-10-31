@@ -19,7 +19,7 @@ HRESULT CInteractiveUI::Initialize(void* pArg)
 {
     CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
     pDesc->fX = g_iWinSizeX * 0.5f - 40.f;
-    pDesc->fY = g_iWinSizeY * 0.5f;
+    pDesc->fY = g_iWinSizeY * 0.525f+60;
     pDesc->fZ = 0.f;
     pDesc->fSizeX = 50.f;
     pDesc->fSizeY = 50.f;
@@ -95,7 +95,7 @@ HRESULT CInteractiveUI::Render()
     m_pVIBufferCom->Render();
 
     if(nullptr !=m_pText)
-    m_pGameInstance->Render_Text(TEXT("Robo"), m_pText, _float2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f-20.f ), m_vColor, 0.4f);
+    m_pGameInstance->Render_Text(TEXT("Robo"), m_pText, _float2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.525f+40.f ), m_vColor, 0.4f);
 
     return S_OK;
 }

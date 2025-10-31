@@ -22,7 +22,7 @@ public:
     virtual _bool CheckInputCondition(_uint stateFlags) override;
 
 private:
-    
+
 
 public:
     static CPlayer_Health* Create(void* pArg);

@@ -35,6 +35,10 @@ HRESULT CCHEST::Initialize(void* pArg)
     Safe_AddRef(m_InteractiveUI);
 
     Init_CallBakc();
+
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
+        return E_FAIL;
+
     return S_OK;
 }
 

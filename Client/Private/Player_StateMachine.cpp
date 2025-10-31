@@ -115,6 +115,11 @@ void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
     return;
 }
 
+void CPlayer_StateMachine::Set_ChangeAnimPlay(_uint State, _bool bPlay)
+{
+    m_StateNodes[State]->Set_ChangeAnimPlay(bPlay);
+}
+
 void CPlayer_StateMachine::progress_Move(_float fTimeDelta, _uint* pState) 
 {   
     if (m_pParentObject->HasState(CPlayer::FLAG_KEYLOCK) == true)

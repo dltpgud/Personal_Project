@@ -33,7 +33,7 @@ HRESULT CDecal::Initialize(void* pArg)
     m_fDecalSize = {pDecalDesc->fSize, pDecalDesc->fSize, pDecalDesc->fDepth};
     m_fDeltaScaling = pDecalDesc->DeltaScaling; 
     m_ProtoKey = pDecalDesc->Key;
-    
+    m_iContinuous = pDecalDesc->iContinuous;
 
 
     if (m_iDecalType == DECAL_DESC::TYPE_SSD)

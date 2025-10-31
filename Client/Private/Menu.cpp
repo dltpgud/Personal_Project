@@ -121,8 +121,8 @@ HRESULT CMenu::Render()
         m_pVIBufferCom->Render();
 	}
 
-	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 시작"), _float2(160.f, 435.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
-	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 종료"), _float2(160.f, 525.f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 시작"), _float2(g_iWinSizeX * 0.123f,  g_iWinSizeY * 0.615f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
+	m_pGameInstance->Render_Text(TEXT("Robo"), TEXT("게임 종료"), _float2(g_iWinSizeX * 0.123f, g_iWinSizeY * 0.715f), XMVectorSet(1.f, 1.f, 1.f, 1.f), 0.8f);
 
 	return S_OK;
 }
@@ -138,16 +138,16 @@ HRESULT CMenu::Set_MenuPos()
 	Desc[0].Update = true;
 
 	/*메뉴바 1*/
-	Desc[1].fX = 255.f;
-	Desc[1].fY = 475.f;
+    Desc[1].fX = g_iWinSizeX * 0.17f;
+    Desc[1].fY = g_iWinSizeY * 0.65f;
     Desc[1].fZ = 0.4f;
 	Desc[1].fSizeX = 255.f;
 	Desc[1].fSizeY = 45.f;
 	Desc[1].Update = true;
 
    /*메뉴바 2*/
-	Desc[2].fX = 255.f;
-    Desc[2].fY = 565.f;
+	Desc[2].fX =g_iWinSizeX * 0.17f;
+    Desc[2].fY =g_iWinSizeY * 0.75f;
     Desc[2].fZ = 0.4f;
 	Desc[2].fSizeX = 255.f;
 	Desc[2].fSizeY = 45.f;

@@ -20,15 +20,16 @@ HRESULT CWeaponUI::Initialize(void* pArg)
 {
     CUI_DESC* pDesc = static_cast<CUI_DESC*>(pArg);
 
-    pDesc->fX = 1170.f;
-    pDesc->fY = 640.f;
+    pDesc->fX = g_iWinSizeX - 110.f;
+    pDesc->fY = g_iWinSizeY - 80.f;
     pDesc->fZ = 0.2f;
     pDesc->fSizeX = 500.f;
     pDesc->fSizeY = 100.f;
     pDesc->UID = UIID_PlayerWeaPon;
     pDesc->fSpeedPerSec = 0.f;
     pDesc->fRotationPerSec = 0.f;
-    m_fXPos = 1150.f;
+    m_fXPos = g_iWinSizeX - 130.f;
+  
 
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
@@ -325,7 +326,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
 {
     /*hendGun*/
     m_Desc[0].fX = m_fXPos;
-    m_Desc[0].fY = 650.f;
+    m_Desc[0].fY = g_iWinSizeY-70.f;
     m_Desc[0].fZ = 0.4f;
     m_Desc[0].fSizeX = 220.f;
     m_Desc[0].fSizeY = 75.f;
@@ -333,7 +334,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
 
     /*AssaultRifle*/
     m_Desc[1].fX = m_fXPos;
-    m_Desc[1].fY = 650.f;
+    m_Desc[1].fY = g_iWinSizeY - 70.f;
     m_Desc[1].fZ = 0.4f;
     m_Desc[1].fSizeX = 200.f;
     m_Desc[1].fSizeY = 75.f;
@@ -341,7 +342,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
 
     /*MissileGatling*/
     m_Desc[2].fX = m_fXPos;
-    m_Desc[2].fY = 650.f;
+    m_Desc[2].fY = g_iWinSizeY - 70.f;
     m_Desc[2].fZ = 0.4f;
     m_Desc[2].fSizeX = 200.f;
     m_Desc[2].fSizeY = 70.f;
@@ -349,7 +350,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
 
     /*HeavyCrossbow*/
     m_Desc[3].fX = m_fXPos;
-    m_Desc[3].fY = 650.f;
+    m_Desc[3].fY = g_iWinSizeY - 70.f;
     m_Desc[3].fZ = 0.4f;
     m_Desc[3].fSizeX = 200.f;
     m_Desc[3].fSizeY = 70.f;
@@ -357,15 +358,15 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos()
 
     /*Fream*/
     m_Desc[4].fX = m_fXPos;
-    m_Desc[4].fY = 650.f;
+    m_Desc[4].fY = g_iWinSizeY - 70.f;
     m_Desc[4].fZ = 0.5f;
     m_Desc[4].fSizeX = 200.f;
     m_Desc[4].fSizeY = 95.f;
     m_Desc[4].fSpeedPerSec = 0.f;
 
     /*Tan*/
-    m_Desc[5].fX = 1000.f;
-    m_Desc[5].fY = 670.f;
+    m_Desc[5].fX = g_iWinSizeX - 280.f; 
+    m_Desc[5].fY = g_iWinSizeY - 50.f;
     m_Desc[5].fZ = 0.5f;
     m_Desc[5].fSizeX = 70.f;
     m_Desc[5].fSizeY = 55.f;
@@ -384,7 +385,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 {
     /*hendGun*/
     m_ScecondDesc[0].fX = m_fXPos + 40.f;
-    m_ScecondDesc[0].fY = 580.f;
+    m_ScecondDesc[0].fY = g_iWinSizeY - 140.f;
     m_ScecondDesc[0].fZ = 0.4f;
     m_ScecondDesc[0].fSizeX = 110.f;
     m_ScecondDesc[0].fSizeY = 35.f;
@@ -392,7 +393,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 
     /*AssaultRifle*/
     m_ScecondDesc[1].fX = m_fXPos + 40.f;
-    m_ScecondDesc[1].fY = 580.f;
+    m_ScecondDesc[1].fY = g_iWinSizeY - 140.f;
     m_ScecondDesc[1].fZ = 0.4f;
     m_ScecondDesc[1].fSizeX = 110.f;
     m_ScecondDesc[1].fSizeY = 35.f;
@@ -400,7 +401,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 
     /*MissileGatling*/
     m_ScecondDesc[2].fX = m_fXPos + 40.f;
-    m_ScecondDesc[2].fY = 580.f;
+    m_ScecondDesc[2].fY = g_iWinSizeY - 140.f;
     m_ScecondDesc[2].fZ = 0.4f;
     m_ScecondDesc[2].fSizeX = 110.f;
     m_ScecondDesc[2].fSizeY = 35.f;
@@ -408,7 +409,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 
     /*HeavyCrossbow*/
     m_ScecondDesc[3].fX = m_fXPos + 40.f;
-    m_ScecondDesc[3].fY = 580.f;
+    m_ScecondDesc[3].fY = g_iWinSizeY - 140.f;
     m_ScecondDesc[3].fZ = 0.4f;
     m_ScecondDesc[3].fSizeX = 120.f;
     m_ScecondDesc[3].fSizeY = 45.f;
@@ -416,7 +417,7 @@ HRESULT CWeaponUI::Set_WeaponUI_Pos2()
 
     /*Fream*/
     m_ScecondDesc[4].fX = m_fXPos + 40.f;
-    m_ScecondDesc[4].fY = 580.f;
+    m_ScecondDesc[4].fY = g_iWinSizeY - 140.f;
     m_ScecondDesc[4].fZ = 0.5f;
     m_ScecondDesc[4].fSizeX = 120.f;
     m_ScecondDesc[4].fSizeY = 45.f;

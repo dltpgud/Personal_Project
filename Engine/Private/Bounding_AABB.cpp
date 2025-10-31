@@ -72,6 +72,14 @@ _bool CBounding_AABB::IsInside(const _float3& pos)
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
 }
 
+void CBounding_AABB::Get_OctreeAABB(_float3& outMin, _float3& outMax) const
+{
+    outMin = {m_pBoundDesc->Center.x - m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y - m_pBoundDesc->Extents.y,
+              m_pBoundDesc->Center.z - m_pBoundDesc->Extents.z};
+    outMax = {m_pBoundDesc->Center.x + m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y + m_pBoundDesc->Extents.y,
+              m_pBoundDesc->Center.z + m_pBoundDesc->Extents.z};
+}
+
 #ifdef _DEBUG
 
 HRESULT CBounding_AABB::Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor)

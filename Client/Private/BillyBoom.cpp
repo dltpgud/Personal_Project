@@ -26,7 +26,7 @@ HRESULT CBillyBoom::Initialize(void* pArg)
     Desc->fSpeedPerSec =  7.f;
     Desc->fRotationPerSec = XMConvertToRadians(120.f);
     Desc->JumpPower = 0.f;
-    Desc->iHP = 1000;
+    Desc->iHP = 300;
     Desc->bOnCell = true;
     Desc->fFixY = 0.5f;
     Desc->iState = ST_IDLE;
@@ -43,7 +43,6 @@ HRESULT CBillyBoom::Initialize(void* pArg)
 void CBillyBoom::Priority_Update(_float fTimeDelta)
 {
     Compute_Length();
-
     if (m_bFinishIntro)
       Change_Pattern(); 
 

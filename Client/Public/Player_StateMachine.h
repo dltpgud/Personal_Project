@@ -40,6 +40,7 @@ protected:
 public:
     void    ResetMachine(); // 상태 머신 초기화
     void    StateMachine_Playing(_float fTimeDelta); // 상태진행
+    void     Set_ChangeAnimPlay(_uint State, _bool bPlay);
 
 private:
    HRESULT  Initialize(void* pArg);

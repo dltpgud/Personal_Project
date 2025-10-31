@@ -2,6 +2,9 @@
 #include "BossBullet_Laser.h"
 #include "GameInstance.h"
 #include "BillyBoom.h"
+
+_int CBossBullet_Laser::iContinuous = 1;
+
 CBossBullet_Laser::CBossBullet_Laser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
 }
@@ -46,6 +49,7 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
     m_DecalDesc.iTexIndex = 1;
     m_DecalDesc.bOnce = false;
     m_DecalDesc.Key = TEXT("Base");
+    m_DecalDesc.iContinuous = iContinuous++;
     return S_OK;
 }
 

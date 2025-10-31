@@ -114,6 +114,11 @@ CBounding* CCollider::Get_Bounding() const
     return m_pBounding;
 }
 
+void CCollider::Get_OctreeAABB(_float3& outMin, _float3& outMax) const
+{
+    m_pBounding->Get_OctreeAABB(outMin, outMax);
+}
+
 void CCollider::Set_Info(void* pArg)
 {
      CBounding::BOUND_DESC* pDesc = static_cast< CBounding::BOUND_DESC*>(pArg);

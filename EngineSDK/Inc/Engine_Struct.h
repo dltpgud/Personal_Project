@@ -45,6 +45,13 @@ namespace Engine
         int ProtoIndex; 
     };
 
+    typedef struct AABB
+    {
+        _float3 min;
+        _float3 max;
+
+    } AABB;
+
     typedef struct DISSOLVE_DESC
     {
         float fDissolve_threshold{0.f};
@@ -167,6 +174,7 @@ namespace Engine
         bool bActive{};
         bool bColActive{};
         float DeltaScaling{};
+        _int iContinuous{0};
         wstring Key{};
     } DECAL_DESC;
 

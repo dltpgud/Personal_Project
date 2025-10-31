@@ -33,6 +33,8 @@ HRESULT CDOOR::Initialize(void* pArg)
     Add_StageDoorLight();
     Add_BossDoorLight();
     Init_CallBakc();
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
+        return E_FAIL;
     return S_OK;
 }
 
@@ -90,9 +92,7 @@ void CDOOR::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
         return;
 
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_DECAL)))
-        return;
-    
+
     if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION), 8.f))
         return;
 

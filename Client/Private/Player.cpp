@@ -129,6 +129,11 @@ void CPlayer::Set_State(_uint flag, _bool value)
             m_iState &= ~flag;   
 }
 
+void CPlayer::Set_ChangeAnimPlay(_uint State, _bool bPlay)
+{
+    m_pStateMachine->Set_ChangeAnimPlay(State, bPlay);
+}
+
 const _float4x4* CPlayer::Get_CameraBone()
 {
     return static_cast<CBody_Player*>(m_PartObjects[PART_BODY])->Get_SocketMatrix("Camera");
@@ -209,7 +214,7 @@ _bool CPlayer::Set_PartObj_Play_Anim(_int Part, _float fTimeDelta, _float fPlayA
 HRESULT CPlayer::Add_Components()
 {
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = _float3(0.75f, 0.75f, 0.75f);
+    OBBDesc.vExtents = _float3(0.75f, 0.75f, 0.f);
     OBBDesc.vCenter = _float3(0.f, 0.f, 0.f);
     OBBDesc.vRotation = {};
 

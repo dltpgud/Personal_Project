@@ -130,7 +130,7 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
 {
     _vector vPosition = Get_TRANSFORM(T_POSITION);
     _vector Dir = XMVector3Normalize(vDir);
-
+    m_vRayDir = Dir;
     _vector vAfterPos = vPosition + Dir * m_fSpeedPerSec * fTimeDelta;
 
     _vector Slide{};
@@ -148,7 +148,7 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
     _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
 
     _vector vDir = XMVector3Normalize(Dir);
-
+    m_vRayDir = vDir;
     m_fJumpVelocity -= m_fGravity * fTimeDelta; 
     _vector vUpMove = XMVectorSet(0.f, m_fJumpVelocity * fTimeDelta, 0.f, 0.f);
     _vector vHorizontal = vDir * (m_fSpeedPerSec * fTimeDelta);
@@ -371,10 +371,8 @@ HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstant
 void CTransform::Get_Ray(OUT _vector& RayPos, OUT _vector& RayDir)
 {
     RayPos = Get_TRANSFORM(T_POSITION);
-    RayDir= XMVector3Normalize(XMVectorSetY(m_vRayDir,0.f));
+    RayDir= XMVector3Normalize(m_vRayDir);
 }
-
-
 
 HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 {    

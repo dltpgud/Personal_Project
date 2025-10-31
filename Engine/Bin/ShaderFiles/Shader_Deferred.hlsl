@@ -26,7 +26,7 @@ texture2D g_DiffuseTexture;
 texture2D g_LightDepthTexture;
 texture2D g_DecalNormalTexture;
 texture2D g_DecalTexture;
-
+texture2D g_OutLineTexture;
 
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
@@ -132,7 +132,6 @@ struct PS_OUT_LIGHT
     vector vShade : SV_TARGET0;
     vector vSpecular : SV_TARGET1;
 };
-
 
 PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
 {
@@ -334,7 +333,6 @@ float3 GammaCorrection(float3 color, float gamma)
     return pow(color, 1.0f / gamma); // 스칼라 값을 벡터의 각 요소에 적용
 }
 
-
 PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -343,11 +341,13 @@ PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
     vector vDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
     vector vShade = g_ShadeTexture.Sample(LinearSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(LinearSampler, In.vTexcoord);
-     // ==== 데칼이랑 외곽선 반영 ====
-    vector vDecal = g_DecalTexture.Sample(LinearSampler, In.vTexcoord);
-    vDiffuse.rgb = lerp(vDiffuse.rgb, vDecal.rgb, vDecal.a);
-     
     float fOutLine = Compute_OutLine(In.vTexcoord);
+   
+    
+    // ==== 데칼이랑 외곽선 반영 ====
+    vector vDecal = g_DecalTexture.Sample(LinearSampler, In.vTexcoord);
+    
+    vDiffuse.rgb = lerp(vDiffuse.rgb, vDecal.rgb, vDecal.a);
      
     if (vDiffuse.a == 0.f)
         discard;
@@ -357,11 +357,11 @@ PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
     if (fCurIsSpec == 0.f)
         vSpecular = 0.f;
  
-     // ==== 월드 / 뷰 좌표 복원 ====
+    // ==== 월드 / 뷰 좌표 복원 ====
     float4 vPositionWS = Compute_WorldPos_byCamera(In.vTexcoord);
     float viewZ = vDepthDesc.y * g_fCamFar;
  
-     // ==== 섀도우 계산 ====
+    // ==== 섀도우 계산 ====
     float2 lightUV;
     float lightDepth;
     bool inLight = false;
@@ -377,16 +377,15 @@ PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
         shadowFactor = PCF_Shadow(lightUV, depthWithBias, g_shadowMapSize);
     }
     
-     // ==== 조명 합성 ====
-    float3 baseLit = (vDiffuse * vShade * fOutLine + vSpecular).rgb;
+    // ==== 조명 합성 ====
+    float3 baseLit = (vDiffuse * fOutLine * vShade + vSpecular).rgb;
     baseLit *= lerp(0.8f, 1.0f, shadowFactor);
-      //====감마 설정 ===
+     
+    //====감마 설정 ===
     baseLit.rgb = GammaCorrection(baseLit.rgb, 0.8f);
     Out.vColor.rgb = baseLit;
     return Out;
 }
-
-
 
 PS_OUT PS_MAIN_Final(PS_IN In)
 {
@@ -432,8 +431,6 @@ PS_OUT PS_MAIN_Final(PS_IN In)
     Out.vColor = float4(finalRGB, 1.f);
     return Out;
 }
-
-
 
 PS_OUT PS_MAIN_PURE(PS_IN In)
 {
@@ -481,7 +478,6 @@ PS_OUT PS_MAIN_BLUR_Y(PS_IN In)
 
     return Out;
 }
-
 
 technique11 DefaultTechnique
 {
@@ -573,7 +569,4 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_Final();
     }
-
-
-
 }

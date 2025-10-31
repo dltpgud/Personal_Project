@@ -225,7 +225,7 @@ PS_OUT PS_WEAPON(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vEmissive = vMtrlEmissive * g_EmissivePower;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.27f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.34f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = 0.f;
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
@@ -259,7 +259,7 @@ PS_OUT PS_Door(PS_IN In)
         Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     }
     Out.vDiffuse = vMtrlDiffuse;
-    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.1f);
+    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.15f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vAmbient = vector(1.1f, 1.1f, 1.1f, 1.1f);
 

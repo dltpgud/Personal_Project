@@ -31,6 +31,7 @@ public:
     virtual _float3 Get_iCurCenter() override;
     virtual void Set_Info(BOUND_DESC* pBoundDesc) override;
     virtual _bool IsInside(const _float3& pos) override;
+    virtual void Get_OctreeAABB(_float3& outMin, _float3& outMax) const override;
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor) override;

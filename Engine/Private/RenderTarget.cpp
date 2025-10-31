@@ -108,8 +108,6 @@ CRenderTarget* CRenderTarget::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
     return pInstance;
 }
 
-
-
 void CRenderTarget::Free()
 {
     __super::Free();

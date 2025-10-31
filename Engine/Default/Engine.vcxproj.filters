@@ -223,9 +223,6 @@
     <Filter Include="01.Utility\10.Effect\Trail">
       <UniqueIdentifier>{329d98ea-6ee8-4196-b94c-b40fd59e102e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Utility\10.Effect\Particle">
-      <UniqueIdentifier>{95995edf-fb1d-4772-a18e-757d36d145fa}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\public\Base.h">
@@ -438,9 +435,6 @@
     <ClInclude Include="..\Public\ViBuffer_DecalCube.h">
       <Filter>01.Utility\04.Component\VIBuffer\Instancing\Cube</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\SpatialGrid.h">
-      <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\CS_SSAO.h">
       <Filter>01.Utility\04.Component\Shader\ComputeShader\SSAO</Filter>
     </ClInclude>
@@ -455,6 +449,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\Effect_TrailStream.h">
       <Filter>01.Utility\10.Effect\Trail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SpatialGrid.h">
+      <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_DecalStream.h">
+      <Filter>01.Utility\10.Effect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -653,9 +653,6 @@
     <ClCompile Include="..\Private\VIBuffer_DecalCube.cpp">
       <Filter>01.Utility\04.Component\VIBuffer\Instancing\Cube</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\SpatialGrid.cpp">
-      <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Decal_Manager.cpp">
       <Filter>01.Utility\10.Effect\Decal\Manager</Filter>
     </ClCompile>
@@ -674,8 +671,11 @@
     <ClCompile Include="..\Private\Effect_TrailStream.cpp">
       <Filter>01.Utility\10.Effect\Trail</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Effect_ParticleStream.cpp">
-      <Filter>01.Utility\10.Effect\Particle</Filter>
+    <ClCompile Include="..\Private\SpatialGrid.cpp">
+      <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_DecalStream.cpp">
+      <Filter>01.Utility\10.Effect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -691,7 +691,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\TrailInterpCS.hlsl">
       <Filter>01.Utility\98.ShaderFiles\Effect\Trail</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\TrailRender.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_Trail.hlsl">
       <Filter>01.Utility\98.ShaderFiles\Effect\Trail</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\SSAO_Compute.hlsl">
@@ -699,6 +699,15 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\TrailUpdateCS.hlsl">
       <Filter>01.Utility\98.ShaderFiles\Effect\Trail</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_DecalBuildInstance.hlsl">
+      <Filter>01.Utility\98.ShaderFiles\Effect\Decal</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_DecalSpawnUpdate.hlsl">
+      <Filter>01.Utility\98.ShaderFiles\Effect\Decal</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\RenderDecal.hlsl">
+      <Filter>01.Utility\98.ShaderFiles\Effect\Decal</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

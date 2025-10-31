@@ -41,6 +41,10 @@ public:
     virtual void SetActive(_bool active, _uint* pState) {}; // 플래그 설정
     virtual _bool CanEnter(_uint* pState) {return false;};  // 상태 진입 조건확인
     virtual _bool CheckInputCondition(_uint stateFlags) {return true;}; // 상태 진행중 탈출 조건
+    void Set_ChangeAnimPlay(_bool bPlay)
+    {
+        m_bPlayAnim = bPlay;
+    }
 
 protected:
     _bool Move_KeyFlage(_uint* pState);  // 방향 플래그 설정
@@ -61,6 +65,7 @@ protected:
     PLAYER_STATE_DESC m_StateDesc;
     _uint* m_pCurWeapon{};
     FMOD::Channel* m_pChannel = nullptr;
+    _bool m_bPlayAnim{};
 
 public:
     static CPlayer_StateNode* Create(void* pArg);

@@ -203,7 +203,7 @@ public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
     _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
     void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
-
+   void CalculateCascadeFrustum(const float* cascadeSplits, int numCascades);
 #pragma endregion
 
 
@@ -216,7 +216,7 @@ public: /* For.ThreadPool */
 
 #pragma region Decal
     HRESULT Add_DecalProto(const wstring& Key, const _tchar* FilePath, const _uint& TexNum =1);
-    HRESULT Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc);
+    HRESULT Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc, _float fTimeDelta = 0.f);
     HRESULT Render_Decal(class CShader* pShader);
     HRESULT Decal_Clear();
     class CDecal* Find_Prototype_Decal(const _wstring& strPrototypeTag);
@@ -225,14 +225,14 @@ public: /* For.ThreadPool */
 #pragma endregion
 
 
-	   
+	 HRESULT Render_AllDecal(class CShader* pShader = nullptr);  
     HRESULT Render_All(class CShader* pShader = nullptr);
 
     // 특정 스트림 등록/조회
     HRESULT Add_EffectStream(const _wstring& key, class CEffectStream* pStream);
 
     // 이펙트 트리거
-    HRESULT Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc);
+    HRESULT Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc, _float fTimeDelta = 0);
     CEffectStream* Find_EffectStream(const _wstring& key);
 
 private:

@@ -22,10 +22,12 @@ public:
 	_uint	 Get_NumVerticesX(){ return m_iNumVerticesX; }
 	_uint    Get_NumVerticesZ() { return m_iNumVerticesZ; }
 
+    AABB Get_WorldAABB(class CTransform* pTransform);
+
 public:
      void Culling(_fmatrix WorldMatrixInverse);
-    _float3 Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, class CTransform* pTransform, OUT _float* fDist,
-                                       OUT _float3* vNormal);
+    _bool Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, class CTransform* pTransform, OUT _float* fDist,
+                                        OUT _float3* vNormal, OUT _float3* vWorldPos);
      _bool Intersect_OnTerrain_QuadTree(class CCollider* pCollider, CTransform* pTransform, OUT _vector* vNormal,
                                         OUT _vector* vWorldPos);
 
@@ -35,6 +37,9 @@ public:
 	_float3*		        m_pPos          = {};
     _uint*                  m_pIndices      = {};
     class CQuadTree* m_pQuadTree = {nullptr};
+
+   _float3 m_vMin {};
+    _float3 m_vMax{};
 
 public:
 	static CVIBuffer_Terrain* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
