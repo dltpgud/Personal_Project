@@ -96,8 +96,11 @@ public: /* For.Object_Manager*/
     HRESULT Add_Collider(class CCollider* Collider, _int Damage = 0);
     HRESULT Add_GameObject_To_ColGroup(class CGameObject* Obj, const _uint& Type);
 	HRESULT Player_To_Monster_Ray_Collison_Check();
-	HRESULT Find_Cell();
+    HRESULT Collision_Init(const _float2& vMin, const _float2& vMax, _float cellSize);
    
+	#ifdef _DEBUG
+        HRESULT RenderGrid();
+    #endif // _DEBUG
 #pragma endregion
 
 #pragma region UI_Manager
@@ -166,14 +169,15 @@ public: /* For.Light_Manager */
 
 #pragma region Calculator
 public: /* For.Calculator */
-     _float3 Picking_OnTerrain( CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
-                                  CTransform* Transform, _float* fDis, _float3* vNormal = nullptr);
+    _bool Picking_OnTerrain( CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis, _float3*  vWorldPosition, _float3* vNormal = nullptr);
     void Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir ,_bool forPlayer = false);
 	_float Compute_Random_Normal();
 	_float Compute_Random(_float fMin, _float fMax);
 	_vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
     _bool RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& min, const _float3& max);
-     
+    _bool TestSphereTriangle(const BoundingSphere& sphere, const _float3& a, const _float3& b, const _float3& c, OUT _float3* oHit= nullptr, OUT _float3* oNormal= nullptr, OUT _float* oPen = nullptr);
+    _bool TestAABBTriangle(const BoundingBox& box, const _float3& a, const _float3& b, const _float3& c,OUT _float3* oHit= nullptr, OUT _float3* oNormal= nullptr, OUT _float* oPen= nullptr);
+    _bool TestOBBTriangle(const BoundingOrientedBox& obb, const _float3& a, const _float3& b, const _float3& c, OUT _float3* oHit= nullptr, OUT _float3* oNormal= nullptr, OUT _float* oPen= nullptr);
 #pragma endregion
 
 #pragma region Font_Manager
@@ -211,30 +215,24 @@ public: /* For.Frustum */
 public: /* For.ThreadPool */
     template <class T, class... Args>
     auto Add_Job(T&& f, Args&&... args) -> future<typename result_of<T(Args...)>::type>;
+    void Add_Jobs(vector<function<void()>>&& jobs);
     _bool AllJobCompleted();
 #pragma endregion
 
-#pragma region Decal
-    HRESULT Add_DecalProto(const wstring& Key, const _tchar* FilePath, const _uint& TexNum =1);
-    HRESULT Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc, _float fTimeDelta = 0.f);
-    HRESULT Render_Decal(class CShader* pShader);
-    HRESULT Decal_Clear();
-    class CDecal* Find_Prototype_Decal(const _wstring& strPrototypeTag);
-    HRESULT BuildGlobalDecalArray();
-    void Preallocate_Decal(_wstring ProtoTag, size_t count, void* desc);
-#pragma endregion
+#pragma region Effect
 
-
-	 HRESULT Render_AllDecal(class CShader* pShader = nullptr);  
+    HRESULT Render_AllDecal(class CShader* pShader = nullptr);
     HRESULT Render_All(class CShader* pShader = nullptr);
 
     // 특정 스트림 등록/조회
     HRESULT Add_EffectStream(const _wstring& key, class CEffectStream* pStream);
-
-    // 이펙트 트리거
     HRESULT Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc, _float fTimeDelta = 0);
     CEffectStream* Find_EffectStream(const _wstring& key);
+#pragma endregion
 
+
+
+#pragma endregion
 private:
 	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
@@ -253,7 +251,6 @@ private:
 	class CTarget_Manager*			m_pTarget_Manager	 = { nullptr };
 	class CFrustum*					m_pFrustum		     = { nullptr };
     class CThreadPool*              m_pThreadPool        = { nullptr };
-    class CDecal_Manager*           m_pDecal_Manager     = { nullptr }; 
 	class CEffect_Manager*          m_pEffect_Manager    = { nullptr }; 
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출

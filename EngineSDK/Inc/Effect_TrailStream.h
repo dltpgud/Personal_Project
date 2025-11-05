@@ -31,20 +31,19 @@ public:
         _uint iTotalSprite = 0;
         _float2 vTrailTexUVScale = {1.f, 1.f};
     };
-
- struct alignas(16) SPAWN_REQUEST
+    struct SPAWN_REQUEST
     {
-        _uint valid;      // 4
-        _uint trailIndex; // 4
-        _float3 headPos;  // 12
-        _float addLife;   // 4  -> 여기까지 24 bytes, 다음은 16배수 단위라 alignas 필요X
-        _float width;     // 4
-        _float3 _pad0;    // ✅ 패딩 (float3 == 12 bytes → width 포함해서 16 align 맞춤)
+        _uint Valid;
+        _uint trailIndex;
+        _float3 headPos;
+        _float addLife;
+        _float width;
+        _float3 _pad0;
 
-        _float4 color; // 16
-        _uint frameIndex; // 4
-        _uint isSegment;  // 4
-        _float3 tailPos;  // 12
+        _float4 color;
+        _uint frameIndex;
+        _uint isSegment;
+        _float3 tailPos;
         _uint generation;
     };
 
@@ -67,11 +66,8 @@ private:
     HRESULT createShaders();
     HRESULT createBuffers();
     HRESULT createPerFrameCB();
-    HRESULT createIndirectArgs();
     void pingpong();
-    //==============================
-    // 내부 구조체 (HLSL과 동일)
-    //==============================
+
     struct TrailPoint
     {
         _float3 pos;
@@ -94,28 +90,28 @@ private:
 
     struct CS_PERFRAME_CS
     {
-        float dt;
-        float fadeSpeed;
-        float lifeTime;
-        UINT maxTrails;
+        _float dt;
+        _float fadeSpeed;
+        _float lifeTime;
+        _uint maxTrails;
 
-        UINT maxPointsPerTrail;
-        UINT spawnCount;
-        UINT mode;
-        float minStepDist;
+        _uint maxPointsPerTrail;
+        _uint spawnCount;
+        _uint mode;
+        _float minStepDist;
 
-        UINT maxStitch;
-        float padCS[3]; // 🔸 남은 12바이트를 채워 총 64바이트(16배수)
+        _uint maxStitch;
+        _float padCS[3];
     };
 
     struct CS_PERFRAME_INTERP
     {
-        UINT mode;
-        UINT maxTrails;
-        UINT maxPointsPerTrail;
-        float lifeTime;
-        DirectX::XMFLOAT3 g_CamPosWS;
-        float _pad0;
+        _uint mode;
+        _uint maxTrails;
+        _uint maxPointsPerTrail;
+        _float lifeTime;
+        _float3 g_CamPosWS;
+        _float _pad0;
     };
 
     struct VS_PERFRAME
@@ -131,16 +127,12 @@ private:
     };
 
 private:
-    //==============================
-    // 멤버 변수
-    //==============================
     TRAILSDESC m_desc{};
     vector<SPAWN_REQUEST> m_spawnQueue;
-    vector<UINT> m_inUse;
-    UINT m_NextTrailID = 0;              // 다음에 할당될 trail index (0~maxTrails-1 순환)
-    std::vector<UINT> m_GenerationTable; // 각 인덱스의 generation 추적용 (CPU 캐시)
+    vector<_uint> m_inUse;
+    _uint m_NextTrailID = 0;             
+    vector<_uint> m_GenerationTable; 
 
-    // Trail Buffers
     ID3D11Buffer* m_pTrailBufA = nullptr;
     ID3D11Buffer* m_pTrailBufB = nullptr;
     ID3D11ShaderResourceView* m_SRV_A = nullptr;
@@ -170,13 +162,12 @@ private:
     ID3D11ComputeShader* m_pCS_Interp = nullptr;
     class CTexture* m_pTrailTexCom = nullptr;
 
+     _uint THREADS = 64;
     _float2 m_vTrailTexUVScale{1.f, 1.f};
     _uint m_iPass{};
     _int m_iTexTotalFrames{};
     _bool m_AasInput = false;
     _int m_iMode{};
-
-
 };
 
 END

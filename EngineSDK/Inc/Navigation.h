@@ -54,7 +54,7 @@ public:
     _vector        Get_TagetPos(_int index);
     vector<_uint>  Get_PathPoints()
     {
-            READ_LOCK;
+        std::lock_guard<std::mutex> lock(m_mutex);
            return m_PathPoints;
     };
 
@@ -69,12 +69,13 @@ public:
                    
 	HRESULT        Delete_ALLCell();
 	void           Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
-     
- private:
-	 _int           Find_Cell_ByPosition(_vector vTargetPos);
 
+
+	 _int           Find_Cell_ByPosition(_vector vTargetPos);
+;
  private:
-     USE_LOCK;
+    // USE_LOCK;
+     mutex m_mutex;
      vector<_uint>              m_PathPoints;
 	 _int					    m_iCurrentCellIndex = { -1 };
 	 vector<class CCell*>	    m_Cells;

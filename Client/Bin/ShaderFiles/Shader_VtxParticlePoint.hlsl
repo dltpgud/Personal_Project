@@ -3,7 +3,7 @@
 matrix			g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D		g_Texture;
 vector			g_vCamPosition;
-
+float g_fCamFar;
 float2 g_textureSize;
 float2 g_frameSize;
 int g_framesPerRow; 
@@ -141,11 +141,11 @@ PS_OUT PS_MAIN(PS_IN In)
     vector Color = g_Texture.Sample(PointSampler, finalUV);
     if (Color.a <= 0.3f)
         discard;
-    Out.vDiffuse = Color;
+    Out.vDiffuse = Color*0.4f;
     Out.vRim = 0.f;
 	
     Out.vAmbient = vector(1.f, 1.f, 1.f, 1.f);
-    Out.vBloom = vector(Color.rgb, In.vPosition.w / 1000);
+    Out.vBloom = vector(Color.rgb * 0.4f, In.vPosition.w / g_fCamFar);
 	
 	return Out;
 }

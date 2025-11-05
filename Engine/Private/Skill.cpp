@@ -5,7 +5,7 @@ CSkill::CSkill(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObje
 {
 }
 
-CSkill::CSkill(const CSkill& Prototype) : CGameObject{ Prototype }
+CSkill::CSkill(const CSkill& Prototype) : CGameObject{Prototype}, m_DecalDesc{Prototype.m_DecalDesc}
 {
 }
 

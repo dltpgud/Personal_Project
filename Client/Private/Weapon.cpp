@@ -124,8 +124,8 @@ HRESULT CWeapon::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEn
     _float3 fEndPos;
     XMStoreFloat3(&fEndPos, RayEndPos);
 
-    CEffect_TrailStream::SPAWN_REQUEST req{};
-    req.valid = 1;
+       CEffect_TrailStream::SPAWN_REQUEST req{};
+    req.Valid = 1;
     req.trailIndex = -1;
     req.headPos = fStartPos;
     req.tailPos = fEndPos;
@@ -292,7 +292,7 @@ HRESULT CWeapon::Init_WeaponDecal()
     pWDesc.fDepth = 0.25f;
     pWDesc.fSize = 0.25f;
     pWDesc.fLifeTime = 3.f;
-    pWDesc.iTexIndex = 1.f;
+    pWDesc.iTexIndex = 1;
     pWDesc.Key = TEXT("Base");
     m_vecWeaPoneDecal[CWeapon::AssaultRifle] = pWDesc;
 
@@ -300,7 +300,7 @@ HRESULT CWeapon::Init_WeaponDecal()
     pWDesc.fDepth = 0.6f;
     pWDesc.fSize = 0.6f;
     pWDesc.fLifeTime = 3.f;
-    pWDesc.iTexIndex = 2.f;
+    pWDesc.iTexIndex = 2;
     pWDesc.Key = TEXT("Base");
     m_vecWeaPoneDecal[CWeapon::MissileGatling] = pWDesc;
 
@@ -308,7 +308,7 @@ HRESULT CWeapon::Init_WeaponDecal()
     pWDesc.fDepth = 0.5f;
     pWDesc.fSize = 0.5f;
     pWDesc.fLifeTime = 3.f;
-    pWDesc.iTexIndex = 6.f;
+    pWDesc.iTexIndex = 6;
     pWDesc.Key = TEXT("Base");
     m_vecWeaPoneDecal[CWeapon::HeavyCrossbow] = pWDesc;
 

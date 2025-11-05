@@ -88,8 +88,8 @@ HRESULT CBillyBoom_Barre::Make_Barre()
     Desc.vPos = vHPos;
     Desc.iActorType = CSkill::BOSS_MONSTER;
     Desc.iSkillType = CSkill::SKill::STYPE_BERRLE;
-    Desc.fClolor[CSkill::COLOR::CSTART] = {0.f, 0.f, 0.f, 0.5f};
-    Desc.fClolor[CSkill::COLOR::CEND]   ={1.f, 0.f, 0.f, 1.f};
+    Desc.fClolor[CSkill::COLOR::CSTART] = {0.f, 0.1f, 0.1f, 1.f};
+    Desc.fClolor[CSkill::COLOR::CEND]   ={1.f, 0.f, 0.1f, 1.f};
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_BossBullet_Berrle", &Desc);
 
@@ -102,7 +102,7 @@ HRESULT CBillyBoom_Barre::Make_Barre()
     BDesc.iSkillType = CSkill::STYPE_BERRLE;
     BDesc.fScale = _float2{1.f, 1.f};
     BDesc.fClolor[CSkill::COLOR::CSTART] = _float4(1.f, 0.f, 0.f, 1.f);
-    BDesc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 1.f, 0.f, 1.f);
+    BDesc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.4f, 0.f, 1.f);
     BDesc.fRadius = 1.25f;
     BDesc.fTrailLength = 5.f;
     BDesc.fTrailWidth = 2.f;

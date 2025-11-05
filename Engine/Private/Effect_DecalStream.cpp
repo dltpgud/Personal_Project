@@ -1,7 +1,7 @@
 ﻿#include "Effect_DecalStream.h"
 #include "Shader.h"
 #include "GameInstance.h"
-#include <d3dcompiler.h>
+
 
 CEffect_DecalStream::CEffect_DecalStream(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CEffectStream(pDevice, pContext)
@@ -28,32 +28,29 @@ HRESULT CEffect_DecalStream::Initialize(void* pArg)
     m_MaxDecals = pDesc->MaxDecals;
     m_MaxSpawnPerFrame = pDesc->MaxSpawnPerFrame;
 
-    // Texture2DArray   
     if (FAILED(BuildGlobalDecalArray(pDesc->FilePathFmt, pDesc->TextureCount)))
         return E_FAIL;
 
-    // 1) 큐브 지오메트리 (기본 데칼 볼륨 메시)
-    if (FAILED(createGeometryBuffers()))
+    m_pVIBuffer_Cube = CVIBuffer_Cube::Create(m_pDevice, m_pContext);
+    if (!m_pVIBuffer_Cube)
         return E_FAIL;
 
-    // 2) GPU persistent buffers
     if (FAILED(createGPUStorageBuffers()))
         return E_FAIL;
 
-    // 3) CPU->GPU 업로드용 spawn buffer
     if (FAILED(createSpawnUploadBuffer()))
         return E_FAIL;
 
-    // 4) DrawIndirect args buffer
-    if (FAILED(createIndirectArgsBuffer()))
+    if (FAILED(CreateRawBuffer(sizeof(UINT) * 5, &m_pIndirectArgs, &m_pIndirectArgsUAV, true)))
         return E_FAIL;
 
     if (FAILED(createCB()))
         return E_FAIL;
 
+    if (FAILED(Create_CS(L"../Bin/ShaderFiles/CS_DecalSpawnUpdate.hlsl", "CSMain", &m_pCS_SpawnUpdate)))
+        return E_FAIL;
 
-    // 5) 컴퓨트 셰이더 로드
-    if (FAILED(createComputeShaders()))
+    if (FAILED(Create_CS(L"../Bin/ShaderFiles/CS_DecalBuildInstance.hlsl", "CSMain", &m_pCS_BuildDrawData)))
         return E_FAIL;
 
     return S_OK;
@@ -134,13 +131,13 @@ void CEffect_DecalStream::Update(_float fTimeDelta)
     vector<UINT> zeros(m_MaxDecals, 0);
     m_pContext->UpdateSubresource(m_pLiveList, 0, nullptr, zeros.data(), 0, 0);
 
-    uploadSpawnRequestsToGPU();
+    UploadSpawnRequestsToGPU();
 
-    dispatchSpawnUpdateCS(fTimeDelta);
+    DispatchSpawnUpdateCS(fTimeDelta);
 
-    resetDrawArgsOnCPU();
+    ResetDrawArgsOnCPU();
 
-    dispatchBuildDrawCS();
+    DispatchBuildDrawCS();
 
     m_SpawnQueue.clear();
 }
@@ -149,12 +146,6 @@ HRESULT CEffect_DecalStream::Render(CShader* pShader)
 {
     if (!pShader)
         return E_FAIL;
-
-    UINT stride = sizeof(XMFLOAT3) + sizeof(XMFLOAT2);
-    UINT offset = 0;
-    m_pContext->IASetVertexBuffers(0, 1, &m_pVB_Cube, &stride, &offset);
-    m_pContext->IASetIndexBuffer(m_pIB_Cube, DXGI_FORMAT_R32_UINT, 0);
-    m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     ID3D11ShaderResourceView* nullSRV[16] = {nullptr};
     m_pContext->PSSetShaderResources(0, 16, nullSRV);
@@ -166,135 +157,27 @@ HRESULT CEffect_DecalStream::Render(CShader* pShader)
     if (FAILED(pShader->Bind_SRV("g_DecalArray", m_pDecalArraySRV)))
         return E_FAIL;
 
+    m_pVIBuffer_Cube->Bind_Buffers();
+
     pShader->Begin(0);
 
     m_pContext->DrawIndexedInstancedIndirect(m_pIndirectArgs, 0);
     return S_OK;
 }
 
-HRESULT CEffect_DecalStream::createGeometryBuffers()
-{
-    struct VTX
-    {
-        XMFLOAT3 pos;
-        XMFLOAT2 uv;
-    };
-    VTX verts[8] = {
-        {{-0.5f, 0.5f, -0.5f}, {0, 0}},  {{0.5f, 0.5f, -0.5f}, {1, 0}},  {{0.5f, -0.5f, -0.5f}, {1, 1}},
-        {{-0.5f, -0.5f, -0.5f}, {0, 1}}, {{-0.5f, 0.5f, 0.5f}, {0, 0}},  {{0.5f, 0.5f, 0.5f}, {1, 0}},
-        {{0.5f, -0.5f, 0.5f}, {1, 1}},   {{-0.5f, -0.5f, 0.5f}, {0, 1}},
-    };
-
-    UINT idx[36] = {1, 5, 6, 1, 6, 2, 4, 0, 3, 4, 3, 7, 4, 5, 1, 4, 1, 0,
-                    3, 2, 6, 3, 6, 7, 5, 4, 7, 5, 7, 6, 0, 1, 2, 0, 2, 3};
-
-    // VB
-    D3D11_BUFFER_DESC bd{};
-    bd.ByteWidth = sizeof(verts);
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA sd{};
-    sd.pSysMem = verts;
-    if (FAILED(m_pDevice->CreateBuffer(&bd, &sd, &m_pVB_Cube)))
-        return E_FAIL;
-
-    // IB
-    D3D11_BUFFER_DESC idesc{};
-    idesc.ByteWidth = sizeof(idx);
-    idesc.Usage = D3D11_USAGE_DEFAULT;
-    idesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA isd{};
-    isd.pSysMem = idx;
-    if (FAILED(m_pDevice->CreateBuffer(&idesc, &isd, &m_pIB_Cube)))
-        return E_FAIL;
-
-    m_iIndexCount = 36;
-    return S_OK;
-}
 
 HRESULT CEffect_DecalStream::createGPUStorageBuffers()
 {
-    {
-        D3D11_BUFFER_DESC bd{};
-        bd.ByteWidth = sizeof(GPU_DecalHeader) * m_MaxDecals;
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-        bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-        bd.StructureByteStride = sizeof(GPU_DecalHeader);
+    if (FAILED(CreateStructuredBuffer(m_MaxDecals, sizeof(GPU_DecalHeader), &m_pDecalSlots, &m_pDecalSlotsSRV,
+                                      &m_pDecalSlotsUAV)))
+        return E_FAIL;
 
-        if (FAILED(m_pDevice->CreateBuffer(&bd, nullptr, &m_pDecalSlots)))
-            return E_FAIL;
+    if (FAILED(CreateStructuredBuffer(m_MaxDecals, sizeof(UINT), &m_pLiveList, &m_pLiveListSRV, &m_pLiveListUAV)))
+        return E_FAIL;
 
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvd{};
-        srvd.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srvd.Format = DXGI_FORMAT_UNKNOWN;
-        srvd.Buffer.FirstElement = 0;
-        srvd.Buffer.NumElements = m_MaxDecals;
-        if (FAILED(m_pDevice->CreateShaderResourceView(m_pDecalSlots, &srvd, &m_pDecalSlotsSRV)))
-            return E_FAIL;
-
-        D3D11_UNORDERED_ACCESS_VIEW_DESC uavd{};
-        uavd.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-        uavd.Format = DXGI_FORMAT_UNKNOWN;
-        uavd.Buffer.FirstElement = 0;
-        uavd.Buffer.NumElements = m_MaxDecals;
-        if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pDecalSlots, &uavd, &m_pDecalSlotsUAV)))
-            return E_FAIL;
-    }
-
-    {
-        D3D11_BUFFER_DESC bd{};
-        bd.ByteWidth = sizeof(UINT) * m_MaxDecals;
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-        bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-        bd.StructureByteStride = sizeof(UINT);
-
-        if (FAILED(m_pDevice->CreateBuffer(&bd, nullptr, &m_pLiveList)))
-            return E_FAIL;
-
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvd{};
-        srvd.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srvd.Format = DXGI_FORMAT_UNKNOWN;
-        srvd.Buffer.NumElements = m_MaxDecals;
-        if (FAILED(m_pDevice->CreateShaderResourceView(m_pLiveList, &srvd, &m_pLiveListSRV)))
-            return E_FAIL;
-
-        D3D11_UNORDERED_ACCESS_VIEW_DESC uavd{};
-        uavd.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-        uavd.Format = DXGI_FORMAT_UNKNOWN;
-        uavd.Buffer.NumElements = m_MaxDecals;
-        if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pLiveList, &uavd, &m_pLiveListUAV)))
-            return E_FAIL;
-    }
-
-    {
-        D3D11_BUFFER_DESC bd{};
-        bd.ByteWidth = sizeof(GPU_DecalInstanceData) * m_MaxDecals;
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-        bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-        bd.StructureByteStride = sizeof(GPU_DecalInstanceData);
-
-        if (FAILED(m_pDevice->CreateBuffer(&bd, nullptr, &m_pInstanceBuffer)))
-            return E_FAIL;
-
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvd{};
-        srvd.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srvd.Format = DXGI_FORMAT_UNKNOWN;
-        srvd.Buffer.NumElements = m_MaxDecals;
-        if (FAILED(m_pDevice->CreateShaderResourceView(m_pInstanceBuffer, &srvd, &m_pInstanceSRV)))
-            return E_FAIL;
-
-        D3D11_UNORDERED_ACCESS_VIEW_DESC uavd{};
-        uavd.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-        uavd.Format = DXGI_FORMAT_UNKNOWN;
-        uavd.Buffer.NumElements = m_MaxDecals;
-        if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pInstanceBuffer, &uavd, &m_pInstanceUAV)))
-            return E_FAIL;
-    }
+    if (FAILED(CreateStructuredBuffer(m_MaxDecals, sizeof(GPU_DecalInstanceData), &m_pInstanceBuffer, &m_pInstanceSRV,
+                                      &m_pInstanceUAV)))
+        return E_FAIL;
 
     return S_OK;
 }
@@ -323,71 +206,11 @@ HRESULT CEffect_DecalStream::createSpawnUploadBuffer()
     return S_OK;
 }
 
-HRESULT CEffect_DecalStream::createIndirectArgsBuffer()
-{
-    D3D11_BUFFER_DESC bd{};
-    bd.ByteWidth = sizeof(UINT) * 5;
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS; // CS에서 InstanceCount 채우게
-    bd.MiscFlags = D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS | D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
-
-    UINT initArgs[5] = {m_iIndexCount, 0, 0, 0, 0};
-    D3D11_SUBRESOURCE_DATA sd{};
-    sd.pSysMem = initArgs;
-
-    if (FAILED(m_pDevice->CreateBuffer(&bd, &sd, &m_pIndirectArgs)))
-        return E_FAIL;
-
-    D3D11_UNORDERED_ACCESS_VIEW_DESC uavd{};
-    uavd.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-    uavd.Format = DXGI_FORMAT_R32_UINT;
-    uavd.Buffer.NumElements = 5;
-    if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pIndirectArgs, &uavd, &m_pIndirectArgsUAV)))
-        return E_FAIL;
-
-    return S_OK;
-}
-
-HRESULT CEffect_DecalStream::createComputeShaders()
-{
-    ID3DBlob* csBlob = nullptr;
-    ID3DBlob* errBlob = nullptr;
-
-    HRESULT hr = D3DCompileFromFile(L"../Bin/ShaderFiles/CS_DecalSpawnUpdate.hlsl", nullptr,
-                                    D3D_COMPILE_STANDARD_FILE_INCLUDE, "CSMain", "cs_5_0", 0, 0, &csBlob, &errBlob);
-    if (FAILED(hr))
-    {
-        if (errBlob)
-            OutputDebugStringA((char*)errBlob->GetBufferPointer());
-        return hr;
-    }
-    if (FAILED(m_pDevice->CreateComputeShader(csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr,
-                                              &m_pCS_SpawnUpdate)))
-        return E_FAIL;
-    Safe_Release(csBlob);
-
-    hr = D3DCompileFromFile(L"../Bin/ShaderFiles/CS_DecalBuildInstance.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-                            "CSMain", "cs_5_0", 0, 0, &csBlob, &errBlob);
-    if (FAILED(hr))
-    {
-        if (errBlob)
-            OutputDebugStringA((char*)errBlob->GetBufferPointer());
-        return hr;
-    }
-    if (FAILED(m_pDevice->CreateComputeShader(csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr,
-                                              &m_pCS_BuildDrawData)))
-        return E_FAIL;
-    Safe_Release(csBlob);
-
-
-    return S_OK;
-}
-
 HRESULT CEffect_DecalStream::createCB()
 {
     D3D11_BUFFER_DESC cbd{};
     cbd.ByteWidth = sizeof(CB_DECAL_FRAME);
-    cbd.Usage = D3D11_USAGE_DEFAULT; //  DEFAULT로
+    cbd.Usage = D3D11_USAGE_DEFAULT;
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbd.CPUAccessFlags = 0; 
     cbd.MiscFlags = 0;
@@ -397,7 +220,7 @@ HRESULT CEffect_DecalStream::createCB()
     return S_OK;
 }
 
-HRESULT CEffect_DecalStream::uploadSpawnRequestsToGPU()
+HRESULT CEffect_DecalStream::UploadSpawnRequestsToGPU()
 {
     D3D11_MAPPED_SUBRESOURCE ms{};
     if (FAILED(m_pContext->Map(m_pSpawnUpload, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
@@ -423,7 +246,7 @@ HRESULT CEffect_DecalStream::uploadSpawnRequestsToGPU()
     return S_OK;
 }
 
-HRESULT CEffect_DecalStream::dispatchSpawnUpdateCS(float dt)
+HRESULT CEffect_DecalStream::DispatchSpawnUpdateCS(float dt)
 {
     CB_DECAL_FRAME cbData = {dt, (UINT)m_SpawnQueue.size(), m_MaxDecals, 0.f};
     m_pContext->UpdateSubresource(m_pCB_DecalFrame, 0, nullptr, &cbData, 0, 0);
@@ -457,117 +280,16 @@ HRESULT CEffect_DecalStream::dispatchSpawnUpdateCS(float dt)
     return S_OK;
 }
 
-void CEffect_DecalStream::resetDrawArgsOnCPU()
+void CEffect_DecalStream::ResetDrawArgsOnCPU()
 {
-    UINT initArgs[5] = {m_iIndexCount, 0, 0, 0, 0};
+    UINT initArgs[5] = {(UINT)m_pVIBuffer_Cube->Get_Indexices(), 0, 0, 0, 0};
     m_pContext->UpdateSubresource(m_pIndirectArgs, 0, nullptr, initArgs, 0, 0);
 }
 
-#ifdef _DEBUG
 
-void CEffect_DecalStream::DebugGPUState()
-{
-    cout << "========== [DecalStream GPU Debug] ==========\n";
-
-    // 1 DrawIndirectArgs 확인
-    {
-        ID3D11Buffer* pStaging = nullptr;
-        D3D11_BUFFER_DESC desc{};
-        m_pIndirectArgs->GetDesc(&desc);
-        desc.Usage = D3D11_USAGE_STAGING;
-        desc.BindFlags = 0;
-        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-        desc.MiscFlags = 0;
-
-        if (SUCCEEDED(m_pDevice->CreateBuffer(&desc, nullptr, &pStaging)))
-        {
-            m_pContext->CopyResource(pStaging, m_pIndirectArgs);
-
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            if (SUCCEEDED(m_pContext->Map(pStaging, 0, D3D11_MAP_READ, 0, &mapped)))
-            {
-                UINT* args = reinterpret_cast<UINT*>(mapped.pData);
-                cout << "[IndirectArgs] IndexCountPerInstance=" << args[0] << ", InstanceCount=" << args[1]
-                          << ", StartIndex=" << args[2] << ", BaseVertex=" << args[3] << ", StartInstance=" << args[4]
-                          << "\n";
-
-                m_pContext->Unmap(pStaging, 0);
-            }
-            Safe_Release(pStaging);
-        }
-        else
-            cout << "[IndirectArgs] ❌ Failed to create staging buffer\n";
-    }
-
-    // 2️nstanceBuffer 확인 (앞부분 3~5개만)
-    {
-        ID3D11Buffer* pStaging = nullptr;
-        D3D11_BUFFER_DESC desc{};
-        m_pInstanceBuffer->GetDesc(&desc);
-        desc.Usage = D3D11_USAGE_STAGING;
-        desc.BindFlags = 0;
-        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-        desc.MiscFlags = 0;
-
-        if (SUCCEEDED(m_pDevice->CreateBuffer(&desc, nullptr, &pStaging)))
-        {
-            m_pContext->CopyResource(pStaging, m_pInstanceBuffer);
-
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            if (SUCCEEDED(m_pContext->Map(pStaging, 0, D3D11_MAP_READ, 0, &mapped)))
-            {
-                auto* data = reinterpret_cast<GPU_DecalInstanceData*>(mapped.pData);
-                 cout << "[InstanceBuffer] showing first 5:\n";
-                for (UINT i = 0; i < min(5u, m_MaxDecals); ++i)
-                {
-                    const auto& d = data[i];
-                    cout << "  [" << i << "] Pos(" << d.DecalPos.x << "," << d.DecalPos.y << "," << d.DecalPos.z
-                              << ") Tex=" << d.TexIndex << " Life=" << d.LifeTime << " Time=" << d.DecalTime
-                              << " Type=" << d.DecalType << " bNormal=" << d.bNormal << "\n";
-                }
-                m_pContext->Unmap(pStaging, 0);
-            }
-            Safe_Release(pStaging);
-        }
-        else
-           cout << "[InstanceBuffer] ❌ Failed to create staging buffer\n";
-    }
-
-    // 3️LiveList (살아있는 데칼 슬롯 인덱스)
-    {
-        ID3D11Buffer* pStaging = nullptr;
-        D3D11_BUFFER_DESC desc{};
-        m_pLiveList->GetDesc(&desc);
-        desc.Usage = D3D11_USAGE_STAGING;
-        desc.BindFlags = 0;
-        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-        desc.MiscFlags = 0;
-
-        if (SUCCEEDED(m_pDevice->CreateBuffer(&desc, nullptr, &pStaging)))
-        {
-            m_pContext->CopyResource(pStaging, m_pLiveList);
-
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            if (SUCCEEDED(m_pContext->Map(pStaging, 0, D3D11_MAP_READ, 0, &mapped)))
-            {
-                auto* ids = reinterpret_cast<UINT*>(mapped.pData);
-                cout << "[LiveList] first 8 indices:";
-                for (UINT i = 0; i < min(8u, m_MaxDecals); ++i) { std::cout << " " << ids[i]; }
-                std::cout << "\n";
-                m_pContext->Unmap(pStaging, 0);
-            }
-            Safe_Release(pStaging);
-        }
-        else
-            cout << "[LiveList] ❌ Failed to create staging buffer\n";
-    }
-
-    cout << "=============================================\n";
-}
-#endif // _DEBUG
 HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint TextureCount)
 {
-   _int iTotalSlices = 0;
+    _uint iTotalSlices = 0;
 
     iTotalSlices += (TextureCount +1); // 노멀 포함
     
@@ -577,7 +299,7 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
     vector<ID3D11Texture2D*> srcTex(iTotalSlices, nullptr);
     D3D11_TEXTURE2D_DESC firstDesc{};
     bool firstSet = false;
-    UINT sliceIdx = 0;
+    _uint sliceIdx = 0;
 
    {
        _tchar path[MAX_PATH] = TEXT("");
@@ -623,7 +345,7 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
        ++sliceIdx;
    }
 
-   for (UINT i = 1; i <= TextureCount; ++i)
+   for (_uint i = 1; i <= TextureCount; ++i)
    {
        _tchar path[MAX_PATH] = TEXT("");
        wsprintf(path, FilePathFmt.c_str(), i);
@@ -675,9 +397,9 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
         return E_FAIL;
     }
 
-    const UINT totalMips = arrDesc.MipLevels;
+    const _uint totalMips = arrDesc.MipLevels;
 
-    for (UINT s = 0; s < iTotalSlices; ++s)
+    for (_uint s = 0; s < iTotalSlices; ++s)
     {
         if (!srcTex[s])
         {
@@ -692,12 +414,12 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
         }
         D3D11_TEXTURE2D_DESC sdesc{};
         srcTex[s]->GetDesc(&sdesc);
-        const UINT copyMips = min(totalMips, sdesc.MipLevels);
+        const _uint copyMips = min(totalMips, sdesc.MipLevels);
 
-        for (UINT mip = 0; mip < copyMips; ++mip)
+        for (_uint mip = 0; mip < copyMips; ++mip)
         {
-            const UINT dstSub = D3D11CalcSubresource(mip, s, totalMips);
-            const UINT srcSub = D3D11CalcSubresource(mip, 0, sdesc.MipLevels);
+            const _uint dstSub = D3D11CalcSubresource(mip, s, totalMips);
+            const _uint srcSub = D3D11CalcSubresource(mip, 0, sdesc.MipLevels);
             m_pContext->CopySubresourceRegion(arrayTex, dstSub, 0, 0, 0, srcTex[s], srcSub, nullptr);
         }
     }
@@ -727,7 +449,7 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
     return S_OK;
 }
 
-HRESULT CEffect_DecalStream::dispatchBuildDrawCS()
+HRESULT CEffect_DecalStream::DispatchBuildDrawCS()
 {
     ID3D11ShaderResourceView* srvs[2] = { m_pLiveListSRV, m_pDecalSlotsSRV };
     m_pContext->CSSetShaderResources(0, 2, srvs);
@@ -755,9 +477,6 @@ void CEffect_DecalStream::Free()
 
     Safe_Release(m_pCS_SpawnUpdate);
     Safe_Release(m_pCS_BuildDrawData);
-
-    Safe_Release(m_pVB_Cube);
-    Safe_Release(m_pIB_Cube);
 
     Safe_Release(m_pDecalSlots);
     Safe_Release(m_pDecalSlotsSRV);

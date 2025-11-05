@@ -31,7 +31,7 @@ public:
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
     HRESULT Bind_Buffers();
 
-    UINT CMesh::Get_NumIndices() const
+    _uint Get_iNumIndices() const
     {
         return m_iNumIndexices;
     }

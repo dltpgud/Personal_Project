@@ -10,9 +10,7 @@
 #include "Font_Manager.h"
 #include "Target_Manager.h"
 #include "Frustum.h"
-#include "Decal_Manager.h"
-#include "Decal.h"
-
+#include "AStarManager.h"
 IMPLEMENT_SINGLETON(CGameInstance)
 
 
@@ -34,7 +32,11 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	m_pTimer_Manager	 = CTimer_Manager::Create();
 	if (nullptr == m_pTimer_Manager)
 		return E_FAIL;
-	
+
+    m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext);
+    if (nullptr == m_pFont_Manager)
+        return E_FAIL;
+
 	m_pComponent_Manager = CComponent_Manager::Create(EngineDesc.iNumLevels);
 	if (nullptr == m_pComponent_Manager)
 		return E_FAIL;
@@ -75,13 +77,8 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pCalculator)
 		return E_FAIL;
 
-	m_pCollider_Manager  = Collider_Manager::Create();
+	m_pCollider_Manager = Collider_Manager::Create(*ppDevice, *ppContext);
 	if (nullptr == m_pCollider_Manager)
-		return E_FAIL;
-
-
-	m_pFont_Manager      = CFont_Manager::Create(*ppDevice, *ppContext);
-	if (nullptr == m_pFont_Manager)
 		return E_FAIL;
 
 	m_pFrustum           = CFrustum::Create();
@@ -90,10 +87,6 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 
     m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency());
     if (nullptr == m_pThreadPool)
-        return E_FAIL;
-
-    m_pDecal_Manager = CDecal_Manager::Create(*ppDevice, *ppContext);
-    if (nullptr == m_pDecal_Manager)
         return E_FAIL;
 
 	m_pEffect_Manager = CEffect_Manager::Create(*ppDevice, *ppContext);
@@ -119,8 +112,6 @@ void CGameInstance::Update(_float fTimeDelta)
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	m_pUI_Manager->Late_Update(fTimeDelta);
-
-	m_pDecal_Manager->Update(fTimeDelta);
     
 	m_pSound->Set3DListenerAttributes();
     
@@ -143,12 +134,10 @@ void CGameInstance::Delete()
 {
     m_pObject_Manager->Delete();
     m_pUI_Manager->Delete();
-    m_pDecal_Manager->Delete();
 }
 
 void CGameInstance::Clear(_uint iClearLevelID)
 {
-    m_pDecal_Manager->Clear();
 	m_pObject_Manager->Clear(iClearLevelID);
 	m_pComponent_Manager->Clear(iClearLevelID);
 	m_pCollider_Manager->Clear();
@@ -436,14 +425,20 @@ HRESULT CGameInstance::Player_To_Monster_Ray_Collison_Check()
  	return m_pCollider_Manager->Set_Collison(true);
 }
 
-HRESULT CGameInstance::Find_Cell()
+HRESULT CGameInstance::Collision_Init(const _float2& vMin, const _float2& vMax, _float cellSize)
 {
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
 
-	return m_pCollider_Manager->Find_Cell();
+	return m_pCollider_Manager->Find_Cell(vMin, vMax, cellSize);
 }
 
+#ifdef _DEBUG
+HRESULT CGameInstance::RenderGrid()
+{
+    return m_pCollider_Manager->Render();
+}
+#endif // _DEBUG
 
 #pragma region UI_Manager
 
@@ -724,12 +719,13 @@ HRESULT CGameInstance::Light_Clear()
 #pragma endregion
 
 #pragma region Calculator
-_float3 CGameInstance::Picking_OnTerrain( CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir, CTransform* Transform, _float* fDis, _float3* vNormal)
+_bool CGameInstance::Picking_OnTerrain(CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
+                                         CTransform* Transform, _float* fDis, _float3* vWorldPosition, _float3* vNormal)
 {
     if (nullptr == m_pCalculator)
-        return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
+        return false;
 
-	return m_pCalculator->Picking_OnTerrain( pTerrainBufferCom, RayPos, RayDir, Transform, fDis, vNormal);
+	return m_pCalculator->Picking_OnTerrain( pTerrainBufferCom, RayPos, RayDir, Transform, fDis, vNormal,vWorldPosition);
 }
 
 void CGameInstance::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector* RayDir , _bool forPlayer)
@@ -765,6 +761,24 @@ _vector CGameInstance::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 _bool CGameInstance::RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& min, const _float3& max)
 {
     return m_pCalculator->RayIntersectsAABB_Local(rayO_L, rayD_L, min, max);
+}
+
+_bool CGameInstance::TestSphereTriangle(const BoundingSphere& sphere, const _float3& a, const _float3& b,
+                                        const _float3& c, OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
+{
+    return m_pCalculator->TestSphereTriangle(sphere,a,b, c, oHit, oNormal, oPen);
+}
+
+_bool CGameInstance::TestAABBTriangle(const BoundingBox& box, const _float3& a, const _float3& b, const _float3& c,
+                                      OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
+{
+    return m_pCalculator->TestAABBTriangle(box, a, b, c, oHit, oNormal, oPen);
+}
+
+_bool CGameInstance::TestOBBTriangle(const BoundingOrientedBox& obb, const _float3& a, const _float3& b,
+                                     const _float3& c, OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
+{
+    return m_pCalculator->TestOBBTriangle(obb, a, b, c, oHit, oNormal, oPen);
 }
 
 #pragma endregion
@@ -880,48 +894,19 @@ void CGameInstance::CalculateCascadeFrustum(const float* cascadeSplits, int numC
 #pragma endregion
 
 
+void CGameInstance::Add_Jobs(vector<function<void()>>&& jobs)
+{
+    m_pThreadPool->Add_Jobs(move(jobs));
+}
+
 _bool CGameInstance::AllJobCompleted()
 {
     return m_pThreadPool->Finish_Job();
 }
 
-HRESULT CGameInstance::Add_DecalProto(const wstring& Key, const _tchar* FilePath, const _uint& TexNum)
-{
-    return m_pDecal_Manager->Add_DecalProto(Key, FilePath, TexNum);
-}
-
-HRESULT CGameInstance::Add_Decal(const wstring& Key, const DECAL_DESC* DecalDesc, _float fTimeDelta)
-{
-    return m_pDecal_Manager->Add_Decal(Key, DecalDesc, fTimeDelta);
-}
-
-HRESULT CGameInstance::Render_Decal(CShader* pShader)
-{
-    return m_pDecal_Manager->Render(pShader);
-}
-
-HRESULT CGameInstance::Decal_Clear()
-{
-    return m_pDecal_Manager->Clear();
-}
-
-CDecal* CGameInstance::Find_Prototype_Decal(const _wstring& strPrototypeTag)
-{
-    return m_pDecal_Manager->Find_Prototype(strPrototypeTag);
-}
-
-HRESULT CGameInstance::BuildGlobalDecalArray()
-{
-    return m_pDecal_Manager->BuildGlobalDecalArray();
-}
-
 void CGameInstance::Preallocate_GameObject(_wstring ProtoTag, size_t count, void* desc)
 {
     m_pObject_Manager->Preallocate(ProtoTag, count, desc);
-}
-void CGameInstance::Preallocate_Decal(_wstring ProtoTag, size_t count, void* desc)
-{
-    m_pDecal_Manager->Preallocate(ProtoTag, count, desc);
 }
 
 HRESULT CGameInstance::Render_AllDecal(CShader* pShader)
@@ -949,12 +934,11 @@ CEffectStream* CGameInstance::Find_EffectStream(const _wstring& key)
     return m_pEffect_Manager->Find_EffectStream(key);
 }
 
+
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
-    Safe_Release(m_pThreadPool);
-    Safe_Release(m_pEffect_Manager);
-	Safe_Release(m_pDecal_Manager);
+
 	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);
 	Safe_Release(m_pFont_Manager);
@@ -967,10 +951,11 @@ void CGameInstance::Free()
 	Safe_Release(m_pComponent_Manager);
     Safe_Release(m_pObject_Manager);
     Safe_Release(m_pUI_Manager);
+    Safe_Release(m_pEffect_Manager);
     Safe_Release(m_pLevel_Manager);
-    
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pInput_Device);
+    Safe_Release(m_pThreadPool);
 	Safe_Release(m_pGraphic_Device);
 
 }

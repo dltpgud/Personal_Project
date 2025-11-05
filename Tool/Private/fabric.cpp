@@ -94,24 +94,6 @@ HRESULT Cfabric::Render_Shadow()
     if (FAILED(m_pTransformCom->Bind_ShaderResource(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
-    // ===== CSM 행렬 바인딩 (구식 시스템에서 CSM으로 변경) =====
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView0", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 0))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView1", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 1))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView2", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 2))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeView3", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_VIEW, 3))))
-        return E_FAIL;
-
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj0", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 0))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj1", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 1))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj2", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 2))))
-        return E_FAIL;
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_CascadeProj3", m_pGameInstance->Get_CascadeMatrix(CPipeLine::D3DTS_PROJ, 3))))
-        return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
 

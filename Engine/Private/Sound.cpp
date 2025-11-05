@@ -92,7 +92,9 @@ void CSound::Set3DListenerAttributes()
 
 void CSound::LoadSoundFile(const _char* soundFile,_bool isBGM)
 {
-    WRITE_LOCK;
+    //WRITE_LOCK;
+    unique_lock<mutex> lock(m_mutex);
+    
 	_char szCurPath[128] = "../../Client/Bin/Resources/Sound/";	 // 상대 경로
 	_char szFullPath[128] = "";
 

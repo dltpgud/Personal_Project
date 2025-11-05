@@ -45,12 +45,12 @@ namespace Engine
 		{ MessageBoxW(NULL, _message, L"System Message",MB_OK); __asm { int 3 };return _return;}
 
 
-#define USE_MANY_LOCKS(counts) CSpinLock m_locks[counts];
-#define USE_LOCK USE_MANY_LOCKS(1)
-#define READ_LOCK_IDX(idx) CReadLockGuard readLockGuard_##idx(m_locks[idx], typeid(this).name());
-#define READ_LOCK READ_LOCK_IDX(0)
-#define WRITE_LOCK_IDX(idx) CWriteLockGuard WriteLockGuard_##idx(m_locks[idx], typeid(this).name());
-#define WRITE_LOCK WRITE_LOCK_IDX(0)
+//#define USE_MANY_LOCKS(counts) CSpinLock m_locks[counts];
+//#define USE_LOCK USE_MANY_LOCKS(1)
+//#define READ_LOCK_IDX(idx) CReadLockGuard readLockGuard_##idx(m_locks[idx], typeid(this).name());
+//#define READ_LOCK READ_LOCK_IDX(0)
+//#define WRITE_LOCK_IDX(idx) CWriteLockGuard WriteLockGuard_##idx(m_locks[idx], typeid(this).name());
+//#define WRITE_LOCK WRITE_LOCK_IDX(0)
 
 #define CRASH(cause)                                                                                                   \
     {                                                                                                                  \

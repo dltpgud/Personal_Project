@@ -1,5 +1,5 @@
 #include "..\Public\RenderTarget.h"
-
+#include "GameInstance.h"
 #include "Shader.h"
 #include "VIBuffer_Rect.h"
 
@@ -76,6 +76,7 @@ HRESULT CRenderTarget::Ready_Debug(_float fX, _float fY, _float fSizeX, _float f
     m_WorldMatrix._41 = fX - ViewportDesc.Width * 0.5f;
     m_WorldMatrix._42 = -fY + ViewportDesc.Height * 0.5f;
 
+
     return S_OK;
 }
 HRESULT CRenderTarget::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
@@ -115,7 +116,6 @@ void CRenderTarget::Free()
     Safe_Release(m_pRTV);
     Safe_Release(m_pSRV);
     Safe_Release(m_pTexture2D);
-
     Safe_Release(m_pContext);
     Safe_Release(m_pDevice);
 }

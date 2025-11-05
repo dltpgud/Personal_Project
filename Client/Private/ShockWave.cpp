@@ -33,16 +33,6 @@ HRESULT CShockWave::Initialize(void * pArg)
     m_pGameInstance->UpdateSoundPosition(pChannel, m_pTransformCom);
     m_fColor = {0.95f, 0.95f, 0.f, 1.f};
 
-	m_DecalDesc.bNormal = false;
-    m_DecalDesc.iTexIndex = 8;
-    m_DecalDesc.fLifeTime =6.f;
-    m_DecalDesc.vPos = m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION);  
-	m_DecalDesc.vDir = XMVectorSet(0.f, -1,0.f,0.f);
-    m_DecalDesc.bOnce = true;
-    m_DecalDesc.DeltaScaling = 10.f;
-    m_DecalDesc.fSize = 1.f;
-    m_DecalDesc.fSize = 1.f;
-    m_DecalDesc.Key = TEXT("Base");
 	return S_OK;
 }
 
@@ -99,13 +89,9 @@ HRESULT CShockWave::Render()
 _bool CShockWave::Comput_SafeZone(_fvector vPlayerPos)
 {
     _vector vCurrCenter = XMVectorSetW(XMLoadFloat3(&m_pColliderCom->Get_iCurCenter()), 1.f);
-   
-    _float fLength = XMVectorGetX(XMVector3Length(vPlayerPos - vCurrCenter));
+    float fLength = XMVectorGetX(XMVector3Length(vPlayerPos - vCurrCenter));
 
-    if (fLength < m_pColliderCom->Get_iCurRadius())
-        return true;
-    else
-        return false;
+    return fLength < (m_pColliderCom->Get_iCurRadius() - 0.3f);
 }
 
 HRESULT CShockWave::Add_Components()

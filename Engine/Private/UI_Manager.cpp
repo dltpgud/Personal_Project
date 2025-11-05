@@ -15,7 +15,7 @@ HRESULT CUI_Manager::Add_UI_To_Proto(const _wstring& strProtoTag, CGameObject* p
 {
     CUI* UIObj = dynamic_cast<CUI*>(pUI);
 
-    WRITE_LOCK;
+        unique_lock<mutex> lock(m_mutex);
     auto result = m_UIObj[UIOBJECT::UI_PROTO].emplace(strProtoTag, UIObj);
 
     if (!result.second)

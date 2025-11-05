@@ -236,9 +236,9 @@ _bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* p
            _uint i1 = mesh->Get_pIndices(t * 3 + 1);
            _uint i2 = mesh->Get_pIndices(t * 3 + 2);
 
-           const _float3& A = GetVetexPos(mesh, i0);   
-           const _float3& B = GetVetexPos(mesh, i1); 
-           const _float3& C = GetVetexPos(mesh, i2);   
+           const _float3& A = GetVertexPos(mesh, i0);   
+           const _float3& B = GetVertexPos(mesh, i1); 
+           const _float3& C = GetVertexPos(mesh, i2);   
 
            // --- Per-tri AABB ---
            _float3 triMin{min(A.x, min(B.x, C.x)), min(A.y, min(B.y, C.y)), min(A.z, min(B.z, C.z))};
@@ -296,7 +296,7 @@ _bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* p
    return true;
 }
 
-_float3 CModel::GetVetexPos(CMesh* Mash, _int Pos)
+_float3 CModel::GetVertexPos(CMesh* Mash, _int Pos)
 {
     if (m_eModelType == TYPE_NONANIM)
     {

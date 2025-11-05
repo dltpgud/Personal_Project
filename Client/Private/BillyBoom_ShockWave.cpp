@@ -89,7 +89,7 @@ HRESULT CBillyBoom_ShockWave::Make_ShockWave()
     Desc.iActorType = CSkill::BOSS_MONSTER;
     Desc.fScale = _float2{0.6f, 0.6f};
     Desc.fClolor[CSkill::COLOR::CSTART] = _float4(1.f, 1.f, 0.f, 0.f);
-    Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.f, 0.f, 1.f);
+    Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.2f, 0.3f, 1.f);
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_ShockWaveBullet", &Desc);
 

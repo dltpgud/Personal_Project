@@ -92,6 +92,23 @@ void CSpatialGrid::UpdateDynamicGrid(const list<CGameObject*>& dynamicObjs)
     }
 }
 
+#ifdef _DEBUG
+_float2 CSpatialGrid::GetWorldMin()
+{
+    return m_WorldMin;
+}
+
+_float2 CSpatialGrid::GetWorldMax()
+{
+    return m_WorldMax;
+}
+
+_float CSpatialGrid::GetCellSize()
+{
+    return m_CellSize;
+}
+#endif // _DEBUG
+
 _bool CSpatialGrid::WorldToCell(const _vector& pos, _int& ix, _int& iz) const
 {
     const _float x = XMVectorGetX(pos);
@@ -126,10 +143,10 @@ void CSpatialGrid::GatherNeighborCells(_int ix, _int iz, _int outIdx[9], _int& o
 }
 
 
-void CSpatialGrid::QueryNearby(const _vector& pos, _float range, std::vector<CGameObject*>& out, _uint groupType) const
+void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGameObject*>& out, _uint groupType) const
 {
     out.clear();
-    out.reserve(64);  // 이정도면 적당하겠지?
+    out.reserve(64);  
     int ix, iz;
     if (!WorldToCell(pos, ix, iz))
         return;

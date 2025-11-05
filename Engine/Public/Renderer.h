@@ -52,7 +52,7 @@ private:
      D3D11_VIEWPORT m_ViewPortDescs[SIZE_END]{};
      _float m_fdX[SIZE_END]{}; 
      _float m_fdY[SIZE_END]{};
-
+     _bool bssao = false;
  private:
 	list<class CGameObject*>	m_RenderGameObjects[RG_END];
 	list<class CComponent*>		m_DebugComponents;

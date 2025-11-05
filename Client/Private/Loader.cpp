@@ -481,6 +481,10 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
     m_pGameInstance->Add_Job([this](){return m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), CNavigation::Create(m_pDevice, m_pContext));});
 
 #pragma region Partcle
+   
+  if (FAILED(m_pGameInstance->Add_Prototype_Component( LEVEL_STATIC, TEXT("Proto Component Fire_Explostion"), CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/T_FireBallAtlas_02.dds")))))
+        return E_FAIL;
+
   CVIBuffer_Instancing::INSTANCING_DESC ParticleExploDesc{};
   ParticleExploDesc.iNumInstance = 90;
   ParticleExploDesc.vCenter = _float3(0.f, 0.f, 0.f);
@@ -494,7 +498,6 @@ HRESULT CLoader::Loading_For_Static_ComPonent()
   if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBuffer_Particle_Explosion"),CVIBuffer_Particle_Point::Create(m_pDevice, m_pContext, &ParticleExploDesc))))
       return E_FAIL;
 
- 
 #pragma endregion
 
     return S_OK;
@@ -580,13 +583,12 @@ HRESULT CLoader::Loading_For_Static_Texture()
     m_pGameInstance->Add_Job([this](){ m_pGameInstance->Add_Prototype_Component(LEVEL_STATIC, TEXT("Prototype_Component_Texture_Mask"),
                     CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Mask/T_Noise_Liquid.dds")));});
 
-   m_pGameInstance->Add_DecalProto(TEXT("Base"), TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds"),9);
-  //CEffect_DecalStream::DECALSTREAM_DESC DECALDESC{};
-  //DECALDESC.MaxDecals = 2048; // 총 슬롯 개수
-  //DECALDESC.MaxSpawnPerFrame = 2048;
-  //DECALDESC.FilePathFmt = TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds");
-  //DECALDESC.TextureCount = 8;
-  //m_pGameInstance->Add_EffectStream(TEXT("Base"), CEffect_DecalStream::Create(m_pDevice, m_pContext, &DECALDESC));
+  CEffect_DecalStream::DECALSTREAM_DESC DECALDESC{};
+  DECALDESC.MaxDecals = 2048; // 총 슬롯 개수
+  DECALDESC.MaxSpawnPerFrame = 2048;
+  DECALDESC.FilePathFmt = TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds");
+  DECALDESC.TextureCount = 8;
+  m_pGameInstance->Add_EffectStream(TEXT("Base"), CEffect_DecalStream::Create(m_pDevice, m_pContext, &DECALDESC));
 
     return S_OK;
 }
@@ -594,8 +596,8 @@ HRESULT CLoader::Loading_For_Static_Texture()
 HRESULT CLoader::Loading_For_Preallocate()
 {
     CEffect_TrailStream::TRAILSDESC TrailTSpexdesc{};
-    TrailTSpexdesc.maxTrails = 300;      // 동시에 존재할 수 있는 트레일 개수
-    TrailTSpexdesc.maxPointsPerTrail = 64; // 각 트레일에 저장될 포인트 개수
+    TrailTSpexdesc.maxTrails = 1024;      // 동시에 존재할 수 있는 트레일 개수
+    TrailTSpexdesc.maxPointsPerTrail = 128; // 각 트레일에 저장될 포인트 개수
     TrailTSpexdesc.fadeSpeed = 1.5f;        // Life 감소 속도
     TrailTSpexdesc.lifeTime = 2.0f;         // 트레일이 사라지기까지의 시간
     TrailTSpexdesc.iPass = CEffect_TrailStream::RP_SPRITE; 
@@ -606,13 +608,10 @@ HRESULT CLoader::Loading_For_Preallocate()
     m_pGameInstance->Add_EffectStream(L"SpriteTexTrail", CEffect_TrailStream::Create(m_pDevice, m_pContext, &TrailTSpexdesc));
 
     CBullet::CBULLET_DESC Bullet{};
-    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 20, &Bullet);
+    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 200, &Bullet);
   
     CPlayerBullet::CPlayerBullet_DESC pBullet{};
     m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_PlayerBullet"), 200, &pBullet);
-   
-    DECAL_DESC DecalDesc{};
-    m_pGameInstance->Preallocate_Decal(TEXT("Base"), 500, &DecalDesc);
     
     CEffect_TrailStream::TRAILSDESC Traildesc{};
     Traildesc.maxTrails = 256;      // 동시에 존재할 수 있는 트레일 개수
@@ -638,14 +637,11 @@ HRESULT CLoader::Loading_For_Preallocate()
     TrailTexdesc.vTrailTexUVScale = {1.f, 1.f}; // UV 스크롤/타일링 계수
     m_pGameInstance->Add_EffectStream(L"TexTrail",CEffect_TrailStream::Create(m_pDevice, m_pContext, &TrailTexdesc));
 
-
-
     return S_OK;
 }
 
 HRESULT CLoader::Loading_For_Add_MashMaterial()
 {
-  
     static_cast<CModel*>(m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Model_Player")))
         ->InsertAiTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, TEXT("../Bin/Resources/Models/AnimModel/T_Arm_Player_FPV_F1.dds"));
 
@@ -1038,11 +1034,7 @@ HRESULT CLoader::Loading_For_BossLevel()
          if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component Fire1_Terrain"),
              CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Terrain/T_Fire_Pattern_02.dds")))))
              return E_FAIL;
-         
-         if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto Component Fire_Explostion"),
-             CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resources/Textures/Effect/T_FireBallAtlas_02.dds")))))
-             return E_FAIL;
-		
+  
 	m_strLoadingText = TEXT("네비게이션 로딩중입니다.");
 
 	      CComponent* pComponent = m_pGameInstance->Find_Prototype(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"));

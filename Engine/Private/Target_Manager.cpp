@@ -72,7 +72,7 @@ HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencil
 
     ID3D11RenderTargetView* RTVs[8] = {nullptr};
 
-    _uint iNumRenderTargets = pMRTs->size();
+    size_t iNumRenderTargets = pMRTs->size();
 
     for (size_t i = 0; i < iNumRenderTargets; i++)
     {

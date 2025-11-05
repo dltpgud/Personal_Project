@@ -2122,11 +2122,11 @@ void CLevel_Edit::Key_input(_float ftimedelta)
             for (size_t i = 0; i < m_vTerrain.size(); ++i)
             {
 
-                _float3 Picking =
-                    m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(m_vTerrain[i])->Get_buffer(),
-                                                       RayPos, RayDir, m_vTerrain[i]->Get_Transform(), &fdis);
+      
+            _float3 Picking;
 
-                if (Picking.x != 0xffff || Picking.y != 0xffff || Picking.z != 0xffff)
+                if (m_pGameInstance->Picking_OnTerrain(static_cast<CTerrain*>(m_vTerrain[i])->Get_buffer(), RayPos,
+                                                       RayDir, m_vTerrain[i]->Get_Transform(), &fdis, &Picking))
                 {
 
                     if (fdis < Terraindis)
@@ -2301,11 +2301,10 @@ void CLevel_Edit::Key_input(_float ftimedelta)
         for (size_t i = 0; i < m_vTerrain.size(); ++i)
         {
 
-            _float3 Picking =
-                m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(m_vTerrain[i])->Get_buffer(), RayPos,
-                                                   RayDir, m_vTerrain[i]->Get_Transform(), &fdis);
+            _float3 Picking;
 
-            if (Picking.x != 0xffff || Picking.y != 0xffff || Picking.z != 0xffff)
+            if (m_pGameInstance->Picking_OnTerrain(static_cast<CTerrain*>(m_vTerrain[i])->Get_buffer(), RayPos, RayDir,
+                                                   m_vTerrain[i]->Get_Transform(), &fdis, &Picking))
             {
 
                 if (fdis < Terraindis)
@@ -2425,10 +2424,12 @@ void CLevel_Edit::Picking_Pos()
     for (auto& vTerrin : m_vTerrain)
     {
 
-        _float3 Picking = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
-                                                             RayPos, RayDir, vTerrin->Get_Transform(), &fdis);
+       
+            _float3 Picking;
 
-        if (Picking.x != 0xffff || Picking.y != 0xffff || Picking.z != 0xffff) // 테라인 피킹에 성공했다면 반복문 탈출
+        if (m_pGameInstance->Picking_OnTerrain(static_cast<CTerrain*>(vTerrin)->Get_buffer(), RayPos, RayDir,
+                                                   vTerrin->Get_Transform(), &fdis, &Picking))
+            
         {
             XMStoreFloat3(&Pick, XMLoadFloat3(&Picking));
 
@@ -2464,19 +2465,10 @@ void CLevel_Edit::Picking_Cell(_uint i)
     // 터레인들과 메쉬들 간의 거리 비교.
     for (auto& vTerrin : m_vTerrain)
     {
-        _float3 PickTerrain = m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(),
-                                                                 RayPos, RayDir, vTerrin->Get_Transform(), &fDist);
-
-        //  if (Desc.pPickedObj)
-        //  {
-        //      fMashDis = Desc.fDis;
-        //      vPos = Desc.vPos;
-        //
-        //  }
-
+        _float3 PickTerrain;
         if (nullptr == Desc.pPickedObj)
         {
-            if (PickTerrain.x != 0xffff || PickTerrain.y != 0xffff || PickTerrain.z != 0xffff)
+            if (m_pGameInstance->Picking_OnTerrain(static_cast<CTerrain*>(vTerrin)->Get_buffer(), RayPos,RayDir, vTerrin->Get_Transform(), &fDist,&PickTerrain))
             {
                 Pick = PickTerrain;
                 break;
@@ -2496,11 +2488,9 @@ void CLevel_Edit::Picking_Cell(_uint i)
             _float Dist{};
             for (auto& vTerrin : m_vTerrain)
             {
-                _float3 PickTerrain =
-                    m_pGameInstance->Picking_OnTerrain(g_hWnd, static_cast<CTerrain*>(vTerrin)->Get_buffer(), RayPos,
-                                                       RayDir, vTerrin->Get_Transform(), &Dist);
+                _float3 PickTerrain;
 
-                if (PickTerrain.x != 0xffff || PickTerrain.y != 0xffff || PickTerrain.z != 0xffff)
+                if (m_pGameInstance->Picking_OnTerrain(static_cast<CTerrain*>(vTerrin)->Get_buffer(), RayPos,RayDir, vTerrin->Get_Transform(), &Dist,&PickTerrain))
                 {
                     if (Dist < fTerrainDist)
                     {

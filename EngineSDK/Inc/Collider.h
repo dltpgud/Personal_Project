@@ -23,7 +23,7 @@ public:
     _bool   IsColl() const;
 	_bool   Intersect(CCollider* pTargetCollider);
     _bool   RayIntersects(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos = nullptr);
-    _float Get_iCurRadius() const;
+    _float  Get_iCurRadius() const;
     _float3 Get_iCurCenter() const;
      CCollider::TYPE Get_Type() const;
     class CBounding* Get_Bounding() const;

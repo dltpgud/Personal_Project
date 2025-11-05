@@ -1,19 +1,13 @@
 #include "Engine_Shader_Defines.hlsli"
 
-//===================================================================
-// CPU에서 GPU_DecalHeader를 쓴 버퍼와 동일한 레이아웃이어야 함
-//===================================================================
 struct DecalHeader
 {
     float3 Pos;
-    float Life; // 총수명
-
+    float Life; 
     float3 Dir;
-    float DecalTime; // 경과시간
-
-    float3 Size; // (sizeX,sizeY,depth) = (Size,Size,Depth)
+    float DecalTime; 
+    float3 Size; 
     float DeltaScale;
-
     int TexIndex;
     int Type;
     int Active;
@@ -22,51 +16,24 @@ struct DecalHeader
 
 struct DecalInstanceData
 {
-    row_major float4x4 WorldInv; // 64바이트
-    float3 DecalPos; // 12
-    float _padA; // 4  -> align 16
-
-    float3 DecalDir; // 12
-    float _padB; // 4
-
-    float3 HalfSize; // 12
-    float LifeTime; // 4
-
-    float DecalTime; // 4
-    int TexIndex; // 4
-    int DecalType; // 4
-    int bNormal; // 4
+    row_major float4x4 WorldInv; 
+    float3 DecalPos; 
+    float _padA;
+    float3 DecalDir; 
+    float _padB; 
+    float3 HalfSize; 
+    float LifeTime; 
+    float DecalTime; 
+    int TexIndex; 
+    int DecalType; 
+    int bNormal; 
 };
 
-
-//===================================================================
-// 리소스
-//===================================================================
-// t0 : g_LiveList = [count, slotIdx0, slotIdx1, ...]
 StructuredBuffer<uint> g_LiveList : register(t0);
-
-// t1 : g_Decals 전체 슬롯
 StructuredBuffer<DecalHeader> g_Decals : register(t1);
-
-// u0 : 최종 인스턴스 데이터 (VS에서 StructuredBuffer로 읽음)
 RWStructuredBuffer<DecalInstanceData> g_InstanceOut : register(u0);
-
-// u1 : DrawIndirectArgs. 우리가 InstanceCount만 늘린다.
-//      DrawIndexedInstancedIndirect 인자 레이아웃:
-//      [0] IndexCountPerInstance
-//      [1] InstanceCount
-//      [2] StartIndexLocation
-//      [3] BaseVertexLocation
-//      [4] StartInstanceLocation
-//
-// 여기서는 DX11 호환성 고려해서 ByteAddressBuffer 유지하되,
-// InstanceCount는 바이트 오프셋 4에 위치.
 RWByteAddressBuffer g_DrawArgs : register(u1);
 
-
-//===================================================================
-// 행렬 보조 함수
-//===================================================================
 float4x4 InverseMatrix(float4x4 m)
 {
     float4x4 r;
@@ -121,7 +88,7 @@ float4x4 ComputeWorldInv(float3 pos, float3 dir, float size, float depth)
     float3 T = normalize(cross(up, N));
     float3 B = normalize(cross(N, T));
     pos += N * 0.001f;
-    // size는 XY로, depth는 Z 쪽 스케일(=decal range)
+    
     float4x4 world =
     {
         float4(T * size, 0),
@@ -133,16 +100,13 @@ float4x4 ComputeWorldInv(float3 pos, float3 dir, float size, float depth)
     return InverseMatrix(world);
 }
 
-//===================================================================
-// Main
-//===================================================================
 [numthreads(256, 1, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
     uint tid = id.x;
 
     // 살아있는 데칼 개수 읽기
-    uint totalAlive = g_LiveList[0]; // g_LiveList[0] = count
+    uint totalAlive = g_LiveList[0]; 
     if (tid >= totalAlive)
         return;
 
@@ -151,21 +115,17 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
     DecalHeader DH = g_Decals[decalSlot];
     if (DH.Active == 0)
-        return; // 안전 체크 (안전망)
+        return;
 
-    // DrawArgs[1] (= InstanceCount)에 1 추가하고
-    // 이전 값을 instanceIdx로 받는다.
     uint instanceIdx;
-    // R32_UINT 배열 (uint[5])처럼 쓰고 있음:
-    // offset 4바이트 위치가 InstanceCount
-    g_DrawArgs.InterlockedAdd(4 /*byte offset*/, 1, instanceIdx);
 
-    // 인스턴스 데이터 채우기
+    g_DrawArgs.InterlockedAdd(4 , 1, instanceIdx);
+
     DecalInstanceData inst = (DecalInstanceData) 0;
     inst.WorldInv = ComputeWorldInv(DH.Pos, DH.Dir, DH.Size.x, DH.Size.z);
     inst.DecalPos = DH.Pos;
     inst.DecalDir = DH.Dir;
-    inst.HalfSize = float3(DH.Size.x, DH.Size.y, DH.Size.z * 0.5f); // 원한다면 z만 절반 등 자유롭게
+    inst.HalfSize = float3(DH.Size.x, DH.Size.y, DH.Size.z );
     inst.LifeTime = DH.Life;
     inst.DecalTime = DH.DecalTime;
     inst.TexIndex = DH.TexIndex;

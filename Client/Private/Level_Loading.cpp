@@ -50,7 +50,6 @@ void CLevel_Loading::Update(_float fTimeDelta)
         case LEVEL_STAGE1:
             if (m_pGameInstance->Get_DIAnyKey())
             {
-                m_pGameInstance->BuildGlobalDecalArray();
                 if (m_pFade)
                     m_pFade->Set_Fade(false);
                 m_pChannel->stop();
