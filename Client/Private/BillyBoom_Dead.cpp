@@ -65,7 +65,7 @@ CStateMachine::Result CBillyBoom_Dead::StateMachine_Playing(_float fTimeDelta, R
         DecalDesc.Key = TEXT("Base");
         DecalDesc.vPos = m_pParentObject->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
         DecalDesc.vNormal = XMVectorSet(0.f, 1, 0.f, 0.f);
-        m_pGameInstance->Add_Decal(DecalDesc.Key, &DecalDesc);
+        m_pGameInstance->Trigger_Effect(DecalDesc.Key, &DecalDesc);
 
         m_bEffect = true;
     }

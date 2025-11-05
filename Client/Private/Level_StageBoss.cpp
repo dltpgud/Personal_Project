@@ -31,7 +31,7 @@ HRESULT CLevel_StageBoss::Initialize()
 	if (FAILED(Ready_Layer_Map(TEXT("Layer_Map"))))
 		return E_FAIL;
 
-	if (FAILED(Ready_Find_cell()))
+	if (FAILED(Ready_Collision_Init()))
 		return E_FAIL;
 
 	if (FAILED(Ready_UI()))
@@ -117,9 +117,9 @@ HRESULT CLevel_StageBoss::Ready_Layer_Map(const _wstring& pLayerTag)
 	return S_OK;
 }
 
-HRESULT CLevel_StageBoss::Ready_Find_cell()
+HRESULT CLevel_StageBoss::Ready_Collision_Init()
 {
-	m_pGameInstance->Find_Cell();
+    m_pGameInstance->Collision_Init({0.f, 0.f}, {100.f, 100.f}, 5);
 	return S_OK;
 }
 

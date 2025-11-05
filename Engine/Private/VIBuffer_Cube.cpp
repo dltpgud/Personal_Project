@@ -121,6 +121,11 @@ HRESULT CVIBuffer_Cube::Initialize(void * pArg)
 	return S_OK;
 }
 
+_int CVIBuffer_Cube::Get_Indexices()
+{
+    return m_iNumIndexices;
+}
+
 CVIBuffer_Cube * CVIBuffer_Cube::Create(ID3D11Device * pDevice, ID3D11DeviceContext * pContext)
 {
 	CVIBuffer_Cube*		pInstance = new CVIBuffer_Cube(pDevice, pContext);

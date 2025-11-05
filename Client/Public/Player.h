@@ -65,6 +65,7 @@ public:
 
     virtual void Set_State(_uint flag, _bool value) override;
      void Set_ChangeAnimPlay(_uint State, _bool bPlay);
+    
 
 public:
 	const _float4x4* Get_CameraBone();

@@ -2,7 +2,7 @@
 #include "MecanoBot_Move.h"
 #include "GameInstance.h"
 #include "Bullet.h"
-
+#include "Particle_Explosion.h"
 CMecanoBot_Move::CMecanoBot_Move()
 {
 }
@@ -59,7 +59,7 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta, R
         }
 
         if (m_iCurIndex != m_iNextIndex)
-        {
+        {    
             if (m_iNextIndex == GO)
                 m_pGameInstance->Play_Sound(L"ST_Enemy_Move_Roll2.ogg", &m_pChannel, 1.f,true);
             if (m_iNextIndex == BACK)
@@ -87,13 +87,13 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta, R
         {
             if (m_pGameInstance->Get_Player()->Get_onCell())
             {
-                m_pGameInstance->Add_Job(
-                    [&]()
-                    {
-                        m_pParentObject->Get_Navigation()->Set_Taget(
-                            m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
-                    });
-
+               m_pGameInstance->Add_Job(
+                   [&]()
+                   {
+                       m_pParentObject->Get_Navigation()->Set_Taget(
+                           m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                   });
+             
                 if (m_pParentObject->Get_Transform()->FollowPath(m_pParentObject->Get_Navigation(), fTimeDelta))
                 {
                     if (false == isFall)

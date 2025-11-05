@@ -76,7 +76,7 @@ HRESULT CParticle_Explosion::Render()
 
 HRESULT CParticle_Explosion::Add_Components()
 {
-	if (FAILED(__super::Add_Component(LEVEL_BOSS, TEXT("Proto Component Fire_Explostion"),
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Proto Component Fire_Explostion"),
 		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom))))
 		return E_FAIL;
 
@@ -104,6 +104,9 @@ HRESULT CParticle_Explosion::Bind_ShaderResources()
 
 	if (FAILED(m_pShaderCom->Bind_RawValue("g_vCamPosition", m_pGameInstance->Get_CamPosition(), sizeof(_float4))))
 		return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_RawValue("g_fCamFar", m_pGameInstance->Get_CamFar(), sizeof(_float))))
+            return E_FAIL;
 
 	if (FAILED(m_pTextureCom->Bind_ShaderResource(m_pShaderCom, "g_Texture", 0)))
 		return E_FAIL;

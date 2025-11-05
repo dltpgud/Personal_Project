@@ -6,6 +6,12 @@
 
 CBullet::CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
+    m_DecalDesc.bOnce = false;
+    m_DecalDesc.Key = TEXT("Base");
+    m_DecalDesc.fSize = 0.5f;
+    m_DecalDesc.fDepth = 0.5f;
+    m_DecalDesc.bNormal = true;
+    m_DecalDesc.fLifeTime = 2.f;
 }
 
 CBullet::CBullet(const CBullet& Prototype) : CSkill{Prototype}
@@ -34,6 +40,8 @@ HRESULT CBullet::Initialize(void* pArg)
   
     m_iTrailIndex = static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"SpriteTexTrail"))->AllocateTrail();
 
+    m_DecalDesc.iTexIndex = 1;
+  
     return S_OK;
 }
 
@@ -48,12 +56,12 @@ void CBullet::Update(_float fTimeDelta)
 {
         _float3 fPos;
         XMStoreFloat3(&fPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
-        CEffect_TrailStream::SPAWN_REQUEST req{};
-        req.valid = m_iLifeState == OBJ_POOL ? 0 : 1;
+      CEffect_TrailStream::  SPAWN_REQUEST req{};
+        req.Valid = m_iLifeState == OBJ_POOL ? 0 : 1;
         req.trailIndex = m_iTrailIndex;
         req.headPos = fPos;
         req.addLife = 1.0f;
-        req.width = 0.9f;
+        req.width = m_iSkillType == BOSS_MONSTER ? 3.5f: 0.9f;
         req.color = m_Color[CSkill::COLOR::CEND];
         req.frameIndex = 1;
         req.isSegment = 0;

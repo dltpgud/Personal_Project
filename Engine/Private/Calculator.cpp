@@ -4,6 +4,12 @@
 #include "Model.h"
 #include "Navigation.h"
 #include "GameInstance.h"
+
+template <typename T> inline T Clamp(const T& value, const T& minVal, const T& maxVal)
+{
+    return (value < minVal) ? minVal : (value > maxVal ? maxVal : value);
+}
+
 CCalculator::CCalculator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{pDevice}, m_pContext{pContext}, m_pGameInstance{ CGameInstance::GetInstance() }
 
@@ -36,7 +42,7 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     {  //1인칭 슈팅게임 클라이언트에서 Ray를 쏘는 위치는 고정되어있다.
          POINT ptPlayerAim{};
         ptPlayerAim.x = m_iViewportWidth/2;
-        ptPlayerAim.y = m_iViewportHeight*0.5833;
+        ptPlayerAim.y = m_iViewportHeight*0.5833f;
 
         // 뷰 포트 -> 투영
          vMousePos.x = ptPlayerAim.x / (ViewportWidth * 0.5f) - 1.f;
@@ -73,8 +79,8 @@ void CCalculator::Make_Ray(_matrix Proj, _matrix view, _vector* RayPos, _vector*
     return;
 }
 
-_float3 CCalculator::Picking_OnTerrain(CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
-                                       CTransform* Transform, OUT _float* fDis, OUT _float3* vNormal)
+_bool CCalculator::Picking_OnTerrain(CVIBuffer_Terrain* pTerrainBufferCom, _vector RayPos, _vector RayDir,
+                                       CTransform* Transform, OUT _float* fDis, OUT _float3* vNormal, OUT _float3* vWorldPos)
 {
 
     _float3 vPosition = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -127,7 +133,9 @@ _float3 CCalculator::Picking_OnTerrain(CVIBuffer_Terrain* pTerrainBufferCom, _ve
 
                     *vNormal = fNormal;
                 }
-              return vPosition;
+
+                *vWorldPos = vPosition;
+                return true;
             }
 
             // 왼쪽 아래
@@ -155,12 +163,175 @@ _float3 CCalculator::Picking_OnTerrain(CVIBuffer_Terrain* pTerrainBufferCom, _ve
 
                      *vNormal = fNormal;
                  }
-                return vPosition;
+
+                 *vWorldPos = vPosition;
+                 return true;
             }
         }
     }
 
-    return _float3(FLT_MAX, FLT_MAX, FLT_MAX);
+    return false;
+}
+
+
+_bool CCalculator::TestSphereTriangle(const BoundingSphere& sphere, const _float3& a, const _float3& b,
+                                      const _float3& c,
+                                    OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
+{
+    _vector pa = XMLoadFloat3(&a);
+    _vector pb = XMLoadFloat3(&b);
+    _vector pc = XMLoadFloat3(&c);
+    _vector center = XMLoadFloat3(&sphere.Center);
+
+    // --- 1️⃣ 삼각형 평면 노멀 ---
+    _vector e0 = pb - pa;
+    _vector e1 = pc - pa;
+    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
+
+    // --- 2️⃣ 평면까지 거리 ---
+    _float dist = XMVectorGetX(XMVector3Dot(center - pa, n)); /// 노말 방향으로 얼마나떨어 져있는가?
+    _vector proj = center - n * dist;                         // 구 중심을 평면 위로 내린 수직의 발
+
+    // --- 3️⃣ 투영점이 삼각형 내부인지 체크 ---
+    _vector c0 = XMVector3Cross(pb - pa, proj - pa);
+    _vector c1 = XMVector3Cross(pc - pb, proj - pb);
+    _vector c2 = XMVector3Cross(pa - pc, proj - pc);
+
+    _bool inside = (XMVectorGetX(XMVector3Dot(c0, n)) >= 0.f && XMVectorGetX(XMVector3Dot(c1, n)) >= 0.f &&
+                    XMVectorGetX(XMVector3Dot(c2, n)) >= 0.f);
+
+    _vector closest;
+    if (inside)
+    {
+        // 평면 안쪽이면 그 투영점을 사용
+        closest = proj;
+    }
+    else
+    {
+        // --- 4️⃣ 내부가 아니라면 edge/vertex까지 검사 ---
+        _vector v0 = pa;
+        _vector v1 = pb;
+        _vector v2 = pc;
+
+        // 각 에지에 대해 최근접점 구하기
+        auto ClosestPointOnSegment = [](_vector p, _vector a, _vector b)
+        {
+            _vector ab = b - a;
+            float t = XMVectorGetX(XMVector3Dot(p - a, ab)) / XMVectorGetX(XMVector3Dot(ab, ab));
+            t = Clamp(t, 0.0f, 1.0f);
+            return a + ab * t;
+        };
+
+        _vector cp0 = ClosestPointOnSegment(center, v0, v1);
+        _vector cp1 = ClosestPointOnSegment(center, v1, v2);
+        _vector cp2 = ClosestPointOnSegment(center, v2, v0);
+
+        _float d0 = XMVectorGetX(XMVector3LengthSq(center - cp0));
+        _float d1 = XMVectorGetX(XMVector3LengthSq(center - cp1));
+        _float d2 = XMVectorGetX(XMVector3LengthSq(center - cp2));
+
+        if (d0 < d1 && d0 < d2)
+            closest = cp0;
+        else if (d1 < d2)
+            closest = cp1;
+        else
+            closest = cp2;
+    }
+
+    // --- 5️⃣ 중심과 최근접점 사이 거리 계산 ---
+    _vector diff = center - closest;
+    _float distSq = XMVectorGetX(XMVector3LengthSq(diff));
+    _float radius = sphere.Radius;
+
+    if (distSq > radius * radius)
+        return false;
+
+    _float distActual = sqrtf(distSq);
+    _float penetration = radius - distActual;
+    if (penetration < 0.f)
+        return false;
+
+    _vector normal = (distActual > 0.0001f) ? XMVector3Normalize(diff) : n; // 중심이 겹쳤을 때 fallback
+
+    _vector hitPos = closest;
+
+    if (oHit)
+    XMStoreFloat3(oHit, hitPos);
+
+    if (oNormal)
+    XMStoreFloat3(oNormal, normal);
+
+    if (oPen)
+    *oPen = penetration;
+    return true;
+}
+
+_bool CCalculator::TestAABBTriangle(const BoundingBox& box, const _float3& a, const _float3& b, const _float3& c,
+                                  OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
+{
+    // 삼각형의 AABB 계산
+    _vector v0 = XMLoadFloat3(&a);
+    _vector v1 = XMLoadFloat3(&b);
+    _vector v2 = XMLoadFloat3(&c);
+
+    _vector vMin = XMVectorMin(XMVectorMin(v0, v1), v2);
+    _vector vMax = XMVectorMax(XMVectorMax(v0, v1), v2);
+
+    BoundingBox triBox;
+    BoundingBox::CreateFromPoints(triBox, vMin, vMax);
+
+    // 간단히 박스와 박스 교차로 근사
+    if (!box.Intersects(triBox))
+        return false;
+
+    // 노멀 (삼각형 평면 기준)
+    _vector e0 = v1 - v0;
+    _vector e1 = v2 - v0;
+    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
+
+    if (oNormal)
+    XMStoreFloat3(oNormal, n);
+
+    // 히트 포인트는 삼각형 중심 근사
+    _vector avg = (v0 + v1 + v2) / 3.f;
+    if (oHit)
+    XMStoreFloat3(oHit, avg);
+
+    if (oPen)
+    *oPen = 0.001f; // 근사 침투값
+    return true;
+}
+
+_bool CCalculator::TestOBBTriangle(const BoundingOrientedBox& obb, const _float3& a, const _float3& b, const _float3& c,
+                                 OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
+{
+    _vector v0 = XMLoadFloat3(&a);
+    _vector v1 = XMLoadFloat3(&b);
+    _vector v2 = XMLoadFloat3(&c);
+
+    // 삼각형을 감싸는 AABB 계산
+    _vector vMin = XMVectorMin(XMVectorMin(v0, v1), v2);
+    _vector vMax = XMVectorMax(XMVectorMax(v0, v1), v2);
+
+    BoundingBox triBox;
+    BoundingBox::CreateFromPoints(triBox, vMin, vMax);
+
+    if (!obb.Intersects(triBox))
+        return false;
+
+    _vector e0 = v1 - v0;
+    _vector e1 = v2 - v0;
+    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
+
+    if (oNormal)
+    XMStoreFloat3(oNormal, n);
+    _vector avg = (v0 + v1 + v2) / 3.f;
+    if (oHit)
+    XMStoreFloat3(oHit, avg);
+
+    if (oPen)
+    *oPen = 0.001f;
+    return true;
 }
 
 

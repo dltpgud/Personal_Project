@@ -7,10 +7,18 @@ _int CBossBullet_Laser::iContinuous = 1;
 
 CBossBullet_Laser::CBossBullet_Laser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{pDevice, pContext}
 {
+    m_DecalDesc.bNormal = true;
+    m_DecalDesc.fSize = 2.f;
+    m_DecalDesc.fLifeTime = 5.f;
+    m_DecalDesc.iTexIndex = 1;
+    m_DecalDesc.bOnce = false;
+    m_DecalDesc.Key = TEXT("Base");
 }
 
-CBossBullet_Laser::CBossBullet_Laser(const CBossBullet_Laser& Prototype) : CSkill{Prototype}
+CBossBullet_Laser::CBossBullet_Laser(const CBossBullet_Laser& Prototype)
+    : CSkill{Prototype}
 {
+
 }
     
 HRESULT CBossBullet_Laser::Initialize_Prototype()
@@ -43,12 +51,7 @@ HRESULT CBossBullet_Laser::Initialize(void* pArg)
     m_Color[CSkill::COLOR::CEND] = { 1.f, 0.f, 0.f,1.f };
 
     m_pTransformCom->Set_Scaling(0.3f, 0.3f, 0.9f);
-    m_DecalDesc.bNormal = true;
-    m_DecalDesc.fSize = 2.f;
-    m_DecalDesc.fLifeTime = 5.f;
-    m_DecalDesc.iTexIndex = 1;
-    m_DecalDesc.bOnce = false;
-    m_DecalDesc.Key = TEXT("Base");
+
     m_DecalDesc.iContinuous = iContinuous++;
     return S_OK;
 }

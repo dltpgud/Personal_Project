@@ -26,7 +26,11 @@ texture2D g_DiffuseTexture;
 texture2D g_LightDepthTexture;
 texture2D g_DecalNormalTexture;
 texture2D g_DecalTexture;
-texture2D g_OutLineTexture;
+
+
+texture2D g_AccumTexture;
+texture2D g_AccumNormalTexture;
+texture2D g_RevealageTexture;
 
 texture2D g_EmissiveTexture;
 texture2D g_RimTexture;
@@ -67,6 +71,7 @@ float4 Compute_WorldPos_byCamera(float2 vTexcoord)
     float4 vWorldPos = 0.f;
 
     vector vDepthDesc = g_DepthTexture.Sample(PointSamplerClamp, vTexcoord);
+
     float fViewZ = vDepthDesc.y * g_fCamFar;
 	
     vWorldPos.x = vTexcoord.x * 2.f - 1.f;
@@ -246,37 +251,56 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_POINT(PS_IN In)
 float Compute_OutLine(float2 vTexcoord)
 {
     float OutLine = 1.f;
-    vector Nomal = g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord);
-    if (0.f != Nomal.w)
-    {
-        float3 nMid = Nomal.xyz * 2.f - 1.f;
-        float3 nLeft = g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord + float2(-1.f / g_WinDowSize.x, 0.f)).xyz * 2.f - 1.f;
-        float3 nRight = g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord + float2(1.f / g_WinDowSize.x, 0.f)).xyz * 2.f - 1.f;
-        float3 nUp = g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord + float2(0.f, -1.f / g_WinDowSize.y)).xyz * 2.f - 1.f;
-        float3 nDown = g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord + float2(0.f, 1.f / g_WinDowSize.y)).xyz * 2.f - 1.f;
-     
-     // 각도 차이 기반 (dot 값이 작을수록 각도 차이가 큼)
-        float normalDiff = 1.f - min(dot(nMid, nLeft), min(dot(nMid, nRight), min(dot(nMid, nUp), dot(nMid, nDown))));
-     
-     // 노멀 차이 임계값 (너무 작으면 내부 노이즈까지 잡힘)
-        const float normalThreshold = Nomal.w;
-     
-        if (normalDiff > normalThreshold)
-        {
-     // 보조 외곽선: 기존 OutLine보다 우선하지 않고 병합
-            OutLine = min(OutLine, 0.f);
-        }
-    }
-  
+
+    vector NormalSample = g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord);
+    float depthCenter = g_DepthTexture.Sample(LinearSamplerClamp, vTexcoord).r;
+
+    if ( depthCenter <= 0.f)
+        return OutLine;
+    
+    float2 dx = float2(1.f / g_WinDowSize.x, 0.f);
+    float2 dy = float2(0.f, 1.f / g_WinDowSize.y);
+
+    // 인접 노멀/깊이 샘플
+    float3 nMid = normalize(NormalSample.xyz * 2.f - 1.f);
+    float3 nLeft = normalize(g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord - dx).xyz * 2.f - 1.f);
+    float3 nRight = normalize(g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord + dx).xyz * 2.f - 1.f);
+    float3 nUp = normalize(g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord - dy).xyz * 2.f - 1.f);
+    float3 nDown = normalize(g_NormalTexture.Sample(LinearSamplerClamp, vTexcoord + dy).xyz * 2.f - 1.f);
+
+    float dLeft = g_DepthTexture.Sample(LinearSamplerClamp, vTexcoord - dx).r;
+    float dRight = g_DepthTexture.Sample(LinearSamplerClamp, vTexcoord + dx).r;
+    float dUp = g_DepthTexture.Sample(LinearSamplerClamp, vTexcoord - dy).r;
+    float dDown = g_DepthTexture.Sample(LinearSamplerClamp, vTexcoord + dy).r;
+
+    const float depthEdgeLimit = 0.0015f;
+    bool depthEdge = ( abs(depthCenter - dLeft) > depthEdgeLimit ||  abs(depthCenter - dRight) > depthEdgeLimit
+    || abs(depthCenter - dUp) > depthEdgeLimit || abs(depthCenter - dDown) > depthEdgeLimit );
+ 
+    float dotL = dot(nMid, nLeft);
+    float dotR = dot(nMid, nRight);
+    float dotU = dot(nMid, nUp);
+    float dotD = dot(nMid, nDown);
+
+    float normalDiff = 1.f - min(min(dotL, dotR), min(dotU, dotD));
+
+    float3 viewDir = float3(0.f, 0.f, 1.f); // 화면 정면 기준
+    float ndotv = abs(dot(nMid, viewDir));
+    float normalThreshold = lerp(0.01f, 0.1f, ndotv); 
+
+    if (normalDiff > normalThreshold || depthEdge)
+        OutLine = 0.f;
+
     return OutLine;
 }
+
 
 void ProjectToLight(float4 worldPos, out float2 uv, out float depth, out bool valid)
 {
     float4 lp = mul(worldPos, g_LightViewMatrix);
     lp = mul(lp, g_LightProjMatrix);
 
-    // D3D: NDC z = z/w ∈ [0,1]  (★ 0.5+0.5 하면 안 됨)
+    // D3D: NDC z = z/w ∈ [0,1]  (0.5+0.5 하면 안 됨)
     float invw = rcp(lp.w);
     float nx = lp.x * invw; // -1..1
     float ny = lp.y * invw; // -1..1
@@ -398,7 +422,6 @@ PS_OUT PS_MAIN_Final(PS_IN In)
     vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
     vector vEffect = g_EffectTexture.Sample(LinearSampler, In.vTexcoord);
 
-     
     // === Bloom_Occlusion====
     float bloomDepth = vBloom.a;
     float sceneDepth = vDepthDesc.g;
@@ -475,6 +498,35 @@ PS_OUT PS_MAIN_BLUR_Y(PS_IN In)
     }
     
     Out.vColor = vDiffuse;
+
+    return Out;
+}
+
+struct PS_DECAL
+{
+    float4 vDecal : SV_TARGET0;
+    float4 vNormal : SV_TARGET1;
+    
+};
+
+
+PS_DECAL PS_COMPOSITE_BLEND(PS_IN In)
+{
+    PS_DECAL Out = (PS_DECAL)0;
+
+    float4 accumColor  = g_AccumTexture.Sample(LinearSampler, In.vTexcoord);
+    float4 accumNormal = g_AccumNormalTexture.Sample(LinearSampler, In.vTexcoord);
+    float revealage    = g_RevealageTexture.Sample(LinearSampler, In.vTexcoord).r;
+
+    float colorWeight  = max(accumColor.a, 1e-5f);
+    float normalWeight = max(accumNormal.a, 1e-5f);
+
+
+    float3 finalColor  = accumColor.rgb / colorWeight;
+    float3 finalNormal = normalize(accumNormal.rgb / normalWeight);
+
+    Out.vDecal  = float4(finalColor, saturate(revealage));
+    Out.vNormal = float4(finalNormal * 0.5f + 0.5f, 1.0f); // [-1,1] → [0,1]
 
     return Out;
 }
@@ -568,5 +620,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_Final();
+    }
+
+    pass CompositeBlend8
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_AlphaBlend_Effect, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_COMPOSITE_BLEND();
     }
 }

@@ -54,8 +54,8 @@ public:
     void Callback(_uint AnimIdx, _int Duration, function<void()> func);
 
     _bool RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* pTransform, OUT _vector& vHitPos_WS, OUT _vector& vHitN_WS, OUT _float* fDist = nullptr);
-   
-    _float3 GetVetexPos(class CMesh* Mash, _int Pos);
+
+    _float3 GetVertexPos(class CMesh* Mash, _int Pos);
 
   class CMesh* Get_Mash(_uint Mashinx);
 

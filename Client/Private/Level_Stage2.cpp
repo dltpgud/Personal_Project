@@ -34,7 +34,7 @@ HRESULT CLevel_Stage2::Initialize()
 	if (FAILED(Ready_UI()))
         return E_FAIL;
 
-	if (FAILED(Ready_Find_cell()))
+	if (FAILED(Ready_Collision_Init()))
 		return E_FAIL;
      
 	return S_OK;
@@ -134,9 +134,9 @@ HRESULT CLevel_Stage2::Ready_Layer_NPC(const _wstring& pLayerTag)
 	return S_OK;
 }
 
-HRESULT CLevel_Stage2::Ready_Find_cell()
+HRESULT CLevel_Stage2::Ready_Collision_Init()
 {
-   m_pGameInstance->Find_Cell();
+    m_pGameInstance->Collision_Init({0.f, 0.f}, {160.f, 190.f}, 10);
 
 	return S_OK;
 }

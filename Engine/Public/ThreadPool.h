@@ -14,10 +14,9 @@ public:
 
     template <class T, class... Args>
     auto Add_Job(T&& f, Args&&... args) -> future<typename result_of<T(Args...)>::type>;
-
+    void Add_Jobs(vector<function<void()>>&& jobs);
     void Work_thread(_int iIndex);
     _bool Finish_Job();
-    void InitTLS();
 
 
 private:

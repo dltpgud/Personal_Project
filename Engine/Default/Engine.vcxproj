@@ -198,8 +198,6 @@ call UpdateLib.bat</Command>
     </ClInclude>
     <ClInclude Include="..\Public\ComputeShader.h" />
     <ClInclude Include="..\Public\ContainerObject.h" />
-    <ClInclude Include="..\Public\Decal.h" />
-    <ClInclude Include="..\Public\Decal_Manager.h" />
     <ClInclude Include="..\Public\EffectStream.h" />
     <ClInclude Include="..\Public\Effect_DecalStream.h" />
     <ClInclude Include="..\Public\Effect_Manager.h" />
@@ -241,7 +239,6 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\Shader.h" />
     <ClInclude Include="..\Public\Sound.h" />
     <ClInclude Include="..\Public\SpatialGrid.h" />
-    <ClInclude Include="..\Public\SPinLock.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -257,7 +254,6 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\VIBuffer.h" />
     <ClInclude Include="..\Public\VIBuffer_Cell.h" />
     <ClInclude Include="..\Public\VIBuffer_Cube.h" />
-    <ClInclude Include="..\Public\ViBuffer_DecalCube.h" />
     <ClInclude Include="..\Public\VIBuffer_Instancing.h" />
     <ClInclude Include="..\Public\VIBuffer_Particle_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Point.h" />
@@ -294,8 +290,6 @@ call UpdateLib.bat</Command>
     </ClCompile>
     <ClCompile Include="..\Private\ComputeShader.cpp" />
     <ClCompile Include="..\Private\ContainerObject.cpp" />
-    <ClCompile Include="..\Private\Decal.cpp" />
-    <ClCompile Include="..\Private\Decal_Manager.cpp" />
     <ClCompile Include="..\Private\EffectStream.cpp" />
     <ClCompile Include="..\Private\Frustum.cpp" />
     <ClCompile Include="..\Private\ObjectPool.cpp" />
@@ -331,7 +325,6 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\Shader.cpp" />
     <ClCompile Include="..\Private\Sound.cpp" />
     <ClCompile Include="..\Private\SpatialGrid.cpp" />
-    <ClCompile Include="..\Private\SPinLock.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -347,7 +340,6 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\VIBuffer.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Cell.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Cube.cpp" />
-    <ClCompile Include="..\Private\VIBuffer_DecalCube.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instancing.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Particle_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
@@ -360,11 +352,10 @@ call UpdateLib.bat</Command>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\CS_DecalBuildInstance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\CS_DecalSpawnUpdate.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\RenderDecal.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\SSAO_Compute.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\TrailUpdateCS.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Cell.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Deferred.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\TrailInterpCS.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Trail.hlsl" />

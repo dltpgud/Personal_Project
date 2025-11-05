@@ -15,18 +15,13 @@ public:
     void Update(_float fTimeDelta);
     HRESULT Render_All(class CShader* pShader = nullptr);
     HRESULT Render_Decal(class CShader* pShader = nullptr);
-    // 특정 스트림 등록/조회
+   
     HRESULT Add_EffectStream(const _wstring& key, CEffectStream* pStream);
-
-
-    // 이펙트 트리거
     HRESULT Trigger_Effect(const _wstring& streamKey, void* pSpawnDesc, _float fTimeDelta = 0.f);
     CEffectStream* Find_EffectStream(const _wstring& key);
 
 private:
     HRESULT Initialize();
-
-
 public:
     static CEffect_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual void Free() override;

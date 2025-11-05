@@ -28,7 +28,7 @@ public:
     {
         if (!obj)
             return;
-
+        
         auto& pool = s_pools[type_index(typeid(*obj))];
         pool.push_back(static_cast<void*>(obj));
     }

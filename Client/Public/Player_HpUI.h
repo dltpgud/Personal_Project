@@ -43,15 +43,7 @@ public:
 	 swprintf_s(m_tfHP, 50, L"%d\n", m_iHP);
 	}
 
-	void Set_HPGage(_int GageCount) {
-		if (GageCount < -1)
-			return;
-		
-		if(m_iMaxHP == m_iHP)
-			return;
-
-		m_iGageCount = GageCount;
-	};
+	void Set_HPGage(_int GageCount);
 
 private:
     virtual HRESULT Add_Components() override;

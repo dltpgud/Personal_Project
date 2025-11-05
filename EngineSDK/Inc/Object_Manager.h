@@ -19,9 +19,7 @@ public:
 	void    Clear(_uint iClearLevelID);
     HRESULT Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& strLayerTag, CGameObject* clone);
 
-    void Preallocate(_wstring ProtoTag, size_t count, void* desc);
-    
-      
+    void Preallocate(_wstring ProtoTag, size_t count, void* desc);  
     
 	class CGameObject*                      Find_Prototype(const _wstring& strPrototypeTag); 
 	class CGameObject*                      Find_CloneGameObject(_uint iLevelIndex, const _wstring& strLayerTag, const _uint& ProtoTag);
@@ -41,8 +39,7 @@ public:
    list<class CGameObject*>                 Get_ALL_GameObject(_uint iLevelIndex, const _wstring& strLayerTag);
 
 private:
-
-    USE_LOCK;
+    mutex m_mutex;
 	map<const _wstring, class CGameObject*>				m_Prototypes;
     map<const _wstring, class CLayer*>*                 m_pLayers = {nullptr};
 	_uint												m_iNumLevels = { 0 };

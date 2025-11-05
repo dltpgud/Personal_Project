@@ -25,8 +25,8 @@ public:
 
 
 private:	
-	USE_LOCK;
-
+	//USE_LOCK;
+    mutex m_mutex;
 	map<TCHAR*, Sound*> m_mapSound;
     ChannelGroup* m_pChannelGroupBGM{};
     ChannelGroup* m_pChannelGroupSE{};

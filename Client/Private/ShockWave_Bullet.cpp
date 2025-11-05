@@ -34,17 +34,6 @@ HRESULT CShockWave_Bullet::Initialize(void* pArg)
     m_fLifeTime = 20.f;
   
     m_iTrailIndex = static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"SpriteTexTrail"))->AllocateTrail();
-
-    m_DecalDesc.vDir = XMVector3Normalize(m_vDir);
-    m_DecalDesc.bActive = false;
-    m_DecalDesc.iTexIndex = 2;
-    m_DecalDesc.bNormal = true;
-    m_DecalDesc.bOnce = true;
-    m_DecalDesc.fSize = 1.5f;
-    m_DecalDesc.fDepth = 1.5f;
-    m_DecalDesc.fLifeTime = 3.f;
-    m_DecalDesc.vPos = m_vPos;
-    m_DecalDesc.Key = TEXT("Base");
     
     return S_OK;
 }
@@ -53,7 +42,7 @@ void CShockWave_Bullet::Priority_Update(_float fTimeDelta)
 {
     __super::Priority_Update(fTimeDelta);
 
-     m_pTransformCom->Go_jump_Dir(fTimeDelta,m_vDir, -0.1f);     
+     m_pTransformCom->Go_jump_Dir(fTimeDelta,m_vDir, -0.5f);     
 }
 
 void CShockWave_Bullet::Update(_float fTimeDelta)
@@ -61,7 +50,7 @@ void CShockWave_Bullet::Update(_float fTimeDelta)
     _float3 fPos;
     XMStoreFloat3(&fPos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
     CEffect_TrailStream::SPAWN_REQUEST req{};
-    req.valid = m_iLifeState == OBJ_POOL ? 0 : 1;
+    req.Valid = m_iLifeState == OBJ_POOL ? 0 : 1;
     req.trailIndex = m_iTrailIndex;
     req.headPos = fPos;
     req.addLife = 1.0f;

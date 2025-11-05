@@ -66,7 +66,7 @@ public:
      }
 
      void Set_HealthCurrentHP(_int Health);
-     _bool IsFullHP() const { return m_iHP == m_iMAXHP;}
+     _bool IsFullHP() const;
      _bool GetTriggerFlag(_uint flag) const
      {
          return (m_iTriggerState & flag) != 0;

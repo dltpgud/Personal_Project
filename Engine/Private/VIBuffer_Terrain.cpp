@@ -430,8 +430,12 @@ _bool CVIBuffer_Terrain::Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayD
                                                       OUT _float* fDist, OUT _float3* vNormal, OUT _float3* vWorldPos)
 {
     if (!m_pQuadTree)
+    {
+       if (m_pGameInstance->Picking_OnTerrain(this, RayPos, RayDir, pTransform, fDist, vWorldPos, vNormal))
+            return true;
+        
         return false;
-
+    }
     _matrix invWorld = pTransform->Get_WorldMatrix_Inverse();
     _vector localRayPos = XMVector3TransformCoord(RayPos, invWorld);
     _vector localRayDir = XMVector3Normalize(XMVector3TransformNormal(RayDir, invWorld));
@@ -599,7 +603,7 @@ void CVIBuffer_Terrain::Culling(_fmatrix WorldMatrixInverse)
 
     _uint* pIndices = static_cast<_uint*>(SubResource.pData);
 
-    m_pQuadTree->Culling(m_pGameInstance, m_pVertexPositions, pIndices, &iNumIndices, WorldMatrixInverse);
+    m_pQuadTree->Culling(m_pVertexPositions, pIndices, &iNumIndices, WorldMatrixInverse);
 
     m_pContext->Unmap(m_pIB, 0);
 

@@ -3,13 +3,10 @@
 #include "GameInstance.h"
 #include <algorithm>
 
-template <typename T> inline T Clamp(const T& value, const T& minVal, const T& maxVal)
+
+CQuadTree::CQuadTree() : m_pGameInstance{CGameInstance::GetInstance()}
 {
-    return (value < minVal) ? minVal : (value > maxVal ? maxVal : value);
-}
-CQuadTree::CQuadTree() 
-{
-  
+    Safe_AddRef(m_pGameInstance);
 }
 
 HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
@@ -40,10 +37,10 @@ HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
 	return S_OK;
 }
 
-void CQuadTree::Culling(CGameInstance* pGameInstance, const _float3* pVerticesPos, _uint* pIndices, _uint* pNumIndices, _fmatrix WorldMatrixInv)
+void CQuadTree::Culling( const _float3* pVerticesPos, _uint* pIndices, _uint* pNumIndices, _fmatrix WorldMatrixInv)
 {
     //  isDraw() 함수로 카메라와의 거리를 계산해서 LOD를 결정
-    if (nullptr == m_Children[CORNER_LT] || true == isDraw(pGameInstance, pVerticesPos, WorldMatrixInv))
+    if (nullptr == m_Children[CORNER_LT] || true == isDraw(pVerticesPos, WorldMatrixInv))
     {
         _uint iIndices[4] = {
             m_iCorners[CORNER_LT],
@@ -58,10 +55,10 @@ void CQuadTree::Culling(CGameInstance* pGameInstance, const _float3* pVerticesPo
 
         _bool isIn[4] = {
             // 각 코너들이 카메라 프러스텀 안에 있는지 확인 (안전 마진 적용)
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[0]]), 1.f), fSafetyMargin),
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[1]]), 1.f), fSafetyMargin),
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[2]]), 1.f), fSafetyMargin),
-            pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[3]]), 1.f), fSafetyMargin),
+            m_pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[0]]), 1.f), fSafetyMargin),
+            m_pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[1]]), 1.f), fSafetyMargin),
+            m_pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[2]]), 1.f), fSafetyMargin),
+            m_pGameInstance->isIn_Frustum_LocalSpace(XMVectorSetW(XMLoadFloat3(&pVerticesPos[iIndices[3]]), 1.f), fSafetyMargin),
         };
 
         // 프러스텀 컬링 조건을 완화하여 구멍 방지
@@ -89,19 +86,19 @@ void CQuadTree::Culling(CGameInstance* pGameInstance, const _float3* pVerticesPo
             .m128_f32[0];
 
     // fRadius 반지름 안에 있는 Frustum 안에 있는 terrain 사각형이 있다면 자식들을 호출한다.
-    if (true == pGameInstance->isIn_Frustum_LocalSpace(XMLoadFloat3(&pVerticesPos[m_iCenter]), fRadius))
+    if (true == m_pGameInstance->isIn_Frustum_LocalSpace(XMLoadFloat3(&pVerticesPos[m_iCenter]), fRadius))
     {
         for (auto& pChild : m_Children)
         {
             if (nullptr != pChild)
-                pChild->Culling(pGameInstance, pVerticesPos, pIndices, pNumIndices, WorldMatrixInv);
+                pChild->Culling(pVerticesPos, pIndices, pNumIndices, WorldMatrixInv);
         }
     }
 }
 
-_bool CQuadTree::isDraw(CGameInstance * pGameInstance, const _float3 * pVerticesPos, _fmatrix WorldMatrixInv)
+_bool CQuadTree::isDraw( const _float3 * pVerticesPos, _fmatrix WorldMatrixInv)
 {
-	_vector		vCamPosition = XMLoadFloat4(pGameInstance->Get_CamPosition());
+    _vector vCamPosition = XMLoadFloat4(m_pGameInstance->Get_CamPosition());
 
 	vCamPosition = XMVector3TransformCoord(vCamPosition, WorldMatrixInv);
 
@@ -140,7 +137,7 @@ _bool CQuadTree::Picking_Ray(const _float3* pVerticesPos, _vector RayPos, _vecto
     if (!bounds.Intersects(RayPos, RayDir, boxDist))
         return false;
 
-    // 2️⃣ 리프라면 두 삼각형 검사
+    // 2️ 리프라면 두 삼각형 검사
     if (m_Children[CORNER_LT] == nullptr)
     {
         _uint idx[4] = {m_iCorners[CORNER_LT], m_iCorners[CORNER_RT], m_iCorners[CORNER_RB], m_iCorners[CORNER_LB]};
@@ -232,7 +229,7 @@ _bool CQuadTree::Intersect_Node(const BoundingSphere& sphere, const _float3* pVe
         _float3 hit{}, normal{};
         _float pen = -FLT_MAX;
 
-        if (TestSphereTriangle(sphere, vLT, vRT, vRB, &hit, &normal, &pen))
+        if (m_pGameInstance->TestSphereTriangle(sphere, vLT, vRT, vRB, &hit, &normal, &pen))
         {
             if (pen > *pBestPenetration || *pBestPenetration == -FLT_MAX)
             {
@@ -241,7 +238,7 @@ _bool CQuadTree::Intersect_Node(const BoundingSphere& sphere, const _float3* pVe
                 *pHitNormal = normal;
             }
         }
-        if (TestSphereTriangle(sphere, vLT, vRB, vLB, &hit, &normal, &pen))
+        if (m_pGameInstance->TestSphereTriangle(sphere, vLT, vRB, vLB, &hit, &normal, &pen))
         {
             if (pen > *pBestPenetration || *pBestPenetration == -FLT_MAX)
             {
@@ -299,7 +296,7 @@ _bool CQuadTree::Intersect_Node(const BoundingBox& box, const _float3* pVertices
         _float3 hit{}, normal{};
         _float pen = -FLT_MAX;
 
-        if (TestAABBTriangle(box, vLT, vRT, vRB, &hit, &normal, &pen))
+        if (m_pGameInstance->TestAABBTriangle(box, vLT, vRT, vRB, &hit, &normal, &pen))
         {
             if (pen > *pBestPenetration)
             {
@@ -308,7 +305,7 @@ _bool CQuadTree::Intersect_Node(const BoundingBox& box, const _float3* pVertices
                 *pHitNormal = normal;
             }
         }
-        if (TestAABBTriangle(box, vLT, vRB, vLB, &hit, &normal, &pen))
+        if (m_pGameInstance->TestAABBTriangle(box, vLT, vRB, vLB, &hit, &normal, &pen))
         {
             if (pen > *pBestPenetration)
             {
@@ -366,7 +363,7 @@ _bool CQuadTree::Intersect_Node(const BoundingOrientedBox& obb, const _float3* p
         _float3 hit{}, normal{};
         _float pen = -FLT_MAX;
 
-        if (TestOBBTriangle(obb, vLT, vRT, vRB, &hit, &normal, &pen))
+        if (m_pGameInstance->TestOBBTriangle(obb, vLT, vRT, vRB, &hit, &normal, &pen))
         {
             if (pen > *pBestPenetration)
             {
@@ -375,7 +372,7 @@ _bool CQuadTree::Intersect_Node(const BoundingOrientedBox& obb, const _float3* p
                 *pHitNormal = normal;
             }
         }
-        if (TestOBBTriangle(obb, vLT, vRB, vLB, &hit, &normal, &pen))
+        if (m_pGameInstance-> TestOBBTriangle(obb, vLT, vRB, vLB, &hit, &normal, &pen))
         {
             if (pen > *pBestPenetration)
             {
@@ -397,154 +394,6 @@ _bool CQuadTree::Intersect_Node(const BoundingOrientedBox& obb, const _float3* p
 }
 
 
-
-_bool CQuadTree::TestSphereTriangle(const BoundingSphere& sphere, const _float3& a, const _float3& b, const _float3& c,
-                                    OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
-{
-    _vector pa = XMLoadFloat3(&a);
-    _vector pb = XMLoadFloat3(&b);
-    _vector pc = XMLoadFloat3(&c);
-    _vector center = XMLoadFloat3(&sphere.Center);
-
-    // --- 1️⃣ 삼각형 평면 노멀 ---
-    _vector e0 = pb - pa;
-    _vector e1 = pc - pa;
-    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
-
-    // --- 2️⃣ 평면까지 거리 ---
-    _float dist = XMVectorGetX(XMVector3Dot(center - pa, n));  /// 노말 방향으로 얼마나떨어 져있는가?
-    _vector proj = center - n * dist; // 구 중심을 평면 위로 내린 수직의 발
-
-    // --- 3️⃣ 투영점이 삼각형 내부인지 체크 ---
-    _vector c0 = XMVector3Cross(pb - pa, proj - pa);
-    _vector c1 = XMVector3Cross(pc - pb, proj - pb);
-    _vector c2 = XMVector3Cross(pa - pc, proj - pc);
-
-    _bool inside = (XMVectorGetX(XMVector3Dot(c0, n)) >= 0.f && XMVectorGetX(XMVector3Dot(c1, n)) >= 0.f &&
-                   XMVectorGetX(XMVector3Dot(c2, n)) >= 0.f);
-
-    _vector closest;
-    if (inside)
-    {
-        // 평면 안쪽이면 그 투영점을 사용
-        closest = proj;
-    }
-    else
-    {
-        // --- 4️⃣ 내부가 아니라면 edge/vertex까지 검사 ---
-        _vector v0 = pa;
-        _vector v1 = pb;
-        _vector v2 = pc;
-
-        // 각 에지에 대해 최근접점 구하기
-        auto ClosestPointOnSegment = [](_vector p, _vector a, _vector b)
-        {
-            _vector ab = b - a;
-            float t = XMVectorGetX(XMVector3Dot(p - a, ab)) / XMVectorGetX(XMVector3Dot(ab, ab));
-            t = Clamp(t, 0.0f, 1.0f);
-            return a + ab * t;
-        };
-
-        _vector cp0 = ClosestPointOnSegment(center, v0, v1);
-        _vector cp1 = ClosestPointOnSegment(center, v1, v2);
-        _vector cp2 = ClosestPointOnSegment(center, v2, v0);
-
-        _float d0 = XMVectorGetX(XMVector3LengthSq(center - cp0));
-        _float d1 = XMVectorGetX(XMVector3LengthSq(center - cp1));
-        _float d2 = XMVectorGetX(XMVector3LengthSq(center - cp2));
-
-        if (d0 < d1 && d0 < d2)
-            closest = cp0;
-        else if (d1 < d2)
-            closest = cp1;
-        else
-            closest = cp2;
-    }
-
-    // --- 5️⃣ 중심과 최근접점 사이 거리 계산 ---
-    _vector diff = center - closest;
-    _float distSq = XMVectorGetX(XMVector3LengthSq(diff));
-    _float radius = sphere.Radius;
-
-    if (distSq > radius * radius)
-        return false;
-
-    _float distActual = sqrtf(distSq);
-    _float penetration = radius - distActual;
-    if (penetration < 0.f)
-        return false;
-
-    _vector normal = (distActual > 0.0001f) ? XMVector3Normalize(diff) : n; // 중심이 겹쳤을 때 fallback
-
-    _vector hitPos = closest;
-
-    XMStoreFloat3(oHit, hitPos);
-    XMStoreFloat3(oNormal, normal);
-    *oPen = penetration;
-    return true;
-}
-
-_bool CQuadTree::TestAABBTriangle(const BoundingBox& box, const _float3& a, const _float3& b, const _float3& c,
-                                  OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
-{
-    // 삼각형의 AABB 계산
-    _vector v0 = XMLoadFloat3(&a);
-    _vector v1 = XMLoadFloat3(&b);
-    _vector v2 = XMLoadFloat3(&c);
-
-    _vector vMin = XMVectorMin(XMVectorMin(v0, v1), v2);
-    _vector vMax = XMVectorMax(XMVectorMax(v0, v1), v2);
-
-    BoundingBox triBox;
-    BoundingBox::CreateFromPoints(triBox, vMin, vMax);
-
-    // 간단히 박스와 박스 교차로 근사
-    if (!box.Intersects(triBox))
-        return false;
-
-    // 노멀 (삼각형 평면 기준)
-    _vector e0 = v1 - v0;
-    _vector e1 = v2 - v0;
-    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
-
-    XMStoreFloat3(oNormal, n);
-
-    // 히트 포인트는 삼각형 중심 근사
-    _vector avg = (v0 + v1 + v2) / 3.f;
-    XMStoreFloat3(oHit, avg);
-
-    *oPen = 0.001f; // 근사 침투값
-    return true;
-}
-
-_bool CQuadTree::TestOBBTriangle(const BoundingOrientedBox& obb, const _float3& a, const _float3& b, const _float3& c,
-                                 OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
-{
-    _vector v0 = XMLoadFloat3(&a);
-    _vector v1 = XMLoadFloat3(&b);
-    _vector v2 = XMLoadFloat3(&c);
-
-    // 삼각형을 감싸는 AABB 계산
-    _vector vMin = XMVectorMin(XMVectorMin(v0, v1), v2);
-    _vector vMax = XMVectorMax(XMVectorMax(v0, v1), v2);
-
-    BoundingBox triBox;
-    BoundingBox::CreateFromPoints(triBox, vMin, vMax);
-
-    if (!obb.Intersects(triBox))
-        return false;
-
-    _vector e0 = v1 - v0;
-    _vector e1 = v2 - v0;
-    _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
-
-    XMStoreFloat3(oNormal, n);
-    _vector avg = (v0 + v1 + v2) / 3.f;
-    XMStoreFloat3(oHit, avg);
-    *oPen = 0.001f;
-    return true;
-}
-
 CQuadTree * CQuadTree::Create(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
 {
 	CQuadTree*		pInstance = new CQuadTree();
@@ -564,4 +413,6 @@ void CQuadTree::Free()
 
 	for (auto& pQuadTree : m_Children)
 		Safe_Release(pQuadTree);
+
+    Safe_Release(m_pGameInstance);
 }

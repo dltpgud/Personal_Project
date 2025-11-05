@@ -1,29 +1,15 @@
-//=====================================================================
-// SSAO_Combined.hlsl (cs_5_0)
-//  - Compute SSAO + BlurX + BlurY
-//  - Cartoon style (RoboQuest-like) SSAO
-//=====================================================================
 #include "Engine_Shader_Defines.hlsli"
 
-//=====================================================================
-// Common Resources
-//=====================================================================
-Texture2D g_DepthTex : register(t0); // R=clipZ, G=viewZ/far
-Texture2D g_NormalTex : register(t1); // (N*0.5+0.5)
+Texture2D g_DepthTexture : register(t0); // R=clipZ, G=viewZ/far
+Texture2D g_NormalTexture : register(t1); // (N*0.5+0.5)
 
-// SSAO 계산 결과를 Blur X/Y에 입력용으로 사용
 Texture2D g_AOInput : register(t2); // for Blur X
 Texture2D g_AOBlurXIn : register(t3); // for Blur Y
 
-// 출력용 UAV
 RWTexture2D<float> g_AOOut : register(u0); // SSAO output
 RWTexture2D<float> g_AOBlurX : register(u1); // Temp (X blur)
 RWTexture2D<float> g_AOBlurY : register(u2); // Final AO result
 
-
-//=====================================================================
-// Constant Buffer
-//=====================================================================
 cbuffer SSAO_CB : register(b0)
 {
     float4x4 g_View;
@@ -37,9 +23,6 @@ cbuffer SSAO_CB : register(b0)
     float g_AOIntensity; // AO overall strength (0~1)
 };
 
-//=====================================================================
-// Utilities
-//=====================================================================
 float2 Hash2(float2 p)
 {
     p = frac(p * float2(123.34, 456.21));
@@ -59,9 +42,6 @@ float3 ReconstructViewPos(float2 uv, float depthClip, float viewZNorm)
     return view.xyz;
 }
 
-//=====================================================================
-// SSAO Kernel
-//=====================================================================
 static const int KERNEL_COUNT = 16;
 static const float3 KERNEL[KERNEL_COUNT] =
 {
@@ -75,9 +55,6 @@ static const float3 KERNEL[KERNEL_COUNT] =
     float3(0.10, -0.20, 0.50), float3(-0.10, -0.10, 0.60)
 };
 
-//=====================================================================
-// 1️⃣ SSAO Compute Pass
-//=====================================================================
 [numthreads(16, 16, 1)]
 void CS_SSAO(uint3 DTid : SV_DispatchThreadID)
 {
@@ -85,7 +62,7 @@ void CS_SSAO(uint3 DTid : SV_DispatchThreadID)
         return;
 
     float2 uv = (DTid.xy + 0.5f) / float2(g_Width, g_Height);
-    float2 depthRG = g_DepthTex.SampleLevel(PointSamplerClamp, uv, 0).rg;
+    float2 depthRG = g_DepthTexture.SampleLevel(PointSamplerClamp, uv, 0).rg;
     float depthClip = depthRG.x;
     float viewZNorm = depthRG.y;
 
@@ -95,7 +72,7 @@ void CS_SSAO(uint3 DTid : SV_DispatchThreadID)
         return;
     }
 
-    float3 nWorld = g_NormalTex.SampleLevel(LinearSamplerClamp, uv, 0).xyz * 2.0f - 1.0f;
+    float3 nWorld = g_NormalTexture.SampleLevel(LinearSamplerClamp, uv, 0).xyz * 2.0f - 1.0f;
     float3 normalVS = normalize(mul(nWorld, (float3x3) g_View));
     float3 posVS = ReconstructViewPos(uv, depthClip, viewZNorm);
 
@@ -120,7 +97,7 @@ void CS_SSAO(uint3 DTid : SV_DispatchThreadID)
         if (any(suv < 0.0f) || any(suv > 1.0f))
             continue;
 
-        float2 sDepthRG = g_DepthTex.SampleLevel(PointSamplerClamp, suv, 0).rg;
+        float2 sDepthRG = g_DepthTexture.SampleLevel(PointSamplerClamp, suv, 0).rg;
         float3 sVS = ReconstructViewPos(suv, sDepthRG.x, sDepthRG.y);
 
         float diff = sVS.z - samplePosVS.z;
@@ -129,16 +106,13 @@ void CS_SSAO(uint3 DTid : SV_DispatchThreadID)
     }
 
     float ao = 1.0f - (occlusion / (float) KERNEL_COUNT);
-    ao = pow(ao, 1.5f); // brightness correction
-    ao = floor(ao * 3.0f) / 3.0f; // quantization (toon-like)
-    ao = lerp(1.0f, ao, g_AOIntensity); // AO intensity mix
+    ao = pow(ao, 1.5f); 
+    ao = floor(ao * 3.0f) / 3.0f; 
+    ao = lerp(1.0f, ao, g_AOIntensity); 
 
     g_AOOut[DTid.xy] = ao;
 }
 
-//=====================================================================
-// 2️⃣ Blur X Pass
-//=====================================================================
 [numthreads(16, 16, 1)]
 void CS_BlurX(uint3 DTid : SV_DispatchThreadID)
 {
@@ -160,9 +134,6 @@ void CS_BlurX(uint3 DTid : SV_DispatchThreadID)
     g_AOBlurX[DTid.xy] = sum / wsum;
 }
 
-//=====================================================================
-// 3️⃣ Blur Y Pass
-//=====================================================================
 [numthreads(16, 16, 1)]
 void CS_BlurY(uint3 DTid : SV_DispatchThreadID)
 {

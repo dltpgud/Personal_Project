@@ -4,8 +4,6 @@
 #include "GameObject.h"
 #include "UI_Manager.h"
 
-
-
 CObject_Manager::CObject_Manager() 
 {
 	
@@ -28,7 +26,7 @@ HRESULT CObject_Manager::Add_Prototype(const _wstring& strPrototypeTag, CGameObj
 	if (nullptr != Find_Prototype(strPrototypeTag))
 		return E_FAIL;
     
-	WRITE_LOCK;
+    unique_lock<mutex> lock(m_mutex);
 	m_Prototypes.emplace(strPrototypeTag, pPrototype);
 
 	return S_OK;
@@ -162,8 +160,6 @@ CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, v
 
 	if (nullptr == pPrototype)
 		return nullptr;
-        
-
 
 	CGameObject* pGameObject = ObjectPool<Engine::CGameObject>::Pop(pPrototype, pArg);
         

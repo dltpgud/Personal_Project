@@ -106,11 +106,6 @@ struct PS_IN
     int DecalType : TEXCOORD12;
 };
 
-struct PS_OUT
-{
-    float4 vDecal : SV_TARGET0;
-    float4 vNormal : SV_TARGET1;
-};
 
 //-------------------------------------------
 float4 ComputeDecalEffect(float3 baseColor, float decalTime, float lifeTime)
@@ -147,7 +142,16 @@ float4 Compute_WorldPos_byCamera(float2 vTexcoord)
     return vWorldPos;
 }
 
-//-------------------------------------------
+struct PS_OUT
+{
+    float4 vAccum : SV_Target0; // 색상+알파 누적
+    float4 vAccumNormal : SV_Target1; // 노말 누적
+    float vRevealage : SV_Target2; // 투명 누적
+};
+
+//=====================================================
+// Function: PS_Decal  (Weighted Blended Version)
+//=====================================================
 PS_OUT PS_Decal(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -158,30 +162,26 @@ PS_OUT PS_Decal(PS_IN In)
     float3 N = normalize(In.DecalDir);
     float3 up = (abs(N.y) < 0.999f) ? float3(0, 1, 0) : float3(1, 0, 0);
     float3 T = normalize(cross(up, N));
-    float3 B = cross(N, T); // normalize 생략 가능 (T,B,N 직교계)
-
+    float3 B = cross(N, T);
     float3x3 TBN = float3x3(T, B, N);
 
     float3 surfNormal = normalize(g_NormalTexture.SampleLevel(NoMipSampler, screenUV, 0).xyz * 2.f - 1.f);
 
     float4 localPos;
 
+    // Box vs SSD (Sphere/Planar)
     if (In.DecalType == 0)
-    { //BOX
+    {
         localPos = mul(worldPos, In.WorldInv);
-      
         if (any(abs(localPos.xyz) > 1.f))
             discard;
-        
         if (dot(normalize(surfNormal), N) < 0.1f)
             discard;
     }
     else
-    {//SSD
-        float3 rel = (worldPos.xyz - In.DecalPos) / In.HalfSize; 
-
+    {
+        float3 rel = (worldPos.xyz - In.DecalPos) / In.HalfSize;
         localPos = float4(mul(rel, transpose(TBN)), 1.f);
-
         if (any(abs(localPos.xy) > 1.f))
             discard;
     }
@@ -189,62 +189,56 @@ PS_OUT PS_Decal(PS_IN In)
     float2 uv = localPos.xy * 0.5f + 0.5f;
     float4 decalSample = g_DecalArray.Sample(NoMipSampler, float3(uv, In.TexIndex));
 
-    float edgeFadeVol = saturate(1.0f - max(abs(localPos.x), max(abs(localPos.y), abs(localPos.z))));
-    float edgeFadePlanar = saturate(1.0f - max(abs(localPos.x), abs(localPos.y)));
-    float edgeFade = (In.DecalType == 0) ? edgeFadeVol : edgeFadePlanar;
-
-    // =========================
-    // 생존도 페이드 (시간 경과 기반)
-    // =========================
-    // t = 현재까지 지난 비율 (0~1)
     float t = saturate(In.DecalTime / max(In.LifeTime, 0.0001f));
-
-    // lifeFade = 1 → 막 생성됨
-    // lifeFade = 0 → 거의 죽을 시간
     float lifeFade = 1.0f - t;
 
-  
-    float finalAlpha = decalSample.a * edgeFade * lifeFade;
-
-    if (finalAlpha < 0.01f)
+    float weightalpha = saturate(decalSample.a * lifeFade * 2.0f);
+    
+    if (weightalpha < 0.01f)
         discard;
 
     float4 finalRGB = ComputeDecalEffect(decalSample.rgb, In.DecalTime, In.LifeTime);
 
+    //----------------------------------------------------
+    // Weighted Blended Accumulation
+    //----------------------------------------------------
+    // Accum (색상 * 알파)
+    Out.vAccum = float4(finalRGB.rgb * weightalpha, weightalpha);
+
+    // Normal Accum
     if (In.bNormal != 0)
     {
         float3 nTS = g_DecalArray.Sample(NoMipSampler, float3(uv, 0)).xyz * 2.f - 1.f;
         nTS.z = sqrt(saturate(1 - dot(nTS.xy, nTS.xy)));
-
         float3 decalNormalWS = normalize(mul(nTS, TBN));
+        float normalWeight = weightalpha * weightalpha;
 
-        // GBuffer normal 형식에 맞게 encode
-        Out.vNormal = float4(decalNormalWS * 0.5f + 0.5f, 0.f);
+        Out.vAccumNormal = float4(decalNormalWS * normalWeight, normalWeight);
     }
     else
     {
-        Out.vNormal = float4(0, 0, 0, 0);
+        Out.vAccumNormal = float4(0, 0, 0, 0);
     }
 
-    float fadeAlpha = saturate(finalRGB.a * decalSample.a);
-    if (fadeAlpha < 0.02f)
-        discard;
-
-    
-    Out.vDecal = float4(finalRGB.rgb, finalAlpha);
+    // Revealage (1 - alpha)
+    Out.vRevealage = weightalpha;
 
     return Out;
 }
 
-
-technique11 DecalTech
+//=====================================================
+// Technique (for Weighted Blended MRT)
+//=====================================================
+technique11 Decal_WBOIT
 {
-    pass Decal
+    pass P0
     {
         SetRasterizerState(RS_Decal);
         SetDepthStencilState(DSS_DefaultNoWrite, 0);
-        SetBlendState(BS_Decal, float4(0, 0, 0, 0), 0xffffffff);
+        SetBlendState(BS_WBOIT, float4(0, 0, 0, 0), 0xffffffff);
+
         VertexShader = compile vs_5_0 VS_Decal();
+        GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_Decal();
     }
 }

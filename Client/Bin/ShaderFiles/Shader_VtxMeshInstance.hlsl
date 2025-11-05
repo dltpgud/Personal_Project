@@ -107,7 +107,7 @@ PS_OUT PS_MAIN(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse;
 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 1.f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
@@ -134,7 +134,7 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
     
     Out.vDiffuse = vMtrlDiffuse;
 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.01f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vAmbient = vector(0.2f, 0.2f, 0.2f, 1.f);

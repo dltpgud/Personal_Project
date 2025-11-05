@@ -23,7 +23,7 @@ public:
     _bool WorldToCell(const _vector& pos, _int& ix, _int& iz) const;
     _int CellIndex(_int ix, _int iz) const;
     void GatherNeighborCells(_int ix, _int iz, _int outIdx[9], _int& outCount) const;
-    void QueryNearby(const _vector& pos, _float range, vector<CGameObject*>& out, _uint groupMask) const;
+    void QueryNearby(const _vector& pos, _float range, OUT vector<CGameObject*>& out, _uint groupMask) const;
     void BuildStaticGrid(const list<CGameObject*>& staticObjs);
     void UpdateDynamicGrid(const list<CGameObject*>& dynamicObjs);
 
@@ -31,6 +31,12 @@ public:
     {
         return m_DynamicGrid;
     }
+
+#ifdef _DEBUG
+    _float2  GetWorldMin();
+    _float2  GetWorldMax(); 
+    _float   GetCellSize();
+#endif // _DEBUG
 
 private:
     _float2 m_WorldMin{}, m_WorldMax{};

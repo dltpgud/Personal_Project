@@ -38,8 +38,7 @@ private:
     map<const _wstring, class CUI*> m_UIObj[UI_END];
     list<class CUI*> m_UIEeventList[EVENT_END];
 
-   
-    USE_LOCK;
+     mutex m_mutex;
 
 public:
     static CUI_Manager* Create();

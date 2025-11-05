@@ -208,7 +208,7 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
     if (goalIndex >= m_Cells.size())
         return {};
 
-    priority_queue<AStarNode, std::vector<AStarNode>, std::greater<>> openList;
+    priority_queue<AStarNode, vector<AStarNode>, greater<>> openList; // 탐색후보들. 가장 적은 곳을 우선적으로 꺼내 탐색
     unordered_map<_uint, _float> costSoFar; // gCost 저장용
     unordered_map<_uint, _uint> cameFrom;  // 부모 노드 저장용
 
@@ -224,18 +224,18 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
         AStarNode current = openList.top();
         openList.pop();
 
-        if (current.index == goalIndex)
+        if (current.index == goalIndex) //목표 셀 도착시
         {
-            // 경로 복원
+            // 탐색 그만하고 경로 복원
             vector<_uint> path;
             _uint cur = goalIndex;
-            while (cur != cameFrom[cur])
+            while (cur != cameFrom[cur]) // 시작 지점으로 거슬러가자
             {
                 path.push_back(cur);
-                cur = cameFrom[cur];
+                cur = cameFrom[cur]; // 노드가 어디서 왔는지 찾고
             }
-            path.push_back(startIndex);
-            std::reverse(path.begin(), path.end());
+            path.push_back(startIndex); //마지막
+            reverse(path.begin(), path.end());
                 return path;
         }
 
@@ -256,11 +256,11 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
             _float stepCost = XMVectorGetX(XMVector3Length(neighborCenter - currCenter));
             _float newG = costSoFar[current.index] + stepCost;
 
-            if (costSoFar.find(neighborIndex) == costSoFar.end() || newG < costSoFar[neighborIndex])
+            if (costSoFar.find(neighborIndex) == costSoFar.end() || newG < costSoFar[neighborIndex]) // 한번도 방분한적 없거나 이번에 찾은 경로가 더 싸다면 
             {
                 costSoFar[neighborIndex] = newG;
 
-                // 휴리스틱: 목표 중점과 이웃 중점 간 거리 (유클리드 거리)
+                // 휴리스틱: 목표 중점과 이웃 중점 간 거리 
                 _float h = XMVectorGetX(XMVector3Length(goalCenter - neighborCenter));
 
                 openList.push({static_cast<_uint>(neighborIndex), newG, h, current.index});
@@ -595,11 +595,10 @@ _int CNavigation::Find_Cell_ByPosition(_vector vTargetPos)
     }
     return -1;
 }
-
 void CNavigation::Set_Taget(_vector Taget)
 {
-    WRITE_LOCK;
-
+    //WRITE_LOCK;
+    unique_lock<mutex> lock(m_mutex);
      _int Goal = Find_Cell_ByPosition(Taget);
     if (Goal < 0 || m_iCurrentCellIndex < 0)
         return;

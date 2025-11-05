@@ -50,11 +50,16 @@ void CPlayer_HpUI::Update(_float fTimeDelta)
     if (m_iGageCount != -1)
     {
         m_iGageCount--;
-        m_iHP += m_iHealthHP;
-   
-        m_pGameInstance->Get_Player()->Set_HealthCurrentHP(m_iHealthHP);
-        swprintf_s(m_tfHP, 50, L"%d\n", m_iHP);
-        if (true == m_pGameInstance->Get_Player()->IsFullHP() || m_iGageCount == 0)
+  
+
+       if (false == m_pGameInstance->Get_Player()->IsFullHP())
+       {
+            m_iHP += m_iHealthHP;
+            m_pGameInstance->Get_Player()->Set_HealthCurrentHP(m_iHealthHP);
+            swprintf_s(m_tfHP, 50, L"%d\n", m_iHP);
+       }
+      
+       if (true == m_pGameInstance->Get_Player()->IsFullHP() || m_iGageCount == 0)
                 m_iGageCount = -1;  
     }
     m_fRatio = static_cast<_float>(m_iHP) /  static_cast<_float>(m_iMaxHP);
@@ -120,6 +125,18 @@ void CPlayer_HpUI::ShakingEvent(_float fTimeDelta)
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(m_fX - g_iWinSizeX * 0.5f, -m_fY + g_iWinSizeY * 0.5f, m_fZ, 1.f));
 }
 
+
+void CPlayer_HpUI::Set_HPGage(_int GageCount)
+{
+    if (GageCount < -1)
+        return;
+
+    if (m_iMaxHP == m_iHP)
+        return;
+
+    m_iGageCount = GageCount;
+
+}
 
 HRESULT CPlayer_HpUI::Add_Components()
 {

@@ -166,7 +166,7 @@ PS_OUT PS_MAIN_MONSTER(PS_IN In)
    rim = pow(1 - rim, g_RimPow);
     
     Out.vRim = rim * g_RimColor;
-    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.28f);
+    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vAmbient = vector(1.5f, 1.5f, 1.5f, 1.5f);
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 1.f);
@@ -204,7 +204,7 @@ PS_OUT PS_MAIN_BOSSMONSTER(PS_IN In)
     
     Out.vEmissive =  vMtrlEmissive;
     Out.vDiffuse = vMtrlDiffuse;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.2f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 1.f);
     Out.vRim = (rim * g_RimColor);
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
@@ -225,7 +225,7 @@ PS_OUT PS_WEAPON(PS_IN In)
 
     Out.vDiffuse = vMtrlDiffuse ;
     Out.vEmissive = vMtrlEmissive * g_EmissivePower;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.34f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 1.f);
     Out.vRim = 0.f;
     Out.vAmbient = vector(2.f, 2.f, 2.f, 2.f);
@@ -259,7 +259,7 @@ PS_OUT PS_Door(PS_IN In)
         Out.vBloom = vector(0.f, 0.f, 0.f, In.vProjPos.w / g_fCamFar);
     }
     Out.vDiffuse = vMtrlDiffuse;
-    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.15f);
+    Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vAmbient = vector(1.1f, 1.1f, 1.1f, 1.1f);
 
@@ -326,9 +326,9 @@ PS_OUT PS_MAIN_NPC(PS_IN In)
         vNormal.z = sqrt(1 - vNormal.x * vNormal.x - vNormal.y * vNormal.y);
         float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz, In.vNormal.xyz);
         vNormal = vector(mul(vNormal.xyz, WorldMatrix), 0.f);
-        Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.2f);
+        Out.vNormal = vector(vNormal.xyz * 0.5f + 0.5f, 0.f);
     }else 
-        Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.2f);
+        Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDiffuse = vMtrlDiffuse;
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 1.f, 0.f);
     Out.vRim = (rim * g_RimColor);

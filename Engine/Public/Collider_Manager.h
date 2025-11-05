@@ -15,7 +15,7 @@ public:
     };
 
 private:
-    Collider_Manager();
+    Collider_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual ~Collider_Manager() = default;
 
 public:
@@ -25,12 +25,17 @@ public:
     HRESULT Add_GameObject_To_ColGroup(class CGameObject* Obj, const _uint& Type);
     void Clear();
 
-    HRESULT Find_Cell();
+    HRESULT Find_Cell(const _float2& vMin, const _float2& vMax, _float cellSize);
     HRESULT Set_Collison(_bool SetColl)
     {
         m_bIsColl = SetColl;
         return S_OK;
     }
+
+    
+#ifdef _DEBUG
+    HRESULT Render();
+#endif
 
 private:
     HRESULT Initialize();
@@ -42,18 +47,6 @@ private:
     HRESULT Player_To_Mash_Collison_for_Decal();
     HRESULT MonsterSkill_To_Mash_Collison(_float fTimedelta);
 
-
-    struct LaserDecalCache
-    {
-        _vector vPrevPos = XMVectorZero();
-        _vector vPrevDir = XMVectorZero();
-        _vector vHitPos = XMVectorZero();
-        _vector vHitNormal = XMVectorZero();
-        bool bValid = false;
-        float fTimeAcc = 0.f; // 주기적 갱신용
-    };
-
-
 private:
     class CGameInstance* m_pGameInstance = { nullptr };
     list <class CCollider*>m_ColliderList;
@@ -62,17 +55,21 @@ private:
     _int m_ColliderDamage{ 0};
     _bool m_bIsColl = { false };
     _bool m_bStaticBuilt{false};
-    unordered_map<class CComponent*, pair<_float3, _float3>> m_ModelCache;
-    unordered_map<class CSkill*, LaserDecalCache> m_LaserCache;
 
 private:
     CSpatialGrid m_SpatialGrid;
-    _float m_lastCheckedTime = 0.0f;
-    const _float m_checkInterval = 0.1f;
-    _int iTime = 0;
+
+
+#ifdef _DEBUG
+    ID3D11Device* m_pDevice = {nullptr};
+    ID3D11DeviceContext* m_pContext = {nullptr};
+    PrimitiveBatch<VertexPositionColor>* m_pBatch{};
+    BasicEffect* m_pEffect{};
+    ID3D11InputLayout* m_pInputLayout{};
+#endif
 
 public:
-    static Collider_Manager* Create();
+    static Collider_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     virtual void Free() override;
 };
 END

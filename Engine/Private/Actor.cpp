@@ -103,7 +103,7 @@ void CActor::Set_HealthCurrentHP(_int Health)
 	if (IsFullHP())
 		return;
 
-	if (m_iHP + Health >= m_iMAXHP)
+	if ((m_iHP + Health )>= m_iMAXHP)
     {
        m_iHP = m_iMAXHP;
     }
@@ -111,6 +111,12 @@ void CActor::Set_HealthCurrentHP(_int Health)
     {
         m_iHP += Health;
     }
+}
+
+_bool CActor::IsFullHP() const
+{
+   return m_iHP >= m_iMAXHP;
+    
 }
 
 void CActor::Free()

@@ -25,7 +25,7 @@ HRESULT CHealthBall::Initialize(void* pArg)
 
    m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, pDesc->vPos);
 
-   _float theta = XMConvertToRadians(rand() % 360);   // ���� ȸ����
+   _float theta = XMConvertToRadians(rand() % 360); 
    _float phi = XMConvertToRadians(rand() % 25 + 20);
    _float x = cosf(theta) * sinf(phi);
    _float y = cosf(phi);
@@ -64,7 +64,7 @@ void CHealthBall::Priority_Update(_float fTimeDelta)
     if (fDist < 15 && m_bStop)
         m_pTransformCom->Set_MoveSpeed(20.f);
 
-    if (fDist < 20.f) 
+    if (fDist < 20.f ) 
     {
         DirToPlayer = XMVector3Normalize(DirToPlayer);
         m_pTransformCom->GO_Dir(fTimeDelta, DirToPlayer);
@@ -206,5 +206,4 @@ void CHealthBall::Free()
     __super::Free();
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pVIBufferCom);
-    static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"CuTrail"))->ReleaseTrail(m_iTrailIndex);
 }

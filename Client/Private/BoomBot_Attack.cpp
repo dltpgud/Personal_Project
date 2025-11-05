@@ -72,7 +72,7 @@ void CBoomBot_Attack::Make_Bullet()
     Desc.iSkillType = CSkill::STYPE_STURN;
     Desc.fScale     = _float2{0.2f, 0.2f};
     Desc.fClolor[CSkill::COLOR::CSTART] = _float4(0.f, 0.f, 0.f, 0.f);
-    Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.1f, 1.f, 1.f); 
+    Desc.fClolor[CSkill::COLOR::CEND]   = _float4(1.f, 0.3f, 1.f, 1.f); 
     Desc.fTrailLength = 3.f;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              TEXT("Prototype GameObject_Bullet"), &Desc);

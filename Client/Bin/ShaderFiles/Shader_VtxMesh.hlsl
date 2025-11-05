@@ -112,7 +112,7 @@ PS_OUT PS_NONOUTLINE(PS_IN In)
     
     Out.vDiffuse = vMtrlDiffuse;
 
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.3f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vector(0.f, 0.f, 0.f, 0.f);
     Out.vRim = 0.f;
@@ -202,7 +202,7 @@ PS_OUT PS_WALL(PS_IN In)
     
     Out.vDiffuse = vDiffuse;
     Out.vRim = 0.f;
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.6f);
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
     Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
     Out.vEmissive = vEmissive;
     Out.vAmbient = vector(1.3f, 1.f, 1.f, 1.f);

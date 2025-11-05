@@ -10,23 +10,17 @@ protected:
 
 public:
 
-    virtual HRESULT Initialize(void* pArg) PURE;
-
     virtual void Update(_float fTimeDelta) PURE;
 
     virtual HRESULT Render(class CShader* pShader) PURE;
 
     virtual HRESULT Trigger_Effect(void* pArg, _float fTimeDelta) PURE;
 
-    virtual void Clear_EffectPlan() {};
-
-    virtual void Register_EffectPlan(_uint iEffectID, _float fDelayTime, _float fLifeTime,
-                                     const _float4x4* pTransform) {};
-
-    virtual void Register_EffectPlanOncePtr(_uint iEffectID, _float fDelayTime, _float fLifeTime,
-                                            const _float4x4* pTransform) {};
-
-    virtual _bool IsNoAlive() const {return false;};
+protected:
+    virtual HRESULT Initialize(void* pArg) PURE;
+    HRESULT CreateStructuredBuffer(_uint elementCount, _uint stride, ID3D11Buffer** outBuffer,ID3D11ShaderResourceView** outSRV, ID3D11UnorderedAccessView** outUAV, const void* initData = nullptr) ;
+    HRESULT CreateRawBuffer(_uint byteWidth, ID3D11Buffer** outBuffer, ID3D11UnorderedAccessView** outUAV, _bool allowDrawIndirect = false);
+    HRESULT Create_CS(_wstring strFilePath, _string strEntryPoint, ID3D11ComputeShader** ppComputeShader);
 
 protected:
     ID3D11Device* m_pDevice = nullptr;
@@ -37,4 +31,4 @@ public:
     virtual void Free() override;
 
 };
-END
+END 

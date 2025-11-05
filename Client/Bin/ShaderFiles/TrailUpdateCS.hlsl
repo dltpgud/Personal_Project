@@ -1,10 +1,4 @@
-//------------------------------------------------------------------------------
-// TrailUpdateCS.hlsl 
-//------------------------------------------------------------------------------
-//
-//------------------------------------------------------------------------------
 
-// 공통 상수 버퍼
 cbuffer CS_PERFRAME : register(b0)
 {
     float dt;
@@ -20,7 +14,6 @@ cbuffer CS_PERFRAME : register(b0)
     float2 _pad0;
 };
 
-// 구조체
 struct TrailPoint
 {
     float3 pos;
@@ -31,14 +24,14 @@ struct TrailPoint
 struct TrailHeader
 {
     float width;
-    float3 _pad0; // align to 16 bytes
+    float3 _pad0; 
     uint active;
     uint head;
     uint count;
     uint first;
     uint frameIndex;
-    uint generation; // ✅ 세대 번호 (C++과 일치)
-    uint2 _pad1; // align to 16 bytes
+    uint generation; 
+    uint2 _pad1; 
 };
 
 struct SpawnReq
@@ -53,28 +46,24 @@ struct SpawnReq
     uint frameIndex;
     uint isSegment;
     float3 tailPos;
-    uint generation; // ✅ 세대 번호 (C++과 일치)
+    uint generation; 
 };
-
-
 
 cbuffer CS_PERFRAME_Init : register(b1)
 {
-    uint maxTrail; // 최대 트레일 수
-    uint maxPointsTrail; // 최대 포인트 수
-    uint trailInx; // 초기화할 트레일 인덱스
-    float lTime; // 트레일의 생명 시간
+    uint maxTrail; 
+    uint maxPointsTrail; 
+    uint trailInx; 
+    float lTime; 
     float3 padding;
 };
 
-
-// 리소스
 StructuredBuffer<TrailPoint> g_In : register(t0);
 StructuredBuffer<SpawnReq> g_Spawn : register(t1);
 RWStructuredBuffer<TrailPoint> g_Out : register(u0);
 RWStructuredBuffer<TrailHeader> g_Header : register(u1);
 RWStructuredBuffer<TrailPoint> g_Out2 : register(u2);
-// 링버퍼에 포인트를 푸시하는 함수
+
 void PushPoint(inout TrailHeader header, uint base, TrailPoint p, uint maxPts)
 {
     uint writeIdx = header.head % maxPts;
@@ -87,7 +76,6 @@ void PushPoint(inout TrailHeader header, uint base, TrailPoint p, uint maxPts)
         header.first = (header.first + 1) % maxPts;
 }
 
-// 메인 커널
 [numthreads(64, 1, 1)]
 void CSMain(uint3 gid : SV_DispatchThreadID)
 {
@@ -98,11 +86,8 @@ void CSMain(uint3 gid : SV_DispatchThreadID)
     uint base = trailId * maxPointsPerTrail;
     TrailHeader header = g_Header[trailId];
 
-    // === (0) 스폰 요청 확인 ===
     SpawnReq sr = g_Spawn[trailId];
-
-
-    // === (1) 기존 포인트 fade ===
+    
     bool anyAlive = false;
     [loop]
     for (uint i = 0; i < maxPointsPerTrail; ++i)
@@ -118,10 +103,9 @@ void CSMain(uint3 gid : SV_DispatchThreadID)
                 anyAlive = true;
         }
 
-        g_Out[idx] = tp; // ping-pong 복사
+        g_Out[idx] = tp; 
     }
-
-    // === (2) 새 스폰 요청 처리 ===
+    
     if (sr.valid == 1)
     {
         if (sr.width > 0.0f)
@@ -132,7 +116,6 @@ void CSMain(uint3 gid : SV_DispatchThreadID)
         header.generation = sr.generation;
         if (sr.isSegment == 1)
         {
-            // 세그먼트 포인트 추가
             TrailPoint p0 = { sr.headPos, lifeTime, sr.color };
             TrailPoint p1 = { sr.tailPos, lifeTime, sr.color };
             PushPoint(header, base, p0, maxPointsPerTrail);
@@ -141,7 +124,6 @@ void CSMain(uint3 gid : SV_DispatchThreadID)
         }
         else
         {
-            // 스티칭을 위한 트레일 포인트 추가
             TrailPoint targetP;
             targetP.pos = sr.headPos;
             targetP.life = max(sr.addLife > 0 ? sr.addLife : lifeTime, 0.0f);
@@ -172,30 +154,26 @@ void CSMain(uint3 gid : SV_DispatchThreadID)
             anyAlive = true;
         }
     }
-
-    // === (3) 완전 소멸 시 초기화 ===
+    
     if (!anyAlive)
     {
-        // 헤더 초기화
         header.active = 0;
         header.count = 0;
         header.head = 0;
         header.first = 0;
         header.frameIndex = 0;
 
-        // 트레일 포인트 초기화
         [loop]
         for (uint i = 0; i < maxPointsPerTrail; ++i)
         {
             TrailPoint tp;
-            tp.pos = float3(0, 0, 0); // 위치 초기화
-            tp.life = 0.0f; // 생명 초기화
-            tp.color = float4(0, 0, 0, 0); // 색상 초기화 (투명)
+            tp.pos = float3(0, 0, 0); 
+            tp.life = 0.0f; 
+            tp.color = float4(0, 0, 0, 0); 
             g_Out[base + i] = tp;
         }
     }
 
-    // === (4) 헤더 기록 ===
     g_Header[trailId] = header;
 }
 

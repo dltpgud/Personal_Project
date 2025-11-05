@@ -15,11 +15,25 @@ HRESULT CThreadPool::Initialize(_uint iNumThread)
     for (_uint i = 0; i < m_iNumThread; ++i)
     {
         m_vecThread.emplace_back([this, i] {
-                this->InitTLS();
            this-> Work_thread(i); });
     }
 
     return S_OK;
+}
+
+void CThreadPool::Add_Jobs(vector<function<void()>>&& jobs)
+{
+
+        std::unique_lock<std::mutex> lock(m_Job_Mutex);
+
+        if (m_bStop.load())
+            throw std::runtime_error("enqueue on stopped ThreadPool");
+
+        // 여러 개의 작업을 한꺼번에 큐에 추가
+        for (auto& job : jobs) m_Job_queue.emplace(std::move(job));
+
+    // 모든 스레드에게 알림 (한꺼번에 깨어남)
+    m_Job_Condition.notify_all();
 }
 
 void CThreadPool::Work_thread(_int iIndex)
@@ -29,9 +43,10 @@ void CThreadPool::Work_thread(_int iIndex)
         function<void()> Job;
         {
             unique_lock<mutex> lock(m_Job_Mutex);
-            while (!m_bStop.load() && m_Job_queue.empty()) m_Job_Condition.wait(lock);
 
-            if (m_bStop.load())
+            m_Job_Condition.wait(lock, [this] { return m_bStop.load() || !m_Job_queue.empty(); });
+
+            if (m_bStop.load() && m_Job_queue.empty())
                 break;
 
             Job = move(m_Job_queue.front());
@@ -43,7 +58,6 @@ void CThreadPool::Work_thread(_int iIndex)
         m_vecThread_Working[iIndex]->store(false);
     }
 }
-
 _bool CThreadPool::Finish_Job()
 {
     unique_lock<mutex> jobLock(m_Job_Mutex);
@@ -58,11 +72,6 @@ _bool CThreadPool::Finish_Job()
     return true;
 }
 
-void CThreadPool::InitTLS()
-{
-    static atomic<unsigned __int32> SThreadID = 1;
-    g_ThreadlD = SThreadID.fetch_add(1);
-}
 
 CThreadPool* CThreadPool::Create(_uint iNumThread)
 {
@@ -79,9 +88,7 @@ CThreadPool* CThreadPool::Create(_uint iNumThread)
 
 void CThreadPool::Free()
 {
-    unique_lock<mutex> lock(m_Job_Mutex);
     m_bStop.store(true);
-
     m_Job_Condition.notify_all();
 
     for (thread& t : m_vecThread)
