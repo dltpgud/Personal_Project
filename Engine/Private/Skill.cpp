@@ -37,12 +37,14 @@ HRESULT CSkill::Initialize(void* pArg)
 
 void CSkill::Priority_Update(_float fTimeDelta)
 {
-	m_fTimeSum += fTimeDelta;
+   
+        m_fTimeSum += fTimeDelta;
 
-	if (m_fTimeSum > m_fLifeTime)
-	{
-      Dead_Rutine();
-	}
+        if (m_fTimeSum > m_fLifeTime)
+        {
+            Dead_Rutine();
+        }
+    
 }
 
 void CSkill::Update(_float fTimeDelta)
@@ -77,6 +79,7 @@ _uint CSkill::Get_ActorType()
 {
 	return m_iActorType;
 }
+
 
 
 void CSkill::Free()

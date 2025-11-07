@@ -36,7 +36,8 @@ public:
     virtual void Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
     virtual void Dead_Rutine() override;
-  
+    virtual HRESULT CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEndPos,
+                                 _vector vNomal = XMVectorZero(), void* pArg = nullptr) override;
 
 private:
     virtual HRESULT Add_Components() override;

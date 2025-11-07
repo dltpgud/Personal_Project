@@ -44,7 +44,7 @@ public:
   
     DECAL_DESC* Get_DecalDesc()  { return &m_DecalDesc; }
     _float Get_TimeSum() const {return m_fTimeSum;};
- 
+
 
 protected:
     _uint        m_iActorType{ 0 };
@@ -57,7 +57,7 @@ protected:
     _uint        m_iSkillType = { STYPE_NOMAL };
     _float4      m_Color[COLOR_END]{};
     _vector      m_vDir{};
-    
+
     DECAL_DESC   m_DecalDesc;
 
 public:
