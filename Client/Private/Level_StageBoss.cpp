@@ -110,7 +110,7 @@ HRESULT CLevel_StageBoss::Ready_Layer_Map(const _wstring& pLayerTag)
                                        L"../Bin/Data/Map/SetMap_Boss_ani.dat", &Desc)))
         return E_FAIL;
 
-    if (FAILED(Load_to_Next_Map_Wall(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_WALL",
+    if (FAILED(Load_to_Next_Map_NonaniObj(LEVEL_BOSS, pLayerTag, L"Prototype GameObject_WALL",
                                      L"../Bin/Data/Map/SetMap_Boss_Wall.dat", &Desc)))
         return E_FAIL;
 

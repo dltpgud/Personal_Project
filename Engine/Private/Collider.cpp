@@ -99,6 +99,7 @@ _bool CCollider::IsInside(const _float3& pos)
 {
     return m_pBounding->IsInside(pos);
 }
+
 _float3 CCollider::Get_iCurCenter() const
 {
 	return m_pBounding->Get_iCurCenter();
@@ -114,10 +115,6 @@ CBounding* CCollider::Get_Bounding() const
     return m_pBounding;
 }
 
-void CCollider::Get_OctreeAABB(_float3& outMin, _float3& outMax) const
-{
-    m_pBounding->Get_OctreeAABB(outMin, outMax);
-}
 
 void CCollider::Set_Info(void* pArg)
 {

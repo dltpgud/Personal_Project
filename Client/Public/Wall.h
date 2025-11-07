@@ -27,6 +27,7 @@ public:
     virtual HRESULT Render() override;
     virtual HRESULT Render_Shadow() override;
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
+    virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat, _uint iLevel);
     virtual HRESULT CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEndPos, _vector vNomal = XMVectorZero(),
                                  void* pArg = nullptr);
 
@@ -36,9 +37,9 @@ private:
     _float4 m_fDoorEmissiveColor{};
     _wstring m_pModelName{};
     _float3 m_fExtend;
+    _uint m_wModelLevel{};
 
 private:
-    virtual HRESULT Add_Components() override;
     HRESULT Bind_ShaderResources();
 
 public:

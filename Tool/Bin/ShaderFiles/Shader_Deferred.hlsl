@@ -274,7 +274,8 @@ float Compute_OutLine(float2 vTexcoord)
     float dDown = g_DepthTexture.Sample(LinearSamplerClamp, vTexcoord + dy).r;
 
     const float depthEdgeLimit = 0.0015f;
-    bool depthEdge = ( abs(depthCenter - dLeft) > depthEdgeLimit ||  abs(depthCenter - dRight) > depthEdgeLimit || abs(depthCenter - dUp) > depthEdgeLimit || abs(depthCenter - dDown) > depthEdgeLimit );
+    bool depthEdge = ( abs(depthCenter - dLeft) > depthEdgeLimit ||  abs(depthCenter - dRight) > depthEdgeLimit
+    || abs(depthCenter - dUp) > depthEdgeLimit || abs(depthCenter - dDown) > depthEdgeLimit );
  
     float dotL = dot(nMid, nLeft);
     float dotR = dot(nMid, nRight);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "NonAniObj.h"
 #include "GameInstance.h"
-
+#include "ProxyObject.h"
 CNonAni::CNonAni(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject {pDevice, pContext}
 {
 }
@@ -89,6 +89,7 @@ HRESULT CNonAni::Render()
 void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
      m_wModel = protoModel;
+    m_wModelLevel = ILevel;
     if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
     {
@@ -100,20 +101,25 @@ void CNonAni::Set_Model(const _wstring& protoModel, _uint ILevel)
         m_iPass = 1;
     else
         m_iPass = 0;
-
-    CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
-    m_pModelCom->Center_Ext(&AABBDesc.vCenter, &AABBDesc.vExtents);
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"), TEXT("Com_Collider"),
-                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &AABBDesc)))
-        return ;
 }
 
-void CNonAni::Set_InstaceBuffer(const vector<_matrix>& worldmat)
+void CNonAni::Set_InstaceBuffer(const vector<_matrix>& worldmat, _uint iLevel)
 {
    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMeshIst"), TEXT("Com_Shader"),
                                  reinterpret_cast<CComponent**>(&m_pShaderCom))))
    return ;
+
   m_pModelCom->Set_InstanceBuffer(worldmat);
+
+  for (_uint i = 0; i < worldmat.size(); ++i) {
+      CProxyObject::MashInstanceDataCPU Desc{};
+      Desc.CuriLevelIndex = m_wModelLevel;
+      Desc.ModelTag = m_wModel;
+      Desc.WorldMatrix = worldmat[i];
+      if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(iLevel, TEXT("Layer_Proxy"), TEXT("Proto GameObject_Proxy"),
+                                                          &Desc)))
+         return;
+  }
 }
 
 HRESULT CNonAni::Bind_ShaderResources()

@@ -201,6 +201,7 @@
     <ClInclude Include="..\Public\BossIntroBG.h" />
     <ClInclude Include="..\Public\Bullet.h" />
     <ClInclude Include="..\Public\CHEST.h" />
+    <ClInclude Include="..\Public\ProxyObject.h" />
     <ClInclude Include="..\Public\DOOR.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -321,6 +322,7 @@
     <ClCompile Include="..\Private\BossIntroBG.cpp" />
     <ClCompile Include="..\Private\Bullet.cpp" />
     <ClCompile Include="..\Private\CHEST.cpp" />
+    <ClCompile Include="..\Private\ProxyObject.cpp" />
     <ClCompile Include="..\Private\DOOR.cpp" />
     <ClCompile Include="..\Private\Camera_Free.cpp" />
     <ClCompile Include="..\Private\Cursor.cpp" />

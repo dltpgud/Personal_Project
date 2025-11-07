@@ -142,6 +142,39 @@ vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord);
     return Out;
 }
 
+PS_OUT PS_WALL(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+	
+    vector vMtrlDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
+    vector vMatEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
+    
+    if (vMtrlDiffuse.a <= 0.3f)
+        discard;
+
+    vector vEmissive;
+    vector vDiffuse;
+    if (true == g_bDoorEmissive)
+    {
+        vDiffuse.rgb = float3(0.1f, 0.1f, 0.1f);
+        vEmissive = vMatEmissive * g_DoorEmissiveColor;
+    }
+    else
+    {
+        vDiffuse = vMtrlDiffuse;
+        vEmissive = vector(0.f, 0.f, 0.f, 0.f);
+    }
+    
+    Out.vDiffuse = vDiffuse;
+    Out.vRim = 0.f;
+    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    Out.vDepth = vector(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w / g_fCamFar, 0.f, 0.f);
+    Out.vEmissive = vEmissive;
+    Out.vAmbient = vector(1.3f, 1.f, 1.f, 1.f);
+    Out.vBloom = vector(vEmissive.rgb, In.vProjPos.w / g_fCamFar);
+    return Out;
+}
+
 
 technique11 DefaultTechnique
 {
@@ -169,7 +202,7 @@ technique11 DefaultTechnique
 
     }
 
-    pass LightDepth
+    pass LightDepth //2
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -179,4 +212,18 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_LIGHTDEPTH();
     }
+
+
+    pass DefaultPass3 //3
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+   
+        VertexShader = compile vs_5_0 VSINST_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_WALL();
+
+    }
+
 }

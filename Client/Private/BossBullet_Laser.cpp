@@ -116,7 +116,7 @@ HRESULT CBossBullet_Laser::Render()
             "g_DiffuseTexture")))
             return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(6)))
+        if (FAILED(m_pShaderCom->Begin(5)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
