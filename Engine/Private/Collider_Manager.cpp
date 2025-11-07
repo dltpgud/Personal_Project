@@ -426,10 +426,9 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash_Collison(_float fTimedelta)
                         Desc->vNormal = vNormal;
                         Desc->vPos = vWorldPos;
                         m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
-
+                        static_cast<CSkill*>(SkillObj)->CreateEffect(XMVectorZero(), XMVectorZero(), vWorldPos);
                         static_cast<CSkill*>(SkillObj)->Dead_Rutine();
-                        static_cast<CSkill*>(SkillObj)->CreateEffect(XMVectorZero(), XMVectorZero(), vWorldPos,
-                                                                     vNormal);
+                        
                         continue;
                     }
                 }
@@ -458,8 +457,9 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash_Collison(_float fTimedelta)
                               Desc->vNormal = vNormalExact;
                               Desc->vPos = vExactHit;
                               m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
-
+                              static_cast<CSkill*>(SkillObj)->CreateEffect(RayPos, RayDir, vExactHit);
                               static_cast<CSkill*>(SkillObj)->Dead_Rutine();
+                          
                               continue;
                             }
                         }

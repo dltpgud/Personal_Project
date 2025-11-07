@@ -111,11 +111,28 @@ void CBullet::Dead_Rutine()
 
 }
 
+HRESULT CBullet::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEndPos, _vector vNomal, void* pArg)
+{
+    _float3 fPos;
+    XMStoreFloat3(&fPos, RayEndPos);
+    CEffect_TrailStream::SPAWN_REQUEST req{};
+    req.Valid = m_iLifeState == OBJ_POOL ? 0 : 1;
+    req.trailIndex = m_iTrailIndex;
+    req.headPos = fPos;
+    req.addLife = 1.0f;
+    req.width = m_iSkillType == BOSS_MONSTER ? 3.5f : 0.9f;
+    req.color = m_Color[CSkill::COLOR::CEND];
+    req.frameIndex = 1;
+    req.isSegment = 0;
+    m_pGameInstance->Trigger_Effect(L"SpriteTexTrail", &req);
+    return S_OK;
+}
+
 HRESULT CBullet::Add_Components()
 {
     CBounding_Sphere::BOUND_SPHERE_DESC CBounding_Sphere{};
     _float3 Center{}, Extents{};
-    CBounding_Sphere.fRadius = 0.3f;
+    CBounding_Sphere.fRadius = 0.4f;
     CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
 
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"), TEXT("Com_Collider"),
