@@ -52,7 +52,7 @@
 #include "Decal.h"
 #include "HealthBall.h"
 #include "ShockWave_Bullet.h"
-
+#include "ProxyObject.h"
 _uint APIENTRY LoadingMain(void* pArg)
 {
 	CoInitializeEx(nullptr, 0); // 컴객체를 한 번 초기화 해준다.
@@ -144,7 +144,8 @@ void CLoader::Output_LoadingState()
 HRESULT CLoader::Loading_For_ProtoObject()
 {
 #pragma region Map
-   
+    m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Proto GameObject_Proxy"), CProxyObject::Create(m_pDevice, m_pContext)); });
+
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Proto GameObject_Terrain"), CTerrain::Create(m_pDevice, m_pContext)); });
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_NonAniObj"),CNonAni::Create(m_pDevice, m_pContext)); });

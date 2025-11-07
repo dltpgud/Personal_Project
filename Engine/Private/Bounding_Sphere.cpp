@@ -50,14 +50,6 @@ _bool CBounding_Sphere::IsInside(const _float3& pos)
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
 }
 
-void CBounding_Sphere::Get_OctreeAABB(_float3& outMin, _float3& outMax) const
-{
-    outMin = {m_pBoundDesc->Center.x - m_pBoundDesc->Radius, m_pBoundDesc->Center.y - m_pBoundDesc->Radius,
-              m_pBoundDesc->Center.z - m_pBoundDesc->Radius};
-    outMax = {m_pBoundDesc->Center.x + m_pBoundDesc->Radius, m_pBoundDesc->Center.y + m_pBoundDesc->Radius,
-              m_pBoundDesc->Center.z + m_pBoundDesc->Radius};
-}
-
 _bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos)
 {
 	_bool		isColl = { false };

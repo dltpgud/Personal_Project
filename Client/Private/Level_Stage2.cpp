@@ -112,7 +112,7 @@ HRESULT CLevel_Stage2::Ready_Layer_Map(const _wstring& pLayerTag)
                                     L"../Bin/Data/Map/SetMap_Stage2_ani.dat", &Desc)))
       return E_FAIL;
    
-   if (FAILED(Load_to_Next_Map_Wall(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_WALL",
+   if (FAILED(Load_to_Next_Map_NonaniObj(LEVEL_STAGE2, pLayerTag, L"Prototype GameObject_WALL",
                                     L"../Bin/Data/Map/SetMap_Stage2_Wall.dat", &Desc)))
        return E_FAIL;
 

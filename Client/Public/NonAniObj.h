@@ -15,6 +15,7 @@ private:
     CNonAni(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
     CNonAni(const CNonAni& Prototype);
     virtual ~CNonAni() = default;
+  
 
 public:
    
@@ -26,13 +27,18 @@ public:
     virtual HRESULT Render_Shadow() override;
     virtual HRESULT Render() override;
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
-    virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat);
+    virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat, _uint iLevel);
 
 private:
     CShader* m_pShaderCom = {nullptr};
     CModel* m_pModelCom = {nullptr};
     _wstring m_wModel{};
+    _uint m_wModelLevel{};
     _uint m_iPass{ 0 };
+
+
+
+
 private:
 
     HRESULT Bind_ShaderResources();

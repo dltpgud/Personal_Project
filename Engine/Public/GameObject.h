@@ -47,7 +47,9 @@ public:
     virtual void Set_Model(const _wstring& protoModel, _uint iLevel = 0)
     {
     }
-    virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat){}
+    virtual void Set_InstaceBuffer(const vector<_matrix>& worldmatm, _uint iLevel )
+    {
+    }
     _int  Get_ObjectType()
     {
         return m_iObjectType;

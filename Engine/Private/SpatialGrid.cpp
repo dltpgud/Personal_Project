@@ -147,11 +147,11 @@ void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGam
 {
     out.clear();
     out.reserve(64);  
-    int ix, iz;
+    _int ix, iz;
     if (!WorldToCell(pos, ix, iz))
         return;
 
-    int r = static_cast<int>(ceil(range / m_CellSize));
+    _int r = static_cast<int>(ceil(range / m_CellSize));
     for (int dz = -r; dz <= r; ++dz)
     {
         for (int dx = -r; dx <= r; ++dx)

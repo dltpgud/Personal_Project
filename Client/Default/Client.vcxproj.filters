@@ -259,6 +259,9 @@
     <Filter Include="02.GameObjects\02.Item\HealthBall">
       <UniqueIdentifier>{87f92224-8313-417a-89d5-e1e4de5e9548}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.GameObjects\01. Map\Proxy">
+      <UniqueIdentifier>{3d3ea761-8cc6-4f43-80aa-ceeb4487e0a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -579,6 +582,9 @@
     <ClInclude Include="..\Public\ShockWave_Bullet.h">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\ProxyObject.h">
+      <Filter>02.GameObjects\01. Map\Proxy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -886,6 +892,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ShockWave_Bullet.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\Boss\ShockWave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ProxyObject.cpp">
+      <Filter>02.GameObjects\01. Map\Proxy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

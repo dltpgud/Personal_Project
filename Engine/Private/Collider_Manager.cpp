@@ -105,11 +105,6 @@ HRESULT Collider_Manager::Check_Inetrect_Player()
 
         iter->Get_Collider()->CollUpdate(pPlayer);
 
-        for (auto& monster : m_GameObjeList[COL_MONSTER])
-        {
-            iter->Get_Collider()->CollUpdate(dynamic_cast<CActor*>(monster));
-        }
-
         Safe_Release(iter);
     }
 
@@ -294,8 +289,8 @@ HRESULT Collider_Manager::Player_To_Mash_Collison_for_Decal()
     {
         if (!Obj)
             continue;
-
-        if (auto* pBuf = dynamic_cast<CVIBuffer_Terrain*>(Obj->Find_Component(TEXT("Com_Buffer"))))
+        auto* pBuf = dynamic_cast<CVIBuffer_Terrain*>(Obj->Find_Component(TEXT("Com_Buffer")));
+        if (Obj&& pBuf)
         {
             if (!pTerrainBuffer)
             {

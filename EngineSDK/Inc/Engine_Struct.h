@@ -44,7 +44,7 @@ namespace Engine
         int DecalType; // SSD or Box
         int ProtoIndex; 
     };
-
+   
     typedef struct AABB
     {
         _float3 min;

@@ -17,8 +17,6 @@ public:
    
     HRESULT Load_to_Next_Map_NonaniObj(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
                                            const _tchar* strProtoMapPath, void* Arg = nullptr);
-    HRESULT Load_to_Next_Map_Wall(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
-                                      const _tchar* strProtoMapPath, void* Arg = nullptr);
     HRESULT Load_to_Next_Map_AniOBj(const _uint& iLevelIndex, const _wstring& strLayerTag, const _wstring& strProto,
                                          const _tchar* strProtoMapPath, void* Arg = nullptr);
     HRESULT Load_to_Next_Map_Monster(const _uint& iLevelIndex, const _wstring& strLayerTag,const _wstring& strProto,

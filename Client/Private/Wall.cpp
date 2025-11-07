@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Wall.h"
 #include "GameInstance.h"
+#include "ProxyObject.h"
 CWall::CWall(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -20,9 +21,6 @@ HRESULT CWall::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
-    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
-        return E_FAIL;
     return S_OK;
 }
 
@@ -39,10 +37,6 @@ void CWall::Update(_float fTimeDelta)
 void CWall::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
-        return;
-
-    if (false == m_pGameInstance->isIn_Frustum_WorldSpace(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION),
-                                                          m_fExtend.x* m_fExtend.y/2))
         return;
 
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
@@ -82,7 +76,7 @@ HRESULT CWall::Render()
         if (FAILED(m_pShaderCom->Bind_RawValue("g_bDoorEmissive", &bEmissive, sizeof(_bool))))
                     return E_FAIL;
 
-        if (FAILED(m_pShaderCom->Begin(5)))
+        if (FAILED(m_pShaderCom->Begin(3)))
             return E_FAIL;
 
         m_pModelCom->Render(i);
@@ -114,6 +108,7 @@ HRESULT CWall::Render_Shadow()
 
 void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
+    m_wModelLevel = ILevel;
     m_pModelName = protoModel;
     if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
@@ -126,16 +121,27 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
     else if (ILevel == LEVEL_STAGE2)
         m_fDoorEmissiveColor = { 1.f,0.f,0.f, 1.f };
    
-    _float3 fCenter{};
-    m_pModelCom->Center_Ext(&fCenter, &m_fExtend);
-
-    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = m_fExtend;
-    OBBDesc.vCenter = fCenter;
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
-                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
-
         return;
+}
+
+void CWall::Set_InstaceBuffer(const vector<_matrix>& worldmat, _uint iLevel)
+{
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMeshIst"), TEXT("Com_Shader"),
+                                      reinterpret_cast<CComponent**>(&m_pShaderCom))))
+        return;
+
+    m_pModelCom->Set_InstanceBuffer(worldmat);
+
+    for (_uint i = 0; i < worldmat.size(); ++i)
+    {
+        CProxyObject::MashInstanceDataCPU Desc{};
+        Desc.CuriLevelIndex = m_wModelLevel;
+        Desc.ModelTag = m_pModelName;
+        Desc.WorldMatrix = worldmat[i];
+        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(iLevel, TEXT("Layer_Proxy"), TEXT("Proto GameObject_Proxy"),
+                                                            &Desc)))
+            return;
+    }
 }
 
 HRESULT CWall::CreateEffect(_vector RayStartPos, _vector RayDir,_vector RayEndPos, _vector vNomal, void* pArg)
@@ -144,14 +150,7 @@ HRESULT CWall::CreateEffect(_vector RayStartPos, _vector RayDir,_vector RayEndPo
     return S_OK;
 }
 
-HRESULT CWall::Add_Components()
-{
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
-                                      reinterpret_cast<CComponent**>(&m_pShaderCom))))
-        return E_FAIL;
 
-    return S_OK;
-}
 
 HRESULT CWall::Bind_ShaderResources()
 {
