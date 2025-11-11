@@ -85,7 +85,7 @@ CStateMachine::Result CMecanoBot_Move::StateMachine_Playing(_float fTimeDelta, R
 
         if (*m_fLength > 13.f || isFall)
         {
-            if (m_pGameInstance->Get_Player()->Get_onCell())
+            if (m_pGameInstance->Get_Player()->Get_onCell() && *m_fLength > 7)
             {
                m_pGameInstance->Add_Job(
                    [&]()

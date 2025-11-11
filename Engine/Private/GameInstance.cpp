@@ -98,7 +98,6 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 
 void CGameInstance::Update(_float fTimeDelta)
 {
-    
 	m_pInput_Device->Update_InputDev();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
@@ -118,7 +117,6 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pCollider_Manager->All_Collison_check(fTimeDelta);
 
 	m_pLevel_Manager->Update(fTimeDelta);
-
 }
 
 void CGameInstance::Draw()

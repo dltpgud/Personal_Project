@@ -71,7 +71,7 @@ CStateMachine::Result CJetFly_Move::StateMachine_Playing(_float fTimeDelta, RIM_
    
     if (*m_fLength > 20.f)
     {
-        if (m_pGameInstance->Get_Player()->Get_onCell())
+        if (m_pGameInstance->Get_Player()->Get_onCell() && *m_fLength > 10)
         {
           m_pGameInstance->Add_Job(
               [&]()
