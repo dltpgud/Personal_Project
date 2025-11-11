@@ -20,8 +20,6 @@ Collider_Manager::Collider_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT Collider_Manager::Initialize()
 {
-    m_SpatialGrid.SetWorld({-20.f,-40.f}, {300.f, 300.f}, 10);
-
 
 #ifdef _DEBUG
     m_pBatch = new PrimitiveBatch<VertexPositionColor>(m_pContext);
@@ -552,21 +550,20 @@ HRESULT Collider_Manager::Monster_To_Monster_Collision()
 
     const _float pushFactor = 0.3f;
 
-    // 셀 인덱스 순서대로만 검사 → 중복 제거
     const int cellCount = static_cast<int>(grid.size());
     for (int i = 0; i < cellCount; ++i)
     {
         auto& cell = grid[i];
-        if (cell.dynamics.empty())
+        if (cell.Obj.empty())
             continue;
 
-        const size_t count = cell.dynamics.size();
+        const size_t count = cell.Obj.size();
         for (size_t a = 0; a < count; ++a)
         {
-            if (!cell.dynamics[a])
+            if (!cell.Obj[a])
                 continue;
          
-            CActor* pA = dynamic_cast<CActor*>(cell.dynamics[a]);
+            CActor* pA = dynamic_cast<CActor*>(cell.Obj[a]);
             if (!pA)
                 continue;
 
@@ -580,7 +577,7 @@ HRESULT Collider_Manager::Monster_To_Monster_Collision()
 
             for (size_t b = a + 1; b < count; ++b)
             {
-                CActor* pB = dynamic_cast<CActor*>(cell.dynamics[b]);
+                CActor* pB = dynamic_cast<CActor*>(cell.Obj[b]);
                 if (!pB)
                     continue;
 
@@ -630,10 +627,10 @@ HRESULT Collider_Manager::Monster_To_Monster_Collision()
                     continue; // 이미 처리된 셀은 스킵 (중복 제거)
 
                 auto& neighbor = grid[neighborCellIdx];
-                if (neighbor.dynamics.empty())
+                if (neighbor.Obj.empty())
                     continue;
 
-                for (auto* objB : neighbor.dynamics)
+                for (auto* objB : neighbor.Obj)
                 {
                     CActor* pB = dynamic_cast<CActor*>(objB);
                     if (!pB)

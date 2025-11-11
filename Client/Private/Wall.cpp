@@ -138,7 +138,7 @@ void CWall::Set_InstaceBuffer(const vector<_matrix>& worldmat, _uint iLevel)
         Desc.CuriLevelIndex = m_wModelLevel;
         Desc.ModelTag = m_pModelName;
         Desc.WorldMatrix = worldmat[i];
-        if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(iLevel, TEXT("Layer_Proxy"), TEXT("Proto GameObject_Proxy"),
+       if (FAILED(m_pGameInstance->Add_GameObject_To_Layer(iLevel, TEXT("Layer_Proxy"), TEXT("Proto GameObject_Proxy"),
                                                             &Desc)))
             return;
     }

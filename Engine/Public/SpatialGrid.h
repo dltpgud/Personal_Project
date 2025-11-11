@@ -10,8 +10,8 @@ class CSpatialGrid final : public CBase
 public:
     struct Cell
     {
-        vector<CGameObject*> statics;
-        vector<CGameObject*> dynamics;
+
+        vector<CGameObject*> Obj;
     };
 
 public:

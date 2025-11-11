@@ -6,22 +6,21 @@ void CSpatialGrid::ClearDynamic()
 {
     for (auto& obj : m_DynamicGrid)
     {
-        obj.dynamics.clear(); // 동적 객체 리스트 비우기
-        obj.statics.clear();  // 정적 객체 리스트 비우기
+        obj.Obj.clear(); // 동적 객체 리스트 비우기
+
     }
 }
 void CSpatialGrid::Clear()
 {
      for (auto& obj : m_DynamicGrid)
      { 
-         obj.dynamics.clear();
-         obj.statics.clear();
+         obj.Obj.clear();
+
      }
 
     for (auto& obj : m_StaticGrid)
-     {
-         obj.dynamics.clear();
-        obj.statics.clear();
+    {
+         obj.Obj.clear();
     }
 }
 void CSpatialGrid::SetWorld(const _float2& vMin, const _float2& vMax, _float cellSize)
@@ -66,14 +65,14 @@ void CSpatialGrid::BuildStaticGrid(const list<CGameObject*>& staticObjs)
 
             for (_int z = minZ; z <= maxZ; ++z)
             {
-                for (_int x = minX; x <= maxX; ++x) { m_StaticGrid[CellIndex(x, z)].statics.push_back(obj); }
+                for (_int x = minX; x <= maxX; ++x) { m_StaticGrid[CellIndex(x, z)].Obj.push_back(obj); }
             }
         }
         else
         {
             _int ix, iz;
             if (WorldToCell(obj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), ix, iz))
-                m_StaticGrid[iz * m_GridW + ix].statics.push_back(obj);
+                m_StaticGrid[iz * m_GridW + ix].Obj.push_back(obj);
         }
     }
 }
@@ -87,7 +86,7 @@ void CSpatialGrid::UpdateDynamicGrid(const list<CGameObject*>& dynamicObjs)
         int ix, iz;
         if (WorldToCell(obj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), ix, iz))
         {
-            m_DynamicGrid[iz * m_GridW + ix].dynamics.push_back(obj);
+            m_DynamicGrid[iz * m_GridW + ix].Obj.push_back(obj);
         }
     }
 }
@@ -164,11 +163,11 @@ void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGam
             const Cell& dc = m_DynamicGrid[nz * m_GridW + nx];
 
             if (groupType == Collider_Manager::COL_MONSTER)
-                out.insert(out.end(), dc.dynamics.begin(), dc.dynamics.end());
+                out.insert(out.end(), dc.Obj.begin(), dc.Obj.end());
             else if (groupType == Collider_Manager::COL_STATIC)
-                out.insert(out.end(), sc.statics.begin(), sc.statics.end());
+                out.insert(out.end(), sc.Obj.begin(), sc.Obj.end());
             else if (groupType == Collider_Manager::COL_MONSTER_SKILL)
-                out.insert(out.end(), dc.dynamics.begin(), dc.dynamics.end());
+                out.insert(out.end(), dc.Obj.begin(), dc.Obj.end());
         }
     }
 }
