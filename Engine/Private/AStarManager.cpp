@@ -1,28 +1,64 @@
 // AStar_Manager.cpp
 #include "AStarManager.h"
 #include "Navigation.h"
-#include "GameInstance.h" 
+#include "GameInstance.h"
 
 CAStar_Manager::CAStar_Manager() : m_pGameInstance{CGameInstance::GetInstance()}
 {
     Safe_AddRef(m_pGameInstance);
 }
 
+void CAStar_Manager::Set_Mode(Mode mode)
+{
+    m_Mode = mode;
+}
+
 void CAStar_Manager::Request_Path(CNavigation* pOwner, _vector GolPos)
 {
     if (nullptr == m_pCells || nullptr == pOwner)
         return;
-    m_pGameInstance->Add_Job(
-        [this, pOwner, GolPos]()
-        {
-            // 1) 실제 A* 실행
-            
-            vector<_uint> path = this->FindPath_Internal(pOwner->Get_CurrentCellIndex(), pOwner->Find_Cell_ByPosition(GolPos));
 
-            // 2) 결과를 네비게이션 컴포넌트에 되돌려주기
-            //    여기서 바로 멤버에 넣어도 되는데, 네가 뮤텍스로 감쌀거면 OnPathReady 안에서 처리
-            pOwner->OnPathReady(path);
-        });
+    _uint start = pOwner->Get_CurrentCellIndex();
+    _uint goal = pOwner->Find_Cell_ByPosition(GolPos);
+
+    switch (m_Mode)
+    {
+    case Mode::SingleThread:
+    {
+        auto begin = std::chrono::high_resolution_clock::now();
+
+        vector<_uint> path = this->FindPath_Internal(start, goal);
+        pOwner->OnPathReady(path);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        double ms = std::chrono::duration<double, std::milli>(end - begin).count();
+
+        if (m_pGameInstance->Get_DIKeyDown(DIK_9))
+        std::cout << "[A* SingleThread] Time: " << ms << " ms\n";
+
+        break;
+    }
+
+    case Mode::ThreadPool:
+    {
+        auto begin = std::chrono::high_resolution_clock::now();
+
+        // ThreadPool job 하나만 넣기
+        m_pGameInstance->Add_Job(
+            [this, pOwner, start, goal, begin]()
+            {
+                vector<_uint> path = this->FindPath_Internal(start, goal);
+                pOwner->OnPathReady(path);
+
+                auto end = std::chrono::high_resolution_clock::now();
+                double ms = std::chrono::duration<double, std::milli>(end - begin).count();
+                if (m_pGameInstance->Get_DIKeyDown(DIK_9))
+                std::cout << "[A* ThreadPool] Time: " << ms << " ms\n";
+            });
+
+        break;
+    }
+    }
 }
 
 void CAStar_Manager::Start_AIUpdateLoop()
@@ -43,28 +79,55 @@ void CAStar_Manager::Start_AIUpdateLoop()
                     if (!m_bRunning)
                         break;
 
-                    // 작업 복사 후 비움
                     jobs.swap(m_pendingJobs);
                 }
 
-                // --- 여기서 한 번에 여러 Job 등록 ---
-                std::vector<std::function<void()>> tasks;
-                tasks.reserve(jobs.size());
-
-                for (auto& job : jobs)
+                if (m_Mode == Mode::SingleThread)
                 {
-                    tasks.emplace_back(
-                        [this, job]()
-                        {
-                            std::vector<_uint> path = FindPath_Internal(job.start, job.goal);
-                            job.pOwner->OnPathReady(path);
-                        });
+                    auto begin = std::chrono::high_resolution_clock::now();
+
+                    for (auto& job : jobs)
+                    {
+                        vector<_uint> path = FindPath_Internal(job.start, job.goal);
+                        job.pOwner->OnPathReady(path);
+                    }
+
+                    auto end = std::chrono::high_resolution_clock::now();
+                    double ms = std::chrono::duration<double, std::milli>(end - begin).count();
+                    if (m_pGameInstance->Get_DIKeyDown(DIK_9))
+                    std::cout << "[A* AIThread Single] Jobs: " << jobs.size() << "  Time: " << ms << " ms\n";
                 }
 
-                m_pGameInstance->Add_Jobs(std::move(tasks));
+                else if (m_Mode == Mode::ThreadPool)
+                {
+                    std::vector<std::function<void()>> tasks;
+                    tasks.reserve(jobs.size());
+
+                    for (auto& job : jobs)
+                    {
+                        tasks.emplace_back(
+                            [this, job]()
+                            {
+                                vector<_uint> path = FindPath_Internal(job.start, job.goal);
+                                job.pOwner->OnPathReady(path);
+                            });
+                    }
+
+                    auto begin = std::chrono::high_resolution_clock::now();
+
+                    m_pGameInstance->Add_Jobs(std::move(tasks));
+
+                    while (!m_pGameInstance->AllJobCompleted()) { std::this_thread::yield(); }
+
+                    auto end = std::chrono::high_resolution_clock::now();
+                    double ms = std::chrono::duration<double, std::milli>(end - begin).count();
+                    if (m_pGameInstance->Get_DIKeyDown(DIK_9))
+                    std::cout << "[A* AIThread ThreadPool] Jobs: " << jobs.size() << "  Time: " << ms << " ms\n";
+                }
             }
         });
 }
+
 void CAStar_Manager::Stop_AIUpdateLoop()
 {
     m_bRunning = false;
@@ -72,6 +135,7 @@ void CAStar_Manager::Stop_AIUpdateLoop()
     if (m_AIThread.joinable())
         m_AIThread.join();
 }
+
 HRESULT CAStar_Manager::Initialize_Prototype()
 {
     Start_AIUpdateLoop();
@@ -85,7 +149,6 @@ vector<_uint> CAStar_Manager::FindPath_Internal(_uint startIndex, _uint goalInde
         return empty;
     if (goalIndex >= m_pCells->size())
         return empty;
-
 
     priority_queue<AStarNode, std::vector<AStarNode>, std::greater<>> openList;
     unordered_map<_uint, float> costSoFar;
@@ -105,7 +168,7 @@ vector<_uint> CAStar_Manager::FindPath_Internal(_uint startIndex, _uint goalInde
 
         if (current.index == goalIndex)
         {
-            std::vector<_uint> path;
+            vector<_uint> path;
             _uint cur = goalIndex;
             while (cur != cameFrom[cur])
             {

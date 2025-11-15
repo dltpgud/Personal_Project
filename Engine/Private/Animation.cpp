@@ -61,7 +61,7 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
     if (m_fCurrentPosition >= m_fDuration)
     {
         if (isLoop) // 반복하는 애니메이션이라면
-        {
+        { 
             m_fCurrentPosition = 0.f;
             m_CallbackCheck.clear();
         }
@@ -85,6 +85,7 @@ _bool CAnimation::Update_TransformationMatrix(const vector<class CBone*>& Bones,
         m_Channels[i]->Update_TransformationMatrix(Bones, &m_iChannelKeyFrameIndices[i], fChannelAnimTime,
                                                    m_fChangingTime < m_fMotionChangingTIme, m_fMotionChangingTIme,
                                                    m_vLastKeyFrame[i]);
+
     return false;
 }
 

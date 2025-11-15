@@ -22,6 +22,7 @@ HRESULT CMonster::Initialize(void* pArg)
     Desc->iNumPartObjects = PART_END;
     Desc->Object_Type = GAMEOBJ_TYPE::ACTOR;
     Desc->iType = CActor::TYPE_MONSTER;
+    Desc->iHP = 1.f;
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 

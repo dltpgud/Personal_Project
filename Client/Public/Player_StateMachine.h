@@ -29,6 +29,7 @@ public:
         NODE_RUN,
         NODE_IDLE,
      
+        NODE_NONE,
         NODE_END
     };
 
@@ -58,7 +59,8 @@ private:
     _uint m_iPreviousState{}; 
     _uint m_iLastActiveState{}; 
 
-public:
+
+ public:
     static CPlayer_StateMachine* Create(void* pArg);
     virtual void Free();
 };

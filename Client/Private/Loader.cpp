@@ -42,7 +42,6 @@
 #include "ShootEffect.h"
 #include "Player_StateUI.h"
 #include "Player_ShootingStateUI.h"
-#include "PlayerBullet.h"
 #include "BossBullet_Berrle.h"
 #include "ShockWave.h"
 #include "BossBullet_Laser.h"
@@ -246,8 +245,6 @@ HRESULT CLoader::Loading_For_ProtoObject()
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_BossBullet_Berrle"),CBossBullet_Berrle::Create(m_pDevice, m_pContext));});
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_BossBullet_Laser"),CBossBullet_Laser::Create(m_pDevice, m_pContext));});
-
-    m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_PlayerBullet"),CPlayerBullet::Create(m_pDevice, m_pContext));});
 
     m_pGameInstance->Add_Job([this]() { m_pGameInstance->Add_Prototype(TEXT("Prototype GameObject_Bullet"),CBullet::Create(m_pDevice, m_pContext));});
   
@@ -589,7 +586,9 @@ HRESULT CLoader::Loading_For_Static_Texture()
   DECALDESC.MaxSpawnPerFrame = 2048;
   DECALDESC.FilePathFmt = TEXT("../Bin/Resources/Textures/Effect/BaseDecal%d.dds");
   DECALDESC.TextureCount = 8;
+ 
   m_pGameInstance->Add_EffectStream(TEXT("Base"), CEffect_DecalStream::Create(m_pDevice, m_pContext, &DECALDESC));
+      
 
     return S_OK;
 }
@@ -608,25 +607,25 @@ HRESULT CLoader::Loading_For_Preallocate()
     TrailTSpexdesc.iTotalSprite = 4;
     m_pGameInstance->Add_EffectStream(L"SpriteTexTrail", CEffect_TrailStream::Create(m_pDevice, m_pContext, &TrailTSpexdesc));
 
-    CBullet::CBULLET_DESC Bullet{};
-    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 200, &Bullet);
-  
-    CPlayerBullet::CPlayerBullet_DESC pBullet{};
-    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_PlayerBullet"), 200, &pBullet);
-    
+
     CEffect_TrailStream::TRAILSDESC Traildesc{};
-    Traildesc.maxTrails = 256;      // 동시에 존재할 수 있는 트레일 개수
+    Traildesc.maxTrails = 256;        // 동시에 존재할 수 있는 트레일 개수
     Traildesc.maxPointsPerTrail = 64; // 각 트레일에 저장될 포인트 개수
     Traildesc.fadeSpeed = 1.5f;       // Life 감소 속도
     Traildesc.lifeTime = 2.0f;        // 트레일이 사라지기까지의 시간
-    Traildesc.iPass = CEffect_TrailStream::RP_CURVE; 
+    Traildesc.iPass = CEffect_TrailStream::RP_CURVE;
     TrailTSpexdesc.Mode = CEffect_TrailStream::RM_CURVE;
     Traildesc.vTrailTexUVScale = {1.f, 2.f}; // UV 스크롤/타일링 계수
     m_pGameInstance->Add_EffectStream(L"CuTrail", CEffect_TrailStream::Create(m_pDevice, m_pContext, &Traildesc));
-   
+    
+    CBullet::CBULLET_DESC Bullet{};
+    auto fut1 = m_pGameInstance->Add_Job(
+        [&]() { m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_Bullet"), 200, &Bullet);});
+    
     CHealthBall::CHealthBall_DESC pHealthBall{};
-    m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_HealthBall"), 200, &pHealthBall);
-   
+    auto fut2 = m_pGameInstance->Add_Job(
+        [&]() { m_pGameInstance->Preallocate_GameObject(TEXT("Prototype GameObject_HealthBall"), 200, &pHealthBall);});
+
     CEffect_TrailStream::TRAILSDESC TrailTexdesc{};
     TrailTexdesc.maxTrails = 1024;       // 동시에 존재할 수 있는 트레일 개수
     TrailTexdesc.maxPointsPerTrail = 64; // 각 트레일에 저장될 포인트 개수
@@ -1115,9 +1114,6 @@ HRESULT CLoader::Loading_For_BossLevel()
                    TEXT("../Bin/Data/NonAni/ShockWave.dat"), PreTransformMatrix))))
 		    return E_FAIL;
 
-       ///if (FAILED(m_pGameInstance->Add_Prototype_Component(LEVEL_BOSS, TEXT("Proto_Component_Shock"),CModel::Create(m_pDevice, m_pContext, CModel::TYPE_NONANIM,
-       ///           TEXT("../Bin/Data/NonAni/Shock.dat"), PreTransformMatrix))))
-		//    return E_FAIL;
 #pragma endregion
 
 	m_strLoadingText = TEXT("로딩 완료되었습니다.");

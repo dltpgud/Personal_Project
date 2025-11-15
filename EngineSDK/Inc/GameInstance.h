@@ -217,6 +217,8 @@ public: /* For.ThreadPool */
     auto Add_Job(T&& f, Args&&... args) -> future<typename result_of<T(Args...)>::type>;
     void Add_Jobs(vector<function<void()>>&& jobs);
     _bool AllJobCompleted();
+
+
 #pragma endregion
 
 #pragma region Effect
@@ -252,6 +254,8 @@ private:
 	class CFrustum*					m_pFrustum		     = { nullptr };
     class CThreadPool*              m_pThreadPool        = { nullptr };
 	class CEffect_Manager*          m_pEffect_Manager    = { nullptr }; 
+
+
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;

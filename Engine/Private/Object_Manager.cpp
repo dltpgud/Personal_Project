@@ -136,6 +136,7 @@ void CObject_Manager::Preallocate(_wstring ProtoTag,  size_t count, void* desc)
 
 CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)
 {
+
 	auto iter = m_Prototypes.find(strPrototypeTag);
 
 	if(iter == m_Prototypes.end())
