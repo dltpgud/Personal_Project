@@ -93,7 +93,7 @@ CStateMachine::Result CGunPawn_Move::StateMachine_Playing(_float fTimeDelta, RIM
                   m_pParentObject->Get_Navigation()->Set_Taget(
                               m_pGameInstance->Get_Player()->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
               });
-
+       
             if (m_pParentObject->Get_Transform()->FollowPath(m_pParentObject->Get_Navigation(), fTimeDelta))
             {
                 if (false == isFall)

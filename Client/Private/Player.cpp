@@ -24,7 +24,7 @@ HRESULT CPlayer::Initialize(void* pArg)
     CActor::Actor_DESC Desc{};
 
     Desc.iNumPartObjects = PART_END;
-    Desc.fSpeedPerSec = 2.f; 
+    Desc.fSpeedPerSec = 16.f; 
     Desc.fRotationPerSec = XMConvertToRadians(60.f);
     Desc.JumpPower = 10.f; 
     Desc.iType = CActor::TYPE_PLAYER;

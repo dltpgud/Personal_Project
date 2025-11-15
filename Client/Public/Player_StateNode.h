@@ -32,16 +32,19 @@ protected:
 	virtual ~CPlayer_StateNode() = default;
 
 public:
-    virtual HRESULT Initialize(void* pArg);
-    virtual void State_Enter(_uint* pState, _uint* pPreState);// 상태에 진입
+    virtual void State_Enter(_uint* pState, _uint* pPreState);                          // 상태에 진입
     virtual _bool State_Processing(_float fTimedelta, _uint* pState, _uint* pPreState); //상태 진행
-    virtual _bool State_Exit(_uint* pState); // 상태 탈출
-    virtual void Init_CallBack_Func(); // 초기화할 콜백
-    virtual _bool IsActive(_uint stateFlags) const {return false;}; // 플래그가 활성화 되어있는지 확인
-    virtual void SetActive(_bool active, _uint* pState) {}; // 플래그 설정
-    virtual _bool CanEnter(_uint* pState) {return false;};  // 상태 진입 조건확인
-    virtual _bool CheckInputCondition(_uint stateFlags) {return true;}; // 상태 진행중 탈출 조건
-    void Set_ChangeAnimPlay(_bool bPlay)
+    virtual _bool State_Exit(_uint* pState);                                            // 상태 탈출
+    virtual _bool CanEnter(_uint* pState) {return false;};                              // 상태 진입 조건확인
+    virtual _bool IsActive(_uint stateFlags) const {return false;};                     // 플래그가 활성화 되어있는지 확인
+    virtual void SetActive(_bool active, _uint* pState) {};                             // 플래그 설정
+    virtual HRESULT Initialize(void* pArg);                                             // 초기화
+    virtual void Init_CallBack_Func();                                                  // 초기화할 콜백
+    virtual _bool CheckInputCondition(_uint stateFlags) {return true;};                 // 상태 진행중 탈출 조건
+
+
+
+    void Set_ChangeAnimPlay(_bool bPlay)                                               
     {
         m_bPlayAnim = bPlay;
     }

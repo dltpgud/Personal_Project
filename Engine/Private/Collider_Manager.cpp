@@ -158,14 +158,13 @@ _bool Collider_Manager::Player_To_Monster_Ray_Collison_Check()
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
 
-    // 1️⃣ 공간분할 쿼리: Ray 근처 몬스터만 후보로
+   
     vector<CGameObject*> vCandidates;
     m_SpatialGrid.QueryNearby(RayPos, 150.f, vCandidates, COL_MONSTER); // 150.f는 시야 거리 반경
 
     if (vCandidates.empty())
         return false;
 
-    // 2️⃣ Ray와의 충돌 후보 찾기
     CActor* pPickedObj = nullptr;
     _float fBestDist = FLT_MAX;
 

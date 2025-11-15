@@ -42,10 +42,9 @@ public:
     HRESULT Render(_uint iMeshIndex);
 
     HRESULT Bind_Mesh_BoneMatrices(class CShader* pShader, _uint iMeshIndex, const _char* pConstantName);
-    _bool Play_Animation(_float fTimeDelta);
+    _bool Play_Animation(_float fTimeDelta, _matrix BoneAnimMat = XMMatrixIdentity(), _int BoneIndex = -1);
 
     void Set_Animation(_uint index, _bool IsLoop = false);
-
 
     void init_Loop();
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
@@ -78,7 +77,6 @@ private:
     _uint m_iCurrentAnimIndex = {};
     _uint m_iNumAnimations = {0};
     vector<class CAnimation*> m_Animations;
-    
 
 private:
     ID3D11Buffer* m_pPositionsBuffer;

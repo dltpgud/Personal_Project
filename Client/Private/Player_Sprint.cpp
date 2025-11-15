@@ -27,7 +27,7 @@ void CPlayer_Sprint::State_Enter(_uint* pState, _uint* pPreState)
         __super::State_Enter(pState, pPreState);
     }
     m_pGameInstance->Set_OpenUI(true, TEXT("PlayerState"));
-    m_pParentObject->Get_Transform()->Set_MoveSpeed(6.f);
+    m_pParentObject->Get_Transform()->Set_MoveSpeed(45.f);
 
 }
 
@@ -51,7 +51,7 @@ _bool CPlayer_Sprint::State_Processing(_float fTimedelta, _uint* pState, _uint* 
 
 _bool CPlayer_Sprint::State_Exit(_uint* pState)
 {
-    m_pParentObject->Get_Transform()->Set_MoveSpeed(2.f);
+    m_pParentObject->Get_Transform()->Set_MoveSpeed(16.f);
     return true;
 }
 

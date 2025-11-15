@@ -146,6 +146,7 @@ PS_OUT PS_Decal(PS_IN In)
         localPos = mul(worldPos, In.WorldInv);
         if (any(abs(localPos.xyz) > 1.f))
             discard;
+
         
         
         if (dot(normalize(surfNormal), N) < 0.1f)

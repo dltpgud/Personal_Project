@@ -256,11 +256,12 @@ vector<_uint> CNavigation::FindPath(_uint startIndex, _uint goalIndex)
             _float stepCost = XMVectorGetX(XMVector3Length(neighborCenter - currCenter));
             _float newG = costSoFar[current.index] + stepCost;
 
-            if (costSoFar.find(neighborIndex) == costSoFar.end() || newG < costSoFar[neighborIndex]) // 한번도 방분한적 없거나 이번에 찾은 경로가 더 싸다면 
+            // 한번도 방분한적 없거나 이번에 찾은 경로가 더 싸다면 
+            if (costSoFar.find(neighborIndex) == costSoFar.end() || newG < costSoFar[neighborIndex]) 
             {
                 costSoFar[neighborIndex] = newG;
 
-                // 휴리스틱: 목표 중점과 이웃 중점 간 거리 
+                // 목표 중점과 이웃 중점 간 거리 (휴라스틱)
                 _float h = XMVectorGetX(XMVector3Length(goalCenter - neighborCenter));
 
                 openList.push({static_cast<_uint>(neighborIndex), newG, h, current.index});

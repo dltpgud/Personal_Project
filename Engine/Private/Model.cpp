@@ -36,6 +36,7 @@ HRESULT CModel::Initialize_Proto(TYPE eModelType, const TCHAR* pModelFilePath, _
 
 HRESULT CModel::Initialize(void* pArg)
 {
+  
     return S_OK;
 }
 
@@ -119,13 +120,18 @@ HRESULT CModel::Bind_Mesh_BoneMatrices(CShader* pShader, _uint iMeshIndex, const
     return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, m_Bones, pConstantName);
 }
 
-_bool CModel::Play_Animation(_float fTimeDelta)
+_bool CModel::Play_Animation(_float fTimeDelta, _matrix BoneAnimMat , _int BoneIndex )
 {
     _bool isFinished = m_Animations[m_iCurrentAnimIndex]->Update_TransformationMatrix(m_Bones, m_IsLoop, fTimeDelta);
 
     for (auto& pBone : m_Bones)
     {
          pBone->Update_CombinedTransformationMatrix(m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix));
+    }
+
+    if (BoneIndex != -1)
+    {
+        Set_BoneUpdateMatrix(BoneIndex, BoneAnimMat);
     }
 
     return isFinished;

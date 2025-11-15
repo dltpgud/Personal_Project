@@ -9,6 +9,11 @@ class CNavigation; // 앞으로 콜백해줄 거라 미리 선언
 class CAStar_Manager final : public CBase
 {
 private:
+    enum  Mode
+    {
+        SingleThread,
+        ThreadPool
+    };
     struct AStarNode
     {
         _uint index;
@@ -41,12 +46,13 @@ public:
 
     // 비동기 요청
     void Request_Path(CNavigation* pOwner, _vector GolPos);
-    void Start_AIUpdateLoop();
-    void Stop_AIUpdateLoop();
+
+    void Set_Mode(Mode mode);
 
 private:
     HRESULT Initialize_Prototype();
-
+    void Start_AIUpdateLoop();
+    void Stop_AIUpdateLoop();
     // 실제 A* 로직 (동기)
     vector<_uint> FindPath_Internal(_uint startIndex, _uint goalIndex);
 
@@ -59,7 +65,8 @@ private:
     std::atomic<bool> m_bRunning = false;
     std::thread m_AIThread;
     std::condition_variable m_cv;
-    
+    Mode m_Mode = Mode::ThreadPool;
+
 public:
     static CAStar_Manager* Create();
     virtual void Free() override;

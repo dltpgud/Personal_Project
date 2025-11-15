@@ -521,12 +521,11 @@ PS_DECAL PS_COMPOSITE_BLEND(PS_IN In)
     float colorWeight  = max(accumColor.a, 1e-5f);
     float normalWeight = max(accumNormal.a, 1e-5f);
 
-
     float3 finalColor  = accumColor.rgb / colorWeight;
     float3 finalNormal = normalize(accumNormal.rgb / normalWeight);
 
     Out.vDecal  = float4(finalColor, saturate(revealage));
-    Out.vNormal = float4(finalNormal * 0.5f + 0.5f, 1.0f); // [-1,1] → [0,1]
+    Out.vNormal = float4(finalNormal * 0.5f + 0.5f, 1.0f);
 
     return Out;
 }

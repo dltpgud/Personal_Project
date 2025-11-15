@@ -15,7 +15,8 @@ public:
         {
             void* raw = pool.back();
             pool.pop_back();
-           
+  
+        
             T* obj = static_cast<T*>(raw);
             obj->Initialize(std::forward<Args>(args)...);
             return obj;
@@ -28,9 +29,10 @@ public:
     {
         if (!obj)
             return;
-        
+  
         auto& pool = s_pools[type_index(typeid(*obj))];
         pool.push_back(static_cast<void*>(obj));
+
     }
 
     static void ClearAll()

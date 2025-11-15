@@ -57,63 +57,74 @@ void CPlayer_StateMachine::ResetMachine()
     m_pGameInstance->Set_OpenUI(false, TEXT("PlayerState"));
 }
 
+
+
 void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
 {
     if (m_StateNodes.empty())
         return;
 
+    // 1) 이동 처리 : 매 프레임 1번만
+    progress_Move(fTimeDelta, m_iState);
+
+    const _uint prevFlags = *m_iState;
+
     for (auto& node : m_StateNodes)
     {
-        if (nullptr == node)
+        if (!node)
             continue;
-       
-        _bool bactive = node->IsActive(*m_iState); // 활성여부
 
-        progress_Move(fTimeDelta, m_iState); // DIR 플래그로 이동
+        const bool bActive = node->IsActive(prevFlags);
 
-        if (!bactive) // 활성 안되어 있으니 검사
+        // 비활성 상태 → 활성 검사
+        if (!bActive)
         {
-            if (node->CanEnter(m_iState)) //상태를 활성화할 수 있는가?
-            {
-                Check_UIState(&m_iPreviousState);  // 이전 상태에 따른 UI 끄기 
-                node->State_Enter(m_iState, &m_iPreviousState);  // 상태 진입
-                m_iPreviousState = *m_iState;  
-                node->SetActive(true, m_iState); //플래그 켜기
-                m_iLastActiveState = *m_iState; // 현재 활성화된 상태 저장
-            }
+            if (!node->CanEnter(m_iState))
+                continue;
+
+            Check_UIState(&m_iPreviousState);  
+            node->State_Enter(m_iState, &m_iPreviousState);
+
+            m_iPreviousState = *m_iState;
+            node->SetActive(true, m_iState);
+            m_iLastActiveState = *m_iState;
+
+            continue;
         }
-        else
-        {
-            if (node->State_Processing(fTimeDelta, m_iState, &m_iPreviousState)) // 상태 진행
-            {
-                _bool bReturnPrev = node->State_Exit(m_iState); // 상태 탈출
-                m_iPreviousState = *m_iState;  
-                node->SetActive(false, m_iState); // 상태 크기
 
-                if (!bReturnPrev)
-                {
-                    Check_UIState(&m_iPreviousState);  
-                    *m_iState |= CPlayer::MOV_IDLE;
-                    m_StateNodes[NODE_IDLE]->State_Enter(m_iState, &m_iPreviousState); 
-                }
-            }
-            else
+        // 활성 상태 → 처리
+        if (node->State_Processing(fTimeDelta, m_iState, &m_iPreviousState))
+        {
+            // 상태 종료
+            const bool bReturnPrev = node->State_Exit(m_iState);
+            m_iPreviousState = *m_iState;
+            node->SetActive(false, m_iState);
+
+            // 종료 후 바로 Idle로 돌아가야 하는 경우
+            if (!bReturnPrev)
             {
-                // 상태가 활성화되어 있지만 이전 상태와 다른 경우 State_Enter 재호출
-                if (m_iLastActiveState != *m_iState && node->CanEnter(m_iState))
-                {
-                    Check_UIState(&m_iPreviousState); 
-                    node->State_Enter(m_iState, &m_iPreviousState);
-                    m_iPreviousState = *m_iState;  
-                    node->SetActive(true, m_iState); 
-                    m_iLastActiveState = *m_iState;
-                }
+                Check_UIState(&m_iPreviousState);
+
+                *m_iState |= CPlayer::MOV_IDLE;
+                m_StateNodes[NODE_IDLE]->State_Enter(m_iState, &m_iPreviousState);
             }
+
+            continue;
+        }
+
+        // 활성 상태이지만 다른 상태로 전환된 경우 → 진입 다시 호출
+        if (m_iLastActiveState != *m_iState && node->CanEnter(m_iState))
+        {
+            Check_UIState(&m_iPreviousState);
+            node->State_Enter(m_iState, &m_iPreviousState);
+
+            m_iPreviousState = *m_iState;
+            node->SetActive(true, m_iState);
+            m_iLastActiveState = *m_iState;
         }
     }
-
-    return;
 }
+
 
 void CPlayer_StateMachine::Set_ChangeAnimPlay(_uint State, _bool bPlay)
 {

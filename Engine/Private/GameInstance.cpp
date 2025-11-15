@@ -936,7 +936,6 @@ CEffectStream* CGameInstance::Find_EffectStream(const _wstring& key)
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
-
 	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);
 	Safe_Release(m_pFont_Manager);

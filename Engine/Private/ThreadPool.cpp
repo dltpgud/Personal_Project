@@ -58,6 +58,7 @@ void CThreadPool::Work_thread(_int iIndex)
         m_vecThread_Working[iIndex]->store(false);
     }
 }
+
 _bool CThreadPool::Finish_Job()
 {
     unique_lock<mutex> jobLock(m_Job_Mutex);
