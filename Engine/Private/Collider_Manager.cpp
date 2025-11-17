@@ -113,13 +113,13 @@ HRESULT Collider_Manager::Check_Inetrect_Player()
 
 void Collider_Manager::All_Collison_check(_float fTimedelta)
 {
-    m_SpatialGrid.ClearDynamic();
-    m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
-    m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
+   m_SpatialGrid.ClearDynamic();
+   m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
+   m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
     
-    MonsterSkill_To_Mash_Collison(fTimedelta);
-    Monster_To_Monster_Collision();
-    Check_Collider_PlayerCollison();
+   MonsterSkill_To_Mash_Collison(fTimedelta);
+   Monster_To_Monster_Collision();
+   Check_Collider_PlayerCollison();
 
     Player_To_Monster_Bullet_Collison();
     Check_Inetrect_Player();

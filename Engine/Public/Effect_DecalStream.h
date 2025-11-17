@@ -32,11 +32,11 @@ private:
 
     HRESULT createCB();
 
-    HRESULT UploadSpawnRequestsToGPU();
-    HRESULT DispatchSpawnUpdateCS(float dt);
+    UINT UploadSpawnRequestsToGPU();
+    HRESULT DispatchSpawnUpdateCS(float dt, UINT spawnCount);
     HRESULT DispatchBuildDrawCS();
     void    ResetDrawArgsOnCPU();
-
+    void ClearLiveList_OnGPU();
    HRESULT BuildGlobalDecalArray(_wstring FilePathFmt, _uint TextureCount);
 
 private:
@@ -73,10 +73,9 @@ private:
        _float DeltaScale;
        _float PadA;
        _int TexIndex;
-       _int DecalType;
        _int bNormal;
        _int PadB;
-       _float4x4 WorldInv;
+
    };
 
    struct CONTINUOUS_STATE
@@ -89,22 +88,20 @@ private:
    struct GPU_DecalInstanceData
    {
        _float4x4 WorldInv; // row_major float4x4
-       _float3 DecalPos;
        _float _padA;
        _float3 DecalDir;
        _float _padB;
-       _float3 HalfSize;
        _float LifeTime;
        _float DecalTime;
        _int TexIndex;
-       _int DecalType;
        _int bNormal;
    };
 
 private:
     ID3D11ComputeShader* m_pCS_SpawnUpdate = nullptr;
     ID3D11ComputeShader* m_pCS_BuildDrawData = nullptr;
-
+    ID3D11ComputeShader* m_pCS_ClearLiveList = nullptr;
+    ID3D11ComputeShader*  m_pCS_ResetArgs = nullptr;
     class CVIBuffer_Cube* m_pVIBuffer_Cube = nullptr;
 
     ID3D11Buffer* m_pDecalSlots = nullptr;
@@ -115,32 +112,39 @@ private:
     ID3D11ShaderResourceView* m_pLiveListSRV = nullptr;
     ID3D11UnorderedAccessView* m_pLiveListUAV = nullptr;
 
-    ID3D11Buffer* m_pInstanceBuffer = nullptr;
-    ID3D11ShaderResourceView* m_pInstanceSRV = nullptr;
-    ID3D11UnorderedAccessView* m_pInstanceUAV = nullptr;
+    ID3D11Buffer* m_pInstanceBuffer[2] = {nullptr};
+    ID3D11ShaderResourceView* m_pInstanceSRV[2] = {nullptr};
+    ID3D11UnorderedAccessView* m_pInstanceUAV[2] = {nullptr};
 
     ID3D11Buffer* m_pSpawnUpload = nullptr;
     ID3D11ShaderResourceView* m_pSpawnUploadSRV = nullptr;
 
-    ID3D11Buffer* m_pIndirectArgs = nullptr;
-    ID3D11UnorderedAccessView* m_pIndirectArgsUAV = nullptr;
+    ID3D11Buffer* m_pIndirectArgs[2] = {nullptr};
+    ID3D11UnorderedAccessView* m_pIndirectArgsUAV[2] = {nullptr};
 
     ID3D11ShaderResourceView* m_pDecalArraySRV = nullptr;
     ID3D11Buffer* m_pCB_DecalFrame = nullptr;
+    ID3D11Buffer* m_pCB_ResetArgs = nullptr;
+
+
 
 private:
     UINT m_MaxDecals = 0;
     UINT m_MaxSpawnPerFrame = 0;
-    const _float fkMinDistance = 0.3f;
-    const _float kCooldownMs = 0.01f;
+    const _float fkMinDistance = 0.5f;
+    const _float kCooldownMs = 0.03f;
     _float m_TotalTime = 0.f;
     unordered_map<_uint, CONTINUOUS_STATE> m_ContinuousMap;
     UINT THREADS = 256;
+    UINT m_FrameIndex = 0;
+    UINT writeIdx{};
+    UINT lastIndexCount = 0;
 
-    struct CPU_DECAL_REQUEST
-    {
-        DECAL_SPAWN_REQ Req;
-    };
-    vector<CPU_DECAL_REQUEST> m_SpawnQueue;
+    const UINT kSpawnRingSize = 4096;
+    DECAL_SPAWN_REQ m_SpawnRing[4096];
+    std::atomic<UINT> m_SpawnWrite{0};
+    std::atomic<UINT> m_SpawnRead{0};
+
+
 };
 END

@@ -350,8 +350,10 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\CS_SSAO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_ClearLiveList.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\CS_DecalBuildInstance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\CS_DecalSpawnUpdate.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\CS_ResetArgs.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\SSAO_Compute.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\TrailUpdateCS.hlsl" />

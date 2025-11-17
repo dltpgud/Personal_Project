@@ -1,5 +1,7 @@
 #include "Engine_Shader_Defines.hlsli"
 
+// CS_DecalSpawnUpdate.hlsl
+
 cbuffer CB_DECAL_FRAME : register(b0)
 {
     float g_DeltaTime;
@@ -12,20 +14,15 @@ struct DECAL_SPAWN_REQ
 {
     float3 Pos;
     uint Valid;
-
     float3 Dir;
     float Size;
-
     float Depth;
     float LifeTime;
     float DeltaScale;
     float PadA;
-
     int TexIndex;
-    int DecalType;
     int bNormal;
     int PadB;
-    float4x4 WorldInv;
 };
 
 struct GPU_DecalHeader
@@ -46,6 +43,7 @@ StructuredBuffer<DECAL_SPAWN_REQ> g_SpawnReq : register(t0);
 RWStructuredBuffer<GPU_DecalHeader> g_Decals : register(u0);
 RWStructuredBuffer<uint> g_LiveList : register(u1);
 
+// Compute shader main function
 [numthreads(256, 1, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
@@ -55,20 +53,21 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
     GPU_DecalHeader h = g_Decals[idx];
 
+    // Update decal time if active
     if (h.Active == 1)
     {
         h.DecalTime += g_DeltaTime;
-
         if (h.DecalTime >= h.Life)
         {
             h.Active = 0;
         }
     }
 
+    // Spawn new decals if not active and if spawn count is valid
     if (h.Active == 0 && g_SpawnCount > 0)
     {
         uint spawnIdx;
-        InterlockedAdd(g_LiveList[1000], 1, spawnIdx);
+        InterlockedAdd(g_LiveList[100], 1, spawnIdx); // Track the live list index
 
         if (spawnIdx < g_SpawnCount)
         {
@@ -83,12 +82,12 @@ void CSMain(uint3 id : SV_DispatchThreadID)
                 h.DecalTime = 0.0f;
                 h.DeltaScale = req.DeltaScale;
                 h.TexIndex = req.TexIndex;
-                h.Type = req.DecalType;
                 h.Active = 1;
             }
         }
     }
 
+    // Add active decal to live list
     if (h.Active == 1)
     {
         uint outIdx;
@@ -96,5 +95,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         g_LiveList[outIdx + 1] = idx;
     }
 
+    // Write the updated decal back to the buffer
     g_Decals[idx] = h;
 }

@@ -1,5 +1,5 @@
 #include "Engine_Shader_Defines.hlsli"
-
+//CS_Buildinstance
 struct DecalHeader
 {
     float3 Pos;
@@ -16,16 +16,13 @@ struct DecalHeader
 
 struct DecalInstanceData
 {
-    row_major float4x4 WorldInv; 
-    float3 DecalPos; 
+    row_major float4x4 WorldInv;  
     float _padA;
     float3 DecalDir; 
     float _padB; 
-    float3 HalfSize; 
     float LifeTime; 
     float DecalTime; 
     int TexIndex; 
-    int DecalType; 
     int bNormal; 
 };
 
@@ -123,14 +120,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
     DecalInstanceData inst = (DecalInstanceData) 0;
     inst.WorldInv = ComputeWorldInv(DH.Pos, DH.Dir, DH.Size.x, DH.Size.z);
-    inst.DecalPos = DH.Pos;
     inst.DecalDir = DH.Dir;
-    inst.HalfSize = float3(DH.Size.x, DH.Size.y, DH.Size.z );
     inst.LifeTime = DH.Life;
     inst.DecalTime = DH.DecalTime;
     inst.TexIndex = DH.TexIndex;
     inst.bNormal = DH.bNormal;
-    inst.DecalType = DH.Type;
 
     g_InstanceOut[instanceIdx] = inst;
 }

@@ -43,8 +43,8 @@ HRESULT CBillyBoom::Initialize(void* pArg)
 void CBillyBoom::Priority_Update(_float fTimeDelta)
 {
     Compute_Length();
-    if (m_bFinishIntro)
-      Change_Pattern(); 
+   if (m_bFinishIntro)
+     Change_Pattern(); 
 
     __super::Priority_Update(fTimeDelta);
 }

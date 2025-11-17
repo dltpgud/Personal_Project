@@ -679,6 +679,12 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_Decal.hlsl">
       <Filter>01.Utility\98.ShaderFiles\Effect\Decal</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_ClearLiveList.hlsl">
+      <Filter>01.Utility\98.ShaderFiles\Effect\Decal</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\CS_ResetArgs.hlsl">
+      <Filter>01.Utility\98.ShaderFiles\Effect\Decal</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
