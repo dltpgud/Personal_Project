@@ -40,10 +40,11 @@ HRESULT CEffect_DecalStream::Initialize(void* pArg)
 
     if (FAILED(createSpawnUploadBuffer()))
         return E_FAIL;
-
-    if (FAILED(CreateRawBuffer(sizeof(UINT) * 5, &m_pIndirectArgs, &m_pIndirectArgsUAV, true)))
-        return E_FAIL;
-
+    for (_int i = 0; i < 2; ++i)
+    {
+        if (FAILED(CreateRawBuffer(sizeof(UINT) * 5, &m_pIndirectArgs[i], &m_pIndirectArgsUAV[i], true)))
+            return E_FAIL;
+    }
     if (FAILED(createCB()))
         return E_FAIL;
 
@@ -53,6 +54,11 @@ HRESULT CEffect_DecalStream::Initialize(void* pArg)
     if (FAILED(Create_CS(L"../Bin/ShaderFiles/CS_DecalBuildInstance.hlsl", "CSMain", &m_pCS_BuildDrawData)))
         return E_FAIL;
 
+    if (FAILED(Create_CS(L"../Bin/ShaderFiles/CS_ClearLiveList.hlsl", "CSMain", &m_pCS_ClearLiveList)))
+        return E_FAIL;
+    if (FAILED(Create_CS(L"../Bin/ShaderFiles/CS_ResetArgs.hlsl", "CSMain", &m_pCS_ResetArgs)))
+        return E_FAIL;
+
     return S_OK;
 }
 
@@ -60,11 +66,11 @@ HRESULT CEffect_DecalStream::Trigger_Effect(void* pArg, _float fTimeDelta)
 {
     if (!pArg)
         return S_OK;
-
+   // auto cpuBegin = std::chrono::high_resolution_clock::now();
     DECAL_DESC* pDecal = static_cast<DECAL_DESC*>(pArg);
 
-    CPU_DECAL_REQUEST r{};
-    DECAL_SPAWN_REQ& out = r.Req;
+
+    DECAL_SPAWN_REQ out;
 
     // 방향 선택 (SSD면 Dir, BOX면 Normal)
     _vector useDir = (pDecal->iType == DECAL_DESC::TYPE_SSD) ? pDecal->vDir : pDecal->vNormal;
@@ -80,66 +86,82 @@ HRESULT CEffect_DecalStream::Trigger_Effect(void* pArg, _float fTimeDelta)
     out.LifeTime = pDecal->fLifeTime;
     out.DeltaScale = pDecal->DeltaScaling;
     out.TexIndex = pDecal->iTexIndex;
-    out.DecalType = pDecal->iType;
     out.bNormal = pDecal->bNormal ? 1 : 0;
 
-    if (0 == pDecal->iContinuous)
-    {
-        m_SpawnQueue.push_back(r);
+   if (0 == pDecal->iContinuous)
+   {
+       UINT write = m_SpawnWrite.load(std::memory_order_relaxed);
+       UINT read = m_SpawnRead.load(std::memory_order_acquire);
+       UINT next = (write + 1) % kSpawnRingSize;
+       if (next == read)
+       {
+           return S_OK;
+       }
+       m_SpawnRing[write] = out;
+       m_SpawnWrite.store(next, std::memory_order_release);
 
-        if (pDecal->bOnce)
-            pDecal->bActive = true;
+       if (pDecal->bOnce)
+           pDecal->bActive = true;
 
-        return S_OK;
-    }
-    else
-    {
-        CONTINUOUS_STATE& state = m_ContinuousMap[pDecal->iContinuous];
-        m_TotalTime += fTimeDelta;
-
-        _vector curPos = pDecal->vPos;
-        _bool canSpawn = false;
-        if (!state.Initialized)
-        {
-            canSpawn = true;
-            state.Initialized = true;
-        }
-        else
-        {
-            _float dist = XMVectorGetX(XMVector3Length(curPos - state.LastPos));
-            _float elapsed = m_TotalTime - state.LastTime;
-
-            if (dist >= fkMinDistance && elapsed >= kCooldownMs)
-                canSpawn = true;
-        }
-
-        if (canSpawn)
-        {
-            m_SpawnQueue.push_back(r);
-            state.LastPos = curPos;
-            state.LastTime = m_TotalTime;
-        }
-
-        return S_OK;
-    }
+       return S_OK;
+   }
+   else
+   {
+   
+      CONTINUOUS_STATE& state = m_ContinuousMap[pDecal->iContinuous];
+      m_TotalTime += fTimeDelta;
+      
+      _vector curPos = pDecal->vPos;
+      _bool canSpawn = false;
+      if (!state.Initialized)
+      {
+          canSpawn = true;
+          state.Initialized = true;
+      }
+      else
+      {
+          _float dist = XMVectorGetX(XMVector3Length(curPos - state.LastPos));
+          _float elapsed = m_TotalTime - state.LastTime;
+      
+          if (dist >= fkMinDistance && elapsed >= kCooldownMs)
+              canSpawn = true;
+      }
+      
+      if (canSpawn)
+      {
+          UINT write = m_SpawnWrite.load(std::memory_order_relaxed);
+          UINT read = m_SpawnRead.load(std::memory_order_acquire);
+          UINT next = (write + 1) % kSpawnRingSize;
+          if (next == read)
+          {
+              return S_OK;
+          }
+          m_SpawnRing[write] = out;
+          m_SpawnWrite.store(next, std::memory_order_release);
+         
+          state.LastPos = curPos;
+          state.LastTime = m_TotalTime;
+      }
+   
+        
+   }
 
     return S_OK;
 }
 
 void CEffect_DecalStream::Update(_float fTimeDelta)
 {
-    vector<UINT> zeros(m_MaxDecals, 0);
-    m_pContext->UpdateSubresource(m_pLiveList, 0, nullptr, zeros.data(), 0, 0);
-
-    UploadSpawnRequestsToGPU();
-
-    DispatchSpawnUpdateCS(fTimeDelta);
-
-    ResetDrawArgsOnCPU();
-
-    DispatchBuildDrawCS();
-
-    m_SpawnQueue.clear();
+   m_FrameIndex++;
+   writeIdx = m_FrameIndex & 1;
+   
+   ClearLiveList_OnGPU();
+   UINT spawnCount= UploadSpawnRequestsToGPU();
+   
+   DispatchSpawnUpdateCS(fTimeDelta, spawnCount);
+   
+   ResetDrawArgsOnCPU();
+   
+   DispatchBuildDrawCS();
 }
 
 HRESULT CEffect_DecalStream::Render(CShader* pShader)
@@ -149,9 +171,9 @@ HRESULT CEffect_DecalStream::Render(CShader* pShader)
 
     ID3D11ShaderResourceView* nullSRV[16] = {nullptr};
     m_pContext->PSSetShaderResources(0, 16, nullSRV);
+    const UINT readIdx = (m_FrameIndex + 1) & 1;
 
-    // VS용 StructuredBuffer 바인딩
-    if (FAILED(pShader->Bind_SRV("g_InstanceDataVS", m_pInstanceSRV)))
+    if (FAILED(pShader->Bind_SRV("g_InstanceDataVS", m_pInstanceSRV[readIdx])))
         return E_FAIL;
 
     if (FAILED(pShader->Bind_SRV("g_DecalArray", m_pDecalArraySRV)))
@@ -161,7 +183,8 @@ HRESULT CEffect_DecalStream::Render(CShader* pShader)
 
     pShader->Begin(0);
 
-    m_pContext->DrawIndexedInstancedIndirect(m_pIndirectArgs, 0);
+    m_pContext->DrawIndexedInstancedIndirect(m_pIndirectArgs[readIdx], 0);
+
     return S_OK;
 }
 
@@ -174,11 +197,12 @@ HRESULT CEffect_DecalStream::createGPUStorageBuffers()
 
     if (FAILED(CreateStructuredBuffer(m_MaxDecals, sizeof(UINT), &m_pLiveList, &m_pLiveListSRV, &m_pLiveListUAV)))
         return E_FAIL;
-
-    if (FAILED(CreateStructuredBuffer(m_MaxDecals, sizeof(GPU_DecalInstanceData), &m_pInstanceBuffer, &m_pInstanceSRV,
-                                      &m_pInstanceUAV)))
-        return E_FAIL;
-
+    for (_int i = 0; i < 2; ++i)
+    {
+        if (FAILED(CreateStructuredBuffer(m_MaxDecals, sizeof(GPU_DecalInstanceData), &m_pInstanceBuffer[i],
+                                          &m_pInstanceSRV[i], &m_pInstanceUAV[i])))
+            return E_FAIL;
+    }
     return S_OK;
 }
 
@@ -217,14 +241,26 @@ HRESULT CEffect_DecalStream::createCB()
     cbd.StructureByteStride = 0;
     if (FAILED( m_pDevice->CreateBuffer(&cbd, nullptr, &m_pCB_DecalFrame)))
         return E_FAIL;
+
+    D3D11_BUFFER_DESC cb{};
+    cb.ByteWidth = 16;
+    cb.Usage = D3D11_USAGE_DEFAULT;
+    cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+    if (FAILED(m_pDevice->CreateBuffer(&cb, nullptr, &m_pCB_ResetArgs)))
+        return E_FAIL;
+
     return S_OK;
 }
 
-HRESULT CEffect_DecalStream::UploadSpawnRequestsToGPU()
+UINT CEffect_DecalStream::UploadSpawnRequestsToGPU()
 {
+    if (m_SpawnWrite == m_SpawnRead)
+        return 0;
+
     D3D11_MAPPED_SUBRESOURCE ms{};
     if (FAILED(m_pContext->Map(m_pSpawnUpload, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
-        return E_FAIL;
+        return 0;
 
     auto* out = reinterpret_cast<DECAL_SPAWN_REQ*>(ms.pData);
 
@@ -234,21 +270,33 @@ HRESULT CEffect_DecalStream::UploadSpawnRequestsToGPU()
         out[i].Valid = 0;
     }
 
-    UINT writeCount = (UINT)std::min<size_t>(m_SpawnQueue.size(), m_MaxSpawnPerFrame);
-    for (UINT i = 0; i < writeCount; ++i)
+    // 링 버퍼에서 pending 개수 계산
+    UINT read = m_SpawnRead.load(std::memory_order_acquire);
+    UINT write = m_SpawnWrite.load(std::memory_order_acquire);
+
+    UINT pending = (write >= read) ? (write - read) : (kSpawnRingSize - read + write);
+
+    UINT consumeCount = std::min<UINT>(pending, m_MaxSpawnPerFrame);
+
+    for (UINT i = 0; i < consumeCount; ++i)
     {
-        out[i] = m_SpawnQueue[i].Req;
+        UINT ringIdx = (read + i) % kSpawnRingSize;
+        out[i] = m_SpawnRing[ringIdx];
         out[i].Valid = 1;
     }
 
     m_pContext->Unmap(m_pSpawnUpload, 0);
 
-    return S_OK;
+    // 소비한 만큼 read index 전진
+    UINT newRead = (read + consumeCount) % kSpawnRingSize;
+    m_SpawnRead.store(newRead, std::memory_order_release);
+
+    return consumeCount;
 }
 
-HRESULT CEffect_DecalStream::DispatchSpawnUpdateCS(float dt)
+HRESULT CEffect_DecalStream::DispatchSpawnUpdateCS(float dt, UINT spawnCount)
 {
-    CB_DECAL_FRAME cbData = {dt, (UINT)m_SpawnQueue.size(), m_MaxDecals, 0.f};
+    CB_DECAL_FRAME cbData = {dt, spawnCount, m_MaxDecals, 0.f};
     m_pContext->UpdateSubresource(m_pCB_DecalFrame, 0, nullptr, &cbData, 0, 0);
 
     m_pContext->CSSetShader(m_pCS_SpawnUpdate, nullptr, 0);
@@ -263,8 +311,6 @@ HRESULT CEffect_DecalStream::DispatchSpawnUpdateCS(float dt)
 
     UINT groups = (m_MaxDecals + THREADS - 1) / THREADS;
     m_pContext->Dispatch(groups, 1, 1);
-
-    m_pContext->Flush();
 
     ID3D11UnorderedAccessView* nullUAV[2] = {nullptr, nullptr};
     m_pContext->CSSetUnorderedAccessViews(0, 2, nullUAV, initialCounts);
@@ -282,8 +328,33 @@ HRESULT CEffect_DecalStream::DispatchSpawnUpdateCS(float dt)
 
 void CEffect_DecalStream::ResetDrawArgsOnCPU()
 {
-    UINT initArgs[5] = {(UINT)m_pVIBuffer_Cube->Get_Indexices(), 0, 0, 0, 0};
-    m_pContext->UpdateSubresource(m_pIndirectArgs, 0, nullptr, initArgs, 0, 0);
+ UINT indexCount = m_pVIBuffer_Cube->Get_Indexices();
+
+    if (indexCount != lastIndexCount)
+     {
+         // CB 업데이트 (CPU → GPU)
+         m_pContext->UpdateSubresource(m_pCB_ResetArgs, 0, nullptr, &indexCount, 0, 0);
+         lastIndexCount = indexCount;
+     }
+
+ m_pContext->CSSetShader(m_pCS_ResetArgs, nullptr, 0);
+
+ ID3D11Buffer* cb[] = {m_pCB_ResetArgs};
+ m_pContext->CSSetConstantBuffers(0, 1, cb);
+
+ ID3D11UnorderedAccessView* uav[] = {m_pIndirectArgsUAV[writeIdx]};
+ UINT initCounts[] = {-1};
+ m_pContext->CSSetUnorderedAccessViews(0, 1, uav, initCounts);
+
+ m_pContext->Dispatch(1, 1, 1);
+
+ ID3D11UnorderedAccessView* nullUAV[] = {nullptr};
+ m_pContext->CSSetUnorderedAccessViews(0, 1, nullUAV, initCounts);
+
+ ID3D11Buffer* nullCB[] = {nullptr};
+ m_pContext->CSSetConstantBuffers(0, 1, nullCB);
+
+ m_pContext->CSSetShader(nullptr, nullptr, 0);
 }
 
 
@@ -451,10 +522,11 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
 
 HRESULT CEffect_DecalStream::DispatchBuildDrawCS()
 {
+
     ID3D11ShaderResourceView* srvs[2] = { m_pLiveListSRV, m_pDecalSlotsSRV };
     m_pContext->CSSetShaderResources(0, 2, srvs);
 
-    ID3D11UnorderedAccessView* uavs[2] = {  m_pInstanceUAV, m_pIndirectArgsUAV };
+    ID3D11UnorderedAccessView* uavs[2] = {m_pInstanceUAV[writeIdx], m_pIndirectArgsUAV[writeIdx]};
     m_pContext->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
 
     m_pContext->CSSetShader(m_pCS_BuildDrawData, nullptr, 0);
@@ -467,9 +539,28 @@ HRESULT CEffect_DecalStream::DispatchBuildDrawCS()
     m_pContext->CSSetShaderResources(0, 2, nullSRV);
     m_pContext->CSSetUnorderedAccessViews(0, 2, nullUAV, nullptr);
     m_pContext->CSSetShader(nullptr, nullptr, 0);
-
+    
     return S_OK;
 }
+
+void CEffect_DecalStream::ClearLiveList_OnGPU()
+{
+
+    ID3D11UnorderedAccessView* uav = m_pLiveListUAV;
+    UINT initialCount = (UINT)-1; // 사용 안 하지만 형태 맞추기용
+
+    m_pContext->CSSetShader(m_pCS_ClearLiveList, nullptr, 0);
+    m_pContext->CSSetUnorderedAccessViews(0, 1, &uav, &initialCount);
+
+    // 1x1x1 하나만 호출
+    m_pContext->Dispatch(1, 1, 1);
+
+    // 상태 정리
+    ID3D11UnorderedAccessView* nullUAV = nullptr;
+    m_pContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, &initialCount);
+    m_pContext->CSSetShader(nullptr, nullptr, 0);
+}
+
 
 void CEffect_DecalStream::Free()
 {
@@ -477,7 +568,8 @@ void CEffect_DecalStream::Free()
 
     Safe_Release(m_pCS_SpawnUpdate);
     Safe_Release(m_pCS_BuildDrawData);
-
+    Safe_Release(m_pCS_ResetArgs);
+    
     Safe_Release(m_pDecalSlots);
     Safe_Release(m_pDecalSlotsSRV);
     Safe_Release(m_pDecalSlotsUAV);
@@ -486,15 +578,25 @@ void CEffect_DecalStream::Free()
     Safe_Release(m_pLiveListSRV);
     Safe_Release(m_pLiveListUAV);
 
-    Safe_Release(m_pInstanceBuffer);
-    Safe_Release(m_pInstanceSRV);
-    Safe_Release(m_pInstanceUAV);
+
+    for (int i = 0; i < 2; ++i)
+    {
+        Safe_Release(m_pInstanceBuffer[i]);
+        Safe_Release(m_pInstanceSRV[i]);
+        Safe_Release(m_pInstanceUAV[i]);
+
+        Safe_Release(m_pIndirectArgs[i]);
+        Safe_Release(m_pIndirectArgsUAV[i]);
+    }
+
 
     Safe_Release(m_pSpawnUpload);
     Safe_Release(m_pSpawnUploadSRV);
 
-    Safe_Release(m_pIndirectArgs);
-    Safe_Release(m_pIndirectArgsUAV);
+    Safe_Release(m_pCS_ClearLiveList);
+    Safe_Release(m_pCB_ResetArgs);
+    
+
 
     Safe_Release(m_pDecalArraySRV);
 }

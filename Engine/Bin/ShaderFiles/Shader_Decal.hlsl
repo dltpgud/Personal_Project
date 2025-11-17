@@ -14,15 +14,12 @@ Texture2DArray g_DecalArray : register(t12);
 struct DecalInstanceData
 {
     row_major float4x4 WorldInv; 
-    float3 DecalPos; 
     float _padA; 
     float3 DecalDir; 
     float _padB; 
-    float3 HalfSize; 
     float LifeTime; 
     float DecalTime; 
     int TexIndex; 
-    int DecalType; 
     int bNormal; 
 }; 
 
@@ -40,14 +37,11 @@ struct VS_OUTPUT
     float4 Position : SV_POSITION;
     float2 Texcoord : TEXCOORD0;
     row_major float4x4 WorldInv : TEXCOORD1;
-    float3 DecalPos : TEXCOORD5;
-    float3 DecalDir : TEXCOORD6;
-    float3 HalfSize : TEXCOORD7;
-    float LifeTime : TEXCOORD8;
-    float DecalTime : TEXCOORD9;
-    int TexIndex : TEXCOORD10;
-    int bNormal : TEXCOORD11;
-    int DecalType : TEXCOORD12;
+    float3 DecalDir : TEXCOORD5;
+    float LifeTime : TEXCOORD6;
+    float DecalTime : TEXCOORD7;
+    int TexIndex : TEXCOORD8;
+    int bNormal : TEXCOORD9;
 };
 
 VS_OUTPUT VS_Decal(VS_INPUT In)
@@ -61,14 +55,12 @@ VS_OUTPUT VS_Decal(VS_INPUT In)
 
     Out.Texcoord = In.Texcoord;
     Out.WorldInv = inst.WorldInv;
-    Out.DecalPos = inst.DecalPos;
     Out.DecalDir = inst.DecalDir;
-    Out.HalfSize = inst.HalfSize;
     Out.LifeTime = inst.LifeTime;
     Out.DecalTime = inst.DecalTime;
     Out.TexIndex = inst.TexIndex;
     Out.bNormal = inst.bNormal;
-    Out.DecalType = inst.DecalType;
+
     return Out;
 }
 
@@ -77,14 +69,11 @@ struct PS_IN
     float4 vPosition : SV_POSITION;
     float2 vTexcoord : TEXCOORD0;
     row_major float4x4 WorldInv : TEXCOORD1;
-    float3 DecalPos : TEXCOORD5;
-    float3 DecalDir : TEXCOORD6;
-    float3 HalfSize : TEXCOORD7;
-    float LifeTime : TEXCOORD8;
-    float DecalTime : TEXCOORD9;
-    int TexIndex : TEXCOORD10;
-    int bNormal : TEXCOORD11;
-    int DecalType : TEXCOORD12;
+    float3 DecalDir : TEXCOORD5;
+    float LifeTime : TEXCOORD6;
+    float DecalTime : TEXCOORD7;
+    int TexIndex : TEXCOORD8;
+    int bNormal : TEXCOORD9;
 };
 
 float4 ComputeDecalEffect(float3 baseColor, float decalTime, float lifeTime)
@@ -131,34 +120,16 @@ PS_OUT PS_Decal(PS_IN In)
     float2 screenUV = In.vPosition.xy / g_WinDowSize;
     float4 worldPos = Compute_WorldPos_byCamera(screenUV);
 
-    float3 N = normalize(In.DecalDir);
-    float3 up = (abs(N.y) < 0.999f) ? float3(0, 1, 0) : float3(1, 0, 0);
-    float3 T = normalize(cross(up, N));
-    float3 B = cross(N, T);
-    float3x3 TBN = float3x3(T, B, N);
-
     float3 surfNormal = normalize(g_NormalTexture.SampleLevel(NoMipSampler, screenUV, 0).xyz * 2.f - 1.f);
-
+    float3 N = normalize(In.DecalDir);
     float4 localPos;
 
-    if (In.DecalType == 0)
-    {
-        localPos = mul(worldPos, In.WorldInv);
-        if (any(abs(localPos.xyz) > 1.f))
-            discard;
+    localPos = mul(worldPos, In.WorldInv);
+    if (any(abs(localPos.xyz) > 1.f))
+          discard;
 
-        
-        
-        if (dot(normalize(surfNormal), N) < 0.1f)
-            discard;
-    }
-    else
-    {
-        float3 rel = (worldPos.xyz - In.DecalPos) / In.HalfSize;
-        localPos = float4(mul(rel, transpose(TBN)), 1.f);
-        if (any(abs(localPos.xy) > 1.f))
-            discard;
-    }
+    if (dot(normalize(surfNormal), N) < 0.1f)
+          discard;
 
     float2 uv = localPos.xy * 0.5f + 0.5f;
     float4 decalSample = g_DecalArray.Sample(NoMipSampler, float3(uv, In.TexIndex));
@@ -185,6 +156,12 @@ PS_OUT PS_Decal(PS_IN In)
 
     if (In.bNormal != 0)
     {
+      
+        float3 up = (abs(N.y) < 0.999f) ? float3(0, 1, 0) : float3(1, 0, 0);
+        float3 T = normalize(cross(up, N));
+        float3 B = cross(N, T);
+        float3x3 TBN = float3x3(T, B, N);
+
         float3 nTS = g_DecalArray.Sample(NoMipSampler, float3(uv, 0)).xyz * 2.f - 1.f;
         nTS.z = sqrt(saturate(1 - dot(nTS.xy, nTS.xy)));
         float3 decalNormalWS = normalize(mul(nTS, TBN));

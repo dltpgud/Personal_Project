@@ -39,8 +39,8 @@ HRESULT CEffect_Manager::Render_Decal(CShader* pShader)
 {
     for (auto it = m_EffectStreams.begin(); it != m_EffectStreams.end(); ++it)
     {
-        if (it->second && nullptr != dynamic_cast<CEffect_DecalStream*>(it->second))
-            it->second->Render(pShader);
+       if (it->second && nullptr != dynamic_cast<CEffect_DecalStream*>(it->second))
+           it->second->Render(pShader);
     }
     return S_OK;
 }
