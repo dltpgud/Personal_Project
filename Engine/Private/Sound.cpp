@@ -103,10 +103,8 @@ void CSound::LoadSoundFile(const _char* soundFile,_bool isBGM)
 	_char szfull[128]{};
 
 	strcpy_s(szfull, soundFile);
-	// "../Sound/" + "Success.wav"
 
 	strcat_s(szFullPath, szfull);
-	// "../Sound/Success.wav"
 
 	Sound* pSound = nullptr;
         FMOD_RESULT eRes{};
@@ -117,7 +115,7 @@ void CSound::LoadSoundFile(const _char* soundFile,_bool isBGM)
     else
     {
         eRes = m_pSystem->createSound(szFullPath, FMOD_3D | FMOD_3D_LINEARROLLOFF, 0, &pSound);
-        pSound->set3DMinMaxDistance(1.f, 80.0f); // 1m ~ 50m 까지 들림
+        pSound->set3DMinMaxDistance(1.f, 80.0f); // 1m ~ 80m 까지 들림
     }
 
     if (eRes == FMOD_OK)
@@ -127,7 +125,6 @@ void CSound::LoadSoundFile(const _char* soundFile,_bool isBGM)
 		TCHAR* pSoundKey = new TCHAR[iLength];
 		ZeroMemory(pSoundKey, sizeof(TCHAR) * iLength);
 
-		// 아스키 코드 문자열을 유니코드 문자열로 변환시켜주는 함수
 		MultiByteToWideChar(CP_ACP, 0, szfull, iLength, pSoundKey, iLength);
 
 		m_mapSound.emplace(pSoundKey, pSound);

@@ -10,7 +10,6 @@ CFrustum::CFrustum()
 
 HRESULT CFrustum::Initialize()
 {
-	/* 투영스페이스 상의 절두체의 여덟개 모서리 점을 구했다. */
 	m_vPoints[0] = _float3(-1.f, 1.f, 0.f);
 	m_vPoints[1] = _float3(1.f, 1.f, 0.f);
 	m_vPoints[2] = _float3(1.f, -1.f, 0.f);
@@ -26,7 +25,6 @@ HRESULT CFrustum::Initialize()
 
 void CFrustum::Update()
 {
-	/* 월드 스페이스로 이전시키자. */
 	for (size_t i = 0; i < 8; i++)
 	{
 		XMStoreFloat3(&m_vWorldPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vPoints[i]),
@@ -36,7 +34,6 @@ void CFrustum::Update()
 	}
 
 	Make_Planes(m_vWorldPoints, m_WorldPlanes);
-
 }
 
 
@@ -59,10 +56,6 @@ _bool CFrustum::isIn_LocalSpace(_fvector vTargetPos, _float fRange)
 {
     for (size_t i = 0; i < 6; i++)
     {
-        /*ax + by + cz + d = ??
-        a b c d
-        x y z 1*/
-
         if (fRange < XMVectorGetX(XMPlaneDotCoord(XMLoadFloat4(&m_LocalPlanes[i]), vTargetPos)))
             return false;
     }
@@ -79,58 +72,8 @@ void CFrustum::Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
         XMStoreFloat3(&vLocalPoints[i], XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPoints[i]), WorldMatrixInv));
     }
 
-    // XMPlaneTransform();
 
     Make_Planes(vLocalPoints, m_LocalPlanes);
-}
-
-void CFrustum::CalculateCascadeFrustum(const float* cascadeSplits, int numCascades)
-{
-    _vector vLightDir = XMVectorSet(-0.2f, -1.f, -0.5f, 0.f); 
-    _vector vCamPos = XMLoadFloat4(m_pGameInstance->Get_CamPosition());
-
-    for (int cascadeIndex = 0; cascadeIndex < numCascades; ++cascadeIndex)
-    {
-        // 각 캐스케이드에 맞는 근거리, 원거리 깊이 설정
-        float nearZ = cascadeSplits[cascadeIndex];
-        float farZ = (cascadeIndex + 1 < numCascades) ? cascadeSplits[cascadeIndex + 1] : *m_pGameInstance->Get_CamFar();
-
-        // 라이트 위치 계산 (빛의 방향을 기준으로)
-        _vector vLightPos = vCamPos - vLightDir * farZ; // 라이트의 위치는 카메라와 빛의 방향에 따라 계산
-
-        // Up 벡터 계산 (빛의 방향과 Y축이 거의 평행할 경우 다른 축을 사용)
-        _vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-        if (fabsf(XMVectorGetX(XMVector3Dot(vUp, vLightDir))) > 0.9f)
-        {
-            vUp = XMVectorSet(0.f, 0.f, 1.f, 0.f); // 다른 축을 사용
-        }
-
-        // 라이트 뷰 행렬 생성
-        _matrix matLightView = XMMatrixLookAtLH(vLightPos, vCamPos, vUp);
-
-        // 각 캐스케이드에 대해 8개 모서리 점 계산
-        _float3 corners[8] = {{-1.f, 1.f, nearZ}, {1.f, 1.f, nearZ}, {1.f, -1.f, nearZ}, {-1.f, -1.f, nearZ},
-                              {-1.f, 1.f, farZ},  {1.f, 1.f, farZ},  {1.f, -1.f, farZ},  {-1.f, -1.f, farZ}};
-
-        // 근거리와 원거리의 8개 점을 계산하여 월드 공간으로 변환
-        for (int i = 0; i < 8; ++i)
-        {
-            XMVECTOR corner = XMLoadFloat3(&corners[i]);
-            XMVECTOR cornerVS = XMVector3TransformCoord(corner, matLightView); // 뷰 변환
-            XMStoreFloat3(&m_vWorldPoints[i], cornerVS);
-        }
-
-        // 프러스텀 평면을 생성
-        Make_Planes(m_vWorldPoints, m_WorldPlanes);
-
-        // 각 캐스케이드에 맞는 프로젝션 행렬 생성
-        _matrix matLightProj = XMMatrixOrthographicOffCenterLH(m_vWorldPoints[0].x, m_vWorldPoints[1].x,
-                                                               m_vWorldPoints[3].y, m_vWorldPoints[2].y, nearZ, farZ);
-
-        // 게임 인스턴스에 각 캐스케이드에 맞는 변환 행렬을 설정
-        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_VIEW, matLightView);
-        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_PROJ, matLightProj);
-    }
 }
 
 HRESULT CFrustum::Make_Planes(const _float3* pPoints, _float4* pPlanes)
@@ -150,7 +93,6 @@ HRESULT CFrustum::Make_Planes(const _float3* pPoints, _float4* pPlanes)
 
 	return S_OK;
 }
-
 
 CFrustum * CFrustum::Create()
 {

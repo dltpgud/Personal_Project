@@ -90,15 +90,15 @@ HRESULT CEffect_DecalStream::Trigger_Effect(void* pArg, _float fTimeDelta)
 
    if (0 == pDecal->iContinuous)
    {
-       UINT write = m_SpawnWrite.load(std::memory_order_relaxed);
-       UINT read = m_SpawnRead.load(std::memory_order_acquire);
+       UINT write = m_SpawnWrite.load(memory_order_relaxed);
+       UINT read = m_SpawnRead.load(memory_order_acquire);
        UINT next = (write + 1) % kSpawnRingSize;
        if (next == read)
        {
            return S_OK;
        }
        m_SpawnRing[write] = out;
-       m_SpawnWrite.store(next, std::memory_order_release);
+       m_SpawnWrite.store(next, memory_order_release);
 
        if (pDecal->bOnce)
            pDecal->bActive = true;
@@ -129,15 +129,15 @@ HRESULT CEffect_DecalStream::Trigger_Effect(void* pArg, _float fTimeDelta)
       
       if (canSpawn)
       {
-          UINT write = m_SpawnWrite.load(std::memory_order_relaxed);
-          UINT read = m_SpawnRead.load(std::memory_order_acquire);
+          UINT write = m_SpawnWrite.load(memory_order_relaxed);
+          UINT read = m_SpawnRead.load(memory_order_acquire);
           UINT next = (write + 1) % kSpawnRingSize;
           if (next == read)
           {
               return S_OK;
           }
           m_SpawnRing[write] = out;
-          m_SpawnWrite.store(next, std::memory_order_release);
+          m_SpawnWrite.store(next, memory_order_release);
          
           state.LastPos = curPos;
           state.LastTime = m_TotalTime;
@@ -545,17 +545,14 @@ HRESULT CEffect_DecalStream::DispatchBuildDrawCS()
 
 void CEffect_DecalStream::ClearLiveList_OnGPU()
 {
-
     ID3D11UnorderedAccessView* uav = m_pLiveListUAV;
-    UINT initialCount = (UINT)-1; // 사용 안 하지만 형태 맞추기용
+    UINT initialCount = (UINT)-1; 
 
     m_pContext->CSSetShader(m_pCS_ClearLiveList, nullptr, 0);
     m_pContext->CSSetUnorderedAccessViews(0, 1, &uav, &initialCount);
 
-    // 1x1x1 하나만 호출
     m_pContext->Dispatch(1, 1, 1);
 
-    // 상태 정리
     ID3D11UnorderedAccessView* nullUAV = nullptr;
     m_pContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, &initialCount);
     m_pContext->CSSetShader(nullptr, nullptr, 0);

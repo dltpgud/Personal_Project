@@ -262,15 +262,6 @@ namespace Engine
 
     } VTXPARTICLE_POINT;
 
-    typedef struct ENGINE_DLL VTXDECAL
-    {
-        XMFLOAT3 vPosition;
-        XMFLOAT3 vTexcoord;
-
-        static const unsigned int iNumElements = 15;
-        static const D3D11_INPUT_ELEMENT_DESC Elements[iNumElements];
-    } VTXDECAL;
-
     typedef struct TRAIL_POINT
     {
         XMFLOAT3 vPosition;
