@@ -1,5 +1,4 @@
 ﻿#pragma once
-
 #include "Renderer.h"
 #include "Collider_Manager.h"
 #include "Sound.h"
@@ -11,9 +10,6 @@
 #include "ThreadPool.h"
 #include "Frustum.h"
 #include "Effect_Manager.h"
-/* CGameInstance : */
-/* 내 Engine에 유일하게 존재하는 싱글톤클래스다. */
-/* Client사용자가 엔진의 기능을 이용하고자한다면 CGameInstance를 통해서 기능을 수행할 수 있도록 하겠다. */
 
 BEGIN(Engine)
 
@@ -207,7 +203,6 @@ public: /* For.Frustum */
 	_bool isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange = 0.f);
     _bool isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange = 0.f);
     void Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv);
-   void CalculateCascadeFrustum(const float* cascadeSplits, int numCascades);
 #pragma endregion
 
 
@@ -232,9 +227,6 @@ public: /* For.ThreadPool */
     CEffectStream* Find_EffectStream(const _wstring& key);
 #pragma endregion
 
-
-
-#pragma endregion
 private:
 	class Collider_Manager*			m_pCollider_Manager  = { nullptr };
 	class CGraphic_Device*			m_pGraphic_Device	 = { nullptr };
@@ -254,7 +246,6 @@ private:
 	class CFrustum*					m_pFrustum		     = { nullptr };
     class CThreadPool*              m_pThreadPool        = { nullptr };
 	class CEffect_Manager*          m_pEffect_Manager    = { nullptr }; 
-
 
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출

@@ -242,12 +242,10 @@ HRESULT CLevel::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _wstring& s
     
         bFile = ReadFile(hFile, &(Type), sizeof(_uint), &dwByte, nullptr);
 
-        // wstring 문자열 길이
         DWORD strLength;
         bFile = ReadFile(hFile, &strLength, sizeof(DWORD), &dwByte, NULL);
 
-        // wstring 데이터 읽기
-        wchar_t* pModel = new wchar_t[strLength + 1]; // NULL 종단 추가
+        wchar_t* pModel = new wchar_t[strLength + 1];
         bFile = ReadFile(hFile, pModel, strLength * sizeof(wchar_t), &dwByte, NULL);
         pModel[strLength] = L'\0';
 

@@ -121,10 +121,8 @@ void CGameInstance::Update(_float fTimeDelta)
 
 void CGameInstance::Draw()
 {
-	/* 게임내에 필요한 대다수의 객체들을 모두 그려낸다. */
 	m_pRenderer->Draw();
 
-	/* 할일이 없어. 디버그모드에서만 디버그내용만 출력하는 용도 .*/
 	m_pLevel_Manager->Render();
 }
 
@@ -882,11 +880,6 @@ _bool CGameInstance::isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange)
 void CGameInstance::Frustum_Transform_To_LocalSpace(_fmatrix WorldMatrixInv)
 {
     return m_pFrustum->Transform_To_LocalSpace(WorldMatrixInv);
-}
-
-void CGameInstance::CalculateCascadeFrustum(const float* cascadeSplits, int numCascades)
-{
-    return m_pFrustum->CalculateCascadeFrustum(cascadeSplits, numCascades);
 }
 
 #pragma endregion

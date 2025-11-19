@@ -23,16 +23,14 @@ HRESULT CThreadPool::Initialize(_uint iNumThread)
 
 void CThreadPool::Add_Jobs(vector<function<void()>>&& jobs)
 {
+    std::unique_lock<std::mutex> lock(m_Job_Mutex);
 
-        std::unique_lock<std::mutex> lock(m_Job_Mutex);
+    if (m_bStop.load())
+        throw std::runtime_error("enqueue on stopped ThreadPool");
 
-        if (m_bStop.load())
-            throw std::runtime_error("enqueue on stopped ThreadPool");
+    for (auto& job : jobs) m_Job_queue.emplace(std::move(job));
 
-        // 여러 개의 작업을 한꺼번에 큐에 추가
-        for (auto& job : jobs) m_Job_queue.emplace(std::move(job));
-
-    // 모든 스레드에게 알림 (한꺼번에 깨어남)
+ 
     m_Job_Condition.notify_all();
 }
 
