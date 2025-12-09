@@ -155,66 +155,54 @@ HRESULT CLevel_Stage2::Ready_Light()
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;
 
-    
+    _float3 minBound = _float3(-100.f, 0.f, 0.f);
+    _float3 maxBound = _float3(200.f, 100.f, 250.f); 
 
-        _float3 minBound = _float3(-100.f, 0.f, 0.f);
-        _float3 maxBound = _float3(200.f, 100.f, 250.f); // 높이 100은 예시
+    _vector vLightDir = XMVector3Normalize(XMLoadFloat4(&LightDesc.vDirection));
 
-        // 라이트 방향
-        _vector vLightDir = XMVector3Normalize(XMLoadFloat4(&LightDesc.vDirection));
+    _vector vCenter = 0.5f * (XMLoadFloat3(&minBound) + XMLoadFloat3(&maxBound));
 
-        // 맵 중심
-        _vector vCenter = 0.5f * (XMLoadFloat3(&minBound) + XMLoadFloat3(&maxBound));
+    _vector vLightPos = vCenter - vLightDir * 800.f;
 
-        // 라이트 위치 = 맵 중심 - 라이트 방향 * 거리
-        _vector vLightPos = vCenter - vLightDir * 800.f;
+    _vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+    if (fabsf(XMVectorGetX(XMVector3Dot(vUp, vLightDir))) > 0.9f) // 거의 평행일 경우
+    {
+        vUp = XMVectorSet(0.f, 0.f, 1.f, 0.f); // 다른 축으로 교체
+    }
 
-        // Up 벡터 보정
-        _vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-        if (fabsf(XMVectorGetX(XMVector3Dot(vUp, vLightDir))) > 0.9f) // 거의 평행일 경우
-        {
-            vUp = XMVectorSet(0.f, 0.f, 1.f, 0.f); // 다른 축으로 교체
-        }
+    _matrix LightView = XMMatrixLookAtLH(vLightPos, vCenter, vUp);
 
-        // View 행렬
-        _matrix LightView = XMMatrixLookAtLH(vLightPos, vCenter, vUp);
+    _float3 corners[8] = {
+        {minBound.x, minBound.y, minBound.z}, {maxBound.x, minBound.y, minBound.z},
+        {minBound.x, maxBound.y, minBound.z}, {maxBound.x, maxBound.y, minBound.z},
+        {minBound.x, minBound.y, maxBound.z}, {maxBound.x, minBound.y, maxBound.z},
+        {minBound.x, maxBound.y, maxBound.z}, {maxBound.x, maxBound.y, maxBound.z},
+    };
 
-        // ---- AABB 8점 뽑기 ----
-        _float3 corners[8] = {
-            {minBound.x, minBound.y, minBound.z}, {maxBound.x, minBound.y, minBound.z},
-            {minBound.x, maxBound.y, minBound.z}, {maxBound.x, maxBound.y, minBound.z},
-            {minBound.x, minBound.y, maxBound.z}, {maxBound.x, minBound.y, maxBound.z},
-            {minBound.x, maxBound.y, maxBound.z}, {maxBound.x, maxBound.y, maxBound.z},
-        };
+    _float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
+    _float maxX = -FLT_MAX, maxY = -FLT_MAX, maxZ = -FLT_MAX;
 
-        float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
-        float maxX = -FLT_MAX, maxY = -FLT_MAX, maxZ = -FLT_MAX;
+    for (int i = 0; i < 8; i++)
+    {
+        _vector corner = XMLoadFloat3(&corners[i]);
+        _vector cornerVS = XMVector3TransformCoord(corner, LightView);
 
-        for (int i = 0; i < 8; i++)
-        {
-            _vector corner = XMLoadFloat3(&corners[i]);
-            _vector cornerVS = XMVector3TransformCoord(corner, LightView);
+        minX = min(minX, XMVectorGetX(cornerVS));
+        minY = min(minY, XMVectorGetY(cornerVS));
+        minZ = min(minZ, XMVectorGetZ(cornerVS));
 
-            minX = min(minX, XMVectorGetX(cornerVS));
-            minY = min(minY, XMVectorGetY(cornerVS));
-            minZ = min(minZ, XMVectorGetZ(cornerVS));
+        maxX = max(maxX, XMVectorGetX(cornerVS));
+        maxY = max(maxY, XMVectorGetY(cornerVS));
+        maxZ = max(maxZ, XMVectorGetZ(cornerVS));
+    }
 
-            maxX = max(maxX, XMVectorGetX(cornerVS));
-            maxY = max(maxY, XMVectorGetY(cornerVS));
-            maxZ = max(maxZ, XMVectorGetZ(cornerVS));
-        }
+    _float nearZ = minZ - 5.f;
+    _float farZ = maxZ + 20.f;
 
-        // Ortho 크기 세팅 (타이트하게)
-        _float nearZ = minZ - 5.f;
-        _float farZ = maxZ + 20.f;
+    _matrix LightProj = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, nearZ, farZ);
 
-        _matrix LightProj = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, nearZ, farZ);
-
-        // 게임 인스턴스에 세팅
-        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_VIEW, LightView);
-        m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_PROJ, LightProj);
-
-
+    m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_VIEW, LightView);
+    m_pGameInstance->Set_ShadowTransformMatrix(CPipeLine::D3DTS_PROJ, LightProj);
 
 	return S_OK;
 }

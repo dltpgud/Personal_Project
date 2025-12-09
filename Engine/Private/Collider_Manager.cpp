@@ -113,6 +113,7 @@ HRESULT Collider_Manager::Check_Inetrect_Player()
 
 void Collider_Manager::All_Collison_check(_float fTimedelta)
 {
+
    m_SpatialGrid.ClearDynamic();
    m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
    m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
@@ -137,7 +138,7 @@ void Collider_Manager::All_Collison_check(_float fTimedelta)
 
     for (_int i = 0; i < COL_END; i++)
     {
-        if (i != COL_STATIC)
+        //if (i != COL_STATIC)
         {
 
             for (auto& Obj : m_GameObjeList[i]) Safe_Release(Obj);
@@ -281,7 +282,7 @@ HRESULT Collider_Manager::Player_To_Mash_Collison_for_Decal()
 
     vector<CGameObject*> vCandidates;
     m_SpatialGrid.QueryNearby(RayPos, 200.f, vCandidates, COL_STATIC);
-
+    
     for (auto& Obj : vCandidates)
     {
         if (!Obj)
@@ -671,7 +672,7 @@ HRESULT Collider_Manager::Render()
     if ( nullptr == m_pEffect)
         return E_FAIL;
 
-    // 쉐이더에 행렬 값 던져 주고
+    // 쉐이더에 행렬 값 던져 주고     
     m_pEffect->SetWorld(XMMatrixIdentity());
     m_pEffect->SetView(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW));
     m_pEffect->SetProjection(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ));

@@ -44,7 +44,7 @@ private:
     _int m_GridW = 0, m_GridH = 0; // X, Z
     vector<Cell> m_StaticGrid;
     vector<Cell> m_DynamicGrid;
-
+    mutable _uint m_QueryId = 1; // 쿼리마다 증가시키는 ID
 };
 
 END

@@ -411,9 +411,6 @@
     <ClInclude Include="..\Public\ThreadPool.h">
       <Filter>00.System\Thread</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\TLS.h">
-      <Filter>99.Defines</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Actor.h">
       <Filter>01.Utility\02.GameObjects\Actor</Filter>
     </ClInclude>
@@ -622,9 +619,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\ThreadPool.cpp">
       <Filter>00.System\Thread</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\TLS.cpp">
-      <Filter>99.Defines</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ComputeShader.cpp">
       <Filter>01.Utility\04.Component\Shader\ComputeShader</Filter>

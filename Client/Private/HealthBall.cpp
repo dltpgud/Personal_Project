@@ -39,7 +39,7 @@ HRESULT CHealthBall::Initialize(void* pArg)
     
     m_fPrePos = {0.f, 0.f, 0.f};
     m_fCurPos = {0.f, 0.f, 0.f};
-
+    m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
     m_pTransformCom->Set_MoveSpeed(5.f);
     m_bStop = false;
     // 고유한 트레일 인덱스 할당 (64개 제한)
@@ -58,7 +58,15 @@ void CHealthBall::Priority_Update(_float fTimeDelta)
 
     if (m_bStop == false)
     {
-        m_pTransformCom->Go_jump_Dir(fTimeDelta, m_vDir, 0.5f, nullptr, &m_bStop);
+        _float3 Pos{};
+
+        XMStoreFloat3(&Pos, m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+
+        _float fY{0.f};
+
+        fY = m_pNavigationCom->Compute_HeightOnCell(&Pos);
+
+        m_pTransformCom->Go_jump_Dir(fTimeDelta, m_vDir, fY+0.5f, nullptr, &m_bStop);
     }
 
     if (fDist < 15 && m_bStop)
@@ -145,6 +153,12 @@ HRESULT CHealthBall::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_VIBufferPoint"),
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom))))
         return E_FAIL; 
+
+      CNavigation::NAVIGATION_DESC Desc{};
+
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
+                                      reinterpret_cast<CComponent**>(&m_pNavigationCom), &Desc)))
+        return E_FAIL;
 
   return S_OK;
 }
