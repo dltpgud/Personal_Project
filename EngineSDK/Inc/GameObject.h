@@ -65,7 +65,9 @@ protected:
     _int m_iObjectType{-1};
    _int m_iCloneCount{};
 
-  
+public:
+   mutable _uint m_LastQueryId = 0;
+
 protected:
     map<const _wstring, class CComponent*> m_Components;
     CCollider* m_pColliderCom = {nullptr};

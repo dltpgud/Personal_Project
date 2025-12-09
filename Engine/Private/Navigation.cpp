@@ -552,6 +552,8 @@ _bool CNavigation::Get_bDemage(_int& HP)
 
 void CNavigation::Find_CurrentCell(_vector vWorldPos)
 {
+    if (nullptr == m_WorldMatrix)
+        return;
     _vector vAfterLocalPos  = XMVector3TransformCoord(vWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
     _vector vBeforeLocalPos = XMVectorZero();
     _int iNeighborIndex     = {-1};

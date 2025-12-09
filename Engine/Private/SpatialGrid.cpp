@@ -145,13 +145,31 @@ void CSpatialGrid::GatherNeighborCells(_int ix, _int iz, _int outIdx[9], _int& o
 void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGameObject*>& out, _uint groupType) const
 {
     out.clear();
-    out.reserve(64);  
+    out.reserve(64);
+
+    // 쿼리 ID 갱신
+    ++m_QueryId;
+    if (m_QueryId == 0) // 오버플로우 방지 (0은 미사용 값으로 남겨두기)
+        ++m_QueryId;
+
     _int ix, iz;
-    if (!WorldToCell(pos, ix, iz))
+    if (!WorldToCell(pos, ix, iz)) // 월드 위치 기반 셀 인덱스 반환 
         return;
 
-    _int r = static_cast<int>(ceil(range / m_CellSize));
-    for (int dz = -r; dz <= r; ++dz)
+    auto tryPush = [&](CGameObject* obj) // 쿼리 아이디 기반 한 번만 컨테이너에 담기
+    {
+        if (!obj)
+            return;
+
+        if (obj->m_LastQueryId != m_QueryId)
+        {
+            obj->m_LastQueryId = m_QueryId; // 이번 쿼리에서 이미 넣었다는 표시
+            out.push_back(obj);
+        }
+    };
+
+    _int r = static_cast<int>(ceil(range / m_CellSize)); // 반경 몇 칸 검사 할지 범위 설정
+    for (int dz = -r; dz <= r; ++dz) //중심 셀을 기준 월드 안 주변 r칸에 ​포함되는 모든 셀 검사​
     {
         for (int dx = -r; dx <= r; ++dx)
         {
@@ -162,15 +180,20 @@ void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGam
             const Cell& sc = m_StaticGrid[nz * m_GridW + nx];
             const Cell& dc = m_DynamicGrid[nz * m_GridW + nx];
 
-            if (groupType == Collider_Manager::COL_MONSTER)
-                out.insert(out.end(), dc.Obj.begin(), dc.Obj.end());
-            else if (groupType == Collider_Manager::COL_STATIC)
-                out.insert(out.end(), sc.Obj.begin(), sc.Obj.end());
-            else if (groupType == Collider_Manager::COL_MONSTER_SKILL)
-                out.insert(out.end(), dc.Obj.begin(), dc.Obj.end());
+            //각 셀의 정적 오브젝트와​ 동적 오브젝트에 접근해 ​ 그룹 별 결과 반환
+            if (groupType == Collider_Manager::COL_STATIC)
+            {
+                for (auto* obj : sc.Obj) tryPush(obj);
+            }
+            else 
+            {
+                for (auto* obj : dc.Obj) tryPush(obj);
+            }
         }
     }
 }
+
+
 
 
 
