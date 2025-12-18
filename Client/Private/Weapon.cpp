@@ -289,8 +289,8 @@ HRESULT CWeapon::Init_WeaponDecal()
     m_vecWeaPoneDecal[CWeapon::HendGun] = pWDesc;
 
     pWDesc.bNormal = true;
-    pWDesc.fDepth = 0.25f;
-    pWDesc.fSize = 0.25f;
+    pWDesc.fDepth = 0.2f;
+    pWDesc.fSize = 0.2f;
     pWDesc.fLifeTime = 3.f;
     pWDesc.iTexIndex = 1;
     pWDesc.Key = TEXT("Base");

@@ -614,7 +614,7 @@ HRESULT CLoader::Loading_For_Preallocate()
     Traildesc.fadeSpeed = 1.5f;       // Life 감소 속도
     Traildesc.lifeTime = 2.0f;        // 트레일이 사라지기까지의 시간
     Traildesc.iPass = CEffect_TrailStream::RP_CURVE;
-    TrailTSpexdesc.Mode = CEffect_TrailStream::RM_CURVE;
+    Traildesc.Mode = CEffect_TrailStream::RM_CURVE;
     Traildesc.vTrailTexUVScale = {1.f, 2.f}; // UV 스크롤/타일링 계수
     m_pGameInstance->Add_EffectStream(L"CuTrail", CEffect_TrailStream::Create(m_pDevice, m_pContext, &Traildesc));
     
@@ -632,7 +632,7 @@ HRESULT CLoader::Loading_For_Preallocate()
     TrailTexdesc.fadeSpeed = 2.f;       // Life 감소 속도
     TrailTexdesc.lifeTime = 2.0f;        // 트레일이 사라지기까지의 시간
     TrailTexdesc.iPass = CEffect_TrailStream::RP_TEX;
-    TrailTSpexdesc.Mode = CEffect_TrailStream::RM_DEFULT;
+    TrailTexdesc.Mode = CEffect_TrailStream::RM_DEFULT;
     TrailTexdesc.pTrailTexturePath = TEXT("../Bin/Resources/Textures/Effect/T_Trails_Gen1.dds");
     TrailTexdesc.vTrailTexUVScale = {1.f, 1.f}; // UV 스크롤/타일링 계수
     m_pGameInstance->Add_EffectStream(L"TexTrail",CEffect_TrailStream::Create(m_pDevice, m_pContext, &TrailTexdesc));

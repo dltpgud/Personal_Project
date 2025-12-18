@@ -36,9 +36,9 @@ public:
 END
 
 template <class T, class... Args>
-    auto CThreadPool::Add_Job(T&& f, Args&&... args) -> std::future<typename std::result_of<T(Args...)>::type>
+    auto CThreadPool::Add_Job(T&& f, Args&&... args) -> future<typename result_of<T(Args...)>::type>
 {
-    using Result = typename std::result_of<T(Args...)>::type;
+    using Result = typename result_of<T(Args...)>::type;
 
     auto task = make_shared<std::packaged_task<Result()>>(bind(forward<T>(f), forward<Args>(args)...));
 
@@ -48,7 +48,7 @@ template <class T, class... Args>
         unique_lock<std::mutex> lock(m_Job_Mutex);
 
         if (m_bStop.load())
-            throw std::runtime_error("enqueue on stopped ThreadPool");
+            throw runtime_error("enqueue on stopped ThreadPool");
 
         m_Job_queue.emplace([task]() { (*task)(); });
     }

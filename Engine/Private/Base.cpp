@@ -22,7 +22,7 @@ _uint CBase::Release()
 
 	else
 		return m_iRefCnt--;
-}
+ }
 
 void CBase::Free()
 {

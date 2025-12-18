@@ -113,7 +113,6 @@ HRESULT Collider_Manager::Check_Inetrect_Player()
 
 void Collider_Manager::All_Collison_check(_float fTimedelta)
 {
-
    m_SpatialGrid.ClearDynamic();
    m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
    m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);

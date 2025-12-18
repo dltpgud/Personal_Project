@@ -19,8 +19,6 @@ HRESULT CEffect_TrailStream::Initialize(void* pArg)
         m_pTrailTexCom = CTexture::Create(m_pDevice, m_pContext, m_desc.pTrailTexturePath, m_desc.iTextureNum);
         m_iTexTotalFrames = m_desc.iTotalSprite;
     }
-    if (m_pTrailTexCom)
-        Safe_AddRef(m_pTrailTexCom);
 
     if (FAILED(createShaders()))
         return E_FAIL;
@@ -30,7 +28,6 @@ HRESULT CEffect_TrailStream::Initialize(void* pArg)
         return E_FAIL;
     if (FAILED(CreateRawBuffer(20, &m_pIndirectArgs, &m_UAV_IndirectArgs, true)))
         return E_FAIL;
-
 
     m_inUse.assign(m_desc.maxTrails, 0);
     m_GenerationTable.assign(m_desc.maxTrails, 0);
@@ -371,4 +368,9 @@ void CEffect_TrailStream::Free()
     Safe_Release(m_pTrailVertex);
     Safe_Release(m_UAV_TrailVertex);
     Safe_Release(m_pCSPerFrame_Interp);
+    Safe_Release(m_UAV_IndirectArgs);
+
+
+
+
 }
