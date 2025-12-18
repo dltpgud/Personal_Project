@@ -479,7 +479,7 @@ HRESULT CEffect_DecalStream::BuildGlobalDecalArray(_wstring FilePathFmt, _uint T
         if (!srcTex[s])
         {
             wchar_t msg[256];
-            swprintf_s(msg, L"❌ srcTex[%d] is null!\n", s);
+            swprintf_s(msg, L"srcTex[%d] is null!\n", s);
             OutputDebugStringW(msg);
             continue;
         }
@@ -596,4 +596,14 @@ void CEffect_DecalStream::Free()
 
 
     Safe_Release(m_pDecalArraySRV);
+
+    Safe_Release(m_pVIBuffer_Cube);
+
+    Safe_Release(m_pCB_DecalFrame);
+
+
+
+
+
+ 
 }

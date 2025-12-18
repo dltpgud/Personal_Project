@@ -68,6 +68,7 @@ _bool CThreadPool::Finish_Job()
         if (working->load())
             return false;
     }
+    
     return true;
 }
 

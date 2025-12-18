@@ -16,7 +16,7 @@ public:
             void* raw = pool.back();
             pool.pop_back();
   
-        
+              cout << "Size : " << pool.size() << "\n";
             T* obj = static_cast<T*>(raw);
             obj->Initialize(std::forward<Args>(args)...);
             return obj;
@@ -32,7 +32,7 @@ public:
   
         auto& pool = s_pools[type_index(typeid(*obj))];
         pool.push_back(static_cast<void*>(obj));
-
+        cout << "Size : " << pool.size()  << "\n";
     }
 
     static void ClearAll()
@@ -72,6 +72,7 @@ public:
         {
             T* obj = prototype->Clone(forward<Args>(args)...);
             pool.push_back(static_cast<void*>(obj));
+           
         }
     }
 

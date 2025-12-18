@@ -61,7 +61,7 @@ void CLayer::Delete()
       }
       else if ((*iter) && OBJ_POOL == state)
       {
-     
+          Safe_Release(*iter);
           ObjectPool<Engine::CGameObject>::Push(*iter);
           iter = m_GameObjects.erase(iter);
       }

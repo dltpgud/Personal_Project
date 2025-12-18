@@ -246,7 +246,7 @@ private:
 	class CFrustum*					m_pFrustum		     = { nullptr };
     class CThreadPool*              m_pThreadPool        = { nullptr };
 	class CEffect_Manager*          m_pEffect_Manager    = { nullptr }; 
-
+   
  public:
 	static void  Release_Engine(); // 레퍼런스 카운트 누수를 막기위해 한 번 더 호출
 	virtual void Free() override;

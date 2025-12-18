@@ -57,7 +57,6 @@ HRESULT CEffect_Manager::Add_EffectStream(const _wstring& key, CEffectStream* pS
         return S_OK;
     }
 
-    Safe_AddRef(pStream);
     m_EffectStreams.emplace(key, pStream);
     return S_OK;
 }
@@ -94,7 +93,8 @@ CEffect_Manager* CEffect_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 
 void CEffect_Manager::Free()
 {
-    for (auto iter = m_EffectStreams.begin(); iter != m_EffectStreams.end(); ++iter) Safe_Release(iter->second);
+    for (auto iter : m_EffectStreams) 
+        Safe_Release(iter.second);
     m_EffectStreams.clear();
 
     Safe_Release(m_pGameInstance);

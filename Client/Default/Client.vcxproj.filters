@@ -31,9 +31,6 @@
     <Filter Include="02.GameObjects\01. Map">
       <UniqueIdentifier>{edefdc45-33f8-443a-878c-12c517405296}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\01. Map\Terrain">
-      <UniqueIdentifier>{cefd18b7-2999-4443-8a8d-5bca001e1fa4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\01. Map\AniObj">
       <UniqueIdentifier>{1f1c455e-f6b9-4f7d-b441-86a755e1473a}</UniqueIdentifier>
     </Filter>
@@ -223,9 +220,6 @@
     <Filter Include="02.GameObjects\03.Actor\Bullet">
       <UniqueIdentifier>{7d6916a0-a62e-4b37-8383-3d9704231319}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.GameObjects\03.Actor\Bullet\Player">
-      <UniqueIdentifier>{03aa1484-4972-4d10-954f-48035698f265}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.GameObjects\03.Actor\Bullet\NomalMonster">
       <UniqueIdentifier>{f0d97725-4843-467f-90b9-5178f39e1d73}</UniqueIdentifier>
     </Filter>
@@ -261,6 +255,9 @@
     </Filter>
     <Filter Include="02.GameObjects\01. Map\Proxy">
       <UniqueIdentifier>{3d3ea761-8cc6-4f43-80aa-ceeb4487e0a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.GameObjects\01. Map\Terrain">
+      <UniqueIdentifier>{cefd18b7-2999-4443-8a8d-5bca001e1fa4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -377,9 +374,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Loader.h">
       <Filter>01.Level\99.Loading\Loader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerBullet.h">
-      <Filter>02.GameObjects\03.Actor\Bullet\Player</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Bullet.h">
       <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>
@@ -688,9 +682,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\BossHP.cpp">
       <Filter>02.GameObjects\04.UI\Boss UI\Boss HP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerBullet.cpp">
-      <Filter>02.GameObjects\03.Actor\Bullet\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Bullet.cpp">
       <Filter>02.GameObjects\03.Actor\Bullet\NomalMonster</Filter>

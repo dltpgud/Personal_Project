@@ -84,7 +84,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	m_pFrustum           = CFrustum::Create();
 	if (nullptr == m_pFrustum)
 		return E_FAIL;
-
+      
     m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency());
     if (nullptr == m_pThreadPool)
         return E_FAIL;
@@ -92,6 +92,8 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	m_pEffect_Manager = CEffect_Manager::Create(*ppDevice, *ppContext);
     if (nullptr == m_pEffect_Manager)
         return E_FAIL;
+
+
 
 	return S_OK;
 }
@@ -103,7 +105,7 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 	m_pUI_Manager->Priority_Update(fTimeDelta);
 	m_pPipeLine->Update();
-	m_pFrustum->Update();
+        m_pFrustum->Update();
 	
 	m_pObject_Manager->Update(fTimeDelta);
     m_pEffect_Manager->Update(fTimeDelta);  
@@ -869,7 +871,7 @@ HRESULT CGameInstance::Render_RT_Debug(const _wstring& strMRTTag, CShader* pShad
 
 _bool CGameInstance::isIn_Frustum_WorldSpace(_fvector vTargetPos, _float fRange)
 {
-	return m_pFrustum->isIn_WorldSpace(vTargetPos, fRange);
+    return m_pFrustum->isIn_WorldSpace(vTargetPos, fRange);
 }
 
 _bool CGameInstance::isIn_Frustum_LocalSpace(_fvector vTargetPos, _float fRange)
@@ -929,6 +931,7 @@ CEffectStream* CGameInstance::Find_EffectStream(const _wstring& key)
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
+    Safe_Release(m_pEffect_Manager);
 	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);
 	Safe_Release(m_pFont_Manager);
@@ -941,7 +944,6 @@ void CGameInstance::Free()
 	Safe_Release(m_pComponent_Manager);
     Safe_Release(m_pObject_Manager);
     Safe_Release(m_pUI_Manager);
-    Safe_Release(m_pEffect_Manager);
     Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pInput_Device);
