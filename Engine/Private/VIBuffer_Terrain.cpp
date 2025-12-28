@@ -423,176 +423,65 @@ void CVIBuffer_Terrain::DYNAMIC_Set_Buffer(_int x, _int z)
 void CVIBuffer_Terrain::Set_QuadTree()
 {
     m_pQuadTree = CQuadTree::Create(m_iNumVerticesX * m_iNumVerticesZ - m_iNumVerticesX,
-                                    m_iNumVerticesX * m_iNumVerticesZ -1, m_iNumVerticesX - 1, 0);
+                                    m_iNumVerticesX * m_iNumVerticesZ -1, m_iNumVerticesX - 1, 0,m_pVertexPositions);
+}
+
+AABB CVIBuffer_Terrain::LocalAABB()
+{
+   return {m_vMin, m_vMax};
 }
 
 _bool CVIBuffer_Terrain::Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, CTransform* pTransform,
-                                                      OUT _float* fDist, OUT _float3* vNormal, OUT _float3* vWorldPos)
+                                                    OUT _float* fDist, OUT _float3* vNormal, OUT _float3* vWorldPos)
 {
+    // 쿼드트리 없으면 기존 방식 fallback
     if (!m_pQuadTree)
     {
-       if (m_pGameInstance->Picking_OnTerrain(this, RayPos, RayDir, pTransform, fDist, vWorldPos, vNormal))
+        if (m_pGameInstance->Picking_OnTerrain(this, RayPos, RayDir, pTransform, fDist, vWorldPos, vNormal))
             return true;
-        
         return false;
     }
+ 
     _matrix invWorld = pTransform->Get_WorldMatrix_Inverse();
     _vector localRayPos = XMVector3TransformCoord(RayPos, invWorld);
     _vector localRayDir = XMVector3Normalize(XMVector3TransformNormal(RayDir, invWorld));
 
-    _float fBestDist = FLT_MAX;
-    _float3 vLocalHit{}, vLocalNormal{};
-    
-    m_pQuadTree->Picking_Ray(m_pVertexPositions, localRayPos, localRayDir, fBestDist, vLocalHit, vLocalNormal);
+    _float  bestLocalDist = FLT_MAX;
+    _float3 localHit{}, localN{};
 
-    if (fBestDist == FLT_MAX)
+    const _bool hit = m_pQuadTree->Picking_Ray(m_pVertexPositions, localRayPos, localRayDir, bestLocalDist, localHit, localN);
+
+    if (!hit || bestLocalDist == FLT_MAX)
         return false;
-    
-    _vector worldHit = XMVector3TransformCoord(XMLoadFloat3(&vLocalHit), pTransform->Get_WorldMatrix());
-    _vector worldNormal = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&vLocalNormal), pTransform->Get_WorldMatrix()));
+
+    _matrix W = pTransform->Get_WorldMatrix();
+
+    _vector worldHit = XMVector3TransformCoord(XMLoadFloat3(&localHit), W);
+ 
+    _vector worldN = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&localN), W));
+
+    // 노멀 뒤집힘 안정화
+    if (XMVectorGetY(worldN) < 0.f)
+        worldN = XMVectorNegate(worldN);
+
+    if (vWorldPos)
+        XMStoreFloat3(vWorldPos, worldHit);
+
+    if (vNormal)
+        XMStoreFloat3(vNormal, worldN);
 
     if (fDist)
-        *fDist = fBestDist;
-    if (vNormal)
-        XMStoreFloat3(vNormal, worldNormal);
-
-    _float3 vResult;
-    XMStoreFloat3(&vResult, worldHit);
-
-    *vWorldPos = vResult;
+    {
+        _vector delta = worldHit - RayPos;
+        *fDist = XMVectorGetX(XMVector3Length(delta));
+    }
 
     return true;
 }
 
-_bool CVIBuffer_Terrain::Intersect_OnTerrain_QuadTree(CCollider* pColliderWorldSpace, CTransform* pTerrainTransform, OUT _vector* pWorldNormal, OUT _vector* pWorldHitPos)
-{
-    if (!m_pQuadTree || !pColliderWorldSpace)
-        return false;
-
-    // 월드->로컬
-    _matrix invWorld = pTerrainTransform->Get_WorldMatrix_Inverse();
-
-    CCollider::TYPE eType = pColliderWorldSpace->Get_Type();
-
-    _float3 bestLocalHit{};
-    _float3 bestLocalN{};
-    _float bestPen = -FLT_MAX;
-    _bool touched = false;
-
-    switch (eType)
-    {
-    case CCollider::TYPE_SPHERE:
-    {
-        // 월드 스피어 가져옴
-        const CBounding_Sphere* pSphBound = static_cast<const CBounding_Sphere*>(pColliderWorldSpace->Get_Bounding());
-        BoundingSphere worldSphere = *pSphBound->Get_Desc();
-
-        // 스피어를 로컬로 변환
-        BoundingSphere localSphere;
-        {
-            _vector c = XMLoadFloat3(&worldSphere.Center);
-            _vector lc = XMVector3TransformCoord(c, invWorld);
-            XMStoreFloat3(&localSphere.Center, lc);
-
-            // 스케일 보정 (반지름은 최대 scale 성분 사용)
-            _vector S, R, T;
-            XMMatrixDecompose(&S, &R, &T, invWorld);
-            _float sx = XMVectorGetX(S);
-            _float sy = XMVectorGetY(S);
-            _float sz = XMVectorGetZ(S);
-            _float maxScale = max(sx, max(sy, sz));
-            localSphere.Radius = worldSphere.Radius * maxScale;
-        }
-       
-         touched = m_pQuadTree->Intersect_Node(localSphere, m_pVertexPositions, &bestLocalHit, &bestLocalN, &bestPen);
-    }
-    break;
-
-    case CCollider::TYPE_AABB:
-    {
-        const CBounding_AABB* pBoxBound = static_cast<const CBounding_AABB*>(pColliderWorldSpace->Get_Bounding());
-        BoundingBox worldBox = *pBoxBound->Get_Desc();
-
-        // AABB를 로컬로 변환
-        BoundingBox localBox;
-        worldBox.Transform(localBox, invWorld);
-
-        touched = m_pQuadTree->Intersect_Node(localBox, m_pVertexPositions, &bestLocalHit, &bestLocalN, &bestPen);
-    }
-    break;
-
-    case CCollider::TYPE_OBB:
-    {
-        const CBounding_OBB* pOBBBound = static_cast<const CBounding_OBB*>(pColliderWorldSpace->Get_Bounding());
-        BoundingOrientedBox worldOBB = *pOBBBound->Get_Desc();
-
-        BoundingOrientedBox localOBB;
-        worldOBB.Transform(localOBB, invWorld);
-
-        touched = m_pQuadTree->Intersect_Node(localOBB, m_pVertexPositions, &bestLocalHit, &bestLocalN, &bestPen);
-    }
-    break;
-    }
-
-    if (!touched || bestPen == -FLT_MAX)
-        return false;
-
-    // 2) 최종 결과를 로컬 -> 월드로 변환해서 리턴
-    _matrix worldMat = pTerrainTransform->Get_WorldMatrix();
-    XMVECTOR wh = XMVector3TransformCoord(XMLoadFloat3(&bestLocalHit), worldMat);
-    XMVECTOR wn = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&bestLocalN), worldMat));
-
-    if (pWorldHitPos)
-        *pWorldHitPos = wh;
-    if (pWorldNormal)
-        *pWorldNormal = wn;
-
-    return true;
-}
-
-
-
-AABB CVIBuffer_Terrain::Get_WorldAABB(CTransform* pTransform)
-{
-    AABB box{};
-    box.min = m_vMin; // 로컬 AABB 최소값
-    box.max = m_vMax; // 로컬 AABB 최대값
-
-    _matrix world = pTransform->Get_WorldMatrix();
-
-    // 8개 꼭짓점 변환 후 다시 AABB 구하기
-    _float3 corners[8] = {
-        {box.min.x, box.min.y, box.min.z}, {box.max.x, box.min.y, box.min.z}, {box.min.x, box.max.y, box.min.z},
-        {box.max.x, box.max.y, box.min.z}, {box.min.x, box.min.y, box.max.z}, {box.max.x, box.min.y, box.max.z},
-        {box.min.x, box.max.y, box.max.z}, {box.max.x, box.max.y, box.max.z},
-    };
-
-    _float3 worldMin = {FLT_MAX, FLT_MAX, FLT_MAX};
-    _float3 worldMax = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
-
-    for (int i = 0; i < 8; ++i)
-    {
-        _vector v = XMVector3TransformCoord(XMLoadFloat3(&corners[i]), world);
-        _float3 w;
-        XMStoreFloat3(&w, v);
-
-        worldMin.x = min(worldMin.x, w.x);
-        worldMin.y = min(worldMin.y, w.y);
-        worldMin.z = min(worldMin.z, w.z);
-
-        worldMax.x = max(worldMax.x, w.x);
-        worldMax.y = max(worldMax.y, w.y);
-        worldMax.z = max(worldMax.z, w.z);
-    }
-
-    box.min = worldMin;
-    box.max = worldMax;
-    return box;
-}
 
 void CVIBuffer_Terrain::Culling(_fmatrix WorldMatrixInverse)
 {
-    // 투영공간에 정의해둔 절두체를 로컬공간으로 변환
     m_pGameInstance->Frustum_Transform_To_LocalSpace(WorldMatrixInverse);
 
     _uint iNumIndices = {0};

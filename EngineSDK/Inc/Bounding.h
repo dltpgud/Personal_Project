@@ -28,7 +28,7 @@ public:
 	virtual _float3 Get_iCurCenter() { return _float3(); }
     virtual void Set_Info(BOUND_DESC* pBoundDesc) = 0;
     virtual _bool IsInside(const _float3& pos) = 0;
-
+    virtual AABB Get_WorldAABB() const = 0;
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor) { return S_OK; }

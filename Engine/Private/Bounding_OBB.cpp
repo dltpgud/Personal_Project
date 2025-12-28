@@ -61,7 +61,7 @@ _bool CBounding_OBB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, 
 
 _float CBounding_OBB::Get_iCurRadius()
 {
-    return m_pBoundDesc->Extents.y;
+    return max(m_pBoundDesc->Extents.x, max(m_pBoundDesc->Extents.y, m_pBoundDesc->Extents.z));
 }
 
 _float3 CBounding_OBB::Get_iCurCenter()
@@ -71,6 +71,16 @@ _float3 CBounding_OBB::Get_iCurCenter()
 _bool CBounding_OBB::IsInside(const _float3& pos)
 {
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
+}
+
+AABB CBounding_OBB::Get_WorldAABB() const
+{
+    AABB worldAABB;
+    worldAABB.min = {m_pBoundDesc->Center.x - m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y - m_pBoundDesc->Extents.y,
+                     m_pBoundDesc->Center.z - m_pBoundDesc->Extents.z};
+    worldAABB.max = {m_pBoundDesc->Center.x + m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y + m_pBoundDesc->Extents.y,
+                     m_pBoundDesc->Center.z + m_pBoundDesc->Extents.z};
+    return worldAABB;
 }
 
 void CBounding_OBB::Set_Info(BOUND_DESC* pBoundDesc)

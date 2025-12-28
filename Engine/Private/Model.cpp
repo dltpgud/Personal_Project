@@ -1,4 +1,4 @@
-#include "Model.h"
+﻿#include "Model.h"
 #include "Mesh.h"
 #include "MeshMaterial.h"
 #include "Transform.h"
@@ -158,7 +158,7 @@ HRESULT CModel::Set_InstanceBuffer(const vector<_matrix>& vecObjMat)
     return S_OK;
 }
 
-void CModel::Center_Ext(_float3* Center, _float3* extend)
+void CModel::Center_Ext(OUT _float3* Center, OUT _float3* extend, OUT AABB* AABB)
 {
     _float3 minPoint(FLT_MAX, FLT_MAX, FLT_MAX);
     _float3 maxPoint(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -166,17 +166,16 @@ void CModel::Center_Ext(_float3* Center, _float3* extend)
 
     for (_uint i = 0; i < m_iNumMeshes; i++)
     {
-        _uint NumIndexces = m_Meshes[i]->Get_iNumVertices();
-        for (_uint j = 0; j < NumIndexces; j++)
-        {
-            minPoint.x = min(minPoint.x, m_Meshes[i]->Get_pPos(j)->x);
-            minPoint.y = min(minPoint.y, m_Meshes[i]->Get_pPos(j)->y);
-            minPoint.z = min(minPoint.z, m_Meshes[i]->Get_pPos(j)->z);
+        _float3 MeahMin = m_Meshes[i]->GetAABBMinLocal();
+        _float3 MeahMax = m_Meshes[i]->GetAABBMaxLocal();
+        
+         minPoint.x = min(minPoint.x, MeahMin.x);
+        minPoint.y = min(minPoint.y, MeahMin.y);
+         minPoint.z = min(minPoint.z, MeahMin.z);
 
-            maxPoint.x = max(maxPoint.x, m_Meshes[i]->Get_pPos(j)->x);
-            maxPoint.y = max(maxPoint.y, m_Meshes[i]->Get_pPos(j)->y);
-            maxPoint.z = max(maxPoint.z, m_Meshes[i]->Get_pPos(j)->z);
-        }
+        maxPoint.x = max(maxPoint.x, MeahMax.x);
+        maxPoint.y = max(maxPoint.y, MeahMax.y);
+        maxPoint.z = max(maxPoint.z, MeahMax.z);
     }
 
     *Center = {
@@ -190,6 +189,11 @@ void CModel::Center_Ext(_float3* Center, _float3* extend)
         (maxPoint.y - minPoint.y) / 2.0f,
         (maxPoint.z - minPoint.z) / 2.0f
     };
+
+    if (AABB)
+    {
+        *AABB = {minPoint, maxPoint};
+    }
 }
 
 void CModel::Callback(_uint AnimIdx, _int Duration, function<void()> func)
@@ -205,14 +209,6 @@ _bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* p
 
    _vector oL = XMVector3TransformCoord(vRayPos_WS, Wi);
    _vector dL = XMVector3Normalize(XMVector3TransformNormal(vRayDir_WS, Wi));
-
-   struct HitResult
-   {
-       _bool hit = false;
-       _float dist = FLT_MAX;
-       _vector posL = XMVectorZero();
-       _vector nL = XMVectorZero();
-   };
 
    HitResult g_bestResult;
 
@@ -257,52 +253,50 @@ _bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* p
            if (!AABB.Intersects(oL, dL, fDis))
                continue;
 
-           // --- Backface Cull ---
-           XMVECTOR vA = XMLoadFloat3(&A);
-           XMVECTOR vB = XMLoadFloat3(&B);
-           XMVECTOR vC = XMLoadFloat3(&C);
-           XMVECTOR e0 = XMVectorSubtract(vB, vA);
-           XMVECTOR e1 = XMVectorSubtract(vC, vA);
-           XMVECTOR n = XMVector3Normalize(XMVector3Cross(e0, e1));
-           if (XMVectorGetX(XMVector3Dot(n, dL)) > 0.f)
-               continue;
-
+           _vector vA = XMLoadFloat3(&A);
+           _vector vB = XMLoadFloat3(&B);
+           _vector vC = XMLoadFloat3(&C);
+           _vector e0 = XMVectorSubtract(vB, vA);
+           _vector e1 = XMVectorSubtract(vC, vA);
+           _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));    
+ 
            _float tDist = 0.f;
            if (DirectX::TriangleTests::Intersects(oL, dL, vA, vB, vC, tDist))
            {
-               if (tDist < localBest.dist)
+               if (tDist < localBest.distance)
                {
                    localBest.hit = true;
-                   localBest.dist = tDist;
-                   localBest.posL = XMVectorAdd(oL, XMVectorScale(dL, tDist));
-                   localBest.nL = n;
+                   localBest.distance = tDist;
+                   localBest.position = XMVectorAdd(oL, XMVectorScale(dL, tDist));
+                   localBest.normal = n;
                }
            }
        }
 
-       if (localBest.hit)
+       if (localBest.hit && localBest.distance < g_bestResult.distance)
        {
           g_bestResult = localBest;
-           break;
+       
        }
    }
 
    if (!g_bestResult.hit)
        return false;
 
-   vHitPos_WS = XMVector3TransformCoord(g_bestResult.posL, W);
-   vHitN_WS = XMVector3Normalize(XMVector3TransformNormal(g_bestResult.nL, W));
+   vHitPos_WS = XMVector3TransformCoord(g_bestResult.position, W);
+   vHitN_WS = XMVector3Normalize(XMVector3TransformNormal(g_bestResult.normal, W));
 
   if (XMVectorGetX(XMVector3Dot(vHitN_WS, vRayDir_WS)) > 0.f)
        vHitN_WS = XMVectorNegate(vHitN_WS);
 
   if (fDist)
-   *fDist = g_bestResult.dist;
-  
+  {
+      *fDist = XMVectorGetX(XMVector3Length(XMVector3TransformCoord(g_bestResult.position, W) - vRayPos_WS));
+  }
    return true;
 }
 
-_float3 CModel::GetVertexPos(CMesh* Mash, _int Pos)
+_float3 CModel::GetVertexPos(const CMesh* Mash, _int Pos) const
 {
     if (m_eModelType == TYPE_NONANIM)
     {

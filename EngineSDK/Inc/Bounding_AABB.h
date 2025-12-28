@@ -26,18 +26,19 @@ public:
 	virtual HRESULT Initialize(const BOUND_DESC* pBoundDesc) override;
 	virtual void Update(_fmatrix WorldMatrix) override;
 	virtual _bool Intersect(CCollider::TYPE eType, CBounding* pTargetBounding) override;
-      virtual _bool RayIntersect(_vector RayPos, _vector RayDir, _float& fDis,_vector *hitPos) override;
+    virtual _bool RayIntersect(_vector RayPos, _vector RayDir, _float& fDis,_vector *hitPos) override;
+    virtual _float Get_iCurRadius() override;
+    virtual _float3 Get_iCurCenter() override;
     virtual void Set_Info(BOUND_DESC* pBoundDesc) override;
     virtual _bool IsInside(const _float3& pos) override;
-
+    virtual AABB Get_WorldAABB() const override;
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor) override;
 #endif
 
 private:
-	/* 충돌체를 위한 데이터. */
-	/* 충돌을 수행하려면 이 데이터들이 최소 월드 스페이스 가지는변환이 필요하다. */
+
 	BoundingBox* m_pBoundDesc_Original = { nullptr };
 	BoundingBox* m_pBoundDesc = { nullptr };
 

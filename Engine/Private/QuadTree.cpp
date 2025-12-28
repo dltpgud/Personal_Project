@@ -9,12 +9,32 @@ CQuadTree::CQuadTree() : m_pGameInstance{CGameInstance::GetInstance()}
     Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
+HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB, const _float3* pVerticesPos)
 {
     m_iCorners[CORNER_LT] = iLT; // 왼쪽 위
     m_iCorners[CORNER_RT] = iRT; // 오른쪽 위
     m_iCorners[CORNER_RB] = iRB; // 오른쪽 아래
     m_iCorners[CORNER_LB] = iLB; // 왼쪽 아래
+
+    /////// 쿼드 트리 피킹용 캐싱
+    _float3 minPt = pVerticesPos[iLT];
+    _float3 maxPt = pVerticesPos[iLT];
+
+    for (_int i = 1; i < 4; ++i)
+    {
+        const _float3& v = pVerticesPos[m_iCorners[i]];
+        minPt.x = min(minPt.x, v.x);
+        minPt.y = min(minPt.y, v.y);
+        minPt.z = min(minPt.z, v.z);
+        maxPt.x = max(maxPt.x, v.x);
+        maxPt.y = max(maxPt.y, v.y);
+        maxPt.z = max(maxPt.z, v.z);
+    }
+
+    m_Bounds.Center = _float3((minPt.x + maxPt.x) * 0.5f, (minPt.y + maxPt.y) * 0.5f, (minPt.z + maxPt.z) * 0.5f);
+    m_Bounds.Extents = _float3((maxPt.x - minPt.x) * 0.5f, (maxPt.y - minPt.y) * 0.5f, (maxPt.z - minPt.z) * 0.5f);
+
+    ////////
 
     if (1 == m_iCorners[CORNER_RT] - m_iCorners[CORNER_LT]) // 칸의 개수가 1이면 더 이상 분할 안함
         return S_OK;
@@ -29,10 +49,10 @@ HRESULT CQuadTree::Initialize(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
     iBC = (m_iCorners[CORNER_LB] + m_iCorners[CORNER_RB]) >> 1;
 
     // 자식 사각형들을 생성
-    m_Children[CORNER_LT] = CQuadTree::Create(m_iCorners[CORNER_LT], iTC, m_iCenter, iLC);
-    m_Children[CORNER_RT] = CQuadTree::Create(iTC, m_iCorners[CORNER_RT], iRC, m_iCenter);
-    m_Children[CORNER_RB] = CQuadTree::Create(m_iCenter, iRC, m_iCorners[CORNER_RB], iBC);
-    m_Children[CORNER_LB] = CQuadTree::Create(iLC, m_iCenter, iBC, m_iCorners[CORNER_LB]);
+    m_Children[CORNER_LT] = CQuadTree::Create(m_iCorners[CORNER_LT], iTC, m_iCenter, iLC,pVerticesPos);
+    m_Children[CORNER_RT] = CQuadTree::Create(iTC, m_iCorners[CORNER_RT], iRC, m_iCenter,pVerticesPos);
+    m_Children[CORNER_RB] = CQuadTree::Create(m_iCenter, iRC, m_iCorners[CORNER_RB], iBC,pVerticesPos);
+    m_Children[CORNER_LB] = CQuadTree::Create(iLC, m_iCenter, iBC, m_iCorners[CORNER_LB],pVerticesPos);
 
 	return S_OK;
 }
@@ -115,290 +135,127 @@ _bool CQuadTree::isDraw( const _float3 * pVerticesPos, _fmatrix WorldMatrixInv)
 _bool CQuadTree::Picking_Ray(const _float3* pVerticesPos, _vector RayPos, _vector RayDir, _float& fBestDist,
                              _float3& vHitPos, _float3& vHitNormal)
 {
-    // 1️노드 AABB 계산
-    XMFLOAT3 minPt = pVerticesPos[m_iCorners[CORNER_LT]];
-    XMFLOAT3 maxPt = pVerticesPos[m_iCorners[CORNER_LT]];
-
-    for (int i = 1; i < 4; ++i)
-    {
-        const auto& v = pVerticesPos[m_iCorners[i]];
-        minPt.x = min(minPt.x, v.x);
-        minPt.y = min(minPt.y, v.y);
-        minPt.z = min(minPt.z, v.z);
-        maxPt.x = max(maxPt.x, v.x);
-        maxPt.y = max(maxPt.y, v.y);
-        maxPt.z = max(maxPt.z, v.z);
-    }
-
-    BoundingBox bounds;
-    BoundingBox::CreateFromPoints(bounds, XMLoadFloat3(&minPt), XMLoadFloat3(&maxPt));
-
-    float boxDist;
-    if (!bounds.Intersects(RayPos, RayDir, boxDist))
+    // -------------------------------------------------
+    // 1) 캐싱된 AABB로 교차 + 거리 pruning
+    // -------------------------------------------------
+    _float boxDist = 0.f;
+    if (!m_Bounds.Intersects(RayPos, RayDir, boxDist))
         return false;
 
-    // 2️ 리프라면 두 삼각형 검사
-    if (m_Children[CORNER_LT] == nullptr)
+    if (boxDist > fBestDist)
+        return false;
+
+    // -------------------------------------------------
+    // 2) 리프 노드: 삼각형 2개 테스트
+    // -------------------------------------------------
+    if (m_Children[0] == nullptr)
     {
-        _uint idx[4] = {m_iCorners[CORNER_LT], m_iCorners[CORNER_RT], m_iCorners[CORNER_RB], m_iCorners[CORNER_LB]};
+        const _uint iLT = m_iCorners[CORNER_LT];
+        const _uint iRT = m_iCorners[CORNER_RT];
+        const _uint iRB = m_iCorners[CORNER_RB];
+        const _uint iLB = m_iCorners[CORNER_LB];
 
-        _float dist;
-        // 첫 번째 삼각형
-        if (TriangleTests::Intersects(RayPos, RayDir, XMLoadFloat3(&pVerticesPos[idx[0]]),
-                                      XMLoadFloat3(&pVerticesPos[idx[1]]), XMLoadFloat3(&pVerticesPos[idx[2]]), dist))
-        {
-            if (dist < fBestDist)
-            {
-                fBestDist = dist;
-                XMStoreFloat3(&vHitPos, RayPos + RayDir * dist);
+        _bool hit = false;
 
-                _vector e0 = XMLoadFloat3(&pVerticesPos[idx[1]]) - XMLoadFloat3(&pVerticesPos[idx[0]]);
-                _vector e1 = XMLoadFloat3(&pVerticesPos[idx[2]]) - XMLoadFloat3(&pVerticesPos[idx[0]]);
-                XMStoreFloat3(&vHitNormal, XMVector3Normalize(XMVector3Cross(e0, e1)));
-            }
-        }
+        // tri 1 : LT, RT, RB
+        hit |= RayIntersectsTriangle(RayPos, RayDir, pVerticesPos[iLT], pVerticesPos[iRT], pVerticesPos[iRB], fBestDist,
+                                     vHitPos, vHitNormal);
 
-        // 두 번째 삼각형
-        if (TriangleTests::Intersects(RayPos, RayDir, XMLoadFloat3(&pVerticesPos[idx[0]]),
-                                      XMLoadFloat3(&pVerticesPos[idx[2]]), XMLoadFloat3(&pVerticesPos[idx[3]]), dist))
-        {
-            if (dist < fBestDist)
-            {
-                fBestDist = dist;
-                XMStoreFloat3(&vHitPos, RayPos + RayDir * dist);
+        // tri 2 : LT, RB, LB
+        hit |= RayIntersectsTriangle(RayPos, RayDir, pVerticesPos[iLT], pVerticesPos[iRB], pVerticesPos[iLB], fBestDist,
+                                     vHitPos, vHitNormal);
 
-                _vector e0 = XMLoadFloat3(&pVerticesPos[idx[2]]) - XMLoadFloat3(&pVerticesPos[idx[0]]);
-                _vector e1 = XMLoadFloat3(&pVerticesPos[idx[3]]) - XMLoadFloat3(&pVerticesPos[idx[0]]);
-                XMStoreFloat3(&vHitNormal, XMVector3Normalize(XMVector3Cross(e0, e1)));
-            }
-        }
-
-        return true;
+        return hit;
     }
 
-    for (auto& child : m_Children)
+    // -------------------------------------------------
+    // 3) 내부 노드: 자식 AABB로 후보 수집
+    // -------------------------------------------------
+    ChildPick candidates[4];
+    _int count = 0;
+
+    for (_int i = 0; i < 4; ++i)
     {
-        if (child)
-            child->Picking_Ray(pVerticesPos, RayPos, RayDir, fBestDist, vHitPos, vHitNormal);
+        CQuadTree* child = m_Children[i];
+        if (!child)
+            continue;
+
+        _float cd = 0.f;
+        if (!child->m_Bounds.Intersects(RayPos, RayDir, cd))
+            continue;
+
+        if (cd > fBestDist)
+            continue;
+
+        candidates[count++] = {child, cd};
     }
 
-    return true;
+    // -------------------------------------------------
+    // 4) 거리 기준 정렬 (최대 4개 → selection sort)
+    // -------------------------------------------------
+    for (_int i = 0; i < count; ++i)
+    {
+        _int best = i;
+        for (_int j = i + 1; j < count; ++j)
+            if (candidates[j].dist < candidates[best].dist)
+                best = j;
+
+        if (best != i)
+            swap(candidates[i], candidates[best]);
+    }
+
+    // -------------------------------------------------
+    // 5) 가까운 자식부터 재귀
+    // -------------------------------------------------
+    _bool hit = false;
+    for (_int i = 0; i < count; ++i)
+    {
+        if (candidates[i].dist > fBestDist)
+            break;
+
+        if (candidates[i].node->Picking_Ray(pVerticesPos, RayPos, RayDir, fBestDist, vHitPos, vHitNormal))
+            hit = true;
+    }
+
+    return hit;
 }
 
-_bool CQuadTree::Intersect_Node(const BoundingSphere& sphere, const _float3* pVerticesPos, OUT _float3* pHitPos,
-                                OUT _float3* pHitNormal, OUT _float* pBestPenetration)
+_bool CQuadTree::RayIntersectsTriangle(_vector RayPos, _vector RayDir, const _float3& v0, const _float3& v1,
+                                       const _float3& v2, _float& ioBestDist, _float3& outHitPos, _float3& outNormal)
 {
-    // 1️⃣ 현재 노드의 AABB 계산
-    _float3 minPt = pVerticesPos[m_iCorners[CORNER_LT]];
-    _float3 maxPt = pVerticesPos[m_iCorners[CORNER_LT]];
+   _float dist = 0.f;
 
-    for (int i = 1; i < 4; ++i)
-    {
-        const auto& v = pVerticesPos[m_iCorners[i]];
-        minPt.x = min(minPt.x, v.x);
-        minPt.y = min(minPt.y, v.y);
-        minPt.z = min(minPt.z, v.z);
-        maxPt.x = max(maxPt.x, v.x);
-        maxPt.y = max(maxPt.y, v.y);
-        maxPt.z = max(maxPt.z, v.z);
-    }
+   if (!TriangleTests::Intersects(RayPos, RayDir, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2), dist))
+       return false;
 
-    BoundingBox nodeBox;
-    BoundingBox::CreateFromPoints(nodeBox, XMLoadFloat3(&minPt), XMLoadFloat3(&maxPt));
+   if (dist < 0.f || dist >= ioBestDist)
+       return false;
 
-    // 1차 교차 완화
-    BoundingBox padded = nodeBox;
-    padded.Extents.x += sphere.Radius;
-    padded.Extents.y += sphere.Radius;
-    padded.Extents.z += sphere.Radius;
+   ioBestDist = dist;
 
-    if (!padded.Intersects(sphere))
-        return false;
+   // hit position
+   _vector hitP = RayPos + RayDir * dist;
+   XMStoreFloat3(&outHitPos, hitP);
 
-    // 2️⃣ 리프면 삼각형 검사
-    if (m_Children[CORNER_LT] == nullptr)
-    {
-        const _uint idx[4] = {m_iCorners[CORNER_LT], m_iCorners[CORNER_RT], m_iCorners[CORNER_RB],
-                              m_iCorners[CORNER_LB]};
+   // normal
+   _vector e0 = XMLoadFloat3(&v1) - XMLoadFloat3(&v0);
+   _vector e1 = XMLoadFloat3(&v2) - XMLoadFloat3(&v0);
+   _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));
 
-        const _float3& vLT = pVerticesPos[idx[0]];
-        const _float3& vRT = pVerticesPos[idx[1]];
-        const _float3& vRB = pVerticesPos[idx[2]];
-        const _float3& vLB = pVerticesPos[idx[3]];
+   // Ray 반대 방향으로 노멀 정렬 (Y-up 가정 제거)
+   if (XMVectorGetX(XMVector3Dot(n, RayDir)) > 0.f)
+       n = XMVectorNegate(n);
 
-        _float3 hit{}, normal{};
-        _float pen = -FLT_MAX;
-
-        if (m_pGameInstance->TestSphereTriangle(sphere, vLT, vRT, vRB, &hit, &normal, &pen))
-        {
-            if (pen > *pBestPenetration || *pBestPenetration == -FLT_MAX)
-            {
-                *pBestPenetration = max(pen, 0.0f);
-                *pHitPos = hit;
-                *pHitNormal = normal;
-            }
-        }
-        if (m_pGameInstance->TestSphereTriangle(sphere, vLT, vRB, vLB, &hit, &normal, &pen))
-        {
-            if (pen > *pBestPenetration || *pBestPenetration == -FLT_MAX)
-            {
-                *pBestPenetration = max(pen, 0.0f);
-                *pHitPos = hit;
-                *pHitNormal = normal;
-            }
-        }
-        return true;
-    }
-
-    // 3️⃣ 자식 재귀 검사
-    for (auto& child : m_Children)
-    {
-        if (child && child->Intersect_Node(sphere, pVerticesPos, pHitPos, pHitNormal, pBestPenetration))
-            return true;
-    }
-
-    return false;
-}
-
-_bool CQuadTree::Intersect_Node(const BoundingBox& box, const _float3* pVerticesPos, OUT _float3* pHitPos, OUT _float3* pHitNormal, OUT _float* pBestPenetration)
-{
-    // 노드 AABB 계산
-    _float3 minPt = pVerticesPos[m_iCorners[CORNER_LT]];
-    _float3 maxPt = pVerticesPos[m_iCorners[CORNER_LT]];
-
-    for (int i = 1; i < 4; ++i)
-    {
-        const auto& v = pVerticesPos[m_iCorners[i]];
-        minPt.x = min(minPt.x, v.x);
-        minPt.y = min(minPt.y, v.y);
-        minPt.z = min(minPt.z, v.z);
-        maxPt.x = max(maxPt.x, v.x);
-        maxPt.y = max(maxPt.y, v.y);
-        maxPt.z = max(maxPt.z, v.z);
-    }
-
-    BoundingBox nodeBox;
-    BoundingBox::CreateFromPoints(nodeBox, XMLoadFloat3(&minPt), XMLoadFloat3(&maxPt));
-
-    if (!box.Intersects(nodeBox))
-        return false;
-
-    if (m_Children[CORNER_LT] == nullptr)
-    {
-        const _uint idx[4] = {m_iCorners[CORNER_LT], m_iCorners[CORNER_RT], m_iCorners[CORNER_RB],
-                              m_iCorners[CORNER_LB]};
-
-        const _float3& vLT = pVerticesPos[idx[0]];
-        const _float3& vRT = pVerticesPos[idx[1]];
-        const _float3& vRB = pVerticesPos[idx[2]];
-        const _float3& vLB = pVerticesPos[idx[3]];
-
-        _float3 hit{}, normal{};
-        _float pen = -FLT_MAX;
-
-        if (m_pGameInstance->TestAABBTriangle(box, vLT, vRT, vRB, &hit, &normal, &pen))
-        {
-            if (pen > *pBestPenetration)
-            {
-                *pBestPenetration = pen;
-                *pHitPos = hit;
-                *pHitNormal = normal;
-            }
-        }
-        if (m_pGameInstance->TestAABBTriangle(box, vLT, vRB, vLB, &hit, &normal, &pen))
-        {
-            if (pen > *pBestPenetration)
-            {
-                *pBestPenetration = pen;
-                *pHitPos = hit;
-                *pHitNormal = normal;
-            }
-        }
-        return true;
-    }
-
-    _bool anyHit = false;
-    for (auto& child : m_Children)
-    {
-        if (child && child->Intersect_Node(box, pVerticesPos, pHitPos, pHitNormal, pBestPenetration))
-            anyHit = true;
-    }
-    return anyHit;
-}
-
-_bool CQuadTree::Intersect_Node(const BoundingOrientedBox& obb, const _float3* pVerticesPos, OUT _float3* pHitPos,
-                                OUT _float3* pHitNormal, OUT _float* pBestPenetration)
-{
-    // 노드 AABB 계산
-    _float3 minPt = pVerticesPos[m_iCorners[CORNER_LT]];
-    _float3 maxPt = pVerticesPos[m_iCorners[CORNER_LT]];
-
-    for (int i = 1; i < 4; ++i)
-    {
-        const auto& v = pVerticesPos[m_iCorners[i]];
-        minPt.x = min(minPt.x, v.x);
-        minPt.y = min(minPt.y, v.y);
-        minPt.z = min(minPt.z, v.z);
-        maxPt.x = max(maxPt.x, v.x);
-        maxPt.y = max(maxPt.y, v.y);
-        maxPt.z = max(maxPt.z, v.z);
-    }
-
-    BoundingBox nodeBox;
-    BoundingBox::CreateFromPoints(nodeBox, XMLoadFloat3(&minPt), XMLoadFloat3(&maxPt));
-
-    if (!obb.Intersects(nodeBox))
-        return false;
-
-    if (m_Children[CORNER_LT] == nullptr)
-    {
-        const _uint idx[4] = {m_iCorners[CORNER_LT], m_iCorners[CORNER_RT], m_iCorners[CORNER_RB],
-                              m_iCorners[CORNER_LB]};
-
-        const _float3& vLT = pVerticesPos[idx[0]];
-        const _float3& vRT = pVerticesPos[idx[1]];
-        const _float3& vRB = pVerticesPos[idx[2]];
-        const _float3& vLB = pVerticesPos[idx[3]];
-
-        _float3 hit{}, normal{};
-        _float pen = -FLT_MAX;
-
-        if (m_pGameInstance->TestOBBTriangle(obb, vLT, vRT, vRB, &hit, &normal, &pen))
-        {
-            if (pen > *pBestPenetration)
-            {
-                *pBestPenetration = pen;
-                *pHitPos = hit;
-                *pHitNormal = normal;
-            }
-        }
-        if (m_pGameInstance-> TestOBBTriangle(obb, vLT, vRB, vLB, &hit, &normal, &pen))
-        {
-            if (pen > *pBestPenetration)
-            {
-                *pBestPenetration = pen;
-                *pHitPos = hit;
-                *pHitNormal = normal;
-            }
-        }
-        return true;
-    }
-
-    _bool anyHit = false;
-    for (auto& child : m_Children)
-    {
-        if (child && child->Intersect_Node(obb, pVerticesPos, pHitPos, pHitNormal, pBestPenetration))
-            anyHit = true;
-    }
-    return anyHit;
+   XMStoreFloat3(&outNormal, n);
+   return true;
 }
 
 
-CQuadTree * CQuadTree::Create(_uint iLT, _uint iRT, _uint iRB, _uint iLB)
+CQuadTree* CQuadTree::Create(_uint iLT, _uint iRT, _uint iRB, _uint iLB, const _float3* pVerticesPos)
 {
 	CQuadTree*		pInstance = new CQuadTree();
 
-	if (FAILED(pInstance->Initialize(iLT, iRT, iRB, iLB)))
+	if (FAILED(pInstance->Initialize(iLT, iRT, iRB, iLB, pVerticesPos)))
 	{
 		MSG_BOX("Failed to Created : CQuadTree");
 		Safe_Release(pInstance);

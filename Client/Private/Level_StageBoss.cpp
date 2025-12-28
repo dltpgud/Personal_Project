@@ -119,7 +119,7 @@ HRESULT CLevel_StageBoss::Ready_Layer_Map(const _wstring& pLayerTag)
 
 HRESULT CLevel_StageBoss::Ready_Collision_Init()
 {
-    m_pGameInstance->Collision_Init({0.f, 0.f}, {100.f, 100.f}, 5);
+    m_pGameInstance->Collision_Init({0.f, 0.f}, {100.f, 100.f}, 100);
 	return S_OK;
 }
 

@@ -239,6 +239,7 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\Shader.h" />
     <ClInclude Include="..\Public\Sound.h" />
     <ClInclude Include="..\Public\SpatialGrid.h" />
+    <ClInclude Include="..\Public\StaticBVH.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -324,6 +325,7 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\Shader.cpp" />
     <ClCompile Include="..\Private\Sound.cpp" />
     <ClCompile Include="..\Private\SpatialGrid.cpp" />
+    <ClCompile Include="..\Private\StaticBVH.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

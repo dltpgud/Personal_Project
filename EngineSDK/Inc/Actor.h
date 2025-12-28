@@ -85,6 +85,11 @@ public:
      {
          return &m_DecalDesc;
      } 
+public:
+     virtual _float Get_EffectiveRange()
+     {
+         return {};
+     };
 
  protected:
      CNavigation* m_pNavigationCom = { nullptr };
@@ -99,7 +104,6 @@ public:
      _bool        m_bOnCell = {false};
      _uint        m_iType = {};
      _uint        m_iRim{}; 
-     
 
  public:
         virtual CGameObject* Clone(void* pArg) = 0;

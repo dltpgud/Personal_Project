@@ -44,11 +44,28 @@ namespace Engine
         int DecalType; // SSD or Box
         int ProtoIndex; 
     };
+
+    struct HitResult
+    {
+        _bool hit = false;
+        _float distance = FLT_MAX;
+        _vector position = XMVectorZero();
+        _vector normal = XMVectorZero();
+        class CGameObject* object = nullptr;
+    };
    
     typedef struct AABB
     {
         _float3 min;
         _float3 max;
+
+        XMVECTOR Center() const
+        {
+            _float3 center = {(min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f, (min.z + max.z) * 0.5f};
+
+            // XMVECTOR로 변환하여 반환
+            return XMVectorSet(center.x, center.y, center.z, 1.0f);
+        }
 
     } AABB;
 

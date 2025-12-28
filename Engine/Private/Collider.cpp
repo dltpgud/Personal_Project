@@ -100,6 +100,7 @@ _bool CCollider::IsInside(const _float3& pos)
     return m_pBounding->IsInside(pos);
 }
 
+
 _float3 CCollider::Get_iCurCenter() const
 {
 	return m_pBounding->Get_iCurCenter();

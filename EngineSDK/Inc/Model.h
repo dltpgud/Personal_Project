@@ -48,13 +48,13 @@ public:
 
     void init_Loop();
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
-    void Center_Ext(_float3* Center, _float3* extend);
+    void Center_Ext(OUT _float3* Center, OUT _float3* extend, OUT AABB* AABB=nullptr);
 
     void Callback(_uint AnimIdx, _int Duration, function<void()> func);
 
     _bool RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* pTransform, OUT _vector& vHitPos_WS, OUT _vector& vHitN_WS, OUT _float* fDist = nullptr);
 
-    _float3 GetVertexPos(class CMesh* Mash, _int Pos);
+    _float3 GetVertexPos(const class CMesh* Mash, _int Pos) const;
 
   class CMesh* Get_Mash(_uint Mashinx);
 

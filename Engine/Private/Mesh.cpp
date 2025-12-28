@@ -106,12 +106,12 @@ HRESULT CMesh::Render()
     return S_OK;
 }
 
-_float3* CMesh::Get_pPos(_int i)
+_float3* CMesh::Get_pPos(_int i) const
 {
     return &m_pPos[i];
 }
 
-_float3 CMesh::GetVetexPosAnim(_int vertexIndex)
+_float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
 {
 
     const VTXANIMMESH& vtx = m_pAnimVertices[vertexIndex];
@@ -145,7 +145,7 @@ _float3 CMesh::GetVetexPosAnim(_int vertexIndex)
     return result;
 }
 
-_uint CMesh::Get_pIndices(_int i)
+_uint CMesh::Get_pIndices(_int i) const
 {
     return m_pIndices[i];
 }

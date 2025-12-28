@@ -1,7 +1,7 @@
 ﻿#include "GameInstance.h"
 #include "Actor.h"
 #include "Skill.h"
-#include "iostream"
+
 Collider_Manager::Collider_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pGameInstance{CGameInstance::GetInstance()}
 #ifdef _DEBUG
@@ -11,7 +11,6 @@ Collider_Manager::Collider_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* p
     Safe_AddRef(m_pGameInstance);
 
 #ifdef _DEBUG
-    Safe_AddRef(m_pInputLayout);
     Safe_AddRef(m_pDevice);
     Safe_AddRef(m_pContext);
 #endif
@@ -40,8 +39,10 @@ HRESULT Collider_Manager::Initialize()
     if(FAILED( m_pDevice->CreateInputLayout(VertexPositionColor::InputElements, VertexPositionColor::InputElementCount,
                                  pShaderByteCode, iShaderByteCodeLength, &m_pInputLayout)))
         return E_FAIL;
-
 #endif
+
+    m_StaticBVH = CStaticBVH::Create();
+    m_SpatialGrid = CSpatialGrid::Create();
 
     return S_OK;
 }
@@ -58,6 +59,7 @@ HRESULT Collider_Manager::Add_GameObject_To_ColGroup(class CGameObject* Obj, con
 {
     m_GameObjeList[Type].push_back(Obj);
     Safe_AddRef(Obj);
+
     return S_OK;
 }
 
@@ -113,42 +115,30 @@ HRESULT Collider_Manager::Check_Inetrect_Player()
 
 void Collider_Manager::All_Collison_check(_float fTimedelta)
 {
-   m_SpatialGrid.ClearDynamic();
-   m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
-   m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
+   m_SpatialGrid->Clear();
+   m_SpatialGrid->UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
+   m_SpatialGrid->UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
     
-   MonsterSkill_To_Mash_Collison(fTimedelta);
-   Monster_To_Monster_Collision();
+   MonsterSkill_To_Mash(fTimedelta); 
+   Player_To_MonsterSkill();         // HP 한 번만 깍이게
+   Monster_To_Monster();
+ 
+   Check_Inetrect_Player();
    Check_Collider_PlayerCollison();
 
-    Player_To_Monster_Bullet_Collison();
-    Check_Inetrect_Player();
-    if (m_bIsColl)
-    {
-        if (false == Player_To_Monster_Ray_Collison_Check())
-        {
-            Player_To_Mash_Collison_for_Decal();
-        }
-        m_bIsColl = false;
-    }
+   if (m_bIsColl)
+   {
+       if (false == PlayerWeapon_To_Monster())
+       {
+           PlayerWapon_To_Mash();
+       }
+       m_bIsColl = false;
+   }
 
-    for (auto& coll : m_ColliderList) Safe_Release(coll);
-    m_ColliderList.clear();
-
-    for (_int i = 0; i < COL_END; i++)
-    {
-        //if (i != COL_STATIC)
-        {
-
-            for (auto& Obj : m_GameObjeList[i]) Safe_Release(Obj);
-
-            m_GameObjeList[i].clear();
-        }
-    }
-
+   Clear();
 }
 
-_bool Collider_Manager::Player_To_Monster_Ray_Collison_Check()
+_bool Collider_Manager::PlayerWeapon_To_Monster()
 {
     CActor* pPlayer = m_pGameInstance->Get_Player();
     if (!pPlayer)
@@ -157,354 +147,205 @@ _bool Collider_Manager::Player_To_Monster_Ray_Collison_Check()
     _vector RayPos{}, RayDir{};
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
-
-   
+    
     vector<CGameObject*> vCandidates;
-    m_SpatialGrid.QueryNearby(RayPos, 150.f, vCandidates, COL_MONSTER); // 150.f는 시야 거리 반경
-
+    m_SpatialGrid->QueryNearby(RayPos, pPlayer->Get_EffectiveRange(), vCandidates); // 150.f는 시야 거리 반경
+    
     if (vCandidates.empty())
         return false;
-
-    CActor* pPickedObj = nullptr;
-    _float fBestDist = FLT_MAX;
+    
+    HitResult Hit;
 
     for (auto& Obj : vCandidates)
     {
         if (!Obj)
             continue;
-
+    
         CCollider* pCol = Obj->Get_Collider();
         if (!pCol)
             continue;
-
+    
         _float fDist{};
         if (pCol->RayIntersects(RayPos, RayDir, fDist))
         {
-            if (fDist > 0.f && fDist < fBestDist)
+            if (fDist > 0.f && fDist < Hit.distance)
             {
-                fBestDist = fDist;
-                pPickedObj = dynamic_cast<CActor*>(Obj);
+                Hit.distance = fDist;
+                Hit.object = Obj;
+                Hit.hit = true;
             }
         }
     }
+    
+    if (!Hit.hit)
+        return false;
+    
+    CActor*pPickedObj = dynamic_cast<CActor*>(Hit.object);
 
-    // 3️⃣ 실제 피킹된 몬스터가 없다면 종료
     if (!pPickedObj)
         return false;
 
-    // 4️⃣ 정밀 피킹: 본/메시 단위 충돌 확인
     _vector FinalPos{}, vNormal{};
+     
     if (pPickedObj->Part_Intersects(RayPos, RayDir, FinalPos, vNormal))
     {
-        pPickedObj->Check_Coll();
-        pPlayer->CreateEffect(RayPos, RayDir, FinalPos, vNormal);
-        return true;
+         pPickedObj->Check_Coll();
+         pPlayer->CreateEffect(RayPos, RayDir, FinalPos, vNormal);
+         return true;
     }
-
-    return false;
+    
+     return false;
 }
 
-HRESULT Collider_Manager::Player_To_Monster_Bullet_Collison()
+HRESULT Collider_Manager::Player_To_MonsterSkill()
 {
-    CActor* pPlayer = m_pGameInstance->Get_Player();
-    if (!pPlayer)
-        return E_FAIL;
+   CActor* pPlayer = m_pGameInstance->Get_Player();
+   if (!pPlayer)
+       return E_FAIL;
+ 
+   _vector playerPos = pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+ 
+   vector<CGameObject*> vNearbySkills;
+   _vector RayPos{}, RayDir{}, PrePos{}, CurPos{};
+   _float  RayRen{};
+   pPlayer->Get_Transform()->Get_Ray(RayPos, RayDir, &RayRen, &PrePos, &CurPos);
+   //m_SpatialGrid->QueryNearby(playerPos, 60.f, vNearbySkills);
+   m_SpatialGrid->QueryAABB(PrePos, CurPos, RayRen, vNearbySkills);
 
-    _vector playerPos = pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
-
-    vector<CGameObject*> vNearbySkills;
-    m_SpatialGrid.QueryNearby(playerPos, 150.f, vNearbySkills, COL_MONSTER_SKILL);
-
-    for (auto& pSkillObj : vNearbySkills)
-    {
-        CSkill* pSkill = dynamic_cast<CSkill*>(pSkillObj);
-        if (!pSkill)
-            continue;
-
-        _bool bHit = true;
-        
-        if (CSkill::STYPE_SHOCKWAVE == dynamic_cast<CSkill*>(pSkill)->Get_SkillType())
-        {
-            if (true == dynamic_cast<CSkill*>(pSkill)->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)))
-            {
-                bHit = false;
-            }
-            else
-            {
-                if (false == pPlayer->Get_onCell())
-                    bHit = false;
-                else
-                    bHit = true;
-            }
-        }
-
-        if (true == bHit)
-        {
-            if (true == pSkill->Get_Collider()->Intersect(pPlayer->Get_Collider()))
-            {
-                pPlayer->Set_CurrentHP(dynamic_cast<CSkill*>(pSkill)->Get_Damage());
-
-                if (dynamic_cast<CSkill*>(pSkill)->Get_SkillType() == CSkill::STYPE_STURN)
-                    pPlayer->Stun_Routine();
-                else
-                    pPlayer->Check_Coll();
-
-                if (dynamic_cast<CSkill*>(pSkill)->Get_ActorType() != CSkill::BOSS_MONSTER)
-                {
-                    static_cast<CSkill*>(pSkill)->Dead_Rutine();
-                }
-            }
-        }
-    }
-
+   for (auto& pSkillObj : vNearbySkills)
+   {
+       CSkill* pSkill = dynamic_cast<CSkill*>(pSkillObj);
+       if (!pSkill)
+           continue;
+ 
+       _bool bHit = true;
+       
+       if (CSkill::STYPE_SHOCKWAVE == dynamic_cast<CSkill*>(pSkill)->Get_SkillType())
+       {
+           if (true == dynamic_cast<CSkill*>(pSkill)->Comput_SafeZone(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)))
+           {
+               bHit = false;
+           }
+           else
+           {
+               if (false == pPlayer->Get_onCell())
+                   bHit = false;
+               else
+                   bHit = true;
+           }
+       }
+ 
+       if (true == bHit)
+       {
+           if (true == pSkill->Get_Collider()->Intersect(pPlayer->Get_Collider()))
+           {
+               pPlayer->Set_CurrentHP(dynamic_cast<CSkill*>(pSkill)->Get_Damage());
+ 
+               if (dynamic_cast<CSkill*>(pSkill)->Get_SkillType() == CSkill::STYPE_STURN)
+                   pPlayer->Stun_Routine();
+               else
+                   pPlayer->Check_Coll();
+ 
+               if (dynamic_cast<CSkill*>(pSkill)->Get_ActorType() != CSkill::BOSS_MONSTER)
+               {
+                   static_cast<CSkill*>(pSkill)->Dead_Rutine();
+               }
+           }
+       }
+   }
+ 
     return S_OK;
 }
 
-HRESULT Collider_Manager::Player_To_Mash_Collison_for_Decal()
+HRESULT Collider_Manager::PlayerWapon_To_Mash()
 {
     CActor* pPlayer = m_pGameInstance->Get_Player();
     if (!pPlayer)
         return E_FAIL;
-
-        _float fNearestDist = FLT_MAX;
-    _vector vHitPos{}, vHitNormal{};
-    CGameObject* pNearestObj = nullptr;
-    _bool bTerrainHit = false;
-
-    CGameObject* pTerrainObj = nullptr;
-    CVIBuffer_Terrain* pTerrainBuffer = nullptr;
-
 
     _vector RayPos{}, RayDir{};
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
-
-    vector<CGameObject*> vCandidates;
-    m_SpatialGrid.QueryNearby(RayPos, 200.f, vCandidates, COL_STATIC);
-    
-    for (auto& Obj : vCandidates)
-    {
-        if (!Obj)
-            continue;
-        auto* pBuf = dynamic_cast<CVIBuffer_Terrain*>(Obj->Find_Component(TEXT("Com_Buffer")));
-        if (Obj&& pBuf)
-        {
-            if (!pTerrainBuffer)
-            {
-                pTerrainBuffer = pBuf;
-                pTerrainObj = Obj;
-            }
-            else
-            {
-                _float fPrev = XMVectorGetX(XMVector3Length(RayPos - pTerrainObj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)));
-                _float fCurr = XMVectorGetX(XMVector3Length(RayPos - Obj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION)));
-                if (fCurr < fPrev)
-                {
-                    pTerrainBuffer = pBuf;
-                    pTerrainObj = Obj;
-                }
-            }
-            continue;
-        }
-
-        _float fCurrDist = FLT_MAX;
-        _vector vCurrPos{}, vCurrNormal{};
-        _bool bHit = false;
-
-        if (CCollider* pCol = Obj->Get_Collider())
-        {
-            if (pCol->RayIntersects(RayPos, RayDir, fCurrDist))
-            {
-                if (CModel* pModel = dynamic_cast<CModel*>(Obj->Find_Component(TEXT("Com_Model"))))
-                {
-                    _vector vExactPos{}, vExactNormal{};
-                    if (pModel->RayIntersect(RayPos, RayDir, Obj->Get_Transform(), vExactPos, vExactNormal))
-                    {
-                        bHit = true;
-                        fCurrDist = XMVectorGetX(XMVector3Length(vExactPos - RayPos));
-                        vCurrPos = vExactPos;
-                        vCurrNormal = vExactNormal;
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (CModel* pModel = dynamic_cast<CModel*>(Obj->Find_Component(TEXT("Com_Model"))))
-            {
-                _vector vExactPos{}, vExactNormal{};
-                if (pModel->RayIntersect(RayPos, RayDir, Obj->Get_Transform(), vExactPos, vExactNormal))
-                {
-                    bHit = true;
-                    fCurrDist = XMVectorGetX(XMVector3Length(vExactPos - RayPos));
-                    vCurrPos = vExactPos;
-                    vCurrNormal = vExactNormal;
-                }
-            }
-        }
-
-        if (bHit && fCurrDist < fNearestDist)
-        {
-            fNearestDist = fCurrDist;
-            vHitPos = vCurrPos;
-            vHitNormal = vCurrNormal;
-            pNearestObj = Obj;
-            bTerrainHit = false;
-        }
-    }
-
-    if (pTerrainBuffer)
-    {
-        _float3 fPos{}, fNormal{};
-        _float fDist{};
-        if (pTerrainBuffer->Picking_OnTerrain_QuadTree(RayPos, RayDir, pTerrainObj->Get_Transform(), &fDist, &fNormal,
-                                                       &fPos))
-        {
-            if (fDist < fNearestDist)
-            {
-                fNearestDist = fDist;
-                vHitPos = XMVectorSet(fPos.x, fPos.y, fPos.z, 1.f);
-                vHitNormal = XMVectorSet(fNormal.x, fNormal.y, fNormal.z, 0.f);
-                bTerrainHit = true;
-                pNearestObj = pTerrainObj;
-            }
-        }
-    }
-
-    if (!pNearestObj)
-        return S_OK;
+    HitResult hit;
+    if (!m_StaticBVH->Raycast(RayPos, RayDir, hit))
+        return E_FAIL;
 
     DECAL_DESC* Desc = pPlayer->Get_DecalDesc();
-    Desc->vPos = vHitPos;
-    Desc->vNormal = vHitNormal;
+    Desc->vPos = hit.position;
+    Desc->vNormal = hit.normal;
     Desc->vDir = XMVector3Normalize(RayDir);
     Desc->iType = DECAL_DESC::TYPE_BOX;
 
     m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
-    pPlayer->CreateEffect(RayPos, RayDir, vHitPos, vHitNormal);
+    pPlayer->CreateEffect(RayPos, RayDir, hit.position, hit.normal);
 
     return S_OK;
 }
 
-
-HRESULT Collider_Manager::MonsterSkill_To_Mash_Collison(_float fTimedelta)
+HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
 {
-    vector<CGameObject*> vCandidates;
     for (auto& SkillObj : m_GameObjeList[COL_MONSTER_SKILL])
     {
-        _uint iActorType = static_cast<CSkill*>(SkillObj)->Get_ActorType();
         _uint iSkillType = static_cast<CSkill*>(SkillObj)->Get_SkillType();
-        _vector SkillPos = SkillObj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION);
+        CCollider* SkillCollider = SkillObj->Get_Collider();
+        DECAL_DESC* Desc = static_cast<CSkill*>(SkillObj)->Get_DecalDesc();
+        _bool bCreate = false;
 
-        m_SpatialGrid.QueryNearby(SkillPos, 1.f, vCandidates, COL_STATIC);
-
-        // 3. 쿼리된 객체들에 대해 충돌 검사
-        for (auto& DecalObj : vCandidates)
+        _vector RayPos{}, RayDir{};
+        _float RayLen{};
+        SkillObj->Get_Transform()->Get_Ray(RayPos, RayDir, &RayLen);
+ 
+        if (iSkillType == CSkill::STYPE_LASER)
         {
-            if (nullptr == DecalObj)
-                continue;
+            bCreate = true;
+            RayPos = Desc->vPos;
+            RayDir = Desc->vDir;
+        }
 
-            CCollider* pCol = DecalObj->Get_Collider();
-            if (nullptr == pCol && iSkillType != CSkill::STYPE_LASER && iSkillType != CSkill::STYPE_SHOCKWAVE)
+        _float radius = SkillCollider->Get_iCurRadius();
+        _float MaxRayLen = RayLen + radius + 0.01f;
+
+        HitResult hit;
+        if (!m_StaticBVH->Raycast(RayPos, XMVector3Normalize(RayDir), hit,RayLen))
+            continue;
+
+       
+        if (hit.hit && iSkillType != CSkill::STYPE_SHOCKWAVE && iSkillType != CSkill::STYPE_LASER)
+        {
+            CCollider* HitCol = hit.object->Get_Collider();
+
+            if (HitCol)
             {
-                CVIBuffer_Terrain* buffer =
-                    static_cast<CVIBuffer_Terrain*>(DecalObj->Find_Component(TEXT("Com_Buffer")));
-                _vector vNormal{}, vWorldPos{};
-
-                if (buffer)
+                if (SkillCollider->Intersect(HitCol))
                 {
-                    _float3 fPos{}, fNormal{};
-                    _float fDist{};
-                    if (buffer->Intersect_OnTerrain_QuadTree(SkillObj->Get_Collider(), DecalObj->Get_Transform(),
-                                                             &vNormal, &vWorldPos))
-                    {
-                        DECAL_DESC* Desc = static_cast<CSkill*>(SkillObj)->Get_DecalDesc();
-                        Desc->iType = DECAL_DESC::TYPE_BOX;
-                        Desc->vNormal = vNormal;
-                        Desc->vPos = vWorldPos;
-                        m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
-                        static_cast<CSkill*>(SkillObj)->CreateEffect(XMVectorZero(), XMVectorZero(), vWorldPos);
-                        static_cast<CSkill*>(SkillObj)->Dead_Rutine();
-                        
-                        continue;
-                    }
+                    bCreate = true;
+                    static_cast<CSkill*>(SkillObj)->Dead_Rutine();
                 }
             }
-            else if (iSkillType != CSkill::STYPE_LASER && iSkillType != CSkill::STYPE_SHOCKWAVE)
+            else // Terrain 후보
             {
-                // Collider가 있을 경우 충돌 검사
-                if (pCol && SkillObj->Get_Collider()->Intersect(pCol))
+                _float3 skillPos, hitPos;
+                XMStoreFloat3(&skillPos, SkillObj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION));
+                XMStoreFloat3(&hitPos, hit.position);
+
+                _float bottomY = skillPos.y - radius*2.f;
+                if (bottomY <= hitPos.y + 0.01f)
                 {
-                    CModel* pModel = dynamic_cast<CModel*>(DecalObj->Find_Component(TEXT("Com_Model")));
-                    if (pModel)
-                    {
-                        _vector vExactHit{}, vNormalExact{};
-                        _vector RayPos{}, RayDir{};
-                        SkillObj->Get_Transform()->Get_Ray(RayPos, RayDir);
-
-                        _float3 fRayDir = {XMVectorGetX(RayDir), XMVectorGetY(RayDir), XMVectorGetX(RayDir)};
-                        
-                        if (fRayDir.x != 0 && fRayDir.y != 0 && fRayDir.z != 0)
-                        {
-                            if (pModel->RayIntersect(RayPos, RayDir, DecalObj->Get_Transform(), vExactHit,
-                                                     vNormalExact))
-                            {
-                              DECAL_DESC* Desc = static_cast<CSkill*>(SkillObj)->Get_DecalDesc();
-                              Desc->iType = DECAL_DESC::TYPE_BOX;
-                              Desc->vNormal = vNormalExact;
-                              Desc->vPos = vExactHit;
-                              m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
-                              static_cast<CSkill*>(SkillObj)->CreateEffect(RayPos, RayDir, vExactHit);
-                              static_cast<CSkill*>(SkillObj)->Dead_Rutine();
-                          
-                              continue;
-                            }
-                        }
-                    }
+                    bCreate = true;
+                    static_cast<CSkill*>(SkillObj)->Dead_Rutine();
                 }
-            }
-
-            if (iActorType == CSkill::BOSS_MONSTER)
-            {
-               DECAL_DESC* Desc = static_cast<CSkill*>(SkillObj)->Get_DecalDesc();
-               if (Desc->bOnce && Desc->bActive)
-                   continue;
-               CCollider* DecalCol = DecalObj->Get_Collider();
-
-               if (iSkillType != CSkill::STYPE_SHOCKWAVE)
-               {
-                   if (DecalCol && SkillObj->Get_Collider()->Intersect(DecalCol))
-                   {
-                       Desc->iType = DECAL_DESC::TYPE_SSD;
-                       m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
-                   }
-                   if (nullptr == DecalCol)
-                   {
-                       _float3 fNormal = {};
-                       _float3 fPos = {0.f, 0.f, 0.f};
-                       _float fTerrainDist{};
-                       _float3 fDir{};
-                       XMStoreFloat3(&fDir, Desc->vDir);
-                       if (fDir.x == 0.f && fDir.y == 0.f && fDir.z == 0.f)
-                           Desc->vDir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-                       CVIBuffer_Terrain* buffer =
-                           static_cast<CVIBuffer_Terrain*>(DecalObj->Find_Component(TEXT("Com_Buffer")));
-                       if (iSkillType == CSkill::STYPE_LASER)
-                       {
-                           if (buffer->Picking_OnTerrain_QuadTree(Desc->vPos, XMVector3Normalize(Desc->vDir),
-                                                                  DecalObj->Get_Transform(), &fTerrainDist, &fNormal,
-                                                                  &fPos))
-                           {
-                               Desc->vNormal = XMVectorSet(fNormal.x, fNormal.y, fNormal.z, 0.f);
-                               Desc->vPos = XMVectorSet(fPos.x, fPos.y, fPos.z, 0.f);
-                               Desc->iType = DECAL_DESC::TYPE_BOX;
-                               m_pGameInstance->Trigger_Effect(Desc->Key, Desc, fTimedelta);
-                           }
-                       }
-                   }
-               }
             }
         }
+
+        if (hit.hit && true == bCreate && iSkillType != CSkill::STYPE_SHOCKWAVE)
+        {
+            Desc->iType = DECAL_DESC::TYPE_BOX;
+            Desc->vNormal = hit.normal;
+            Desc->vPos = hit.position;
+            m_pGameInstance->Trigger_Effect(Desc->Key, Desc, iSkillType == CSkill::STYPE_LASER ? fTimedelta : 0.0f);
+            static_cast<CSkill*>(SkillObj)->CreateEffect(RayPos, RayDir, hit.position);
+        }
+
     }
 
     return S_OK;
@@ -522,9 +363,12 @@ void Collider_Manager::Clear()
     }
 }
 
-HRESULT Collider_Manager::Find_Cell(const _float2& vMin, const _float2& vMax, _float cellSize)
+HRESULT Collider_Manager::Init_World(const _float2& vMin, const _float2& vMax, _float cellSize)
 {
-    m_SpatialGrid.SetWorld(vMin, vMax,  cellSize);
+    m_SpatialGrid->Clear();
+    m_SpatialGrid->SetWorld(vMin, vMax,  cellSize);
+  
+    BuildStaticBVH();
 
     m_pGameInstance->Get_Player()->Set_onCell(true);
     m_pGameInstance->Get_Player()->Find_CurrentCell();
@@ -536,20 +380,18 @@ HRESULT Collider_Manager::Find_Cell(const _float2& vMin, const _float2& vMax, _f
     }
     m_GameObjeList[COL_MONSTER].clear();
 
-    m_SpatialGrid.Clear();
-    m_SpatialGrid.BuildStaticGrid(m_GameObjeList[COL_STATIC]);
     return S_OK;
 }
 
-HRESULT Collider_Manager::Monster_To_Monster_Collision()
+HRESULT Collider_Manager::Monster_To_Monster()
 {
-    auto& grid = m_SpatialGrid.DynamicGrid();
+    auto& grid = m_SpatialGrid->DynamicGrid();
     if (grid.empty())
         return S_OK;
 
     const _float pushFactor = 0.3f;
 
-    const int cellCount = static_cast<int>(grid.size());
+    const int cellCount = static_cast<_int>(grid.size());
     for (int i = 0; i < cellCount; ++i)
     {
         auto& cell = grid[i];
@@ -611,17 +453,17 @@ HRESULT Collider_Manager::Monster_To_Monster_Collision()
                 pBTrans->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSetW(posB + dir * overlap, 1.f));
             }
 
-            int ix, iz;
-            if (!m_SpatialGrid.WorldToCell(posA, ix, iz))
+            _int ix, iz;
+            if (!m_SpatialGrid->WorldToCell(posA, ix, iz))
                 continue;
 
-            int neighborIdx[9];
-            int neighborCount = 0;
-            m_SpatialGrid.GatherNeighborCells(ix, iz, neighborIdx, neighborCount);
+            _int neighborIdx[9];
+            _int neighborCount = 0;
+            m_SpatialGrid->GatherNeighborCells(ix, iz, neighborIdx, neighborCount);
 
-            for (int n = 0; n < neighborCount; ++n)
+            for (_int n = 0; n < neighborCount; ++n)
             {
-                int neighborCellIdx = neighborIdx[n];
+                _int neighborCellIdx = neighborIdx[n];
                 if (neighborCellIdx <= i)
                     continue; // 이미 처리된 셀은 스킵 (중복 제거)
 
@@ -666,37 +508,35 @@ HRESULT Collider_Manager::Monster_To_Monster_Collision()
 }
 
 #ifdef _DEBUG
-HRESULT Collider_Manager::Render()
-{
+ HRESULT Collider_Manager::Render()
+ {
     if ( nullptr == m_pEffect)
         return E_FAIL;
-
-    // 쉐이더에 행렬 값 던져 주고     
+    
     m_pEffect->SetWorld(XMMatrixIdentity());
     m_pEffect->SetView(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW));
     m_pEffect->SetProjection(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ));
-
-    // 정점들을 장치에 바인딩해준다.
+   
     m_pContext->IASetInputLayout(m_pInputLayout);
-
+   
     m_pEffect->Apply(m_pContext);
-
+   
     m_pBatch->Begin();
-
-    const auto worldMin = m_SpatialGrid.GetWorldMin();
-    const auto worldMax = m_SpatialGrid.GetWorldMax();
-    const _float cellSize = m_SpatialGrid.GetCellSize();
-
+   
+    const auto worldMin = m_SpatialGrid->GetWorldMin();
+    const auto worldMax = m_SpatialGrid->GetWorldMax();
+    const _float cellSize = m_SpatialGrid->GetCellSize();
+   
     const _float y = 0.1f;
     const XMVECTORF32 color = Colors::AliceBlue;
-
+   
     // 세로선
     for (float x = worldMin.x; x <= worldMax.x; x += cellSize)
     {
         m_pBatch->DrawLine(VertexPositionColor(XMVectorSet(x, y, worldMin.y,1.f), color),
                            VertexPositionColor(XMVectorSet(x, y, worldMax.y,1.f), color));
     }
-
+   
     // 가로선
     for (float z = worldMin.y; z <= worldMax.y; z += cellSize)
     {
@@ -704,11 +544,44 @@ HRESULT Collider_Manager::Render()
                            VertexPositionColor(XMVectorSet(worldMax.x, y, z,1.f), color));
     }
     m_pBatch->End();
-
+    
     return S_OK;
-}
-
+ }
 #endif
+
+void Collider_Manager::BuildStaticBVH()
+{
+    vector<CStaticBVH::Entry> vecEntries;
+    vecEntries.reserve(m_GameObjeList[COL_STATIC].size());
+
+    for (auto* obj : m_GameObjeList[COL_STATIC])
+    {
+        if (!obj)
+            continue;
+
+        CStaticBVH::Entry  Entrie;
+        Entrie.object = obj;
+        Entrie.transform = obj->Get_Transform();
+        Entrie.bounds = obj->Get_WorldAABB(); 
+        Entrie.col = obj->Get_Collider();
+
+        // Terrain인지
+        if (auto* buf = static_cast<CVIBuffer_Terrain*>(obj->Find_Component(TEXT("Com_Buffer"))))
+        {
+            Entrie.type = CStaticBVH::EPrimType::Terrain;
+            Entrie.terrain = buf;
+        }
+        else if (auto* model = dynamic_cast<CModel*>(obj->Find_Component(TEXT("Com_Model"))))
+        {
+            Entrie.type = CStaticBVH::EPrimType::ModelMesh;
+            Entrie.model = model;
+        }
+
+        vecEntries.push_back(Entrie);
+    }
+
+    m_StaticBVH->Build(vecEntries);
+}
 
 Collider_Manager* Collider_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -737,6 +610,10 @@ void Collider_Manager::Free()
         m_GameObjeList[i].clear();
     }
 
+    Safe_Release(m_pGameInstance);
+    Safe_Release(m_StaticBVH);
+    Safe_Release(m_SpatialGrid);
+
 #ifdef _DEBUG
     Safe_Delete(m_pBatch);
     Safe_Delete(m_pEffect);
@@ -744,5 +621,5 @@ void Collider_Manager::Free()
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
 #endif
-    Safe_Release(m_pGameInstance);
+ 
 }

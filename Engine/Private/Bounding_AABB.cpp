@@ -67,17 +67,34 @@ _bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis,
 
 	return isColl;
 }
+_float CBounding_AABB::Get_iCurRadius()
+{
+    return max(m_pBoundDesc->Extents.x, max(m_pBoundDesc->Extents.y, m_pBoundDesc->Extents.z));
+}
+_float3 CBounding_AABB::Get_iCurCenter()
+{
+    return m_pBoundDesc->Center;
+}
 _bool CBounding_AABB::IsInside(const _float3& pos)
 {
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
 }
 
+AABB CBounding_AABB::Get_WorldAABB() const
+{
+    AABB worldAABB;
+    worldAABB.min = {m_pBoundDesc->Center.x - m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y - m_pBoundDesc->Extents.y,
+                     m_pBoundDesc->Center.z - m_pBoundDesc->Extents.z};
+    worldAABB.max = {m_pBoundDesc->Center.x + m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y + m_pBoundDesc->Extents.y,
+                     m_pBoundDesc->Center.z + m_pBoundDesc->Extents.z};  
+    
+	return worldAABB;
+}
 
 #ifdef _DEBUG
 
 HRESULT CBounding_AABB::Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor)
 {
-
 	DX::Draw(pBatch, *m_pBoundDesc, vColor);
 
 	return S_OK;

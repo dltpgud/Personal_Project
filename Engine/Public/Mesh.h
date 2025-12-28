@@ -23,9 +23,9 @@ public:
 
     HRESULT Bind_BoneMatrices(class CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName);
     HRESULT Render();
-    _float3* Get_pPos(_int i);
-    _float3 GetVetexPosAnim(_int vertexIndex);
-    _uint Get_pIndices(_int i);
+    _float3* Get_pPos(_int i) const ;
+    _float3 GetVetexPosAnim(_int vertexIndex) const ;
+    _uint Get_pIndices(_int i) const;
     _uint Get_iNumIndexices();
     _uint Get_iNumVertices();
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);

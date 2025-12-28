@@ -115,10 +115,10 @@ HRESULT CRenderer::Draw()
     if (FAILED(Render_Priority()))
         return E_FAIL;
 
-    if (FAILED(Render_Shadow()))
+    if (FAILED(Render_NonBlend()))
         return E_FAIL;
 
-    if (FAILED(Render_NonBlend()))
+    if (FAILED(Render_Shadow()))
         return E_FAIL;
     
     if (FAILED(Render_Decal()))
@@ -929,7 +929,7 @@ HRESULT CRenderer::Render_Debug()
     m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
     
   //  m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
-   // m_pGameInstance->RenderGrid();
+     m_pGameInstance->RenderGrid();
     return S_OK;
 }
 

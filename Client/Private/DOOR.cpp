@@ -5,7 +5,7 @@
 #include "Player.h"
 #include "Level_Loading.h"
 #include "Fade.h"
-
+#include "ProxyObject.h"
 CDOOR::CDOOR(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CGameObject{pDevice, pContext}
 {
 }
@@ -33,8 +33,15 @@ HRESULT CDOOR::Initialize(void* pArg)
     Add_StageDoorLight();
     Add_BossDoorLight();
     Init_CallBakc();
+
+    _float3 fCenter, fExtend;
+    AABB LocalAABB;
+    m_pModelCom->Center_Ext(&fCenter, &fExtend, &LocalAABB);
+    m_WorldAABB = m_pGameInstance->TransformAABB(LocalAABB, m_pTransformCom->Get_WorldMatrix());
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
         return E_FAIL;
+
+      
     return S_OK;
 }
 

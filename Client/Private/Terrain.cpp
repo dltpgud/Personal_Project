@@ -25,9 +25,12 @@ HRESULT CTerrain::Initialize(void* pArg)
     if (FAILED(__super::Initialize(pDesc)))
         return E_FAIL;
 
-     Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
+    Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
     Set_Buffer(pDesc->Buffer[0], pDesc->Buffer[1]);
-     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
+
+      
+    m_WorldAABB = m_pGameInstance->TransformAABB(m_pVIBufferCom->LocalAABB(), m_pTransformCom->Get_WorldMatrix());
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
         return E_FAIL;
 
     return S_OK;
@@ -50,7 +53,6 @@ void CTerrain::Late_Update(_float fTimeDelta)
 {
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONBLEND, this)))
         return;
-
  
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_SHADOW, this)))
             return;
@@ -110,7 +112,7 @@ void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
     if (isPowerOfTwoPlusOne(m_pSize[0]) && isPowerOfTwoPlusOne(m_pSize[1]))
     {
        m_pVIBufferCom->DYNAMIC_Set_Buffer(m_pSize[0], m_pSize[1]);
-            m_pVIBufferCom->Set_QuadTree();
+       m_pVIBufferCom->Set_QuadTree();
     }
     else
     {

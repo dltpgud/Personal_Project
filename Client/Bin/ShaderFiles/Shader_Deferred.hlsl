@@ -406,7 +406,7 @@ PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
     baseLit *= lerp(0.8f, 1.0f, shadowFactor);
      
     //====감마 설정 ===
-    baseLit.rgb = GammaCorrection(baseLit.rgb, 0.8f);
+     baseLit.rgb = GammaCorrection(baseLit.rgb, 0.8f);
     Out.vColor.rgb = baseLit;
     return Out;
 }
@@ -432,7 +432,6 @@ PS_OUT PS_MAIN_Final(PS_IN In)
     }
     
     vFinalDesc = vFinalDesc + vEffect + vRim + vBloom;
-    
     float3 emissive = vEmissive.rgb;
     
      // ==== 안개 계산 ====
@@ -450,7 +449,7 @@ PS_OUT PS_MAIN_Final(PS_IN In)
     float3 foggedBase = lerp(fogColor, vFinalDesc.rgb, 1.0f - fogT);
     float emissiveFog = lerp(1.0f, 1.0f - fogT, 0.3f);
     float3 finalRGB = foggedBase + emissive * emissiveFog;
-     
+ 
     Out.vColor = float4(finalRGB, 1.f);
     return Out;
 }

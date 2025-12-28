@@ -26,10 +26,7 @@ public:
     _vector PointNomal(_float3 fP1, _float3 fP2, _float3 fP3);
     _float  Compute_Random_Normal();
     _float  Compute_Random(_float fMin, _float fMax);
-    _bool RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& mn, const _float3& mx);
-    _bool TestSphereTriangle(const BoundingSphere& sphere, const _float3& a, const _float3& b, const _float3& c, OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen);
-    _bool TestAABBTriangle(const BoundingBox& box, const _float3& a, const _float3& b, const _float3& c,OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen);
-    _bool TestOBBTriangle(const BoundingOrientedBox& obb, const _float3& a, const _float3& b, const _float3& c, OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen);
+    AABB TransformAABB(const AABB& local, const _matrix& world);
 
 private:
     ID3D11Device* m_pDevice = {nullptr};
