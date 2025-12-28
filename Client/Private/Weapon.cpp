@@ -230,6 +230,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
     pWDesc.BulletScale = {0.1f, 0.1f};
+    pWDesc.BulletRange = 100.f;
     m_vecWeaPone[CWeapon::HendGun] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -243,6 +244,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 0.f, 1.f};
     pWDesc.BulletScale = {0.12f, 0.12f};
+    pWDesc.BulletRange = 120.f;
     m_vecWeaPone[CWeapon::AssaultRifle] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -256,6 +258,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.5f, 0.5f, 0.5f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {1.f, 1.f, 0.f, 1.f};
     pWDesc.BulletScale = {0.2f, 0.2f};
+    pWDesc.BulletRange = 140.f;
     m_vecWeaPone[CWeapon::MissileGatling] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -269,6 +272,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
     pWDesc.BulletScale = {0.16f, 0.16f};
+    pWDesc.BulletRange = 160.f;
     m_vecWeaPone[CWeapon::HeavyCrossbow] = pWDesc;
 
     return S_OK;

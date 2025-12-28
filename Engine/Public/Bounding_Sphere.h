@@ -29,7 +29,7 @@ public:
 	virtual _float3 Get_iCurCenter() override;
     virtual void Set_Info(BOUND_DESC* pBoundDesc) override;
     virtual _bool IsInside(const _float3& pos) override;
-
+    virtual AABB Get_WorldAABB() const override;
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor)override;

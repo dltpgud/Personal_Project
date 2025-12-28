@@ -79,6 +79,7 @@ public:
     void Set_Navigation();
     virtual DECAL_DESC* Get_DecalDesc() override;
     virtual HRESULT CreateEffect(_vector RayStartPos, _vector RayDir,_vector RayEndPos, _vector vNomal = XMVectorZero(), void* pArg = nullptr) override;
+    virtual _float Get_EffectiveRange() override;
 
 private:
     virtual HRESULT Add_Components() override;

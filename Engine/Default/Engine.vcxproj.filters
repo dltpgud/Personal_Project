@@ -438,6 +438,9 @@
     <ClInclude Include="..\Public\EffectStream.h">
       <Filter>01.Utility\10.Effect\Stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\StaticBVH.h">
+      <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -643,6 +646,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\EffectStream.cpp">
       <Filter>01.Utility\10.Effect\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\StaticBVH.cpp">
+      <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

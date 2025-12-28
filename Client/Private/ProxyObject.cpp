@@ -33,8 +33,9 @@ HRESULT CProxyObject::Initialize(void* pArg)
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, pDesc->WorldMatrix.r[3]);
 
     _float3 fCenter, fExtend;
-    m_pModelCom->Center_Ext(&fCenter, &fExtend);
-
+    AABB LocalAABB;
+    m_pModelCom->Center_Ext(&fCenter, &fExtend, &LocalAABB);
+    m_WorldAABB = m_pGameInstance->TransformAABB(LocalAABB, m_pTransformCom->Get_WorldMatrix());
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
     OBBDesc.vExtents = fExtend;
     OBBDesc.vCenter = fCenter;
@@ -68,6 +69,8 @@ HRESULT CProxyObject::Render()
 {   
     return S_OK;
 }
+
+
 
 CProxyObject* CProxyObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

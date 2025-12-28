@@ -182,6 +182,11 @@ HRESULT CPlayer::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEn
     return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->CreateEffect(RayStartPos, RayDir, RayEndPos, vNomal, pArg);
 }
 
+_float CPlayer::Get_EffectiveRange()
+{
+    return static_cast<CWeapon*>(m_PartObjects[PART_WEAPON])->Get_Weapon_Info().BulletRange;
+}
+
 void CPlayer::Set_PartObj_Set_Anim(_int Part,_int Index, _bool IsLoop)
 {
     switch (Part)

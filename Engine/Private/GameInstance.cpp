@@ -85,7 +85,7 @@ HRESULT CGameInstance::Initialize_Engine(const ENGINE_DESC & EngineDesc, _Out_ I
 	if (nullptr == m_pFrustum)
 		return E_FAIL;
       
-    m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency());
+    m_pThreadPool        = CThreadPool::Create(thread::hardware_concurrency()/2);
     if (nullptr == m_pThreadPool)
         return E_FAIL;
 
@@ -428,7 +428,7 @@ HRESULT CGameInstance::Collision_Init(const _float2& vMin, const _float2& vMax, 
 	if (nullptr == m_pCollider_Manager)
 		return E_FAIL;
 
-	return m_pCollider_Manager->Find_Cell(vMin, vMax, cellSize);
+	return m_pCollider_Manager->Init_World(vMin, vMax, cellSize);
 }
 
 #ifdef _DEBUG
@@ -756,27 +756,9 @@ _vector CGameInstance::PointNomal(_float3 fP1, _float3 fP2, _float3 fP3)
 	return m_pCalculator->PointNomal(fP1, fP2, fP3);
 }
 
-_bool CGameInstance::RayIntersectsAABB_Local(_vector rayO_L, _vector rayD_L, const _float3& min, const _float3& max)
+AABB CGameInstance::TransformAABB(const AABB& local, const _matrix& world)
 {
-    return m_pCalculator->RayIntersectsAABB_Local(rayO_L, rayD_L, min, max);
-}
-
-_bool CGameInstance::TestSphereTriangle(const BoundingSphere& sphere, const _float3& a, const _float3& b,
-                                        const _float3& c, OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
-{
-    return m_pCalculator->TestSphereTriangle(sphere,a,b, c, oHit, oNormal, oPen);
-}
-
-_bool CGameInstance::TestAABBTriangle(const BoundingBox& box, const _float3& a, const _float3& b, const _float3& c,
-                                      OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
-{
-    return m_pCalculator->TestAABBTriangle(box, a, b, c, oHit, oNormal, oPen);
-}
-
-_bool CGameInstance::TestOBBTriangle(const BoundingOrientedBox& obb, const _float3& a, const _float3& b,
-                                     const _float3& c, OUT _float3* oHit, OUT _float3* oNormal, OUT _float* oPen)
-{
-    return m_pCalculator->TestOBBTriangle(obb, a, b, c, oHit, oNormal, oPen);
+    return m_pCalculator->TransformAABB(local, world);
 }
 
 #pragma endregion

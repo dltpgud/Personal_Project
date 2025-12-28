@@ -41,7 +41,12 @@ HRESULT CBullet::Initialize(void* pArg)
     m_iTrailIndex = static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"SpriteTexTrail"))->AllocateTrail();
 
     m_DecalDesc.iTexIndex = 1;
-  
+
+    if (m_iSkillType == CSkill::STYPE_BERRLE)
+    {
+        m_DecalDesc.fSize = 2.5f;
+        m_DecalDesc.fDepth = 2.5f;
+    }
     return S_OK;
 }
 

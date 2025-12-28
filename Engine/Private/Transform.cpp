@@ -48,7 +48,7 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
     _vector vTrans = Get_TRANSFORM(Move);
 
     _vector vPosition = Get_TRANSFORM(T_POSITION);
-
+    m_vPrevPos = vPosition;
     if (Dir == 1)
         vTrans *= -1;
 
@@ -76,6 +76,7 @@ void CTransform::Go_Move(MOVE MoveType, _float fTimeDelta, CNavigation* pNavigat
        vPosition = vAfterPos;
   
     Set_TRANSFORM(T_POSITION, vPosition);
+    m_vCurPos = vPosition;
 }
 
 void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _float* isFall, CNavigation* pNavigation)
@@ -83,6 +84,7 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _floa
     m_fJumpVelocity -= m_fGravity * fTimeDelta;
 
     _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
+    m_vPrevPos = vPosition;
     _vector vUp = Get_TRANSFORM(CTransform::T_UP);
 
     // 이동
@@ -93,7 +95,7 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _floa
         vAfterPos += slide;
 
     Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
-
+    m_vCurPos = vAfterPos;
     *isFall = m_fJumpVelocity;
    
     _float3 Position;
@@ -129,8 +131,9 @@ void CTransform::Go_jump(_float fTimeDelta, _float YPos, _bool* Jumpcheck, _floa
 void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigation, _bool* bStop )
 {
     _vector vPosition = Get_TRANSFORM(T_POSITION);
+    m_vPrevPos = vPosition;
     _vector Dir = XMVector3Normalize(vDir);
-    m_vRayDir = Dir;
+    
     _vector vAfterPos = vPosition + Dir * m_fSpeedPerSec * fTimeDelta;
 
     _vector Slide{};
@@ -141,14 +144,15 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
     }
 
     Set_TRANSFORM(T_POSITION, vAfterPos);
+    m_vCurPos = vAfterPos;
 }
 
 void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavigation* pNavigation, _bool* bStop)
 {
     _vector vPosition = Get_TRANSFORM(CTransform::T_POSITION);
-
+    m_vPrevPos = vPosition;
     _vector vDir = XMVector3Normalize(Dir);
-    m_vRayDir = vDir;
+
     m_fJumpVelocity -= m_fGravity * fTimeDelta; 
     _vector vUpMove = XMVectorSet(0.f, m_fJumpVelocity * fTimeDelta, 0.f, 0.f);
     _vector vHorizontal = vDir * (m_fSpeedPerSec * fTimeDelta);
@@ -177,6 +181,7 @@ void CTransform::Go_jump_Dir(_float fTimeDelta, _vector Dir, _float YPos, CNavig
     }
 
     Set_TRANSFORM(CTransform::T_POSITION, vAfterPos);
+    m_vCurPos = vAfterPos;
 }
 
 void CTransform::Stop_Move()
@@ -243,6 +248,7 @@ _bool CTransform::FollowPath(CNavigation* pNavigation, _float fTimedelta)
 
     const _uint targetCellIndex = vec[m_CurrentPathIndex];
     const _vector currentPos = Get_TRANSFORM(CTransform::T_POSITION);
+    m_vPrevPos = currentPos;
     const _vector targetPos = pNavigation->Get_TagetPos(targetCellIndex);
     
     // targetPos가 유효한지 확인
@@ -268,7 +274,6 @@ _bool CTransform::FollowPath(CNavigation* pNavigation, _float fTimedelta)
     _vector vLook = XMVector3Normalize(XMVectorSetY(Get_TRANSFORM(CTransform::T_LOOK), 0.f));
     _vector moveDir = XMVectorSetY(dir, 0.f);
     
-    // moveDir이 0벡터인지 확인 (나누기 0 방지)
     const _float moveDirLength = XMVectorGetX(XMVector3Length(moveDir));
     if (moveDirLength < 0.001f)
         return false;
@@ -292,10 +297,15 @@ _bool CTransform::FollowPath(CNavigation* pNavigation, _float fTimedelta)
     _vector vAfterPos = currentPos + moveDelta;
     _vector vSlide{};
     if (pNavigation && !pNavigation->isMove(vAfterPos, currentPos, &vSlide))
+    {
         Set_TRANSFORM(T_POSITION, currentPos + vSlide);
+        m_vCurPos = currentPos + vSlide;
+    }
     else
+    {
         Set_TRANSFORM(T_POSITION, vAfterPos);
-
+        m_vCurPos = vAfterPos;
+    }
     return false;
 }
 
@@ -356,11 +366,11 @@ void CTransform::Update_Velocity(_float fTimeDelta)
     _vector vCurPos = Get_TRANSFORM(T_POSITION);
 
     if (fTimeDelta > 0.f)
-        m_vVelocity = (vCurPos - m_vPrevPos) / fTimeDelta;
+        m_vVelocity = (vCurPos - m_vPrevVelocityPos) / fTimeDelta;
     else
         m_vVelocity = XMVectorZero();
 
-    m_vPrevPos = vCurPos;
+    m_vPrevVelocityPos = vCurPos;
 }
 
 HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstantName)
@@ -368,11 +378,21 @@ HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstant
     return pShader->Bind_Matrix(pConstantName, &m_WorldMatrix);
 }
 
-void CTransform::Get_Ray(OUT _vector& RayPos, OUT _vector& RayDir)
+void CTransform::Get_Ray(OUT _vector& RayPos, OUT _vector& RayDir, OUT _float* RayLen, OUT _vector* PrePos,
+                         OUT _vector* CurPos)
 {
-    RayPos = Get_TRANSFORM(T_POSITION);
-    RayDir= XMVector3Normalize(m_vRayDir);
+    RayPos = m_vPrevPos;
+    RayDir = XMVector3Normalize(m_vCurPos - m_vPrevPos);
+
+    if (RayLen)
+    *RayLen = XMVectorGetX(XMVector3Length(m_vCurPos - m_vPrevPos));
+
+    if (PrePos)
+        *PrePos = m_vPrevPos;
+    if (CurPos)
+        *CurPos = m_vCurPos;
 }
+
 
 HRESULT CTransform::Initialize_Prototype(void* pTransformDesc)
 {    

@@ -36,6 +36,7 @@ public:
        _int              Damage{};
        _float4           BulletColor[2]{};
        _float2           BulletScale{};
+       _float            BulletRange{};
     };
 
 private:

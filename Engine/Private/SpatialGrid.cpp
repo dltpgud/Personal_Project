@@ -2,26 +2,15 @@
 #include "GameObject.h"
 #include "VIBuffer_Terrain.h"
 #include "Collider_Manager.h"
-void CSpatialGrid::ClearDynamic()
-{
-    for (auto& obj : m_DynamicGrid)
-    {
-        obj.Obj.clear(); // 동적 객체 리스트 비우기
+#include "GameInstance.h"
 
-    }
+CSpatialGrid::CSpatialGrid() : m_pGameInstance { CGameInstance::GetInstance() }
+{
+    Safe_AddRef(m_pGameInstance);
 }
 void CSpatialGrid::Clear()
 {
-     for (auto& obj : m_DynamicGrid)
-     { 
-         obj.Obj.clear();
-
-     }
-
-    for (auto& obj : m_StaticGrid)
-    {
-         obj.Obj.clear();
-    }
+    for (auto& obj : m_DynamicGrid) { obj.Obj.clear(); }
 }
 void CSpatialGrid::SetWorld(const _float2& vMin, const _float2& vMax, _float cellSize)
 {
@@ -34,47 +23,9 @@ void CSpatialGrid::SetWorld(const _float2& vMin, const _float2& vMax, _float cel
 
     m_GridW = static_cast<int>(ceilf(width / m_CellSize));
     m_GridH = static_cast<int>(ceilf(depth / m_CellSize));
-
-    m_StaticGrid.resize(m_GridW * m_GridH);
+   
     m_DynamicGrid.resize(m_GridW * m_GridH);
-}
-
-void CSpatialGrid::BuildStaticGrid(const list<CGameObject*>& staticObjs)
-{
-    for (auto* obj : staticObjs)
-    {
-        if (!obj)
-            continue;
-
-        auto* pTerrain = dynamic_cast<CVIBuffer_Terrain*>(obj->Find_Component(TEXT("Com_Buffer")));
-        if (pTerrain)
-        {
-            // Terrain의 World AABB 계산
-            AABB aabb = pTerrain->Get_WorldAABB(obj->Get_Transform());
-
-            // 커버하는 셀 영역 계산
-            _int minX = static_cast<_int>((aabb.min.x - m_WorldMin.x) / m_CellSize);
-            _int maxX = static_cast<_int>((aabb.max.x - m_WorldMin.x) / m_CellSize);
-            _int minZ = static_cast<_int>((aabb.min.z - m_WorldMin.y) / m_CellSize);
-            _int maxZ = static_cast<_int>((aabb.max.z - m_WorldMin.y) / m_CellSize);
-
-            minX = max(0, minX);
-            minZ = max(0, minZ);
-            maxX = min(m_GridW - 1, maxX);
-            maxZ = min(m_GridH - 1, maxZ);
-
-            for (_int z = minZ; z <= maxZ; ++z)
-            {
-                for (_int x = minX; x <= maxX; ++x) { m_StaticGrid[CellIndex(x, z)].Obj.push_back(obj); }
-            }
-        }
-        else
-        {
-            _int ix, iz;
-            if (WorldToCell(obj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), ix, iz))
-                m_StaticGrid[iz * m_GridW + ix].Obj.push_back(obj);
-        }
-    }
+    
 }
 
 void CSpatialGrid::UpdateDynamicGrid(const list<CGameObject*>& dynamicObjs)
@@ -91,22 +42,10 @@ void CSpatialGrid::UpdateDynamicGrid(const list<CGameObject*>& dynamicObjs)
     }
 }
 
-#ifdef _DEBUG
-_float2 CSpatialGrid::GetWorldMin()
-{
-    return m_WorldMin;
-}
-
-_float2 CSpatialGrid::GetWorldMax()
-{
-    return m_WorldMax;
-}
-
 _float CSpatialGrid::GetCellSize()
 {
     return m_CellSize;
 }
-#endif // _DEBUG
 
 _bool CSpatialGrid::WorldToCell(const _vector& pos, _int& ix, _int& iz) const
 {
@@ -129,11 +68,11 @@ _int CSpatialGrid::CellIndex(_int ix, _int iz) const
 void CSpatialGrid::GatherNeighborCells(_int ix, _int iz, _int outIdx[9], _int& outCount) const
 {
     outCount = 0;
-    for (int dz = -1; dz <= 1; ++dz)
+    for (_int dz = -1; dz <= 1; ++dz)
     {
-        for (int dx = -1; dx <= 1; ++dx)
+        for (_int dx = -1; dx <= 1; ++dx)
         {
-            int nx = ix + dx, nz = iz + dz;
+            _int nx = ix + dx, nz = iz + dz;
             if (nx < 0 || nz < 0 || nx >= m_GridW || nz >= m_GridH)
                 continue;
             outIdx[outCount++] = nz * m_GridW + nx;
@@ -141,59 +80,109 @@ void CSpatialGrid::GatherNeighborCells(_int ix, _int iz, _int outIdx[9], _int& o
     }
 }
 
-
-void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGameObject*>& out, _uint groupType) const
+void CSpatialGrid::QueryNearby(const _vector& pos, _float range, OUT vector<CGameObject*>& out) const
 {
     out.clear();
-    out.reserve(64);
-
-    // 쿼리 ID 갱신
-    ++m_QueryId;
-    if (m_QueryId == 0) // 오버플로우 방지 (0은 미사용 값으로 남겨두기)
-        ++m_QueryId;
+    out.reserve(16);
 
     _int ix, iz;
-    if (!WorldToCell(pos, ix, iz)) // 월드 위치 기반 셀 인덱스 반환 
+    if (!WorldToCell(pos, ix, iz)) // 월드 위치 기반 셀 인덱스 반환
         return;
 
-    auto tryPush = [&](CGameObject* obj) // 쿼리 아이디 기반 한 번만 컨테이너에 담기
+    _int r = static_cast<_int>(ceil(range / m_CellSize)); // 반경 몇 칸 검사 할지 범위 설정
+    for (_int dz = -r; dz <= r; ++dz) // 중심 셀을 기준 월드 안 주변 r칸에 ​포함되는 모든 셀 검사​
     {
-        if (!obj)
-            return;
-
-        if (obj->m_LastQueryId != m_QueryId)
+        for (_int dx = -r; dx <= r; ++dx)
         {
-            obj->m_LastQueryId = m_QueryId; // 이번 쿼리에서 이미 넣었다는 표시
-            out.push_back(obj);
-        }
-    };
-
-    _int r = static_cast<int>(ceil(range / m_CellSize)); // 반경 몇 칸 검사 할지 범위 설정
-    for (int dz = -r; dz <= r; ++dz) //중심 셀을 기준 월드 안 주변 r칸에 ​포함되는 모든 셀 검사​
-    {
-        for (int dx = -r; dx <= r; ++dx)
-        {
-            int nx = ix + dx, nz = iz + dz;
+            _int nx = ix + dx, nz = iz + dz;
             if (nx < 0 || nz < 0 || nx >= m_GridW || nz >= m_GridH)
                 continue;
 
-            const Cell& sc = m_StaticGrid[nz * m_GridW + nx];
-            const Cell& dc = m_DynamicGrid[nz * m_GridW + nx];
+            const Cell& cell = m_DynamicGrid[nz * m_GridW + nx];
 
-            //각 셀의 정적 오브젝트와​ 동적 오브젝트에 접근해 ​ 그룹 별 결과 반환
-            if (groupType == Collider_Manager::COL_STATIC)
-            {
-                for (auto* obj : sc.Obj) tryPush(obj);
-            }
-            else 
-            {
-                for (auto* obj : dc.Obj) tryPush(obj);
+            // 각 셀의 정적 오브젝트와​ 동적 오브젝트에 접근해 ​ 그룹 별 결과 반환
+            for (auto* obj : cell.Obj) {
+                if (!obj)
+                    return;
+
+                out.push_back(obj);
             }
         }
     }
 }
 
+void CSpatialGrid::QueryAABB(const _vector& Prepos, const _vector& Curpos, const _float& RayLen,
+                             OUT vector<CGameObject*>& out) const
+{
+    out.clear();
+    out.reserve(32);
 
+    // 1️ Swept AABB 생성 (Prepos ↔ Curpos)
+    const _float px0 = XMVectorGetX(Prepos);
+    const _float pz0 = XMVectorGetZ(Prepos);
+    const _float px1 = XMVectorGetX(Curpos);
+    const _float pz1 = XMVectorGetZ(Curpos);
 
+    _float minX = min(px0, px1);
+    _float maxX = max(px0, px1);
+    _float minZ = min(pz0, pz1);
+    _float maxZ = max(pz0, pz1);
 
+    // RayLen 보정 (투사체 / 레이용)
+    minX -= RayLen;
+    maxX += RayLen;
+    minZ -= RayLen;
+    maxZ += RayLen;
 
+    // 2️⃣ AABB → Cell 범위 변환
+    _int cellMinX = static_cast<_int>((minX - m_WorldMin.x) / m_CellSize);
+    _int cellMaxX = static_cast<_int>((maxX - m_WorldMin.x) / m_CellSize);
+    _int cellMinZ = static_cast<_int>((minZ - m_WorldMin.y) / m_CellSize);
+    _int cellMaxZ = static_cast<_int>((maxZ - m_WorldMin.y) / m_CellSize);
+
+    // Clamp
+    cellMinX = max(0, cellMinX);
+    cellMinZ = max(0, cellMinZ);
+    cellMaxX = min(m_GridW - 1, cellMaxX);
+    cellMaxZ = min(m_GridH - 1, cellMaxZ);
+
+    // 3️⃣ 해당 셀들의 오브젝트 수집
+    for (_int z = cellMinZ; z <= cellMaxZ; ++z)
+    {
+        for (_int x = cellMinX; x <= cellMaxX; ++x)
+        {
+            const Cell& cell = m_DynamicGrid[z * m_GridW + x];
+            for (auto* obj : cell.Obj)
+            {
+                if (!obj)
+                    continue;
+
+                out.push_back(obj);
+            }
+        }
+    }
+}
+
+#ifdef _DEBUG
+_float2 CSpatialGrid::GetWorldMin()
+{
+    return m_WorldMin;
+}
+
+_float2 CSpatialGrid::GetWorldMax()
+{
+    return m_WorldMax;
+}
+#endif // _DEBUG
+
+CSpatialGrid* CSpatialGrid::Create()
+{
+    CSpatialGrid* pInstance = new CSpatialGrid();
+
+    return pInstance;
+}
+
+void CSpatialGrid::Free()
+{
+    Safe_Release(m_pGameInstance);
+}

@@ -50,6 +50,19 @@ _bool CBounding_Sphere::IsInside(const _float3& pos)
     return m_pBoundDesc->Contains(XMLoadFloat3(&pos)) == DirectX::ContainmentType::CONTAINS;
 }
 
+AABB CBounding_Sphere::Get_WorldAABB() const
+{
+    AABB worldAABB;
+
+    // 구의 중심에서 반지름만큼 떨어진 최소값과 최대값 계산
+    worldAABB.min = {m_pBoundDesc->Center.x - m_pBoundDesc->Radius, m_pBoundDesc->Center.y - m_pBoundDesc->Radius,
+                     m_pBoundDesc->Center.z - m_pBoundDesc->Radius};
+
+    worldAABB.max = {m_pBoundDesc->Center.x + m_pBoundDesc->Radius, m_pBoundDesc->Center.y + m_pBoundDesc->Radius,
+                     m_pBoundDesc->Center.z + m_pBoundDesc->Radius};
+    return worldAABB;
+}
+
 _bool CBounding_Sphere::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, _vector* hitPos)
 {
 	_bool		isColl = { false };

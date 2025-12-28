@@ -22,14 +22,15 @@ public:
 	_uint	 Get_NumVerticesX(){ return m_iNumVerticesX; }
 	_uint    Get_NumVerticesZ() { return m_iNumVerticesZ; }
 
-    AABB Get_WorldAABB(class CTransform* pTransform);
+    AABB LocalAABB();
+ 
+
 
 public:
      void Culling(_fmatrix WorldMatrixInverse);
     _bool Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, class CTransform* pTransform, OUT _float* fDist,
                                         OUT _float3* vNormal, OUT _float3* vWorldPos);
-     _bool Intersect_OnTerrain_QuadTree(class CCollider* pCollider, CTransform* pTransform, OUT _vector* vNormal,
-                                        OUT _vector* vWorldPos);
+
 
  private:
 	_uint					m_iNumVerticesX = {};

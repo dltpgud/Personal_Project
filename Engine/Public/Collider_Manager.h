@@ -1,5 +1,7 @@
+#pragma once
 #include "Base.h"
 #include "SpatialGrid.h"
+#include "StaticBVH.h"
 
 BEGIN(Engine)
 class Collider_Manager final : public CBase
@@ -25,14 +27,13 @@ public:
     HRESULT Add_GameObject_To_ColGroup(class CGameObject* Obj, const _uint& Type);
     void Clear();
 
-    HRESULT Find_Cell(const _float2& vMin, const _float2& vMax, _float cellSize);
+    HRESULT Init_World(const _float2& vMin, const _float2& vMax, _float cellSize);
     HRESULT Set_Collison(_bool SetColl)
     {
         m_bIsColl = SetColl;
         return S_OK;
     }
 
-    
 #ifdef _DEBUG
     HRESULT Render();
 #endif
@@ -41,23 +42,25 @@ private:
     HRESULT Initialize();
     HRESULT Check_Collider_PlayerCollison();
     HRESULT Check_Inetrect_Player();
-    _bool Player_To_Monster_Ray_Collison_Check();
-    HRESULT Monster_To_Monster_Collision();
-    HRESULT Player_To_Monster_Bullet_Collison();
-    HRESULT Player_To_Mash_Collison_for_Decal();
-    HRESULT MonsterSkill_To_Mash_Collison(_float fTimedelta);
+    _bool   PlayerWeapon_To_Monster();
+    HRESULT Monster_To_Monster();
+    HRESULT Player_To_MonsterSkill();
+    HRESULT PlayerWapon_To_Mash();
+    HRESULT MonsterSkill_To_Mash(_float fTimedelta);
+    void    BuildStaticBVH();
 
 private:
     class CGameInstance* m_pGameInstance = { nullptr };
     list <class CCollider*>m_ColliderList;
-    list<class CGameObject*> m_GameObjeList[COL_END];
-    
-    _int m_ColliderDamage{ 0};
+    list <class CGameObject*> m_GameObjeList[COL_END];
+
+    _int m_ColliderDamage{0};
     _bool m_bIsColl = { false };
     _bool m_bStaticBuilt{false};
 
 private:
-    CSpatialGrid m_SpatialGrid;
+    CSpatialGrid* m_SpatialGrid;
+    CStaticBVH* m_StaticBVH;
 
 
 #ifdef _DEBUG
