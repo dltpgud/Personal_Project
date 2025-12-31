@@ -163,9 +163,11 @@ void CModel::Center_Ext(OUT _float3* Center, OUT _float3* extend, OUT AABB* AABB
     _float3 minPoint(FLT_MAX, FLT_MAX, FLT_MAX);
     _float3 maxPoint(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-
     for (_uint i = 0; i < m_iNumMeshes; i++)
     {
+        if (m_eModelType == TYPE_ANIM)
+            m_Meshes[i]->Set_FinalBonMatrices(nullptr, m_Bones);
+
         _float3 MeahMin = m_Meshes[i]->GetAABBMinLocal();
         _float3 MeahMax = m_Meshes[i]->GetAABBMaxLocal();
         
@@ -252,7 +254,7 @@ _bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* p
            
            if (!AABB.Intersects(oL, dL, fDis))
                continue;
-
+         
            _vector vA = XMLoadFloat3(&A);
            _vector vB = XMLoadFloat3(&B);
            _vector vC = XMLoadFloat3(&C);

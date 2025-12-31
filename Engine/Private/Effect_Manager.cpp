@@ -97,7 +97,7 @@ void CEffect_Manager::Free()
         Safe_Release(iter.second);
     m_EffectStreams.clear();
 
-    Safe_Release(m_pGameInstance);
+     Safe_Release(m_pGameInstance);
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
 }

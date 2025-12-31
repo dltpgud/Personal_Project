@@ -194,7 +194,9 @@ void CUI_Manager::Free()
 
     for (size_t i = 0; i < UIOBJECT::UI_END; i++)
     {  
-       for (auto& iter : m_UIObj[i]) { Safe_Release(iter.second); }
+       for (auto& iter : m_UIObj[i]) { 
+           if (iter.second)
+           Safe_Release(iter.second); }
        m_UIObj[i].clear();
     }
 

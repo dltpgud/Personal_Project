@@ -29,9 +29,6 @@ HRESULT CHealthBot::Initialize(void* pArg)
     if (FAILED(__super::Initialize(Desc)))
         return E_FAIL;
 
-    m_pInteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
-    Safe_AddRef(m_pInteractiveUI);
-
     if (FAILED(Init_CallBack()))
         return E_FAIL;
   
@@ -107,6 +104,10 @@ HRESULT CHealthBot::Add_Components()
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"),
         TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
+
+    
+    m_pInteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
+    Safe_AddRef(m_pInteractiveUI);
 
     return S_OK;
 }

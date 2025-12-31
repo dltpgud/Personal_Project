@@ -85,6 +85,10 @@ public:
     /* 항등회전 상태를 기준으로 지정한 각도만큼 회전한다. */
     void Rotation(_float fX, _float fY, _float fZ);
 
+
+
+
+
 public:
 
     _vector Get_TRANSFORM(TRANSFORM eTRANSFORM)

@@ -124,7 +124,7 @@ HRESULT CWeapon::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEn
     _float3 fEndPos;
     XMStoreFloat3(&fEndPos, RayEndPos);
 
-       CEffect_TrailStream::SPAWN_REQUEST req{};
+    CEffect_TrailStream::SPAWN_REQUEST req{};
     req.Valid = 1;
     req.trailIndex = -1;
     req.headPos = fStartPos;
@@ -134,9 +134,6 @@ HRESULT CWeapon::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEn
     req.isSegment = 1; 
     m_pGameInstance->Trigger_Effect(L"TexTrail", &req);
 
-
- 
-
     CShootEffect::CShootEffect_DESC pDesc{};
     pDesc.vPos = m_WeaPonPos;
     pDesc.vTgetPos = {m_WorldMatrix._41, m_WorldMatrix._42, m_WorldMatrix._43, m_WorldMatrix._44};
@@ -145,23 +142,6 @@ HRESULT CWeapon::CreateEffect(_vector RayStartPos, _vector RayDir, _vector RayEn
     pDesc.iWeaponType = m_iWeapon;
     m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
                                              L"Prototype GameObject_ShootEffect", &pDesc);
-
-    //CPlayerBullet::CPlayerBullet_DESC Desc{};
-    //Desc.fSpeedPerSec = 200.f;
-    //Desc.vTagetPos = RayEndPos;
-    //Desc.vPos = m_WeaPonPos;
-    //Desc.iSkillType = CSkill ::STYPE_NOMAL;
-    //Desc.iActorType = CSkill ::PLAYER;
-    //Desc.fClolor[CSkill::COLOR::CSTART] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CSTART];
-    //Desc.fClolor[CSkill::COLOR::CEND] = m_vecWeaPone[m_iWeapon].BulletColor[CSkill::COLOR::CEND];
-    //Desc.iDamage = m_vecWeaPone[m_iWeapon].Damage;
-    //Desc.vLocalPos = LocalOffset;
-    //Desc.fWorldPtr = &m_WorldMatrix;
-    //Desc.fScale = m_vecWeaPone[m_iWeapon].BulletScale;
-    //m_pGameInstance->Add_GameObject_To_Layer(m_pGameInstance->Get_iCurrentLevel(), TEXT("Layer_Skill"),
-    //                                         L"Prototype GameObject_PlayerBullet", &Desc);
-
-
 
     return S_OK;
 }
@@ -230,7 +210,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
     pWDesc.BulletScale = {0.1f, 0.1f};
-    pWDesc.BulletRange = 100.f;
+    pWDesc.BulletRange = 150.f;
     m_vecWeaPone[CWeapon::HendGun] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -244,7 +224,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 0.f, 1.f};
     pWDesc.BulletScale = {0.12f, 0.12f};
-    pWDesc.BulletRange = 120.f;
+    pWDesc.BulletRange = 280.f;
     m_vecWeaPone[CWeapon::AssaultRifle] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -258,7 +238,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.5f, 0.5f, 0.5f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {1.f, 1.f, 0.f, 1.f};
     pWDesc.BulletScale = {0.2f, 0.2f};
-    pWDesc.BulletRange = 140.f;
+    pWDesc.BulletRange = 200.f;
     m_vecWeaPone[CWeapon::MissileGatling] = pWDesc;
 
     pWDesc.iBodyType = BODY_TYPE::T01;
@@ -272,7 +252,7 @@ HRESULT CWeapon::Init_Weapon()
     pWDesc.BulletColor[CSkill::COLOR::CSTART] = {0.f, 0.5f, 1.f, 0.5f};
     pWDesc.BulletColor[CSkill::COLOR::CEND] = {0.f, 1.f, 1.f, 1.f};
     pWDesc.BulletScale = {0.16f, 0.16f};
-    pWDesc.BulletRange = 160.f;
+    pWDesc.BulletRange = 150.f;
     m_vecWeaPone[CWeapon::HeavyCrossbow] = pWDesc;
 
     return S_OK;

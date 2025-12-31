@@ -22,7 +22,7 @@ public:
 	_uint	 Get_NumVerticesX(){ return m_iNumVerticesX; }
 	_uint    Get_NumVerticesZ() { return m_iNumVerticesZ; }
 
-    AABB LocalAABB();
+        void Center_Ext(OUT _float3* Center, OUT _float3* extend);
  
 
 

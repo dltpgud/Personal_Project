@@ -136,7 +136,6 @@ void CObject_Manager::Preallocate(_wstring ProtoTag,  size_t count, void* desc)
 
 CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)
 {
-
 	auto iter = m_Prototypes.find(strPrototypeTag);
 
 	if(iter == m_Prototypes.end())
@@ -246,10 +245,8 @@ void CObject_Manager::Free()
 {
 	__super::Free();
 
-	ObjectPool<Engine::CGameObject>::ClearAll();
-
-    Safe_Release(m_pPlayer);
-	
+	if (m_pPlayer)
+	Safe_Release(m_pPlayer);
 	for (size_t i = 0; i < m_iNumLevels; i++)
     {
 		for (auto& Pair : m_pLayers[i])
@@ -258,10 +255,12 @@ void CObject_Manager::Free()
 	}
 
 	Safe_Delete_Array(m_pLayers);
-	
+
+	ObjectPool<Engine::CGameObject>::ClearAll();
 	for (auto& Pair : m_Prototypes)
 		Safe_Release(Pair.second);
  	m_Prototypes.clear();
+
 }
 
 

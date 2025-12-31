@@ -32,15 +32,10 @@ HRESULT CCHEST::Initialize(void* pArg)
     m_iBoneIndex = m_pModelCom->Get_BoneIndex("Top_Base");
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
-    Safe_AddRef(m_InteractiveUI);
-
     Init_CallBakc();
 
-    _float3 fCenter, fExtend;
-    AABB LocalAABB;
-    m_pModelCom->Center_Ext(&fCenter, &fExtend, &LocalAABB);
-    m_WorldAABB = m_pGameInstance->TransformAABB(LocalAABB, m_pTransformCom->Get_WorldMatrix());
 
+    m_pColliderCom->Update(m_pTransformCom->Get_WorldMatrix());
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
         return E_FAIL;
 
@@ -53,7 +48,7 @@ void CCHEST::Priority_Update(_float fTimeDelta)
 
 void CCHEST::Update(_float fTimeDelta)
 {
-    if (m_InteractiveUI->Get_Interactive(this) && (m_flags & HOVER))
+    if (m_InteractiveUI && m_InteractiveUI->Get_Interactive(this) && (m_flags & HOVER))
     {
         m_pModelCom->Set_Animation(State::OPEN, false);
     }
@@ -116,7 +111,7 @@ HRESULT CCHEST::Render_Shadow()
 
 HRESULT CCHEST::Render()
 {
-    if (FAILED(Bind_ShaderResources()))
+    if (FAILED(Bind_ShaderResources())) // 행렬세팅
         return E_FAIL;
 
     _uint iNumMeshes = m_pModelCom->Get_NumMeshes();
@@ -272,5 +267,5 @@ void CCHEST::Free()
 
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
-    Safe_Release(m_InteractiveUI);
+
 }

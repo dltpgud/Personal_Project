@@ -28,8 +28,19 @@ HRESULT CTerrain::Initialize(void* pArg)
     Set_Model(pDesc->ProtoName, pDesc->CuriLevelIndex);
     Set_Buffer(pDesc->Buffer[0], pDesc->Buffer[1]);
 
-      
-    m_WorldAABB = m_pGameInstance->TransformAABB(m_pVIBufferCom->LocalAABB(), m_pTransformCom->Get_WorldMatrix());
+      _float3 Center,  extend;
+    m_pVIBufferCom->Center_Ext(&Center, &extend);
+     
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+    OBBDesc.vExtents = extend;
+    OBBDesc.vCenter = Center;
+    OBBDesc.vRotation = {0.f, 0.f, 0.f};
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return E_FAIL ;  
+
+
+    m_pColliderCom->Update(m_pTransformCom->Get_WorldMatrix());
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
         return E_FAIL;
 
@@ -118,7 +129,7 @@ void CTerrain::Set_Buffer(_int BufferX, _int BufferY)
     {
       m_pVIBufferCom->Set_Buffer(m_pSize[0], m_pSize[1]);
     }
-    
+   
     return;
 }
 

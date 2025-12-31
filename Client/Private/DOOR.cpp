@@ -34,10 +34,7 @@ HRESULT CDOOR::Initialize(void* pArg)
     Add_BossDoorLight();
     Init_CallBakc();
 
-    _float3 fCenter, fExtend;
-    AABB LocalAABB;
-    m_pModelCom->Center_Ext(&fCenter, &fExtend, &LocalAABB);
-    m_WorldAABB = m_pGameInstance->TransformAABB(LocalAABB, m_pTransformCom->Get_WorldMatrix());
+    m_pColliderCom->Update(m_pTransformCom->Get_WorldMatrix());
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_STATIC)))
         return E_FAIL;
 
@@ -373,7 +370,7 @@ HRESULT CDOOR::Add_Components()
         return E_FAIL;
 
     m_InteractiveUI = static_cast<CInteractiveUI*>(m_pGameInstance->Find_Clone_UIObj(L"Interactive"));
-    Safe_AddRef(m_InteractiveUI);
+ 
 
     return S_OK;
 }
@@ -488,6 +485,5 @@ void CDOOR::Free()
 
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
-    Safe_Release(m_InteractiveUI);
     Safe_Release(m_pNavigationCom);
 }

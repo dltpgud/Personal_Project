@@ -72,27 +72,27 @@ HRESULT CLevel_Stage1::Render()
 HRESULT CLevel_Stage1::Ready_Layer_Monster(const _wstring& pLayerTag)
 {
     CActor::Actor_DESC Desc{};
-
- //if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_GunPawn",
- //                                     L"Proto Component GunPawn_Monster",
- //                                      L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
- //	  return E_FAIL;
-  
- if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
-                                       L"Proto Component JetFly_Monster",
-                                       L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
-     return E_FAIL;
-  
- if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_BoomBot",
-                                     L"Proto Component BoomBot_Monster",
-                                     L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
-     return E_FAIL;
- 
- if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_MecanoBot",
-                                     L"Proto Component MecanoBot_Monster", L"../Bin/Data/Monster/Stage1_Monster.dat",
-                                     &Desc)))
-      return E_FAIL;
-  
+   
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_GunPawn",
+                                        L"Proto Component GunPawn_Monster",
+                                          L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+    	  return E_FAIL;
+     
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_JetFly",
+                                          L"Proto Component JetFly_Monster",
+                                          L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+        return E_FAIL;
+     
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_BoomBot",
+                                        L"Proto Component BoomBot_Monster",
+                                        L"../Bin/Data/Monster/Stage1_Monster.dat", &Desc)))
+        return E_FAIL;
+    
+    if (FAILED(Load_to_Next_Map_Monster(LEVEL_STAGE1, pLayerTag, L"Prototype_GameObject_MecanoBot",
+                                        L"Proto Component MecanoBot_Monster", L"../Bin/Data/Monster/Stage1_Monster.dat",
+                                        &Desc)))
+         return E_FAIL;
+   
 	return S_OK;
 }
 
@@ -138,7 +138,7 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _wstring& pLayerTag)
 	if (FAILED(Load_to_Next_Map_NonaniObj(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_NonAniObj",
                                           L"../Bin/Data/Map/SetMap_Stage1_Nonani.dat",&Desc)))
  		return E_FAIL;
-
+    
     if (FAILED(Load_to_Next_Map_AniOBj(LEVEL_STAGE1, pLayerTag, L"Proto GameObject Door_aniObj",
                                             L"../Bin/Data/Map/SetMap_Stage1_ani.dat", &Desc)))
         return E_FAIL;
@@ -146,11 +146,11 @@ HRESULT CLevel_Stage1::Ready_Layer_Map(const _wstring& pLayerTag)
 	if (FAILED(Load_to_Next_Map_AniOBj(LEVEL_STAGE1, pLayerTag, L"Proto GameObject Chest_aniObj",
                                             L"../Bin/Data/Map/SetMap_Stage1_ani.dat", &Desc)))
 		return E_FAIL;
-
+    
 	if (FAILED(Load_to_Next_Map_NonaniObj(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_WALL",
                                        L"../Bin/Data/Map/SetMap_Stage1_Wall.dat", &Desc)))
 		return E_FAIL;
-   
+    
     if (FAILED(Load_to_Next_Map_Trigger(LEVEL_STAGE1, pLayerTag, L"Prototype GameObject_Trigger",
                                            L"../Bin/Data/Map/Stage1_Trigger.dat", &TriggerDesc)))
     	return E_FAIL;
@@ -284,6 +284,7 @@ HRESULT CLevel_Stage1::Ready_Player()
 	m_pGameInstance->Get_Player()->Get_Transform()->Set_TRANSFORM(CTransform::T_POSITION, XMVectorSet(25.f, 2.f, -12.f, 1.f));
 	m_pGameInstance->Get_Player()->Get_Transform()->Rotation(0.f, 0.4f, 0.f);
     m_pGameInstance->MouseFix(true);
+
 	return S_OK;
 }
 HRESULT CLevel_Stage1::Load_to_Next_Map_terrain(const _uint& iLevelIndex, const _wstring& strLayerTag,

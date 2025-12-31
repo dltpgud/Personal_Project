@@ -57,25 +57,24 @@ _int CStaticBVH::BuildRecursive(_int start, _int end)
     return nodeIdx;
 }
 
-_bool CStaticBVH::Raycast(const _vector& vRayPos, const _vector& vRayDir, HitResult& out, _float maxDist) const
+_bool CStaticBVH::Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist,
+                          OUT _int* Type ) const
 {
   
-    if (XMVector3Equal(vRayDir, XMVectorZero()))
-    {
+   if (XMVectorGetX(XMVector3LengthSq(vRayDir)) < 1e-12f)
         return false;
-    }
 
     out = HitResult{};
     if (m_nodes.empty())
         return false;
 
     _float closest = maxDist;
-    TraverseRay(0, vRayPos, vRayDir, closest, out);
+    TraverseRay(0, vRayPos, vRayDir, closest, out,Type);
     return out.hit;
 }
 
 void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest,
-                             HitResult& out) const
+                             OUT HitResult& out, OUT _int* Type) const
 {
     const Node& n = m_nodes[nodeIdx];
     if (!RayIntersectAABB(vRayPos, vRayDir, n.bounds, closest))
@@ -89,15 +88,16 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
 
         if (entry.type == EPrimType::ModelMesh && entry.model && entry.transform)
         {
-            if (entry.col)
-            {
-                _float colDist = FLT_MAX;
-                if (!entry.col->RayIntersects(vRayPos, vRayDir, colDist))
-                    return; 
+            if (!entry.col)
+                return;
+           
+            _float colDist = FLT_MAX;
+            if (!entry.col->RayIntersects(vRayPos, vRayDir, colDist))
+                return; 
 
-                if (colDist >= closest)
-                    return;
-            }
+            if (colDist >= closest)
+                return;
+            
 
             _vector hitPos{}, hitNrm{};
             if (entry.model->RayIntersect(vRayPos, vRayDir, entry.transform, hitPos, hitNrm))
@@ -112,6 +112,8 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
                     out.position = hitPos;
                     out.normal = hitNrm;
                     out.object = entry.object;
+                    if (Type)
+                    *Type = EPrimType::ModelMesh;
                 }
             }
 
@@ -120,6 +122,16 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
 
         if (entry.type == EPrimType::Terrain && entry.terrain && entry.transform)
         {
+            _float colDist = FLT_MAX;
+            if (!entry.col)
+                return;
+
+            if (!entry.col->RayIntersects(vRayPos, vRayDir, colDist))
+                return;
+
+            if (colDist >= closest)
+                return;
+
             _float t = 0.f;
             _float3 nrm{}, pos{};
             _float3 dir3{};
@@ -135,6 +147,8 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
                     out.position = XMVectorSet(pos.x, pos.y, pos.z, 1.f);
                     out.normal = XMVectorSet(nrm.x, nrm.y, nrm.z, 0.f);
                     out.object = entry.object;
+                    if (Type)
+                    *Type = EPrimType::Terrain;
                 }
             }
             return;
@@ -143,8 +157,8 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
         return;
     }
 
-    TraverseRay(n.left, vRayPos, vRayDir, closest, out);
-    TraverseRay(n.right, vRayPos, vRayDir, closest, out);
+    TraverseRay(n.left, vRayPos, vRayDir, closest, out,Type);
+    TraverseRay(n.right, vRayPos, vRayDir, closest, out,Type);
 }
 
 AABB CStaticBVH::MergeAABB(const AABB& a, const AABB& b)
@@ -174,18 +188,6 @@ _int CStaticBVH::LongestAxis(const AABB& a)
     if (ey > ez)
         return 1; //Y
     return 2; //Z
-}
-
-CStaticBVH* CStaticBVH::Create()
-{
-    CStaticBVH* pInstance = new CStaticBVH();
-
-    return pInstance;
-}
-
-void CStaticBVH::Free()
-{
-    Clear();
 }
 
 _bool CStaticBVH::RayIntersectAABB(const _vector& vRayPos, const _vector& vRayDir , const AABB& box, _float tMax) const

@@ -46,21 +46,18 @@ public:
     virtual ~CStaticBVH() = default;
     void Clear();
     void Build(const vector<Entry>& staticEntries);
-    _bool Raycast(const _vector& vRayPos, const _vector& vRayDir, HitResult& out, _float maxDist = FLT_MAX) const;
+    _bool Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist = FLT_MAX, OUT _int* Type = nullptr) const;
 
 private:
     _int BuildRecursive(_int start, _int end);
-    void TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest, HitResult& out) const;
+    void TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest,OUT HitResult& out,
+                     OUT _int* Type ) const;
 
 private:
     AABB    MergeAABB(const AABB& a, const AABB& b);
     _bool   RayIntersectAABB(const _vector& vRayPos, const _vector& vRayDir, const AABB& box, _float tMax) const;
     _float3 Center(const AABB& a);
     _int    LongestAxis(const AABB& a);
-
-public:
-    static CStaticBVH* Create();
-    virtual void Free() override;
 
 private:
    vector<Entry> m_entries;

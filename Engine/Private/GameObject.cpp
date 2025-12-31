@@ -38,7 +38,7 @@ HRESULT CGameObject::Initialize(void* pArg)
      
      if (m_iCloneCount > 1)
      {
-        m_pTransformCom->Initialize_Prototype(pDesc);
+         m_pTransformCom->Initialize_Prototype(pDesc);
          return S_OK;
      }
    
@@ -133,12 +133,13 @@ void CGameObject::Free()
 {
     __super::Free();
 
-    for (auto& Pair : m_Components) Safe_Release(Pair.second);
-    m_Components.clear();
+        for (auto& Pair : m_Components) Safe_Release(Pair.second);
+        m_Components.clear();
 
-    Safe_Release(m_pColliderCom);
-    Safe_Release(m_pTransformCom);
-    Safe_Release(m_pGameInstance);
-    Safe_Release(m_pContext);
-    Safe_Release(m_pDevice);
+        Safe_Release(m_pColliderCom);
+        Safe_Release(m_pTransformCom);
+        Safe_Release(m_pGameInstance);
+        Safe_Release(m_pContext);
+        Safe_Release(m_pDevice);
+    
 }

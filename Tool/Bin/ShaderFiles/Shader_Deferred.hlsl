@@ -55,7 +55,7 @@ float3 g_FogColorFar = float3(0.92, 0.72, 0.55); // 원거리 (밝은 황토톤)
 
 // 거리 기반 범위
 float g_FogStart = 15.0f; // 안개 시작 거리 (카메라로부터)
-float g_FogEnd = 300.0f; // 안개 끝 (이 뒤는 완전히 안개 속)
+float g_FogEnd = 230.0f; // 안개 끝 (이 뒤는 완전히 안개 속)
 float g_FogDensity = 0.45f; // 전체 강도 (0.3~0.6 사이 튜닝)
 
 
@@ -156,8 +156,7 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
     
     float3 L = normalize(-g_vLightDir.xyz);
     float NdotL = saturate(dot(finalNormal, L));
-
-    // === 툰단계 제거, 대신 라이트 랩으로 부드러운 명암 ===
+    
     float lightWrap = 0.25f; // 0.0~0.4 (값을 높이면 그림자 경계가 부드러워짐)
     float wrapped = saturate((NdotL + lightWrap) / (1.0f + lightWrap));
 
@@ -365,14 +364,13 @@ PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
     vector vDiffuse = g_DiffuseTexture.Sample(LinearSampler, In.vTexcoord);
     vector vShade = g_ShadeTexture.Sample(LinearSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(LinearSampler, In.vTexcoord);
+
+   // ==== 데칼이랑 외곽선 반영 ====
     float fOutLine = Compute_OutLine(In.vTexcoord);
-   
-    
-    // ==== 데칼이랑 외곽선 반영 ====
     vector vDecal = g_DecalTexture.Sample(LinearSampler, In.vTexcoord);
     
     vDiffuse.rgb = lerp(vDiffuse.rgb, vDecal.rgb, vDecal.a);
-     
+    
     if (vDiffuse.a == 0.f)
         discard;
  
@@ -405,8 +403,6 @@ PS_OUT PS_MAIN_LIGHT_COMBINE(PS_IN In)
     float3 baseLit = (vDiffuse * fOutLine * vShade + vSpecular).rgb;
     baseLit *= lerp(0.8f, 1.0f, shadowFactor);
      
-    //====감마 설정 ===
-     baseLit.rgb = GammaCorrection(baseLit.rgb, 0.8f);
     Out.vColor.rgb = baseLit;
     return Out;
 }
@@ -421,17 +417,20 @@ PS_OUT PS_MAIN_Final(PS_IN In)
     vector vRim = g_RimTexture.Sample(LinearSampler, In.vTexcoord);
     vector vEmissive = g_EmissiveTexture.Sample(LinearSampler, In.vTexcoord);
     vector vEffect = g_EffectTexture.Sample(LinearSampler, In.vTexcoord);
-
+    
+    
     // === Bloom_Occlusion====
     float bloomDepth = vBloom.a;
     float sceneDepth = vDepthDesc.g;
     float diff = bloomDepth - sceneDepth;
-    if (diff > 0.5f)
+    if (diff > 0.5f )
     {
         vBloom.rgb = 0.0f;
     }
     
     vFinalDesc = vFinalDesc + vEffect + vRim + vBloom;
+    
+    
     float3 emissive = vEmissive.rgb;
     
      // ==== 안개 계산 ====
@@ -449,7 +448,8 @@ PS_OUT PS_MAIN_Final(PS_IN In)
     float3 foggedBase = lerp(fogColor, vFinalDesc.rgb, 1.0f - fogT);
     float emissiveFog = lerp(1.0f, 1.0f - fogT, 0.3f);
     float3 finalRGB = foggedBase + emissive * emissiveFog;
- 
+     //====감마 설정 ===
+    finalRGB.rgb = GammaCorrection(finalRGB.rgb, 0.8f);
     Out.vColor = float4(finalRGB, 1.f);
     return Out;
 }
@@ -472,14 +472,15 @@ PS_OUT PS_MAIN_BLUR_X(PS_IN In)
     
     float4 vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
-    int i;
+        int i;
     for (i = 0; i < 5; i++)
     {
         vDiffuse += Bloom_Weights[i] * g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord + float2(dX, 0.0) * float(i - 2));
     }
     
-    Out.vColor = vDiffuse;
 
+        Out.vColor = vDiffuse;
+  
     return Out;
 }
 
@@ -496,8 +497,11 @@ PS_OUT PS_MAIN_BLUR_Y(PS_IN In)
         vDiffuse += Bloom_Weights[i] * g_DiffuseTexture.Sample(LinearSamplerClamp, In.vTexcoord + float2(0.0, dY) * float(i - 2));
     }
     
-    Out.vColor = vDiffuse;
+ 
+   
+        Out.vColor = vDiffuse;
 
+    
     return Out;
 }
 

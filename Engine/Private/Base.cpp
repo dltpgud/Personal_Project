@@ -11,6 +11,8 @@ _uint CBase::AddRef()
 
 _uint CBase::Release()
  {
+   
+
 	if (0 == m_iRefCnt)
 	{
 		Free();  // 소멸자를 디폴트로 놓았기에 여기서 호출

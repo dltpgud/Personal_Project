@@ -30,7 +30,7 @@ public:
     _uint Get_iNumVertices();
     HRESULT Set_InstanceBuffer(const vector<_matrix>& vecObjMat);
     HRESULT Bind_Buffers();
-
+    void Set_FinalBonMatrices(_float4x4* BoneMatrices, const vector<class CBone*>& Bones);
     _uint Get_iNumIndices() const
     {
         return m_iNumIndexices;

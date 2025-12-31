@@ -56,11 +56,11 @@ private:
 
     _int m_ColliderDamage{0};
     _bool m_bIsColl = { false };
-    _bool m_bStaticBuilt{false};
+  
 
 private:
-    CSpatialGrid* m_SpatialGrid;
-    CStaticBVH* m_StaticBVH;
+    CSpatialGrid m_SpatialGrid;
+    CStaticBVH m_StaticBVH;
 
 
 #ifdef _DEBUG

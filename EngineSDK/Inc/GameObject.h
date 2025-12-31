@@ -56,13 +56,6 @@ public:
     }
     virtual HRESULT Add_Components() {return S_OK;};
 
-    virtual AABB Get_WorldAABB()
-    {
-        return m_WorldAABB;
-    }
-
-    mutable _uint m_LastQueryId = 0;
-
 protected:
     class CGameInstance* m_pGameInstance = {nullptr};
     ID3D11Device* m_pDevice = {nullptr};
@@ -71,10 +64,8 @@ protected:
    _uint m_iLifeState{};
     _int m_iObjectType{-1};
    _int m_iCloneCount{};
-    AABB m_WorldAABB{};
 
-
-   protected:
+protected:
     map<const _wstring, class CComponent*> m_Components;
     CCollider* m_pColliderCom = {nullptr};
     CTransform* m_pTransformCom = {nullptr};
