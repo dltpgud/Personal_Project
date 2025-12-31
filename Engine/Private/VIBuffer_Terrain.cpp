@@ -426,9 +426,11 @@ void CVIBuffer_Terrain::Set_QuadTree()
                                     m_iNumVerticesX * m_iNumVerticesZ -1, m_iNumVerticesX - 1, 0,m_pVertexPositions);
 }
 
-AABB CVIBuffer_Terrain::LocalAABB()
+void CVIBuffer_Terrain::Center_Ext(OUT _float3* Center, OUT _float3* extend)
 {
-   return {m_vMin, m_vMax};
+    *Center = {(m_vMin.x + m_vMax.x) / 2.0f, (m_vMin.y + m_vMax.y) / 2.0f, (m_vMin.z + m_vMax.z) / 2.0f};
+
+    *extend = {(m_vMax.x - m_vMin.x) / 2.0f, (m_vMax.y - m_vMin.y) / 2.0f, (m_vMax.z - m_vMin.z) / 2.0f};
 }
 
 _bool CVIBuffer_Terrain::Picking_OnTerrain_QuadTree(_vector RayPos, _vector RayDir, CTransform* pTransform,

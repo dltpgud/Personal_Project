@@ -44,23 +44,28 @@ public:
             }
             pair.second.clear();
         }
-        s_pools.clear();
+
     }
 
-    template <typename T> static void Clear()
+   static void ClearByIndex(const std::type_index& idx)
     {
-        auto iter = s_pools.find(type_index(typeid(T)));
-        if (iter != s_pools.end())
-        {
-            for (auto* raw : iter->second)
-            {
-                Base* obj = static_cast<Base*>(raw);
-                Safe_Release(obj);
-            }
-            iter->second.clear();
-            s_pools.erase(iter);
-        }
+        auto it = s_pools.find(idx);
+        if (it == s_pools.end())
+            return;
+
+        for (void* raw : it->second) Safe_Release(static_cast<Base*>(raw));
+
+        it->second.clear();
+        s_pools.erase(it);
     }
+
+    static void ClearByObject(Base* obj)
+    {
+        if (!obj)
+            return;
+        ClearByIndex(std::type_index(typeid(*obj)));
+    }
+
 
     template <typename T, typename... Args> static void Preallocate(T* prototype, size_t count, Args&&... args)
     {

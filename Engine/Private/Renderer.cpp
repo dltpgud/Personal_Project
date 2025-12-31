@@ -133,7 +133,7 @@ HRESULT CRenderer::Draw()
     if (FAILED(Render_Effect()))
         return E_FAIL;
 
-    if (FAILED(Render_Bloom()))
+     if (FAILED(Render_Bloom()))
         return E_FAIL;
 
     if (FAILED(Render_Final()))
@@ -763,7 +763,7 @@ HRESULT CRenderer::Render_Lights()
 
 HRESULT CRenderer::Render_LightsCombine()
 {
-    // 조명 +그림자 + 외곽선
+    // 조명 +그림자 
     if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Final"), nullptr, false)))
         return E_FAIL;
 
@@ -916,20 +916,20 @@ HRESULT CRenderer::Render_Debug()
         return E_FAIL;
    
     m_pVIBuffer->Bind_Buffers();
-   
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_2"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_4"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_8"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Height"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Final"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
-    
-  //  m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
-     m_pGameInstance->RenderGrid();
+   //
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_2"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_4"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_8"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Height"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Final"), m_pShader, m_pVIBuffer);
+   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
+   // 
+   // m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
+    m_pGameInstance->RenderGrid();
     return S_OK;
 }
 

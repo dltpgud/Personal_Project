@@ -110,6 +110,7 @@ void CWall::Set_Model(const _wstring& protoModel, _uint ILevel)
 {
     m_wModelLevel = ILevel;
     m_pModelName = protoModel;
+
     if (FAILED(__super::Add_Component(ILevel, protoModel, TEXT("Com_Model"),
                                       reinterpret_cast<CComponent**>(&m_pModelCom))))
     {

@@ -22,9 +22,9 @@ HRESULT CComponent_Manager::Add_Prototype(_uint iLevelIndex, const _wstring& str
     if (iLevelIndex >= m_iNumLevels || nullptr != Find_Prototype(iLevelIndex, strPrototypeTag))
         return E_FAIL;
    // WRITE_LOCK;
-    m_Component_Mutex.lock();
+    lock_guard<std::mutex> lock(m_Component_Mutex);
     m_pPrototypes[iLevelIndex].emplace(strPrototypeTag, pPrototype);
-    m_Component_Mutex.unlock();
+
     return S_OK;
 }
 
@@ -32,7 +32,7 @@ CComponent* CComponent_Manager::Clone_Component(_uint iLevelIndex, const _wstrin
 {
     if (iLevelIndex >= m_iNumLevels)
         return nullptr;
-
+    lock_guard<std::mutex> lock(m_Component_Mutex);
     CComponent* pPrototype = Find_Prototype(iLevelIndex, strPrototypeTag);
     if (nullptr == pPrototype)
         return nullptr;
@@ -86,7 +86,7 @@ CComponent_Manager* CComponent_Manager::Create(_uint iNumLevels)
 void CComponent_Manager::Free()
 {
     __super::Free();
-
+    lock_guard<std::mutex> lock(m_Component_Mutex);
     for (size_t i = 0; i < m_iNumLevels; i++)
     {
         for (auto& Pair : m_pPrototypes[i]) Safe_Release(Pair.second);

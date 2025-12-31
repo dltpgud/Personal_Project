@@ -8,7 +8,7 @@ Collider_Manager::Collider_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* p
       ,m_pDevice{pDevice}, m_pContext{pContext}
 #endif
 {
-    Safe_AddRef(m_pGameInstance);
+   Safe_AddRef(m_pGameInstance);
 
 #ifdef _DEBUG
     Safe_AddRef(m_pDevice);
@@ -36,13 +36,10 @@ HRESULT Collider_Manager::Initialize()
 
     m_pEffect->GetVertexShaderBytecode(&pShaderByteCode, &iShaderByteCodeLength);
 
-    if(FAILED( m_pDevice->CreateInputLayout(VertexPositionColor::InputElements, VertexPositionColor::InputElementCount,
+    if(FAILED(m_pDevice->CreateInputLayout(VertexPositionColor::InputElements, VertexPositionColor::InputElementCount,
                                  pShaderByteCode, iShaderByteCodeLength, &m_pInputLayout)))
         return E_FAIL;
 #endif
-
-    m_StaticBVH = CStaticBVH::Create();
-    m_SpatialGrid = CSpatialGrid::Create();
 
     return S_OK;
 }
@@ -82,9 +79,8 @@ HRESULT Collider_Manager::Check_Collider_PlayerCollison()
             pPlayer->Check_Coll();
             pPlayer->Set_CurrentHP(m_ColliderDamage);
         }
-        Safe_Release(Collider);
     }
-    m_ColliderList.clear();
+;
     return S_OK;
 }
 
@@ -104,38 +100,34 @@ HRESULT Collider_Manager::Check_Inetrect_Player()
             continue;
 
         iter->Get_Collider()->CollUpdate(pPlayer);
-
-        Safe_Release(iter);
     }
-
-    m_GameObjeList[COL_INTERECT].clear();
 
     return S_OK;
 }
 
 void Collider_Manager::All_Collison_check(_float fTimedelta)
 {
-   m_SpatialGrid->Clear();
-   m_SpatialGrid->UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
-   m_SpatialGrid->UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
-    
-   MonsterSkill_To_Mash(fTimedelta); 
-   Player_To_MonsterSkill();         // HP 한 번만 깍이게
-   Monster_To_Monster();
+  m_SpatialGrid.Clear();
+  m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER]);
+  m_SpatialGrid.UpdateDynamicGrid(m_GameObjeList[COL_MONSTER_SKILL]);
+   
+  MonsterSkill_To_Mash(fTimedelta); 
+  Player_To_MonsterSkill();         
+  Monster_To_Monster();
  
-   Check_Inetrect_Player();
-   Check_Collider_PlayerCollison();
-
-   if (m_bIsColl)
-   {
-       if (false == PlayerWeapon_To_Monster())
-       {
-           PlayerWapon_To_Mash();
-       }
-       m_bIsColl = false;
-   }
-
-   Clear();
+  Check_Inetrect_Player();
+  Check_Collider_PlayerCollison();
+ 
+  if (m_bIsColl)
+  {
+      if (false == PlayerWeapon_To_Monster())
+      {
+          PlayerWapon_To_Mash();
+      }
+      m_bIsColl = false;
+  }
+ 
+  Clear();
 }
 
 _bool Collider_Manager::PlayerWeapon_To_Monster()
@@ -144,13 +136,14 @@ _bool Collider_Manager::PlayerWeapon_To_Monster()
     if (!pPlayer)
         return false;
 
-    _vector RayPos{}, RayDir{};
+    _vector RayPos{}, RayDir{}, dumyRaypos, dumyRayDir;
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
     
     vector<CGameObject*> vCandidates;
-    m_SpatialGrid->QueryNearby(RayPos, pPlayer->Get_EffectiveRange(), vCandidates); // 150.f는 시야 거리 반경
-    
+                 
+    m_SpatialGrid.QueryAABB(pPlayer->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION),  RayPos + RayDir * pPlayer->Get_EffectiveRange(), 0, vCandidates);
+
     if (vCandidates.empty())
         return false;
     
@@ -185,12 +178,20 @@ _bool Collider_Manager::PlayerWeapon_To_Monster()
     if (!pPickedObj)
         return false;
 
-    _vector FinalPos{}, vNormal{};
+
      
-    if (pPickedObj->Part_Intersects(RayPos, RayDir, FinalPos, vNormal))
+    if (pPickedObj->Part_Intersects(RayPos, RayDir, Hit.position, Hit.normal))
     {
          pPickedObj->Check_Coll();
-         pPlayer->CreateEffect(RayPos, RayDir, FinalPos, vNormal);
+         DECAL_DESC* Desc = pPlayer->Get_DecalDesc();
+         Desc->vPos = Hit.position;
+         Desc->vNormal = Hit.normal;
+         Desc->vDir = XMVector3Normalize(RayDir);
+         Desc->iType = DECAL_DESC::TYPE_BOX;
+
+         m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
+
+         pPlayer->CreateEffect(RayPos, RayDir, Hit.position, Hit.normal);
          return true;
     }
     
@@ -208,9 +209,9 @@ HRESULT Collider_Manager::Player_To_MonsterSkill()
    vector<CGameObject*> vNearbySkills;
    _vector RayPos{}, RayDir{}, PrePos{}, CurPos{};
    _float  RayRen{};
+ 
    pPlayer->Get_Transform()->Get_Ray(RayPos, RayDir, &RayRen, &PrePos, &CurPos);
-   //m_SpatialGrid->QueryNearby(playerPos, 60.f, vNearbySkills);
-   m_SpatialGrid->QueryAABB(PrePos, CurPos, RayRen, vNearbySkills);
+   m_SpatialGrid.QueryAABB(PrePos, CurPos, RayRen, vNearbySkills);
 
    for (auto& pSkillObj : vNearbySkills)
    {
@@ -243,7 +244,7 @@ HRESULT Collider_Manager::Player_To_MonsterSkill()
  
                if (dynamic_cast<CSkill*>(pSkill)->Get_SkillType() == CSkill::STYPE_STURN)
                    pPlayer->Stun_Routine();
-               else
+               else {}
                    pPlayer->Check_Coll();
  
                if (dynamic_cast<CSkill*>(pSkill)->Get_ActorType() != CSkill::BOSS_MONSTER)
@@ -267,10 +268,12 @@ HRESULT Collider_Manager::PlayerWapon_To_Mash()
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
     HitResult hit;
-    if (!m_StaticBVH->Raycast(RayPos, RayDir, hit))
-        return E_FAIL;
 
+  
     DECAL_DESC* Desc = pPlayer->Get_DecalDesc();
+    if (!m_StaticBVH.Raycast(RayPos, RayDir, hit))
+        return E_FAIL;
+    
     Desc->vPos = hit.position;
     Desc->vNormal = hit.normal;
     Desc->vDir = XMVector3Normalize(RayDir);
@@ -294,19 +297,22 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
         _vector RayPos{}, RayDir{};
         _float RayLen{};
         SkillObj->Get_Transform()->Get_Ray(RayPos, RayDir, &RayLen);
- 
+
+        _float radius = SkillCollider->Get_iCurRadius();
+
         if (iSkillType == CSkill::STYPE_LASER)
         {
             bCreate = true;
             RayPos = Desc->vPos;
             RayDir = Desc->vDir;
+            radius *= 2.f;
         }
-
-        _float radius = SkillCollider->Get_iCurRadius();
         _float MaxRayLen = RayLen + radius + 0.01f;
 
         HitResult hit;
-        if (!m_StaticBVH->Raycast(RayPos, XMVector3Normalize(RayDir), hit,RayLen))
+        _int Type{};
+
+        if (!m_StaticBVH.Raycast(RayPos, XMVector3Normalize(RayDir), hit, MaxRayLen,&Type))
             continue;
 
        
@@ -314,7 +320,7 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
         {
             CCollider* HitCol = hit.object->Get_Collider();
 
-            if (HitCol)
+            if (HitCol&& Type == CStaticBVH::EPrimType::ModelMesh)
             {
                 if (SkillCollider->Intersect(HitCol))
                 {
@@ -365,8 +371,8 @@ void Collider_Manager::Clear()
 
 HRESULT Collider_Manager::Init_World(const _float2& vMin, const _float2& vMax, _float cellSize)
 {
-    m_SpatialGrid->Clear();
-    m_SpatialGrid->SetWorld(vMin, vMax,  cellSize);
+    m_SpatialGrid.Clear();
+    m_SpatialGrid.SetWorld(vMin, vMax,  cellSize);
   
     BuildStaticBVH();
 
@@ -385,7 +391,7 @@ HRESULT Collider_Manager::Init_World(const _float2& vMin, const _float2& vMax, _
 
 HRESULT Collider_Manager::Monster_To_Monster()
 {
-    auto& grid = m_SpatialGrid->DynamicGrid();
+    auto& grid = m_SpatialGrid.DynamicGrid();
     if (grid.empty())
         return S_OK;
 
@@ -454,12 +460,12 @@ HRESULT Collider_Manager::Monster_To_Monster()
             }
 
             _int ix, iz;
-            if (!m_SpatialGrid->WorldToCell(posA, ix, iz))
+            if (!m_SpatialGrid.WorldToCell(posA, ix, iz))
                 continue;
 
             _int neighborIdx[9];
             _int neighborCount = 0;
-            m_SpatialGrid->GatherNeighborCells(ix, iz, neighborIdx, neighborCount);
+            m_SpatialGrid.GatherNeighborCells(ix, iz, neighborIdx, neighborCount);
 
             for (_int n = 0; n < neighborCount; ++n)
             {
@@ -523,9 +529,9 @@ HRESULT Collider_Manager::Monster_To_Monster()
    
     m_pBatch->Begin();
    
-    const auto worldMin = m_SpatialGrid->GetWorldMin();
-    const auto worldMax = m_SpatialGrid->GetWorldMax();
-    const _float cellSize = m_SpatialGrid->GetCellSize();
+    const auto worldMin = m_SpatialGrid.GetWorldMin();
+    const auto worldMax = m_SpatialGrid.GetWorldMax();
+    const _float cellSize = m_SpatialGrid.GetCellSize();
    
     const _float y = 0.1f;
     const XMVECTORF32 color = Colors::AliceBlue;
@@ -561,11 +567,9 @@ void Collider_Manager::BuildStaticBVH()
 
         CStaticBVH::Entry  Entrie;
         Entrie.object = obj;
-        Entrie.transform = obj->Get_Transform();
-        Entrie.bounds = obj->Get_WorldAABB(); 
+        Entrie.transform = obj->Get_Transform(); 
         Entrie.col = obj->Get_Collider();
-
-        // Terrain인지
+        Entrie.bounds = obj->Get_Collider()->Get_WorldAABB();
         if (auto* buf = static_cast<CVIBuffer_Terrain*>(obj->Find_Component(TEXT("Com_Buffer"))))
         {
             Entrie.type = CStaticBVH::EPrimType::Terrain;
@@ -580,7 +584,7 @@ void Collider_Manager::BuildStaticBVH()
         vecEntries.push_back(Entrie);
     }
 
-    m_StaticBVH->Build(vecEntries);
+    m_StaticBVH.Build(vecEntries);
 }
 
 Collider_Manager* Collider_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -611,8 +615,6 @@ void Collider_Manager::Free()
     }
 
     Safe_Release(m_pGameInstance);
-    Safe_Release(m_StaticBVH);
-    Safe_Release(m_SpatialGrid);
 
 #ifdef _DEBUG
     Safe_Delete(m_pBatch);

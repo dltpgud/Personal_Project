@@ -69,7 +69,6 @@ HRESULT CEffect_DecalStream::Trigger_Effect(void* pArg, _float fTimeDelta)
    // auto cpuBegin = std::chrono::high_resolution_clock::now();
     DECAL_DESC* pDecal = static_cast<DECAL_DESC*>(pArg);
 
-
     DECAL_SPAWN_REQ out;
 
     // 방향 선택 (SSD면 Dir, BOX면 Normal)

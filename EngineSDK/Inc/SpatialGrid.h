@@ -42,11 +42,8 @@ private:
     _float m_CellSize = 10.f;
     _int m_GridW = 0, m_GridH = 0; // X, Z
     vector<Cell> m_DynamicGrid;
-    class CGameInstance* m_pGameInstance = {nullptr};
+  
 
-public:
-    static CSpatialGrid* Create();
-    virtual void Free() override;
 };
 
 END

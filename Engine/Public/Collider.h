@@ -35,7 +35,7 @@ public:
     void CollUpdate(CActor* target);
     void Set_Info(void* pArg);
     _bool IsInside(const _float3& pos);
-
+    AABB Get_WorldAABB();
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render() override;

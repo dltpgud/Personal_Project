@@ -29,6 +29,7 @@ public:
     virtual void Set_Model(const _wstring& protoModel, _uint ILevel) override;
     virtual void Set_InstaceBuffer(const vector<_matrix>& worldmat, _uint iLevel);
 
+
 private:
     CShader* m_pShaderCom = {nullptr};
     CModel* m_pModelCom = {nullptr};

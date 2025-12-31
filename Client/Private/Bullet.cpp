@@ -46,6 +46,11 @@ HRESULT CBullet::Initialize(void* pArg)
     {
         m_DecalDesc.fSize = 2.5f;
         m_DecalDesc.fDepth = 2.5f;
+        CBounding_Sphere::BOUND_SPHERE_DESC CBounding_Sphere{};
+        _float3 Center{}, Extents{};
+        CBounding_Sphere.fRadius = 0.5f;
+        CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
+        m_pColliderCom->Set_Info(&CBounding_Sphere);
     }
     return S_OK;
 }

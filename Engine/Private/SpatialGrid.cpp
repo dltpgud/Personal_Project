@@ -4,9 +4,8 @@
 #include "Collider_Manager.h"
 #include "GameInstance.h"
 
-CSpatialGrid::CSpatialGrid() : m_pGameInstance { CGameInstance::GetInstance() }
+CSpatialGrid::CSpatialGrid() 
 {
-    Safe_AddRef(m_pGameInstance);
 }
 void CSpatialGrid::Clear()
 {
@@ -174,15 +173,3 @@ _float2 CSpatialGrid::GetWorldMax()
     return m_WorldMax;
 }
 #endif // _DEBUG
-
-CSpatialGrid* CSpatialGrid::Create()
-{
-    CSpatialGrid* pInstance = new CSpatialGrid();
-
-    return pInstance;
-}
-
-void CSpatialGrid::Free()
-{
-    Safe_Release(m_pGameInstance);
-}

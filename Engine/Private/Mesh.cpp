@@ -80,19 +80,9 @@ HRESULT CMesh::Initialize(void* pArg)
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const vector<class CBone*>& Bones, const _char* pConstantName)
 {
     _float4x4 BoneMatrices[512];
-    m_FinalBoneMatrices.clear();
-    m_FinalBoneMatrices.reserve(m_Bones.size());
-    _uint iNumBones = {0};
 
-    for (auto& iBoneIndex : m_Bones) /*뼈의 인덱스 만큼 돌면서 행렬을 곱해라*/
-    {
-        _matrix CombinedMatrix = Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
-        _matrix OffsetMatrix = XMLoadFloat4x4(&m_OffsetMatrices[iNumBones]);
-        _matrix finalMat = OffsetMatrix * CombinedMatrix;
-        XMStoreFloat4x4(&BoneMatrices[iNumBones++], finalMat);
-        m_FinalBoneMatrices.push_back(finalMat); // CPU에도 저장
+    Set_FinalBonMatrices(BoneMatrices, Bones);
 
-    }
     return pShader->Bind_Matrices(pConstantName, BoneMatrices, 512);
 }
 
@@ -116,14 +106,14 @@ _float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
 
     const VTXANIMMESH& vtx = m_pAnimVertices[vertexIndex];
 
-    XMVECTOR basePos = XMLoadFloat3(&vtx.vPosition);
-    XMVECTOR skinned = XMVectorZero();
+    _vector basePos = XMLoadFloat3(&vtx.vPosition);
+    _vector skinned = XMVectorZero();
 
-    const float w[4] = {vtx.vBlendWeight.x, vtx.vBlendWeight.y, vtx.vBlendWeight.z, vtx.vBlendWeight.w};
-    const int i[4] = {(int)vtx.vBlendIndex.x, (int)vtx.vBlendIndex.y, (int)vtx.vBlendIndex.z, (int)vtx.vBlendIndex.w};
+    const _float w[4] = {vtx.vBlendWeight.x, vtx.vBlendWeight.y, vtx.vBlendWeight.z, vtx.vBlendWeight.w};
+    const _int i[4] = {(_int)vtx.vBlendIndex.x, (_int)vtx.vBlendIndex.y, (_int)vtx.vBlendIndex.z, (_int)vtx.vBlendIndex.w};
 
-    float wsum = 0.0f;
-    for (int k = 0; k < 4; ++k)
+    _float wsum = 0.0f;
+    for (_int k = 0; k < 4; ++k)
     {
         if (w[k] <= 0.0f)
             continue;
@@ -131,7 +121,7 @@ _float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
         if (i[k] < 0 || i[k] >= (int)m_FinalBoneMatrices.size())
             continue;
 
-        XMMATRIX M = m_FinalBoneMatrices[i[k]]; // (combined * inverseBindPose) 형태여야 함
+        _matrix M = m_FinalBoneMatrices[i[k]]; 
         skinned = XMVectorAdd(skinned, XMVectorScale(XMVector3TransformCoord(basePos, M), w[k]));
         wsum += w[k];
     }
@@ -236,6 +226,25 @@ HRESULT CMesh::Bind_Buffers()
         m_pContext->IASetPrimitiveTopology(m_ePrimitiveTopology);
      
     return S_OK;
+}
+
+void CMesh::Set_FinalBonMatrices(_float4x4* BoneMatrices, const vector<class CBone*>& Bones)
+{
+    m_FinalBoneMatrices.clear();
+    m_FinalBoneMatrices.reserve(m_Bones.size());
+    _uint iNumBones = {0};
+
+    for (auto& iBoneIndex : m_Bones) /*뼈의 인덱스 만큼 돌면서 행렬을 곱해라*/
+    {
+        _matrix CombinedMatrix = Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
+        _matrix OffsetMatrix = XMLoadFloat4x4(&m_OffsetMatrices[iNumBones]);
+        _matrix finalMat = OffsetMatrix * CombinedMatrix;
+
+        if (BoneMatrices)
+        XMStoreFloat4x4(&BoneMatrices[iNumBones++], finalMat);
+
+        m_FinalBoneMatrices.push_back(finalMat); // CPU에도 저장
+    }
 }
 
 HRESULT CMesh::Load_AnimMesh(HANDLE hFile)

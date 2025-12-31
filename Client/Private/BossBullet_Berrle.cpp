@@ -83,6 +83,7 @@ void CBossBullet_Berrle::Update(_float fTimeDelta)
 
         XMStoreFloat4x4(&m_WorldMatrix, m_pTransformCom->Get_WorldMatrix() * SocketMatrix * XMLoadFloat4x4(m_LaserpParentMatrix));
     }
+    __super::Update(fTimeDelta);
 }
 
 void CBossBullet_Berrle::Late_Update(_float fTimeDelta)
@@ -90,7 +91,8 @@ void CBossBullet_Berrle::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_RenderGameObject(CRenderer::RG_NONLIGHT, this)))
        return;
  
-
+        if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER_SKILL)))
+        return;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -171,6 +173,14 @@ HRESULT CBossBullet_Berrle::Add_Components()
         TEXT("Com_Sphere"), reinterpret_cast<CComponent**>(&m_pModelCom))))
         return E_FAIL;
 
+    CBounding_Sphere::BOUND_SPHERE_DESC CBounding_Sphere{};
+    _float3 Center{}, Extents{};
+    CBounding_Sphere.fRadius = 0.5f;
+    CBounding_Sphere.vCenter = _float3(0.f, 0.f, 0.f);
+
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_SPHERE"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &CBounding_Sphere)))
+        return E_FAIL;
     return S_OK;
 }
 

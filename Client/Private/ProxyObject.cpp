@@ -26,16 +26,16 @@ HRESULT CProxyObject::Initialize(void* pArg)
         MSG_BOX("Set_Model failed");
         return E_FAIL;
     }
-
+   
     m_pTransformCom->Set_TRANSFORM(CTransform::T_RIGHT, pDesc->WorldMatrix.r[0]);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_UP, pDesc->WorldMatrix.r[1]);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_LOOK, pDesc->WorldMatrix.r[2]);
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, pDesc->WorldMatrix.r[3]);
-
+   
     _float3 fCenter, fExtend;
     AABB LocalAABB;
     m_pModelCom->Center_Ext(&fCenter, &fExtend, &LocalAABB);
-    m_WorldAABB = m_pGameInstance->TransformAABB(LocalAABB, m_pTransformCom->Get_WorldMatrix());
+ 
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
     OBBDesc.vExtents = fExtend;
     OBBDesc.vCenter = fCenter;
@@ -43,11 +43,11 @@ HRESULT CProxyObject::Initialize(void* pArg)
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
                                       reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
         return E_FAIL;
-
+   
    m_pColliderCom->Update(m_pTransformCom->Get_WorldMatrix());
-
+   
    m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::COL_STATIC);
-
+   
     return S_OK;
 }
 void CProxyObject::Priority_Update(_float fTimeDelta)
