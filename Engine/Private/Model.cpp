@@ -166,8 +166,10 @@ void CModel::Center_Ext(OUT _float3* Center, OUT _float3* extend, OUT AABB* AABB
     for (_uint i = 0; i < m_iNumMeshes; i++)
     {
         if (m_eModelType == TYPE_ANIM)
+        {
             m_Meshes[i]->Set_FinalBonMatrices(nullptr, m_Bones);
-
+            m_Meshes[i]->Build_MeshAABB_Local();
+        }
         _float3 MeahMin = m_Meshes[i]->GetAABBMinLocal();
         _float3 MeahMax = m_Meshes[i]->GetAABBMaxLocal();
         
@@ -187,8 +189,8 @@ void CModel::Center_Ext(OUT _float3* Center, OUT _float3* extend, OUT AABB* AABB
     };
 
     *extend   = {
-        (maxPoint.x - minPoint.x) / 2.0f,
-        (maxPoint.y - minPoint.y) / 2.0f,
+        (maxPoint.x - minPoint.x) / 2.0f ,
+        (maxPoint.y - minPoint.y) / 2.0f ,
         (maxPoint.z - minPoint.z) / 2.0f
     };
 

@@ -172,6 +172,7 @@ CGameObject* CObject_Manager::Clone_Prototype(const _wstring& strPrototypeTag, v
 void CObject_Manager::Set_Player(const _wstring& ProtoTag, void* pArg)
 {
     m_pPlayer = Clone_Prototype(ProtoTag, pArg);
+
 }
 
 _bool CObject_Manager::IsGameObject(_uint iLevelIndex, const _wstring& strLayerTag)
@@ -245,7 +246,7 @@ void CObject_Manager::Free()
 {
 	__super::Free();
 
-	if (m_pPlayer)
+	
 	Safe_Release(m_pPlayer);
 	for (size_t i = 0; i < m_iNumLevels; i++)
     {

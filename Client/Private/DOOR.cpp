@@ -216,7 +216,7 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
 
     m_iState = State::ClOSE;
     m_pModelCom->Set_Animation(m_iState, false);
-
+    m_pModelCom->Play_Animation(0.f);
     if (ILevel == LEVEL_STAGE1)
         m_fDoorEmissiveColor = {1.f, 1.749f, 0.2156f, 1.f};
     else if (ILevel == LEVEL_STAGE2)
@@ -228,6 +228,18 @@ void CDOOR::Set_Model(const _wstring& protoModel, _uint ILevel)
             m_fDoorEmissiveColor = {0.f, 1.f, 0.f, 1.f};
         }
     }
+
+    _float3 Center{}, Extents{};
+    m_pModelCom->Center_Ext(&Center, &Extents);
+    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+    OBBDesc.vExtents = m_iDoorType == DoorType::STAGE ? _float3(Extents.x, Extents.y+5.f, Extents.z)
+                                                      : _float3(Extents.x, Extents.y, Extents.z);
+    OBBDesc.vCenter = Center;
+    OBBDesc.vRotation = _float3(0.f, 0.f, 0.f);
+    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
+                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+        return;
+
 }
 HRESULT CDOOR::Add_StageDoorLight()
 {
@@ -355,13 +367,13 @@ HRESULT CDOOR::Add_Components()
                                       reinterpret_cast<CComponent**>(&m_pShaderCom))))
         return E_FAIL;
 
-    CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
-    OBBDesc.vExtents = _float3(5.f, 8.f, 5.f);
-    OBBDesc.vCenter = _float3(0.f, 1.f, 0.f);
-    OBBDesc.vRotation = _float3(0.f, 0.f, 0.f);
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
-                                      reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
-        return E_FAIL;
+   // CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
+   // OBBDesc.vExtents = _float3(6.f, 10.f, 6.f);
+   // OBBDesc.vCenter = _float3(-0.5f, 0.f, 0.f);
+   // OBBDesc.vRotation = _float3(0.f, 0.f, 0.f);
+   // if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_OBB"), TEXT("Com_Collider"),
+   //                                   reinterpret_cast<CComponent**>(&m_pColliderCom), &OBBDesc)))
+   //     return E_FAIL;
 
     CNavigation::NAVIGATION_DESC Desc{};
     Desc.iCurrentCellIndex = -1;

@@ -243,6 +243,22 @@ void CGameInstance::Update_TimeDelta(const _wstring& strTimerTag)
 	return m_pTimer_Manager->Update_TimeDelta(strTimerTag);
 }
 
+void CGameInstance::BeginFrameStamp(const _wstring& strTimerTag)
+{
+    if (nullptr == m_pTimer_Manager)
+        return;
+
+    return m_pTimer_Manager->BeginFrameStamp(strTimerTag);
+}
+
+_int CGameInstance::GetFrameStamp(const _wstring& strTimerTag)
+{
+    if (nullptr == m_pTimer_Manager)
+        return 0 ;
+
+    return m_pTimer_Manager->GetFrameStamp(strTimerTag);
+}
+
 #pragma endregion
 
 #pragma region Level_Manager 
@@ -913,6 +929,7 @@ CEffectStream* CGameInstance::Find_EffectStream(const _wstring& key)
 void CGameInstance::Free()
 {
 	__super::Free();  // 소멸자가 디폴트임으로
+    Safe_Release(m_pThreadPool);
     Safe_Release(m_pEffect_Manager);
 	Safe_Release(m_pFrustum);
 	Safe_Release(m_pTarget_Manager);
@@ -929,7 +946,6 @@ void CGameInstance::Free()
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pInput_Device);
-    Safe_Release(m_pThreadPool);
 	Safe_Release(m_pGraphic_Device);
 
 }

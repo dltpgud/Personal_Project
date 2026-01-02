@@ -71,7 +71,7 @@ public:
 	void           Delete_Cell(_vector LocalRayPos, _vector LocalRayDir);
 
 
-	 _int           Find_Cell_ByPosition(_vector vTargetPos);
+	 _int          Find_Cell_ByPosition(_vector vTargetPos);
 ;
  private:
     // USE_LOCK;

@@ -92,12 +92,12 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
                 return;
            
             _float colDist = FLT_MAX;
-            if (!entry.col->RayIntersects(vRayPos, vRayDir, colDist))
-                return; 
-
-            if (colDist >= closest)
+             if (!entry.col->RayIntersects(vRayPos, vRayDir, colDist))
+                 return; 
+             
+             if (colDist >= closest)
                 return;
-            
+             
 
             _vector hitPos{}, hitNrm{};
             if (entry.model->RayIntersect(vRayPos, vRayDir, entry.transform, hitPos, hitNrm))

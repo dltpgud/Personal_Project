@@ -28,8 +28,9 @@ HRESULT CGameObject::Initialize_Prototype()
 
 HRESULT CGameObject::Initialize(void* pArg)
 {
-    if (m_iLifeState == OBJ_POOL) { 
-       m_iLifeState = OBJ_NOEVENT;
+    if (m_iLifeState == OBJ_POOL)
+    {
+        m_iLifeState = OBJ_NOEVENT;
         return S_OK;
     }
 
@@ -41,7 +42,7 @@ HRESULT CGameObject::Initialize(void* pArg)
          m_pTransformCom->Initialize_Prototype(pDesc);
          return S_OK;
      }
-   
+ 
     m_pTransformCom = CTransform::Create(m_pDevice, m_pContext, pDesc);
 
     if (nullptr == m_pTransformCom)
@@ -131,7 +132,6 @@ CComponent* CGameObject::Find_Component(const _wstring& strComponentTag)
 
 void CGameObject::Free()
 {
-    __super::Free();
 
         for (auto& Pair : m_Components) Safe_Release(Pair.second);
         m_Components.clear();
@@ -141,5 +141,5 @@ void CGameObject::Free()
         Safe_Release(m_pGameInstance);
         Safe_Release(m_pContext);
         Safe_Release(m_pDevice);
-    
+        __super::Free();
 }

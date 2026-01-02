@@ -141,6 +141,7 @@ void CTransform::GO_Dir(_float fTimeDelta, _vector vDir, CNavigation* pNavigatio
     {
         if (bStop != nullptr)
             *bStop = true;
+        vAfterPos = vPosition;
     }
 
     Set_TRANSFORM(T_POSITION, vAfterPos);
@@ -385,12 +386,13 @@ void CTransform::Get_Ray(OUT _vector& RayPos, OUT _vector& RayDir, OUT _float* R
     RayDir = XMVector3Normalize(m_vCurPos - m_vPrevPos);
 
     if (RayLen)
-    *RayLen = XMVectorGetX(XMVector3Length(m_vCurPos - m_vPrevPos));
+        *RayLen = XMVectorGetX(XMVector3LengthSq(m_vCurPos - m_vPrevPos));
 
     if (PrePos)
         *PrePos = m_vPrevPos;
     if (CurPos)
         *CurPos = m_vCurPos;
+
 }
 
 

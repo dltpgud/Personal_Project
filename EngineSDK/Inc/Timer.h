@@ -16,7 +16,8 @@ public:
 public:
 	HRESULT					Ready_Timer();
 	void					Update_Timer();
-	
+    void                    BeginFrameStamp() {++m_uTick;}
+	_int                    GetFrameStamp() const { return m_uTick; };
 private:
 	LARGE_INTEGER			m_FrameTime{};
 	LARGE_INTEGER			m_FixTime{};
@@ -26,6 +27,7 @@ private:
 private:
 	_float					m_fTimeDelta{};
     _float                  m_fTimeDeltaSum{};
+    _int m_uTick = 0;
 
 public:
 	static CTimer*			Create();

@@ -136,7 +136,7 @@ _bool Collider_Manager::PlayerWeapon_To_Monster()
     if (!pPlayer)
         return false;
 
-    _vector RayPos{}, RayDir{}, dumyRaypos, dumyRayDir;
+    _vector RayPos{}, RayDir{};
     m_pGameInstance->Make_Ray(m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_PROJ),
                               m_pGameInstance->Get_TransformMatrix(CPipeLine::D3DTS_VIEW), &RayPos, &RayDir, true);
     
@@ -294,9 +294,9 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
         DECAL_DESC* Desc = static_cast<CSkill*>(SkillObj)->Get_DecalDesc();
         _bool bCreate = false;
 
-        _vector RayPos{}, RayDir{};
+        _vector RayPos{}, RayDir{},PrePos, CurPos;
         _float RayLen{};
-        SkillObj->Get_Transform()->Get_Ray(RayPos, RayDir, &RayLen);
+        SkillObj->Get_Transform()->Get_Ray(RayPos, RayDir, &RayLen, &PrePos, &CurPos);
 
         _float radius = SkillCollider->Get_iCurRadius();
 
@@ -308,7 +308,7 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
             radius *= 2.f;
         }
         _float MaxRayLen = RayLen + radius + 0.01f;
-
+     
         HitResult hit;
         _int Type{};
 
@@ -321,12 +321,12 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
             CCollider* HitCol = hit.object->Get_Collider();
 
             if (HitCol&& Type == CStaticBVH::EPrimType::ModelMesh)
-            {
+            {  
                 if (SkillCollider->Intersect(HitCol))
                 {
                     bCreate = true;
                     static_cast<CSkill*>(SkillObj)->Dead_Rutine();
-                }
+                }   
             }
             else // Terrain 후보
             {
