@@ -76,7 +76,10 @@ void CNavigation::SetUp_Neighbor()
 
 _bool CNavigation::isMove(_fvector vAfterWorldPos, _fvector vBeforeMoveWorldPos, _vector* Slide)
 {
-   if (m_iCurrentCellIndex <= -1 || m_iCurrentCellIndex > m_Cells.size())
+    if (!m_WorldMatrix)
+        return false;
+
+   if (m_iCurrentCellIndex <= -1 || m_iCurrentCellIndex >= m_Cells.size())
        return false;
    
    _vector vAfterLocalPos = XMVector3TransformCoord(vAfterWorldPos, XMMatrixInverse(nullptr, XMLoadFloat4x4(m_WorldMatrix)));
@@ -525,7 +528,7 @@ void CNavigation::Delete_Cell(_vector LocalRayPos, _vector LocalRayDir)
 
 _bool CNavigation::Get_bFalling()
 {
-    if (0 > m_iCurrentCellIndex || m_Cells.size() < m_iCurrentCellIndex)
+    if (0 > m_iCurrentCellIndex || m_Cells.size() <= m_iCurrentCellIndex)
         return false;
 
     if (m_Cells[m_iCurrentCellIndex]->Get_Type() == CCell::TYPE::FALL)
@@ -538,7 +541,7 @@ _bool CNavigation::Get_bFalling()
 
 _bool CNavigation::Get_bDemage(_int& HP)
 {
-    if (0 > m_iCurrentCellIndex || m_Cells.size() < m_iCurrentCellIndex)
+    if (0 > m_iCurrentCellIndex || m_Cells.size() <= m_iCurrentCellIndex)
         return false;
 
     if (m_Cells[m_iCurrentCellIndex]->Get_Type() == CCell::TYPE::DEMAGE)
@@ -635,8 +638,7 @@ CComponent* CNavigation::Clone(void* pArg)
 
 void CNavigation::Free()
 {
-    __super::Free();
-
+   
     for (auto& pCell : m_Cells) Safe_Release(pCell);
     m_Cells.clear();
     m_Cells.shrink_to_fit();
@@ -644,4 +646,6 @@ void CNavigation::Free()
 #ifdef _DEBUG
     Safe_Release(m_pShader);
 #endif
+
+     __super::Free();
 }

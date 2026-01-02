@@ -55,6 +55,8 @@ public: /* for.Timer_Manager */
     _float* Get_TimeDeltaSum(const _wstring& strTimerTag);
 	HRESULT	Add_Timer(const _wstring& strTimerTag);
 	void    Update_TimeDelta(const _wstring& strTimerTag);
+    void BeginFrameStamp(const _wstring& strTimerTag);
+    _int GetFrameStamp(const _wstring& strTimerTag);
 #pragma endregion
 
 #pragma region Level_Manager

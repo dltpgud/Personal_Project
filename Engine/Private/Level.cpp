@@ -276,11 +276,10 @@ HRESULT CLevel::Load_to_Next_Map_NPC(const _uint& iLevelIndex, const _wstring& s
 }
 void CLevel::Free()
 {
-   
 	__super::Free();
 
+    Safe_Release(m_pGameInstance);
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
-    Safe_Release(m_pGameInstance);
-
+  
 }

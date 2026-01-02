@@ -46,6 +46,24 @@ void CTimer_Manager::Update_TimeDelta(const _wstring& strTimerTag)
 	 pInstance->Update_Timer();
 }
 
+void CTimer_Manager::BeginFrameStamp(const _wstring& strTimerTag)
+{
+    CTimer* pInstance = Find_Timer(strTimerTag);
+    if (nullptr == pInstance)
+        return;
+
+    pInstance->BeginFrameStamp();
+}
+
+_int CTimer_Manager::GetFrameStamp(const _wstring& strTimerTag) 
+{
+    CTimer* pInstance = Find_Timer(strTimerTag);
+    if (nullptr == pInstance)
+        return 0;
+
+    pInstance->GetFrameStamp();
+}
+
 CTimer_Manager* CTimer_Manager::Create()
 {
 	CTimer_Manager* pInstance = new CTimer_Manager();

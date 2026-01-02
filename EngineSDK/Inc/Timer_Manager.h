@@ -18,8 +18,9 @@ public:
 public:
 	HRESULT					Add_Timer(const _wstring& strTimerTag);
 	void					Update_TimeDelta(const _wstring& strTimerTag);
-	
-private:
+    void                    BeginFrameStamp(const _wstring& strTimerTag);
+    _int                    GetFrameStamp(const _wstring& strTimerTag) ;
+    private:
 	CTimer*					Find_Timer(const _wstring& strTimerTag);
 
 private:

@@ -45,6 +45,15 @@ namespace Engine
         int ProtoIndex; 
     };
 
+    struct TOIResult
+    {
+        bool hit = false;
+        float toi = 1.0f;                  // 0~1 (1이면 이번 프레임 충돌 없음)
+        float distance = 0.0f;             // 실제 이동거리 기준 (선택)
+        _vector position = XMVectorZero(); // 충돌 지점(월드)
+        _vector normal = XMVectorZero();   // 충돌 법선(월드)
+    };
+
     struct HitResult
     {
         _bool hit = false;

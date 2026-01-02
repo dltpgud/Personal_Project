@@ -100,6 +100,11 @@ _bool CCollider::IsInside(const _float3& pos)
     return m_pBounding->IsInside(pos);
 }
 
+_bool CCollider::SweepTOI(_vector startPosWS, _vector endPosWS, CCollider* target, OUT TOIResult& out) const
+{
+    return m_pBounding->SweepTOI( startPosWS, endPosWS, target,  out);
+}
+
 AABB CCollider::Get_WorldAABB()
 {
     return m_pBounding->Get_WorldAABB();

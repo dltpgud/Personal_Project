@@ -119,6 +119,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
        if (fTimeAcc >= 1.f / 60.0f)
         #endif // !_DEBUG
         {
+           pGameInstance->BeginFrameStamp(TEXT("Timer_60"));
             pGameInstance->Update_TimeDelta(TEXT("Timer_60"));
 
             /* TimeDelta : 1.f / 60.0 */

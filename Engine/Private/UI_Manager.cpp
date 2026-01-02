@@ -15,7 +15,7 @@ HRESULT CUI_Manager::Add_UI_To_Proto(const _wstring& strProtoTag, CGameObject* p
 {
     CUI* UIObj = dynamic_cast<CUI*>(pUI);
 
-        unique_lock<mutex> lock(m_mutex);
+    unique_lock<mutex> lock(m_mutex);
     auto result = m_UIObj[UIOBJECT::UI_PROTO].emplace(strProtoTag, UIObj);
 
     if (!result.second)
@@ -195,7 +195,6 @@ void CUI_Manager::Free()
     for (size_t i = 0; i < UIOBJECT::UI_END; i++)
     {  
        for (auto& iter : m_UIObj[i]) { 
-           if (iter.second)
            Safe_Release(iter.second); }
        m_UIObj[i].clear();
     }

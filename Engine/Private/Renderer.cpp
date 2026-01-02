@@ -714,7 +714,7 @@ HRESULT CRenderer::Render_Lights()
     }
 
 
-    if (true == bssao)
+   // if (true == bssao)
     {
         m_pCS_SSAO->DispatchSSAO(TEXT("Target_Depth"), TEXT("Target_Normal"));
         m_pCS_SSAO->Bind_SRV(m_pShader, "g_SSAOTexture");

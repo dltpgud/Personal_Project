@@ -15,7 +15,7 @@ public:
         {
             void* raw = pool.back();
             pool.pop_back();
- 
+    
             T* obj = static_cast<T*>(raw);
             obj->Initialize(std::forward<Args>(args)...);
             return obj;
@@ -30,6 +30,8 @@ public:
             return;
   
         auto& pool = s_pools[type_index(typeid(*obj))];
+        Base* base = static_cast<Base*>(obj); //  lvalue
+        Safe_AddRef(base);  
         pool.push_back(static_cast<void*>(obj));
     }
 
@@ -39,33 +41,13 @@ public:
         {
             for (auto* raw : pair.second)
             {
-                Base* obj = static_cast<Base*>(raw);
-                Safe_Release(obj);
+                Base* base = static_cast<Base*>(raw); //  lvalue
+                Safe_Release(base);  
             }
             pair.second.clear();
         }
 
     }
-
-   static void ClearByIndex(const std::type_index& idx)
-    {
-        auto it = s_pools.find(idx);
-        if (it == s_pools.end())
-            return;
-
-        for (void* raw : it->second) Safe_Release(static_cast<Base*>(raw));
-
-        it->second.clear();
-        s_pools.erase(it);
-    }
-
-    static void ClearByObject(Base* obj)
-    {
-        if (!obj)
-            return;
-        ClearByIndex(std::type_index(typeid(*obj)));
-    }
-
 
     template <typename T, typename... Args> static void Preallocate(T* prototype, size_t count, Args&&... args)
     {
@@ -74,8 +56,12 @@ public:
         for (size_t i = 0; i < count; ++i)
         {
             T* obj = prototype->Clone(forward<Args>(args)...);
-            pool.push_back(static_cast<void*>(obj));
-           
+            Push(obj);
+
+            // 여기서 1개 내려서 ref=1 (풀만 소유)
+            Base* base = static_cast<Base*>(obj);
+            Safe_Release(base);
+   
         }
     }
 

@@ -13,7 +13,6 @@ HRESULT CLayer::Add_GameObject(CGameObject* pGameObject)
         return E_FAIL;
 
     m_GameObjects.push_back(pGameObject);
-
     return S_OK;
 }
 
@@ -61,8 +60,8 @@ void CLayer::Delete()
       }
       else if ((*iter) && OBJ_POOL == state)
       {
-          Safe_Release(*iter);
          ObjectPool<Engine::CGameObject>::Push(*iter);
+          Safe_Release(*iter);
           iter = m_GameObjects.erase(iter);
       }
       else
@@ -134,7 +133,7 @@ void CLayer::Free()
 {
     __super::Free();
 
-    for (auto& pGameObject : m_GameObjects) 
-        Safe_Release(pGameObject); 
+    for (auto& pGameObject : m_GameObjects) { 
+        Safe_Release(pGameObject); }
     m_GameObjects.clear();
 }
