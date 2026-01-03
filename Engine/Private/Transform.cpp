@@ -362,6 +362,13 @@ void CTransform::Rotation(_float fX, _float fY, _float fZ)
     Set_TRANSFORM(T_LOOK, XMVector3TransformNormal(vLook, RotationMatrix));
 }
 
+void CTransform::ResetRayPos()
+{
+    m_vPrevPos = XMVectorZero();
+     m_vCurPos = XMVectorZero();
+}
+
+
 void CTransform::Update_Velocity(_float fTimeDelta)
 {
     _vector vCurPos = Get_TRANSFORM(T_POSITION);
@@ -382,11 +389,25 @@ HRESULT CTransform::Bind_ShaderResource(CShader* pShader, const _char* pConstant
 void CTransform::Get_Ray(OUT _vector& RayPos, OUT _vector& RayDir, OUT _float* RayLen, OUT _vector* PrePos,
                          OUT _vector* CurPos)
 {
-    RayPos = m_vPrevPos;
-    RayDir = XMVector3Normalize(m_vCurPos - m_vPrevPos);
+    const _vector delta = m_vCurPos - m_vPrevPos;
+    const _float lenSq = XMVectorGetX(XMVector3LengthSq(delta));
 
-    if (RayLen)
-        *RayLen = XMVectorGetX(XMVector3LengthSq(m_vCurPos - m_vPrevPos));
+    RayPos = m_vPrevPos;
+
+    const _float eps = 1e-8f;
+    if (lenSq > eps)
+    {
+        const _float len = sqrtf(lenSq);
+        RayDir = delta / len; // normalize
+        if (RayLen)
+            *RayLen = len; //  길이(거리)로!
+    }
+    else
+    {
+        RayDir = Get_TRANSFORM(T_LOOK); // XMVectorZero(); // 혹은 이전 프레임 진행방향 저장해두고 그걸 사용
+        if (RayLen)
+            *RayLen = 0.0f;
+    }
 
     if (PrePos)
         *PrePos = m_vPrevPos;

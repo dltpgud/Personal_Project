@@ -85,7 +85,7 @@ public:
     /* 항등회전 상태를 기준으로 지정한 각도만큼 회전한다. */
     void Rotation(_float fX, _float fY, _float fZ);
 
-
+    void ResetRayPos();
 
 
 
@@ -193,7 +193,7 @@ private:
   
 
     _vector m_vPrevPos{}, m_vCurPos; // 이전 프레임 위치 현재위치.
-    uint32_t m_uPrevPosStamp = 0;  
+
  public:
     static CTransform* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pTransformDesc);
     virtual CComponent* Clone(void* pArg) override;

@@ -69,7 +69,10 @@ _bool CBounding_AABB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis,
 }
 _float CBounding_AABB::Get_iCurRadius()
 {
-    return max(m_pBoundDesc->Extents.x, max(m_pBoundDesc->Extents.y, m_pBoundDesc->Extents.z));
+    _float ex = m_pBoundDesc->Extents.x;
+    _float ey = m_pBoundDesc->Extents.y;
+    _float ez = m_pBoundDesc->Extents.z;
+    return sqrtf(ex * ex + ey * ey + ez * ez);
 }
 _float3 CBounding_AABB::Get_iCurCenter()
 {

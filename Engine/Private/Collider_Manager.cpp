@@ -312,7 +312,8 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
         HitResult hit;
         _int Type{};
 
-        if (!m_StaticBVH.Raycast(RayPos, XMVector3Normalize(RayDir), hit, MaxRayLen,&Type))
+
+        if (!m_StaticBVH.Raycast(RayPos, RayDir, hit, MaxRayLen, &Type))
             continue;
 
        
@@ -549,9 +550,58 @@ HRESULT Collider_Manager::Monster_To_Monster()
         m_pBatch->DrawLine(VertexPositionColor(XMVectorSet(worldMin.x, y, z,1.f), color),
                            VertexPositionColor(XMVectorSet(worldMax.x, y, z,1.f), color));
     }
+
+    //BVH 디버그 라인
+  // vector<CStaticBVH::DebugNodeInfo> nodes;
+  // m_StaticBVH.GetDebugNodes(nodes);
+  //
+  // const XMVECTORF32 nodeColor = Colors::Yellow; // 노드
+  // const XMVECTORF32 leafColor = Colors::Lime;   // leaf 강조
+  //
+  // for (const auto& n : nodes)
+  // {
+  //     if (n.entryIndex != -1)
+  //         DrawAABBWire(m_pBatch, n.bounds, leafColor);
+  //     else
+  //         DrawAABBWire(m_pBatch, n.bounds, nodeColor);
+  // }
+
     m_pBatch->End();
     
     return S_OK;
+ }
+ void Collider_Manager::DrawAABBWire(PrimitiveBatch<VertexPositionColor>* batch, const AABB& b,
+                                     const XMVECTORF32& color)
+ { // 8 corners
+     const _vector p[8] = {
+         XMVectorSet(b.min.x, b.min.y, b.min.z, 1.f), // 0
+         XMVectorSet(b.max.x, b.min.y, b.min.z, 1.f), // 1
+         XMVectorSet(b.max.x, b.max.y, b.min.z, 1.f), // 2
+         XMVectorSet(b.min.x, b.max.y, b.min.z, 1.f), // 3
+         XMVectorSet(b.min.x, b.min.y, b.max.z, 1.f), // 4
+         XMVectorSet(b.max.x, b.min.y, b.max.z, 1.f), // 5
+         XMVectorSet(b.max.x, b.max.y, b.max.z, 1.f), // 6
+         XMVectorSet(b.min.x, b.max.y, b.max.z, 1.f), // 7
+     };
+
+     auto L = [&](int a, int c)
+     { batch->DrawLine(VertexPositionColor(p[a], color), VertexPositionColor(p[c], color)); };
+
+     // bottom
+     L(0, 1);
+     L(1, 2);
+     L(2, 3);
+     L(3, 0);
+     // top
+     L(4, 5);
+     L(5, 6);
+     L(6, 7);
+     L(7, 4);
+     // vertical
+     L(0, 4);
+     L(1, 5);
+     L(2, 6);
+     L(3, 7);
  }
 #endif
 

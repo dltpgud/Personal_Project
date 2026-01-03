@@ -153,7 +153,7 @@ HRESULT CCHEST::Add_Components()
         return E_FAIL;
 
     CBounding_AABB::BOUND_AABB_DESC AABBDesc{};
-    AABBDesc.vExtents = _float3(7.f, 1.f, 7.f);
+    AABBDesc.vExtents = _float3(7.f, 2.f, 7.f);
     AABBDesc.vCenter = _float3(0.f, 1.f, 0.f);
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Collider_AABB"),
                                       TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom),

@@ -36,6 +36,7 @@ public:
 
 #ifdef _DEBUG
     HRESULT Render();
+    void DrawAABBWire(PrimitiveBatch<VertexPositionColor>* batch, const AABB& b, const XMVECTORF32& color);
 #endif
 
 private:

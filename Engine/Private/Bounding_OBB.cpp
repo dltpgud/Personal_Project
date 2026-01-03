@@ -61,7 +61,10 @@ _bool CBounding_OBB::RayIntersect(_vector RayPos, _vector RayDir, _float& fDis, 
 
 _float CBounding_OBB::Get_iCurRadius()
 {
-    return max(m_pBoundDesc->Extents.x, max(m_pBoundDesc->Extents.y, m_pBoundDesc->Extents.z));
+    const _float ex = m_pBoundDesc->Extents.x;
+    const _float ey = m_pBoundDesc->Extents.y;
+    const _float ez = m_pBoundDesc->Extents.z;
+    return sqrtf(ex * ex + ey * ey + ez * ez);
 }
 
 _float3 CBounding_OBB::Get_iCurCenter()
@@ -76,10 +79,25 @@ _bool CBounding_OBB::IsInside(const _float3& pos)
 AABB CBounding_OBB::Get_WorldAABB() const
 {
     AABB worldAABB;
-    worldAABB.min = {m_pBoundDesc->Center.x - m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y - m_pBoundDesc->Extents.y,
-                     m_pBoundDesc->Center.z - m_pBoundDesc->Extents.z};
-    worldAABB.max = {m_pBoundDesc->Center.x + m_pBoundDesc->Extents.x, m_pBoundDesc->Center.y + m_pBoundDesc->Extents.y,
-                     m_pBoundDesc->Center.z + m_pBoundDesc->Extents.z};
+    _float3 corners[8];
+    m_pBoundDesc->GetCorners(corners); //  회전 포함된 OBB의 월드 코너 8개
+
+    _float3 minP = corners[0];
+    _float3 maxP = corners[0];
+
+    for (int i = 1; i < 8; ++i)
+    {
+        minP.x = min(minP.x, corners[i].x);
+        minP.y = min(minP.y, corners[i].y);
+        minP.z = min(minP.z, corners[i].z);
+
+        maxP.x = max(maxP.x, corners[i].x);
+        maxP.y = max(maxP.y, corners[i].y);
+        maxP.z = max(maxP.z, corners[i].z);
+    }
+
+    worldAABB.min = {minP.x, minP.y, minP.z};
+    worldAABB.max = {maxP.x, maxP.y, maxP.z};
     return worldAABB;
 }
 

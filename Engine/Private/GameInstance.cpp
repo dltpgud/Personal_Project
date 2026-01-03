@@ -105,7 +105,7 @@ void CGameInstance::Update(_float fTimeDelta)
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 	m_pUI_Manager->Priority_Update(fTimeDelta);
 	m_pPipeLine->Update();
-        m_pFrustum->Update();
+    m_pFrustum->Update();
 	
 	m_pObject_Manager->Update(fTimeDelta);
     m_pEffect_Manager->Update(fTimeDelta);  

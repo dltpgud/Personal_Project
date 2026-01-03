@@ -690,6 +690,5 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
       <Filter>01.Utility\98.ShaderFiles</Filter>
     </None>
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

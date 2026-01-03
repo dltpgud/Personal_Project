@@ -36,7 +36,6 @@ public:
     void Set_Info(void* pArg);
     _bool IsInside(const _float3& pos);
 
-    _bool SweepTOI(_vector startPosWS, _vector endPosWS, CCollider* target, OUT TOIResult& out) const;
     AABB Get_WorldAABB();
 #ifdef _DEBUG
 public:

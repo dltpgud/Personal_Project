@@ -29,11 +29,6 @@ public:
     virtual void Set_Info(BOUND_DESC* pBoundDesc) = 0;
     virtual _bool IsInside(const _float3& pos) = 0;
     virtual AABB Get_WorldAABB() const = 0;
-
-   virtual _bool SweepTOI(_vector startPosWS, _vector endPosWS, CCollider* Taget, OUT TOIResult& out) const
-    {
-        return {};
-    };
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor) { return S_OK; }
