@@ -30,10 +30,6 @@ public:
     virtual void Set_Info(BOUND_DESC* pBoundDesc) override;
     virtual _bool IsInside(const _float3& pos) override;
     virtual AABB Get_WorldAABB() const override;
-    _bool SweepTOI(_vector startPosWS, _vector endPosWS, CCollider* Taget, OUT TOIResult& out);
-    AABB InflateAABB(const AABB& b, float r);
-    _bool RayAABB_EnterTime(_vector o, _vector dN, const AABB& b, _float tMax, _float& outEnter, _vector* outNormal);
-    _bool SweepTOI_SphereVsAABB(_vector start, _vector end, const AABB& targetAABB, _float radius, OUT TOIResult& out);
 #ifdef _DEBUG
 public:
 	virtual HRESULT Render(PrimitiveBatch<VertexPositionColor>* pBatch, _fvector vColor)override;

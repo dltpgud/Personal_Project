@@ -56,7 +56,7 @@ void CBossBullet_Berrle::Priority_Update(_float fTimeDelta)
 
       
     if(CSkill::SKill::STYPE_BERRLE == m_iSkillType)
-     m_pTransformCom->GO_Dir(fTimeDelta, m_vDir, m_pNavigationCom);
+     m_pTransformCom->GO_Dir(fTimeDelta, m_vDir);
 
 
     if (CSkill::SKill::STYPE_LASER == m_iSkillType)
@@ -134,7 +134,7 @@ HRESULT CBossBullet_Berrle::Initialize_SkillType()
         Dir = XMVectorSetW(Dir, 0.f);
         m_vDir = XMVector3Normalize(Dir);
         m_pTransformCom->Set_Scaling(3.f, 3.f, 3.f);
-        m_pNavigationCom->Find_CurrentCell(m_pTransformCom->Get_TRANSFORM(CTransform::T_POSITION));
+       
 
         break;
 
@@ -161,9 +161,6 @@ HRESULT CBossBullet_Berrle::Initialize_SkillType()
 
 HRESULT CBossBullet_Berrle::Add_Components()
 {
-    if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Navigation"), TEXT("Com_Navigation"),
-        reinterpret_cast<CComponent**>(&m_pNavigationCom))))
-        return E_FAIL;
     
     if (FAILED(__super::Add_Component(LEVEL_STATIC, TEXT("Prototype_Component_Shader_VtxMesh"), TEXT("Com_Shader"),
         reinterpret_cast<CComponent**>(&m_pShaderCom))))

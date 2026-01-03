@@ -46,11 +46,28 @@ public:
     virtual ~CStaticBVH() = default;
     void Clear();
     void Build(const vector<Entry>& staticEntries);
-    _bool Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist = FLT_MAX, OUT _int* Type = nullptr) const;
+    _bool Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist = FLT_MAX,OUT _int* Type = nullptr) const;
+
+
+    #ifdef _DEBUG
+public:
+    struct DebugNodeInfo
+    {
+        AABB bounds;
+        int left = -1;
+        int right = -1;
+        int entryIndex = -1;
+    };
+
+    void GetDebugNodes(std::vector<DebugNodeInfo>& out) const;
+    void GetDebugEntryBounds(std::vector<AABB>& out) const;
+#endif
+
 
 private:
     _int BuildRecursive(_int start, _int end);
-    void TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest,OUT HitResult& out,
+    void TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest,
+                     OUT HitResult& out,
                      OUT _int* Type ) const;
 
 private:

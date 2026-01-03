@@ -43,7 +43,6 @@ void CLayer::Late_Update(_float fTimeDelta)
           pGameObject->Late_Update(fTimeDelta);
       }
   }
-  
 }
 
 void CLayer::Delete()

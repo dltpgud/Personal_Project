@@ -11,7 +11,7 @@ CBullet::CBullet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CSkill{
     m_DecalDesc.fSize = 0.5f;
     m_DecalDesc.fDepth = 0.5f;
     m_DecalDesc.bNormal = true;
-    m_DecalDesc.fLifeTime = 2.f;
+    m_DecalDesc.fLifeTime = 20.f;
 }
 
 CBullet::CBullet(const CBullet& Prototype) : CSkill{Prototype}
@@ -33,7 +33,7 @@ HRESULT CBullet::Initialize(void* pArg)
        return E_FAIL; 
 
     m_pTransformCom->Set_TRANSFORM(CTransform::T_POSITION, m_vPos);
-
+   m_pTransformCom->ResetRayPos();
     m_vDir = m_pTagetPos - m_vPos;
     m_vDir = XMVector3Normalize(m_vDir);
     m_fLifeTime = 20.f;

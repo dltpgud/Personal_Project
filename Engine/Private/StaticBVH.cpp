@@ -58,25 +58,32 @@ _int CStaticBVH::BuildRecursive(_int start, _int end)
 }
 
 _bool CStaticBVH::Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist,
+                 
                           OUT _int* Type ) const
 {
   
-   if (XMVectorGetX(XMVector3LengthSq(vRayDir)) < 1e-12f)
+   _vector RayDir = XMVector3Normalize(vRayDir);
+    const _float dirLen = XMVectorGetX(XMVector3Length(vRayDir));
+    if (dirLen < 1e-6f)
         return false;
 
-    out = HitResult{};
-    if (m_nodes.empty())
-        return false;
+   out = HitResult{};
+   if (m_nodes.empty())
+       return false;
 
-    _float closest = maxDist;
-    TraverseRay(0, vRayPos, vRayDir, closest, out,Type);
+   _float closest = maxDist;  
+
+    TraverseRay(0, vRayPos, RayDir, closest, out, Type);
     return out.hit;
 }
 
+
 void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest,
-                             OUT HitResult& out, OUT _int* Type) const
+                              OUT HitResult& out, OUT _int* Type) const
 {
     const Node& n = m_nodes[nodeIdx];
+
+
     if (!RayIntersectAABB(vRayPos, vRayDir, n.bounds, closest))
         return;
 
@@ -157,8 +164,8 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
         return;
     }
 
-    TraverseRay(n.left, vRayPos, vRayDir, closest, out,Type);
-    TraverseRay(n.right, vRayPos, vRayDir, closest, out,Type);
+    TraverseRay(n.left, vRayPos, vRayDir, closest, out, Type);
+    TraverseRay(n.right, vRayPos, vRayDir, closest, out, Type);
 }
 
 AABB CStaticBVH::MergeAABB(const AABB& a, const AABB& b)
@@ -236,3 +243,26 @@ _bool CStaticBVH::RayIntersectAABB(const _vector& vRayPos, const _vector& vRayDi
 
 
 
+#ifdef _DEBUG
+void CStaticBVH::GetDebugNodes(std::vector<DebugNodeInfo>& out) const
+{
+    out.clear();
+    out.reserve(m_nodes.size());
+    for (const auto& n : m_nodes)
+    {
+        DebugNodeInfo d;
+        d.bounds = n.bounds;
+        d.left = n.left;
+        d.right = n.right;
+        d.entryIndex = n.entryIndex;
+        out.push_back(d);
+    }
+}
+
+void CStaticBVH::GetDebugEntryBounds(std::vector<AABB>& out) const
+{
+    out.clear();
+    out.reserve(m_entries.size());
+    for (const auto& e : m_entries) out.push_back(e.bounds);
+}
+#endif
