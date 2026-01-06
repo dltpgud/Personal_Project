@@ -45,15 +45,6 @@ namespace Engine
         int ProtoIndex; 
     };
 
-    struct TOIResult
-    {
-        bool hit = false;
-        float toi = 1.0f;                  // 0~1 (1이면 이번 프레임 충돌 없음)
-        float distance = 0.0f;             // 실제 이동거리 기준 (선택)
-        _vector position = XMVectorZero(); // 충돌 지점(월드)
-        _vector normal = XMVectorZero();   // 충돌 법선(월드)
-    };
-
     struct HitResult
     {
         _bool hit = false;
@@ -268,12 +259,6 @@ namespace Engine
         XMFLOAT3 vPosition;
         float fTrackPosition;
     } KEYFRAME;
-
-    typedef struct CASCADE_DATA
-    {
-        _float4x4 LightViewProj;      // 라이트 VP 행렬
-        std::vector<_float3> Corners; // 월드 공간 프러스텀 꼭짓점 (8개)
-    } CASCADE_DATA;
 
     typedef struct ENGINE_DLL VTXPARTICLE_RECT
     {

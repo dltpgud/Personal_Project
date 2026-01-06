@@ -56,12 +56,12 @@ public:
     virtual void Free() override;
 
     HRESULT Initialize(void* pArg) override;
-    void Update(_float dt) override;
+    void Update(_float fTimeDelta) override;
     HRESULT Render(class CShader* pShader) override;
     HRESULT Trigger_Effect(void* pArg, _float fTimeDelta) override;
 
     int AllocateTrail();
-    void ReleaseTrail(int indx);
+
 private:
     HRESULT createShaders();
     HRESULT createBuffers();
@@ -129,7 +129,6 @@ private:
 private:
     TRAILSDESC m_desc{};
     vector<SPAWN_REQUEST> m_spawnQueue;
-    vector<_uint> m_inUse;
     _uint m_NextTrailID = 0;             
     vector<_uint> m_GenerationTable; 
 
@@ -148,7 +147,6 @@ private:
     ID3D11ShaderResourceView* m_SRV_SpawnUpload = nullptr;
 
     ID3D11Buffer* m_pCSPerFrame = nullptr;
-    ID3D11Buffer* m_pVSPerFrame = nullptr;
     ID3D11Buffer* m_pCSPerFrame_Interp = nullptr;
  
 

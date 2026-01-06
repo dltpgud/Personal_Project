@@ -585,24 +585,13 @@ void CEffect_DecalStream::Free()
         Safe_Release(m_pIndirectArgsUAV[i]);
     }
 
-
     Safe_Release(m_pSpawnUpload);
     Safe_Release(m_pSpawnUploadSRV);
 
     Safe_Release(m_pCS_ClearLiveList);
     Safe_Release(m_pCB_ResetArgs);
     
-
-
     Safe_Release(m_pDecalArraySRV);
-
     Safe_Release(m_pVIBuffer_Cube);
-
     Safe_Release(m_pCB_DecalFrame);
-
-
-
-
-
- 
 }

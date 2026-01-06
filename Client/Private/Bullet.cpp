@@ -116,7 +116,6 @@ HRESULT CBullet::Render()
 
 void CBullet::Dead_Rutine()
 {
-   static_cast<CEffect_TrailStream*>(m_pGameInstance->Find_EffectStream(L"SpriteTexTrail"))->ReleaseTrail(m_iTrailIndex);
     m_iLifeState = OBJ_POOL;
 
 }

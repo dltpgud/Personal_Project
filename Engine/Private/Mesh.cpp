@@ -118,7 +118,7 @@ _float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
         if (w[k] <= 0.0f)
             continue;
         // 방어: 본 인덱스 범위 체크
-        if (i[k] < 0 || i[k] >= (int)m_FinalBoneMatrices.size())
+        if (i[k] < 0 || i[k] >= (_int)m_FinalBoneMatrices.size())
             continue;
 
         _matrix M = m_FinalBoneMatrices[i[k]]; 
@@ -195,6 +195,7 @@ HRESULT CMesh::Set_InstanceBuffer(const vector<_matrix>& vecObjMat)
         return E_FAIL;
 
    Safe_Delete_Array(pIndices);
+
    return S_OK;
 }
 

@@ -114,7 +114,7 @@ void Collider_Manager::All_Collison_check(_float fTimedelta)
   MonsterSkill_To_Mash(fTimedelta); 
   Player_To_MonsterSkill();         
   Monster_To_Monster();
- 
+  MonsterDead_To_Mash();
   Check_Inetrect_Player();
   Check_Collider_PlayerCollison();
  
@@ -354,6 +354,33 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
         }
 
     }
+
+    return S_OK;
+}
+
+HRESULT Collider_Manager::MonsterDead_To_Mash()
+{
+
+      for (auto& Obj : m_GameObjeList[COL_MONSTER]) {
+      
+         DECAL_DESC* Desc = static_cast<CActor*>(Obj)->Get_DecalDesc();
+
+         if (nullptr == Desc)
+             continue;
+         HitResult hit;
+        _int Type{};
+         cout << XMVectorGetX(Desc->vPos) << "\n";
+        if (!m_StaticBVH.Raycast(Desc->vPos, Desc->vDir, hit))
+            continue;
+
+        if (hit.hit)
+        {
+            Desc->vNormal = hit.normal;
+            Desc->vPos = hit.position;
+            m_pGameInstance->Trigger_Effect(Desc->Key, Desc);
+        }
+
+      }
 
     return S_OK;
 }

@@ -439,7 +439,8 @@ CLevel_Stage1* CLevel_Stage1::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
 
 void CLevel_Stage1::Free()
 {
+    Safe_Release(m_pFade);
 	__super::Free();
     m_pGameInstance->StopAll();
-    Safe_Release(m_pFade);
+ 
 }
