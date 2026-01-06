@@ -369,7 +369,7 @@ HRESULT Collider_Manager::MonsterDead_To_Mash()
              continue;
          HitResult hit;
         _int Type{};
-         cout << XMVectorGetX(Desc->vPos) << "\n";
+
         if (!m_StaticBVH.Raycast(Desc->vPos, Desc->vDir, hit))
             continue;
 
