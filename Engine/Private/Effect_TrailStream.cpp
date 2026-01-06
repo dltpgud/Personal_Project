@@ -29,7 +29,6 @@ HRESULT CEffect_TrailStream::Initialize(void* pArg)
     if (FAILED(CreateRawBuffer(20, &m_pIndirectArgs, &m_UAV_IndirectArgs, true)))
         return E_FAIL;
 
-    m_inUse.assign(m_desc.maxTrails, 0);
     m_GenerationTable.assign(m_desc.maxTrails, 0);
     m_NextTrailID = 0;
     return S_OK;
@@ -132,9 +131,6 @@ HRESULT CEffect_TrailStream::createPerFrameCB()
     if (FAILED(m_pDevice->CreateBuffer(&bd, nullptr, &m_pCSPerFrame_Interp)))
         return E_FAIL;
 
-    bd.ByteWidth = sizeof(VS_PERFRAME);
-   if (FAILED(m_pDevice->CreateBuffer(&bd, nullptr, &m_pVSPerFrame)))
-        return E_FAIL;
     return S_OK;
 }
 
@@ -171,23 +167,13 @@ _int CEffect_TrailStream::AllocateTrail()
 
     m_GenerationTable[index]++;
 
-    m_inUse[index] = 1;
-
     return index; 
 }
 
-void CEffect_TrailStream::ReleaseTrail(int index)
-{
-    if (index < 0 || (UINT)index >= m_desc.maxTrails)
-        return;
-
-    m_inUse[index] = 0; 
-}
-
-void CEffect_TrailStream::Update(_float dt)
+void CEffect_TrailStream::Update(_float fTimeDelta)
 {
     CS_PERFRAME_CS cb{};
-    cb.dt = dt;
+    cb.dt = fTimeDelta;
     cb.fadeSpeed = m_desc.fadeSpeed;
     cb.lifeTime = m_desc.lifeTime;
     cb.maxTrails = m_desc.maxTrails;
@@ -359,7 +345,6 @@ void CEffect_TrailStream::Free()
     Safe_Release(m_pSpawnUpload);
     Safe_Release(m_SRV_SpawnUpload);
     Safe_Release(m_pCSPerFrame);
-    Safe_Release(m_pVSPerFrame);
     Safe_Release(m_pIndirectArgs);
     Safe_Release(m_pShader);
     Safe_Release(m_pTrailTexCom);
@@ -369,8 +354,4 @@ void CEffect_TrailStream::Free()
     Safe_Release(m_UAV_TrailVertex);
     Safe_Release(m_pCSPerFrame_Interp);
     Safe_Release(m_UAV_IndirectArgs);
-
-
-
-
 }

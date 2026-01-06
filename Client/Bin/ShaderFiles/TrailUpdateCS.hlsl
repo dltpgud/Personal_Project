@@ -7,7 +7,7 @@ cbuffer CS_PERFRAME : register(b0)
     uint maxTrails;
 
     uint maxPointsPerTrail;
-    uint spawnCount;
+    uint spawnCount; // ¿©±â¼± ¾È¾¸
     uint mode;
     float minStepDist;
     uint maxStitch;
@@ -49,20 +49,10 @@ struct SpawnReq
     uint generation; 
 };
 
-cbuffer CS_PERFRAME_Init : register(b1)
-{
-    uint maxTrail; 
-    uint maxPointsTrail; 
-    uint trailInx; 
-    float lTime; 
-    float3 padding;
-};
-
 StructuredBuffer<TrailPoint> g_In : register(t0);
 StructuredBuffer<SpawnReq> g_Spawn : register(t1);
 RWStructuredBuffer<TrailPoint> g_Out : register(u0);
 RWStructuredBuffer<TrailHeader> g_Header : register(u1);
-RWStructuredBuffer<TrailPoint> g_Out2 : register(u2);
 
 void PushPoint(inout TrailHeader header, uint base, TrailPoint p, uint maxPts)
 {

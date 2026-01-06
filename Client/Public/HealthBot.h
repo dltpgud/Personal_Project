@@ -43,7 +43,8 @@ public:
     virtual void    Update(_float fTimeDelta) override;
     virtual void    Late_Update(_float fTimeDelta) override;
     virtual HRESULT Render() override;
- 
+    virtual _bool Part_Intersects(_vector RayStartPos, _vector RayDir, OUT _vector& RayEndPos, OUT _vector& vNomal);
+
 private:
     virtual HRESULT Add_Components() override;
     virtual HRESULT Add_PartObjects() override;

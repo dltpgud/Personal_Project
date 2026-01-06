@@ -33,7 +33,7 @@ void CSpatialGrid::UpdateDynamicGrid(const list<CGameObject*>& dynamicObjs)
     {
         if (!obj)
             continue;
-        int ix, iz;
+        _int ix, iz;
         if (WorldToCell(obj->Get_Transform()->Get_TRANSFORM(CTransform::T_POSITION), ix, iz))
         {
             m_DynamicGrid[iz * m_GridW + ix].Obj.push_back(obj);

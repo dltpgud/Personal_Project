@@ -48,6 +48,7 @@ private:
     HRESULT Player_To_MonsterSkill();
     HRESULT PlayerWapon_To_Mash();
     HRESULT MonsterSkill_To_Mash(_float fTimedelta);
+    HRESULT MonsterDead_To_Mash();
     void    BuildStaticBVH();
 
 private:

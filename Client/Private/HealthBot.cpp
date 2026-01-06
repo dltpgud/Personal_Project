@@ -83,7 +83,8 @@ void CHealthBot::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_INTERECT)))
         return;
 
-
+    if (FAILED(m_pGameInstance->Add_GameObject_To_ColGroup(this, Collider_Manager::CollGroup::COL_MONSTER)))
+        return;
     __super::Late_Update(fTimeDelta);
 }
 
@@ -93,11 +94,16 @@ HRESULT CHealthBot::Render()
     return S_OK; 
 }
 
+_bool CHealthBot::Part_Intersects(_vector RayStartPos, _vector RayDir, OUT _vector& RayEndPos, OUT _vector& vNomal)
+{
+    return static_cast<CModel*>( m_PartObjects[PART_BODY]->Find_Component(TEXT("Com_Model")))->RayIntersect(RayStartPos,RayDir,m_pTransformCom,RayEndPos,vNomal);
+}
+
 HRESULT CHealthBot::Add_Components()
 { 
     CBounding_OBB::BOUND_OBB_DESC OBBDesc{};
     _float3 Center{}, Extents{};
-    OBBDesc.vExtents = _float3(1.f, 1.3f, 3.f);
+    OBBDesc.vExtents = _float3(2.f, 1.8f, 3.f);
     OBBDesc.vCenter = _float3(0.f, OBBDesc.vExtents.y, 0.f);
     OBBDesc.vRotation = { 0.f,0.f,0.f };
 
