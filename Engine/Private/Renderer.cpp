@@ -60,27 +60,24 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 #ifdef _DEBUG
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Depth"), 50.f, 50.f, 150.f, 150.f)))
          return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Decal"),  50.f, 200.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Decal"),  200.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"),   50.f, 350.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Diffuse"),  350.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"), 200.f, 50.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Normal"), 500.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Final"), 200.f, 200.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Final"), 650.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
 
-    m_pCS_SSAO->Ready_Debug(200.f, 350.f, 150.f, 150.f);
-
-     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Accum"), 200.f, 350.f, 150.f, 150.f)))
+     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Accum"), 800.f, 50.f, 150.f, 150.f)))
        return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_VFX"), 350.f, 50.f, 150.f, 150.f)))
+  
+     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom"), 950.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Final"), 350.f, 200.f, 150.f, 150.f)))
-       return E_FAIL;    
-   // if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Bloom"), 500.f, 50.f, 150.f, 150.f)))
-   //     return E_FAIL;
-    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 650.f, 50.f, 150.f, 150.f)))
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 1100.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
+
+    m_pCS_SSAO->Ready_Debug(1250.f, 50.f, 150.f, 150.f);
 #endif
 
     return S_OK;
@@ -916,19 +913,19 @@ HRESULT CRenderer::Render_Debug()
         return E_FAIL;
    
     m_pVIBuffer->Bind_Buffers();
-   //
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_2"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_4"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_8"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Height"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_Final"), m_pShader, m_pVIBuffer);
-   // m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
-   // 
-   // m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
+   
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_2"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_4"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_8"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Height"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Final"), m_pShader, m_pVIBuffer);
+    m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
+    
+    m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
     m_pGameInstance->RenderGrid();
     return S_OK;
 }

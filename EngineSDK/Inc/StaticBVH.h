@@ -39,6 +39,8 @@ private:
         _int right = -1;
         _int entryIndex = -1; // leaf일 때만 유효
         _bool isLeaf = false;
+
+        _bool visit = false;
     };
 
 public:
@@ -54,9 +56,11 @@ public:
     struct DebugNodeInfo
     {
         AABB bounds;
-        int left = -1;
-        int right = -1;
-        int entryIndex = -1;
+        _int left = -1;
+        _int right = -1;
+        _int entryIndex = -1;
+
+        _bool visit = false;
     };
 
     void GetDebugNodes(std::vector<DebugNodeInfo>& out) const;
@@ -68,17 +72,17 @@ private:
     _int BuildRecursive(_int start, _int end);
     void TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector& vRayDir, _float& closest,
                      OUT HitResult& out,
-                     OUT _int* Type ) const;
+                     OUT _int* Type) const;
 
 private:
     AABB    MergeAABB(const AABB& a, const AABB& b);
-    _bool   RayIntersectAABB(const _vector& vRayPos, const _vector& vRayDir, const AABB& box, _float tMax) const;
+    _bool RayIntersectAABB(const _vector& vRayPos, const _vector& vRayDir, const AABB& box, _float tMax) const;
     _float3 Center(const AABB& a);
     _int    LongestAxis(const AABB& a);
 
 private:
    vector<Entry> m_entries;
-   vector<Node> m_nodes;
+   mutable vector<Node> m_nodes;
 };
 
 END

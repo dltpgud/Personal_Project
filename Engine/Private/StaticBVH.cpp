@@ -87,6 +87,8 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
     if (!RayIntersectAABB(vRayPos, vRayDir, n.bounds, closest))
         return;
 
+    m_nodes[nodeIdx].visit = true;
+
     if (n.entryIndex != -1)
     {
         const Entry& entry = m_entries[n.entryIndex];
@@ -255,6 +257,7 @@ void CStaticBVH::GetDebugNodes(std::vector<DebugNodeInfo>& out) const
         d.left = n.left;
         d.right = n.right;
         d.entryIndex = n.entryIndex;
+        d.visit = n.visit;
         out.push_back(d);
     }
 }
