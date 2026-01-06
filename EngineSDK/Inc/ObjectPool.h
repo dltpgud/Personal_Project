@@ -28,7 +28,8 @@ public:
     {
         if (!obj)
             return;
-  
+        
+
         auto& pool = s_pools[type_index(typeid(*obj))];
         Base* base = static_cast<Base*>(obj); //  lvalue
         Safe_AddRef(base);  
@@ -37,16 +38,22 @@ public:
 
     static void ClearAll()
     {
+
+      
+         vector<void*> toRelease;
         for (auto& pair : s_pools)
         {
-            for (auto* raw : pair.second)
-            {
-                Base* base = static_cast<Base*>(raw); //  lvalue
-                Safe_Release(base);  
-            }
-            pair.second.clear();
+            auto& vec = pair.second;
+            toRelease.insert(toRelease.end(), vec.begin(), vec.end());
+            vec.clear();
         }
 
+        for (void* raw : toRelease)
+        {
+            Base* base = static_cast<Base*>(raw);
+            Safe_Release(base);
+        }
+     
     }
 
     template <typename T, typename... Args> static void Preallocate(T* prototype, size_t count, Args&&... args)
@@ -67,5 +74,6 @@ public:
 
 private:
     static unordered_map<type_index, vector<void*>> s_pools;
+
 };
 

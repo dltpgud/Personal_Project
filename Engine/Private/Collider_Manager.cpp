@@ -579,19 +579,21 @@ HRESULT Collider_Manager::Monster_To_Monster()
     }
 
     //BVH 디버그 라인
-  // vector<CStaticBVH::DebugNodeInfo> nodes;
-  // m_StaticBVH.GetDebugNodes(nodes);
-  //
-  // const XMVECTORF32 nodeColor = Colors::Yellow; // 노드
-  // const XMVECTORF32 leafColor = Colors::Lime;   // leaf 강조
-  //
-  // for (const auto& n : nodes)
-  // {
-  //     if (n.entryIndex != -1)
-  //         DrawAABBWire(m_pBatch, n.bounds, leafColor);
-  //     else
-  //         DrawAABBWire(m_pBatch, n.bounds, nodeColor);
-  // }
+    vector<CStaticBVH::DebugNodeInfo> nodes;
+    m_StaticBVH.GetDebugNodes(nodes);
+    
+    const XMVECTORF32 nodeColor = Colors::Yellow; // 노드
+    const XMVECTORF32 leafColor = Colors::Lime;   // leaf 강조
+    const XMVECTORF32 RedColor = Colors::Red;
+    for (const auto& n : nodes)
+    {
+        if (n.entryIndex != -1 && n.visit == false)
+            DrawAABBWire(m_pBatch, n.bounds, leafColor);
+        else if (n.visit == false)
+            DrawAABBWire(m_pBatch, n.bounds, nodeColor);
+        else 
+            DrawAABBWire(m_pBatch, n.bounds, RedColor);
+    }
 
     m_pBatch->End();
     
