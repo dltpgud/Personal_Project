@@ -2,6 +2,7 @@
 #include "typeindex"
 #include "typeinfo"
 #include  "Engine_Defines.h"
+static bool S_Clear = false;
 
 template <typename Base> 
 class ObjectPool
@@ -26,7 +27,7 @@ public:
 
     template <typename T> static void Push(T* obj)
     {
-        if (!obj)
+        if (!obj || true == S_Clear)
             return;
         
 
@@ -38,8 +39,8 @@ public:
 
     static void ClearAll()
     {
-
-      
+        S_Clear = true;
+        // 1) 먼저 포인터들을 다 뽑아놓고 컨테이너를 비움
          vector<void*> toRelease;
         for (auto& pair : s_pools)
         {
@@ -48,12 +49,13 @@ public:
             vec.clear();
         }
 
+        // 2) 그 다음에 Release (이때 Push가 일어나도 vec는 이미 비어있음)
         for (void* raw : toRelease)
         {
             Base* base = static_cast<Base*>(raw);
             Safe_Release(base);
         }
-     
+        S_Clear = false;
     }
 
     template <typename T, typename... Args> static void Preallocate(T* prototype, size_t count, Args&&... args)

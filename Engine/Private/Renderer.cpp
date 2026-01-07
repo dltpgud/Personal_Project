@@ -115,10 +115,10 @@ HRESULT CRenderer::Draw()
     if (FAILED(Render_NonBlend()))
         return E_FAIL;
 
-    if (FAILED(Render_Shadow()))
-        return E_FAIL;
-    
     if (FAILED(Render_Decal()))
+        return E_FAIL;
+
+    if (FAILED(Render_Shadow()))
         return E_FAIL;
 
     if (FAILED(Render_Lights()))
