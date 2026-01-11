@@ -66,7 +66,7 @@ HRESULT CEffect_DecalStream::Trigger_Effect(void* pArg, _float fTimeDelta)
 {
     if (!pArg)
         return S_OK;
-   // auto cpuBegin = std::chrono::high_resolution_clock::now();
+
     DECAL_DESC* pDecal = static_cast<DECAL_DESC*>(pArg);
 
     DECAL_SPAWN_REQ out;

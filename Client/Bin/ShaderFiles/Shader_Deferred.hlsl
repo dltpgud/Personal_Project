@@ -43,7 +43,7 @@ texture2D g_vMtrlAmbient;
 vector g_vMtrlSpecular = { 1.f, 1.f, 1.f, 1.f };
 
 vector g_vCamPosition;
-  bool g_SSAOEnable; 
+ 
 float2 g_WinDowSize;
 float g_fCamFar;
 texture2D g_FogMaskTex;
@@ -161,12 +161,11 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_DIRECTIONAL(PS_IN In)
     float wrapped = saturate((NdotL + lightWrap) / (1.0f + lightWrap));
 
     // SSAO 읽기
-    float fSSAO = 1.0f;
-    if (g_SSAOEnable)
-    {
-        fSSAO = saturate(g_SSAOTexture.Sample(LinearSamplerClamp, In.vTexcoord).r); // 재선언 X
-        fSSAO = pow(fSSAO, 0.85f);
-    }
+    float fSSAO;
+
+    fSSAO = saturate(g_SSAOTexture.Sample(LinearSamplerClamp, In.vTexcoord).r); // 재선언 X
+    fSSAO = pow(fSSAO, 0.85f);
+    
     // 어두운 영역에서만 AO 강화
     float aoMix = lerp(1.0f, fSSAO, 1.0f - wrapped);
 
@@ -220,12 +219,10 @@ PS_OUT_LIGHT PS_MAIN_LIGHT_POINT(PS_IN In)
     float wrapped = saturate((NdotL + lightWrap) / (1.0f + lightWrap));
 
     // --- SSAO 적용 ---
-    float fSSAO = 1.0f;
-    if (g_SSAOEnable)
-    {
-        fSSAO = saturate(g_SSAOTexture.Sample(LinearSamplerClamp, In.vTexcoord).r);
-        fSSAO = pow(fSSAO, 0.85f);
-    }
+    float fSSAO;
+    fSSAO = saturate(g_SSAOTexture.Sample(LinearSamplerClamp, In.vTexcoord).r);
+    fSSAO = pow(fSSAO, 0.85f);
+    
 
     // 어두운 영역에서만 AO 강화
     float aoMix = lerp(1.0f, fSSAO, 1.0f - wrapped);

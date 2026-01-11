@@ -365,9 +365,11 @@ HRESULT Collider_Manager::MonsterDead_To_Mash()
       
          DECAL_DESC* Desc = static_cast<CActor*>(Obj)->Get_DecalDesc();
 
+          if (true == Desc->bActive)
+             continue;
          if (nullptr == Desc)
              continue;
-         HitResult hit;
+         HitResult hit{};
         _int Type{};
 
         if (!m_StaticBVH.Raycast(Desc->vPos, Desc->vDir, hit))
@@ -683,7 +685,8 @@ Collider_Manager* Collider_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceCo
 void Collider_Manager::Free()
 {
     __super::Free();
-
+    m_StaticBVH.Clear();
+    m_SpatialGrid.Clear();
     for (auto& coll : m_ColliderList) Safe_Release(coll);
     m_ColliderList.clear();
 

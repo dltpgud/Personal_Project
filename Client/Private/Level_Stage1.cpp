@@ -192,7 +192,7 @@ HRESULT CLevel_Stage1::Ready_Light()
 	if (FAILED(m_pGameInstance->Add_Light(LightDesc)))
 		return E_FAIL;
 
-// 맵 바운딩 박스
+//그림자 맵 바운딩 박스
         _float3 minBound = _float3(0.f, 0.f, 0.f);
         _float3 maxBound = _float3(600.f, 100.f, 600.f); // 높이 100은 예시
 
@@ -223,10 +223,10 @@ HRESULT CLevel_Stage1::Ready_Light()
             {minBound.x, maxBound.y, maxBound.z}, {maxBound.x, maxBound.y, maxBound.z},
         };
 
-        float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
-        float maxX = -FLT_MAX, maxY = -FLT_MAX, maxZ = -FLT_MAX;
+        _float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
+        _float maxX = -FLT_MAX, maxY = -FLT_MAX, maxZ = -FLT_MAX;
 
-        for (int i = 0; i < 8; i++)
+        for (_int i = 0; i < 8; i++)
         {
             XMVECTOR corner = XMLoadFloat3(&corners[i]);
             XMVECTOR cornerVS = XMVector3TransformCoord(corner, LightView);
@@ -439,8 +439,9 @@ CLevel_Stage1* CLevel_Stage1::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
 
 void CLevel_Stage1::Free()
 {
-    Safe_Release(m_pFade);
 	__super::Free();
+
+    Safe_Release(m_pFade);
     m_pGameInstance->StopAll();
  
 }

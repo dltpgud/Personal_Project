@@ -76,8 +76,12 @@ HRESULT CRenderer::Initialize(_uint iWinSizeX, _uint iWinSizeY)
         return E_FAIL;
     if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_Emissive"), 1100.f, 50.f, 150.f, 150.f)))
         return E_FAIL;
+    
+     m_pCS_SSAO->Ready_Debug(1250.f, 50.f, 150.f, 150.f);
 
-    m_pCS_SSAO->Ready_Debug(1250.f, 50.f, 150.f, 150.f);
+    if (FAILED(m_pGameInstance->Ready_RT_Debug(TEXT("Target_VFX"), 1400.f, 50.f, 150.f, 150.f)))
+        return E_FAIL;
+    
 #endif
 
     return S_OK;
@@ -303,10 +307,6 @@ HRESULT CRenderer::Initialize_RT()
         return E_FAIL;
 
     if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_Revealage"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
-        return E_FAIL;
-
-    
-    if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("Target_AccumBlur"), m_iWinSizeX, m_iWinSizeY,DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
         return E_FAIL;
 
     return S_OK;
@@ -702,23 +702,10 @@ HRESULT CRenderer::Render_Lights()
 {
    
 
-    if (m_pGameInstance->Get_DIKeyDown(DIK_Y))
-    {
-        if (bssao)
-            bssao = false;
-        else
-            bssao = true;
-    }
-
-
-   // if (true == bssao)
-    {
-        m_pCS_SSAO->DispatchSSAO(TEXT("Target_Depth"), TEXT("Target_Normal"));
-        m_pCS_SSAO->Bind_SRV(m_pShader, "g_SSAOTexture");
-    }
-
-    if (FAILED(m_pShader->Bind_RawValue("g_SSAOEnable", &bssao, sizeof(_bool))))
-        return E_FAIL;
+   
+     m_pCS_SSAO->DispatchSSAO(TEXT("Target_Depth"), TEXT("Target_Normal"));
+      m_pCS_SSAO->Bind_SRV(m_pShader, "g_SSAOTexture");
+    
 
     if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_LightAcc"))))
         return E_FAIL;
@@ -749,6 +736,9 @@ HRESULT CRenderer::Render_Lights()
         return E_FAIL;
     if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_VFXTexture", TEXT("Target_VFX"))))
         return E_FAIL;
+    if (FAILED(m_pGameInstance->Bind_RT_SRV(m_pShader, "g_DiffuseTexture", TEXT("Target_Diffuse"))))
+        return E_FAIL;
+    
     
     m_pGameInstance->Render_Lights(m_pShader, m_pVIBuffer);
 
