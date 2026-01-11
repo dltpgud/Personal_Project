@@ -131,7 +131,7 @@ HRESULT CObject_Manager::Add_Clon_to_Layers(_uint iLevelIndex, const _wstring& s
 
 void CObject_Manager::Preallocate(_wstring ProtoTag,  size_t count, void* desc)
 {
-    ObjectPool<CGameObject>::Preallocate(Find_Prototype(ProtoTag), count, desc);
+    ObjectPool<Engine::CGameObject>::Preallocate(Find_Prototype(ProtoTag), count, desc);
 }
 
 CGameObject* CObject_Manager::Find_Prototype(const _wstring& strPrototypeTag)

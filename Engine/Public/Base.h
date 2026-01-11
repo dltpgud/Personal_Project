@@ -19,7 +19,6 @@ public :
 	/* (레퍼런스 카운트를 감소시킨다. or 삭제한다.) 감소시키기 전의 레퍼런스 카운트를 리턴한다. */
 	_uint Release();
 
-
     private:
 	_uint			m_iRefCnt = { 0 };
  public :

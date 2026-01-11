@@ -626,9 +626,6 @@
     <ClCompile Include="..\Private\ComputeShader.cpp">
       <Filter>01.Utility\04.Component\Shader\ComputeShader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\ObjectPool.cpp">
-      <Filter>99.Defines</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\CS_SSAO.cpp">
       <Filter>01.Utility\04.Component\Shader\ComputeShader\SSAO</Filter>
     </ClCompile>
@@ -649,6 +646,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\StaticBVH.cpp">
       <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ObjectPool.cpp">
+      <Filter>99.Defines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

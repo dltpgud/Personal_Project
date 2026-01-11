@@ -1,11 +1,9 @@
 #pragma once
 #include "typeindex"
 #include "typeinfo"
-#include  "Engine_Defines.h"
-static bool S_Clear = false;
+#include "Engine_Defines.h"
 
-template <typename Base> 
-class ObjectPool
+template <typename Base> class ObjectPool
 {
 public:
     template <typename T, typename... Args> static T* Pop(T* prototype, Args&&... args)
@@ -16,7 +14,7 @@ public:
         {
             void* raw = pool.back();
             pool.pop_back();
-    
+
             T* obj = static_cast<T*>(raw);
             obj->Initialize(std::forward<Args>(args)...);
             return obj;
@@ -29,37 +27,35 @@ public:
     {
         if (!obj || true == S_Clear)
             return;
-        
 
         auto& pool = s_pools[type_index(typeid(*obj))];
         Base* base = static_cast<Base*>(obj); //  lvalue
-        Safe_AddRef(base);  
+        Safe_AddRef(base);
         pool.push_back(static_cast<void*>(obj));
     }
 
     static void ClearAll()
     {
         S_Clear = true;
-        // 1) 먼저 포인터들을 다 뽑아놓고 컨테이너를 비움
-         vector<void*> toRelease;
+
         for (auto& pair : s_pools)
         {
             auto& vec = pair.second;
-            toRelease.insert(toRelease.end(), vec.begin(), vec.end());
+           
+            for (auto& v : vec)
+            {
+                Base* base = static_cast<Base*>(v);
+                Safe_Release(base);
+            }
+
             vec.clear();
         }
-
-        // 2) 그 다음에 Release (이때 Push가 일어나도 vec는 이미 비어있음)
-        for (void* raw : toRelease)
-        {
-            Base* base = static_cast<Base*>(raw);
-            Safe_Release(base);
-        }
-        S_Clear = false;
     }
 
     template <typename T, typename... Args> static void Preallocate(T* prototype, size_t count, Args&&... args)
     {
+        unique_lock<mutex> lock(m_mutex);
+
         auto& pool = s_pools[type_index(typeid(*prototype))];
 
         for (size_t i = 0; i < count; ++i)
@@ -70,12 +66,11 @@ public:
             // 여기서 1개 내려서 ref=1 (풀만 소유)
             Base* base = static_cast<Base*>(obj);
             Safe_Release(base);
-   
         }
     }
 
 private:
     static unordered_map<type_index, vector<void*>> s_pools;
-
+    static mutex m_mutex;
+    static bool S_Clear;
 };
-

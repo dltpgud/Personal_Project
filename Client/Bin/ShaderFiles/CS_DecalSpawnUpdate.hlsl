@@ -43,7 +43,6 @@ StructuredBuffer<DECAL_SPAWN_REQ> g_SpawnReq : register(t0);
 RWStructuredBuffer<GPU_DecalHeader> g_Decals : register(u0);
 RWStructuredBuffer<uint> g_LiveList : register(u1);
 
-// Compute shader main function
 [numthreads(256, 1, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
@@ -53,7 +52,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
     GPU_DecalHeader h = g_Decals[idx];
 
-    // Update decal time if active
     if (h.Active == 1)
     {
         h.DecalTime += g_DeltaTime;
@@ -63,11 +61,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         }
     }
 
-    // Spawn new decals if not active and if spawn count is valid
+  
     if (h.Active == 0 && g_SpawnCount > 0)
     {
         uint spawnIdx;
-        InterlockedAdd(g_LiveList[100], 1, spawnIdx); // Track the live list index
+        InterlockedAdd(g_LiveList[100], 1, spawnIdx); 
 
         if (spawnIdx < g_SpawnCount)
         {
@@ -87,7 +85,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         }
     }
 
-    // Add active decal to live list
+
     if (h.Active == 1)
     {
         uint outIdx;
@@ -95,6 +93,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         g_LiveList[outIdx + 1] = idx;
     }
 
-    // Write the updated decal back to the buffer
+    
     g_Decals[idx] = h;
 }
