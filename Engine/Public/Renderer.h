@@ -52,7 +52,7 @@ private:
      D3D11_VIEWPORT m_ViewPortDescs[SIZE_END]{};
      _float m_fdX[SIZE_END]{}; 
      _float m_fdY[SIZE_END]{};
-
+   
  private:
 	list<class CGameObject*>	m_RenderGameObjects[RG_END];
 	list<class CComponent*>		m_DebugComponents;
@@ -73,6 +73,8 @@ private:
 #ifdef _DEBUG
 private:
 	HRESULT Render_Debug();
+    _bool m_bDebugLineRender{true};
+    _bool m_bDebugRTRender{true};
 #endif
 
 

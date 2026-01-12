@@ -63,7 +63,9 @@ void CMainApp::Render()
     }
 #ifdef _DEBUG
     m_pGameInstance->Render_Text(TEXT("Robo"), m_szFPS, _float2(g_iWinSizeX-180, 0.f), XMVectorSet(1.f, 0.f, 1.f, 1.f), 0.5f);
-
+    m_pGameInstance->Render_Text(TEXT("Robo"), L"Tab : 마우스 고정/해제", _float2(g_iWinSizeX - 200, 40.f), XMVectorSet(1.f, 0.f, 1.f, 1.f), 0.3f);
+    m_pGameInstance->Render_Text(TEXT("Robo"), L"Esc : 디버그 라인 ON/OFF", _float2(g_iWinSizeX - 200, 60.f), XMVectorSet(1.f, 0.f, 1.f, 1.f), 0.3f);
+    m_pGameInstance->Render_Text(TEXT("Robo"), L"LCONTROL : RT ON/OFF", _float2(g_iWinSizeX - 200, 80.f), XMVectorSet(1.f, 0.f, 1.f, 1.f),0.3f);
 #else
 		SetWindowText(g_hWnd, m_szFPS);
 #endif

@@ -886,38 +886,66 @@ HRESULT CRenderer::Render_UI()
 
 HRESULT CRenderer::Render_Debug()
 {
+    if (m_pGameInstance->Get_DIKeyDown(DIK_ESCAPE))
+    {
+        if (m_bDebugLineRender)
+            m_bDebugLineRender = false;
+        else
+            m_bDebugLineRender = true;
+    }
+
+    if (m_pGameInstance->Get_DIKeyDown(DIK_LCONTROL))
+    {
+        if (m_bDebugRTRender)
+            m_bDebugRTRender = false;
+        else
+            m_bDebugRTRender = true;
+    }
+
+
     for (auto& pDebugCom : m_DebugComponents)
     {
         if (nullptr != pDebugCom)
         {
-            pDebugCom->Render();
+            if (m_bDebugLineRender)
+            {
+                pDebugCom->Render();
+            }
+
             Safe_Release(pDebugCom);
         }
     }
       m_DebugComponents.clear();
 
-    if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-        return E_FAIL;
-   
-    if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-        return E_FAIL;
-   
-    m_pVIBuffer->Bind_Buffers();
-   
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_2"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_4"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_8"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Height"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_Final"), m_pShader, m_pVIBuffer);
-    m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
-    
-    m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
-    m_pGameInstance->RenderGrid();
-    return S_OK;
+   if (m_bDebugRTRender)
+   {
+          if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+              return E_FAIL;
+
+          if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+              return E_FAIL;
+
+          m_pVIBuffer->Bind_Buffers();
+
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_GameObjects"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_LightAcc"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Shadow"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Decal"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_2"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_4"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Bloom_8"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Height"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_Final"), m_pShader, m_pVIBuffer);
+          m_pGameInstance->Render_RT_Debug(TEXT("MRT_WBOIT"), m_pShader, m_pVIBuffer);
+
+          m_pCS_SSAO->Render(m_pShader, m_pVIBuffer);
+   }
+
+   if (m_bDebugLineRender)
+   {
+       m_pGameInstance->RenderGrid();
+   }
+   return S_OK;
 }
 
 #endif
