@@ -177,8 +177,6 @@ _bool Collider_Manager::PlayerWeapon_To_Monster()
 
     if (!pPickedObj)
         return false;
-
-
      
     if (pPickedObj->Part_Intersects(RayPos, RayDir, Hit.position, Hit.normal))
     {
@@ -195,7 +193,7 @@ _bool Collider_Manager::PlayerWeapon_To_Monster()
          return true;
     }
     
-     return false;
+    return false;
 }
 
 HRESULT Collider_Manager::Player_To_MonsterSkill()
@@ -271,6 +269,7 @@ HRESULT Collider_Manager::PlayerWapon_To_Mash()
 
   
     DECAL_DESC* Desc = pPlayer->Get_DecalDesc();
+
     if (!m_StaticBVH.Raycast(RayPos, RayDir, hit))
         return E_FAIL;
     
@@ -289,6 +288,9 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
 {
     for (auto& SkillObj : m_GameObjeList[COL_MONSTER_SKILL])
     {
+        if (!SkillObj)
+            continue;
+
         _uint iSkillType = static_cast<CSkill*>(SkillObj)->Get_SkillType();
         CCollider* SkillCollider = SkillObj->Get_Collider();
         DECAL_DESC* Desc = static_cast<CSkill*>(SkillObj)->Get_DecalDesc();
@@ -312,11 +314,9 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
         HitResult hit;
         _int Type{};
 
-
         if (!m_StaticBVH.Raycast(RayPos, RayDir, hit, MaxRayLen, &Type))
             continue;
 
-       
         if (hit.hit && iSkillType != CSkill::STYPE_SHOCKWAVE && iSkillType != CSkill::STYPE_LASER)
         {
             CCollider* HitCol = hit.object->Get_Collider();
@@ -352,7 +352,6 @@ HRESULT Collider_Manager::MonsterSkill_To_Mash(_float fTimedelta)
             m_pGameInstance->Trigger_Effect(Desc->Key, Desc, iSkillType == CSkill::STYPE_LASER ? fTimedelta : 0.0f);
             static_cast<CSkill*>(SkillObj)->CreateEffect(RayPos, RayDir, hit.position);
         }
-
     }
 
     return S_OK;
@@ -367,7 +366,7 @@ HRESULT Collider_Manager::MonsterDead_To_Mash()
 
           if (true == Desc->bActive)
              continue;
-         if (nullptr == Desc)
+          if (Desc->Key == L"")
              continue;
          HitResult hit{};
         _int Type{};

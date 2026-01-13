@@ -64,7 +64,7 @@ void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
     if (m_StateNodes.empty())
         return;
 
-    // 1) 이동 처리 : 매 프레임 1번만
+    // 1) 이동 처리
     progress_Move(fTimeDelta, m_iState);
 
     const _uint prevFlags = *m_iState;
@@ -74,7 +74,7 @@ void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
         if (!node)
             continue;
 
-        const bool bActive = node->IsActive(prevFlags);
+        const _bool bActive = node->IsActive(prevFlags);
 
         // 비활성 상태 → 활성 검사
         if (!bActive)
@@ -96,7 +96,7 @@ void CPlayer_StateMachine::StateMachine_Playing(_float fTimeDelta)
         if (node->State_Processing(fTimeDelta, m_iState, &m_iPreviousState))
         {
             // 상태 종료
-            const bool bReturnPrev = node->State_Exit(m_iState);
+            const _bool bReturnPrev = node->State_Exit(m_iState);
             m_iPreviousState = *m_iState;
             node->SetActive(false, m_iState);
 

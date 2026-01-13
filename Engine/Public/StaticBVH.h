@@ -82,7 +82,7 @@ private:
 
 private:
    vector<Entry> m_entries;
-   mutable vector<Node> m_nodes;
+   vector<Node> m_nodes;
 };
 
 END
