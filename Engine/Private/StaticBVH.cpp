@@ -57,11 +57,8 @@ _int CStaticBVH::BuildRecursive(_int start, _int end)
     return nodeIdx;
 }
 
-_bool CStaticBVH::Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist,
-                 
-                          OUT _int* Type ) const
+_bool CStaticBVH::Raycast(const _vector& vRayPos, const _vector& vRayDir, OUT HitResult& out, _float maxDist, OUT _int* Type ) const
 {
-  
    _vector RayDir = XMVector3Normalize(vRayDir);
     const _float dirLen = XMVectorGetX(XMVector3Length(vRayDir));
     if (dirLen < 1e-6f)
@@ -87,7 +84,7 @@ void CStaticBVH::TraverseRay(_int nodeIdx, const _vector& vRayPos, const _vector
     if (!RayIntersectAABB(vRayPos, vRayDir, n.bounds, closest))
         return;
 
-    m_nodes[nodeIdx].visit = true;
+     const_cast<Node&> (m_nodes[nodeIdx]).visit = true;
 
     if (n.entryIndex != -1)
     {
