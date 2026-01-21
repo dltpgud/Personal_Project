@@ -204,100 +204,72 @@ void CModel::Callback(_uint AnimIdx, _int Duration, function<void()> func)
 {
     m_Animations[AnimIdx]->Callback(Duration, func);
 }
-
 _bool CModel::RayIntersect(_vector vRayPos_WS, _vector vRayDir_WS, CTransform* pTransform, OUT _vector& vHitPos_WS,
                            OUT _vector& vHitN_WS, OUT _float* fDist)
 {
-  _matrix W = pTransform->Get_WorldMatrix();
-   _matrix Wi = pTransform->Get_WorldMatrix_Inverse();
+    const XMMATRIX W = pTransform->Get_WorldMatrix();
+    const XMMATRIX Wi = pTransform->Get_WorldMatrix_Inverse();
 
-   _vector oL = XMVector3TransformCoord(vRayPos_WS, Wi);
-   _vector dL = XMVector3Normalize(XMVector3TransformNormal(vRayDir_WS, Wi));
+    const XMVECTOR oL = XMVector3TransformCoord(vRayPos_WS, Wi);
+    const XMVECTOR dL = XMVector3Normalize(XMVector3TransformNormal(vRayDir_WS, Wi));
 
-   HitResult g_bestResult;
+    HitResult g_bestResult;
+    g_bestResult.hit = false;
+    g_bestResult.distance = FLT_MAX;
 
-     if (m_eModelType == TYPE_ANIM)
-       for (auto& mesh : m_Meshes) mesh->Build_MeshAABB_Local();
+    if (m_eModelType == TYPE_ANIM)
+    {
+        for (auto& mesh : m_Meshes) { 
+            mesh->Build_MeshAABB_Local();;
+            mesh->Refit_BVH_Local();
+        }
+    }
 
-   _float fDis;
-   for (auto& mesh : m_Meshes)
-   {
-       HitResult localBest;
-   
-       _float3 MeahMin = mesh->GetAABBMinLocal();
-       _float3 MeahMax = mesh->GetAABBMaxLocal();
-       _float3 Center = {(MeahMin.x + MeahMax.x) / 2.0f, (MeahMin.y + MeahMax.y) / 2.0f, (MeahMin.z + MeahMax.z) / 2.0f};
-       _float3 extend = {(MeahMax.x - MeahMin.x) / 2.0f, (MeahMax.y - MeahMin.y) / 2.0f, (MeahMax.z - MeahMin.z) / 2.0f};
+    for (auto& mesh : m_Meshes)
+    {
+        const _float3 mn = mesh->GetAABBMinLocal();
+        const _float3 mx = mesh->GetAABBMaxLocal();
 
-       BoundingBox AABB = BoundingBox(Center, extend);
+        const _float3 c{(mn.x + mx.x) * 0.5f, (mn.y + mx.y) * 0.5f, (mn.z + mx.z) * 0.5f};
+        const _float3 e{(mx.x - mn.x) * 0.5f, (mx.y - mn.y) * 0.5f, (mx.z - mn.z) * 0.5f};
 
-       if (!AABB.Intersects(oL, dL, fDis))
-           continue;
+        BoundingBox box(c, e);
 
-       const _uint triCount = mesh->Get_iNumIndexices() / 3;
+        float entry = 0.f;
+        if (!box.Intersects(oL, dL, entry))
+            continue;
 
-       for (_uint t = 0; t < triCount; ++t)
-       {
-           _uint i0 = mesh->Get_pIndices(t * 3 + 0);
-           _uint i1 = mesh->Get_pIndices(t * 3 + 1);
-           _uint i2 = mesh->Get_pIndices(t * 3 + 2);
+        if (g_bestResult.hit && entry >= g_bestResult.distance)
+            continue;
 
-           const _float3& A = GetVertexPos(mesh, i0);   
-           const _float3& B = GetVertexPos(mesh, i1); 
-           const _float3& C = GetVertexPos(mesh, i2);   
+        HitResult localBest;
+        localBest.hit = false;
+        localBest.distance = g_bestResult.distance; 
 
-           // --- Per-tri AABB ---
-           _float3 triMin{min(A.x, min(B.x, C.x)), min(A.y, min(B.y, C.y)), min(A.z, min(B.z, C.z))};
-           _float3 triMax{max(A.x, max(B.x, C.x)), max(A.y, max(B.y, C.y)), max(A.z, max(B.z, C.z))};
-           _float3 Center = {(triMin.x + triMax.x) / 2.0f, (triMin.y + triMax.y) / 2.0f, (triMin.z + triMax.z) / 2.0f};
-           _float3 extend = {(triMax.x - triMin.x) / 2.0f, (triMax.y - triMin.y) / 2.0f, (triMax.z - triMin.z) / 2.0f};
-            
-           BoundingBox AABB = BoundingBox(Center,extend);
-           
-           if (!AABB.Intersects(oL, dL, fDis))
-               continue;
-         
-           _vector vA = XMLoadFloat3(&A);
-           _vector vB = XMLoadFloat3(&B);
-           _vector vC = XMLoadFloat3(&C);
-           _vector e0 = XMVectorSubtract(vB, vA);
-           _vector e1 = XMVectorSubtract(vC, vA);
-           _vector n = XMVector3Normalize(XMVector3Cross(e0, e1));    
- 
-           _float tDist = 0.f;
-           if (DirectX::TriangleTests::Intersects(oL, dL, vA, vB, vC, tDist))
-           {
-               if (tDist < localBest.distance)
-               {
-                   localBest.hit = true;
-                   localBest.distance = tDist;
-                   localBest.position = XMVectorAdd(oL, XMVectorScale(dL, tDist));
-                   localBest.normal = n;
-               }
-           }
-       }
+        if (mesh->RayIntersect_BVH_Local(oL, dL, localBest))
+        {
+            if (!g_bestResult.hit || localBest.distance < g_bestResult.distance)
+                g_bestResult = localBest;
+        }
+    }
 
-       if (localBest.hit && localBest.distance < g_bestResult.distance)
-       {
-          g_bestResult = localBest;
-       
-       }
-   }
+    if (!g_bestResult.hit)
+        return false;
 
-   if (!g_bestResult.hit)
-       return false;
+    vHitPos_WS = XMVector3TransformCoord(g_bestResult.position, W);
+    vHitN_WS = XMVector3Normalize(XMVector3TransformNormal(g_bestResult.normal, W));
 
-   vHitPos_WS = XMVector3TransformCoord(g_bestResult.position, W);
-   vHitN_WS = XMVector3Normalize(XMVector3TransformNormal(g_bestResult.normal, W));
+    // 레이 방향을 향하면 뒤집기
+    if (XMVectorGetX(XMVector3Dot(vHitN_WS, vRayDir_WS)) > 0.f)
+        vHitN_WS = XMVectorNegate(vHitN_WS);
 
-  if (XMVectorGetX(XMVector3Dot(vHitN_WS, vRayDir_WS)) > 0.f)
-       vHitN_WS = XMVectorNegate(vHitN_WS);
+    if (fDist)
+    {
+        const XMVECTOR diff = XMVectorSubtract(vHitPos_WS, vRayPos_WS);
+        *fDist = XMVectorGetX(XMVector3Length(diff));
+    }
 
-  if (fDist)
-  {
-      *fDist = XMVectorGetX(XMVector3Length(XMVector3TransformCoord(g_bestResult.position, W) - vRayPos_WS));
-  }
-   return true;
+    return true;
 }
 
 _float3 CModel::GetVertexPos(const CMesh* Mash, _int Pos) const

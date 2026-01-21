@@ -203,6 +203,7 @@ call UpdateLib.bat</Command>
     <ClInclude Include="..\Public\Effect_Manager.h" />
     <ClInclude Include="..\Public\Effect_TrailStream.h" />
     <ClInclude Include="..\Public\Frustum.h" />
+    <ClInclude Include="..\Public\MeshBVHLocal.h" />
     <ClInclude Include="..\Public\ObjectPool.h" />
     <ClInclude Include="..\Public\QuadTree.h" />
     <ClInclude Include="..\Public\Skill.h" />
@@ -292,6 +293,7 @@ call UpdateLib.bat</Command>
     <ClCompile Include="..\Private\ContainerObject.cpp" />
     <ClCompile Include="..\Private\EffectStream.cpp" />
     <ClCompile Include="..\Private\Frustum.cpp" />
+    <ClCompile Include="..\Private\MeshBVHLocal.cpp" />
     <ClCompile Include="..\Private\ObjectPool.cpp" />
     <ClCompile Include="..\Private\QuadTree.cpp" />
     <ClCompile Include="..\Private\Skill.cpp" />
