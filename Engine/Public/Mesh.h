@@ -2,6 +2,7 @@
 
 #include "VIBuffer.h"
 #include "Model.h"
+#include "MeshBVHLocal.h"
 BEGIN(Engine)
 class CMesh final : public CVIBuffer
 {
@@ -46,6 +47,12 @@ public:
     }
     void Build_MeshAABB_Local();
 
+public:
+    _float3 GetVertexPosBindPose(_uint vi) const;
+    _float3 GetVertexPosLocal_Current(_uint vi) const;
+    void Refit_BVH_Local() const;
+    _bool RayIntersect_BVH_Local(_vector oL, _vector dL, OUT HitResult& outBest) const;
+
 private:
     HRESULT Load_AnimMesh(HANDLE hFile);
     HRESULT Load_NonAnimMesh(HANDLE hFile, _fmatrix PreTransformMatrix);
@@ -66,11 +73,13 @@ private:
     _int m_eModelType{};
 
 private:
-    VTXANIMMESH* m_pAnimVertices = nullptr; // 애니메이션 정점 데이터
+    VTXANIMMESH* m_pAnimVertices = nullptr;
     vector<XMMATRIX> m_FinalBoneMatrices;
 
     _float3 m_AABBMinLocal = {_float(FLT_MAX), _float(FLT_MAX), _float(FLT_MAX)};
     _float3 m_AABBMaxLocal = {_float(-FLT_MAX), _float(-FLT_MAX), _float(-FLT_MAX)};
+
+    MeshBVHLocal* m_BVH;
 
 public:
     static CMesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix);

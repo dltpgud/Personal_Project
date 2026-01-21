@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include "Bone.h"
 #include "Shader.h"
+#include "MeshBVHLocal.h"
 CMesh::CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) : CVIBuffer{pDevice, pContext}
 {
 }
@@ -17,7 +18,6 @@ CMesh::CMesh(const CMesh& Prototype)
     memcpy(m_pAnimVertices, Prototype.m_pAnimVertices, sizeof(VTXANIMMESH) * m_iNumVertices);
     memcpy(m_pPos, Prototype.m_pPos, sizeof(_float3) * m_iNumVertices);
     memcpy(m_pIndices, Prototype.m_pIndices, sizeof(_uint) * m_iNumIndexices);   
-
 }
 HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix PreTransformMatrix)
 {
@@ -65,15 +65,19 @@ HRESULT CMesh::Initialize_Proto(CModel::TYPE eModelType, HANDLE& hFile, _fmatrix
 #pragma endregion
     Safe_Delete_Array(pIndices);
     m_eModelType = eModelType;
+
+     m_BVH = MeshBVHLocal::Create(this);
+
     if (eModelType == CModel::TYPE_NONANIM)
     {
-        Build_MeshAABB_Local();
+       Build_MeshAABB_Local();
     }
     return S_OK;
 }
 
 HRESULT CMesh::Initialize(void* pArg)
 {
+  
     return S_OK;
 }
 
@@ -103,7 +107,6 @@ _float3* CMesh::Get_pPos(_int i) const
 
 _float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
 {
-
     const VTXANIMMESH& vtx = m_pAnimVertices[vertexIndex];
 
     _vector basePos = XMLoadFloat3(&vtx.vPosition);
@@ -117,7 +120,7 @@ _float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
     {
         if (w[k] <= 0.0f)
             continue;
-        // 방어: 본 인덱스 범위 체크
+     
         if (i[k] < 0 || i[k] >= (_int)m_FinalBoneMatrices.size())
             continue;
 
@@ -126,7 +129,6 @@ _float3 CMesh::GetVetexPosAnim(_int vertexIndex) const
         wsum += w[k];
     }
 
-    // 가끔 weight 합이 1 미만이면, 잔여 가중치를 원위치에 더해 주면 안정적
     if (wsum < 1.0f)
         skinned = XMVectorAdd(skinned, XMVectorScale(basePos, (1.0f - wsum)));
 
@@ -376,6 +378,37 @@ void CMesh::Build_MeshAABB_Local()
         m_AABBMaxLocal.z = max(m_AABBMaxLocal.z, p.z);
     }
 }
+ _float3 CMesh::GetVertexPosBindPose(_uint vi) const
+{
+    if (m_eModelType == CModel::TYPE_NONANIM)
+        return m_pPos[vi];
+
+    return m_pAnimVertices[vi].vPosition;
+}
+
+_float3 CMesh::GetVertexPosLocal_Current(_uint vi) const
+{
+    _float3 p{};
+    if (m_eModelType == CModel::TYPE_NONANIM)
+        p = *Get_pPos(vi);
+    else
+    {
+        p = GetVetexPosAnim(vi);
+    }
+    return p;
+}
+
+void CMesh::Refit_BVH_Local() const
+{
+    m_BVH->Refit_BVH_Local();
+}
+
+_bool CMesh::RayIntersect_BVH_Local( _vector oL, _vector dL, OUT HitResult& outBest) const 
+{    
+    return m_BVH->RayIntersect_BVH_Local( oL, dL, outBest);
+}
+
+
 
 CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CModel::TYPE eModelType, HANDLE& hFile,
                      _fmatrix PreTransformMatrix)
@@ -412,4 +445,5 @@ void CMesh::Free()
     Safe_Delete_Array(m_pIndices);
     Safe_Release(m_pInst_Buffer);
     Safe_Delete(m_pInst_BufferData);
+    Safe_Release(m_BVH);
 }

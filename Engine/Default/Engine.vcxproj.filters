@@ -441,6 +441,9 @@
     <ClInclude Include="..\Public\StaticBVH.h">
       <Filter>01.Utility\02.GameObjects\Manager\Collider_Manager</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MeshBVHLocal.h">
+      <Filter>01.Utility\04.Component\Model\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Base.cpp">
@@ -649,6 +652,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ObjectPool.cpp">
       <Filter>99.Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MeshBVHLocal.cpp">
+      <Filter>01.Utility\04.Component\Model\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
